@@ -2155,33 +2155,35 @@ const server = http.createServer((req, res) => {
   if (pathname === '/api/debug_db' && req.method === 'GET') {
     const config = loadConfig();
     const resolvedDbUrl = process.env.DATABASE_URL || config.databaseUrl;
+    const shouldQuery = reqUrl.query.query === 'true';
     
-    let dbStatus = 'unknown';
-    let dbError = null;
-    let usersCount = 0;
-    
-    db.get('SELECT COUNT(*) as cnt FROM users', (err, row) => {
-      if (err) {
-        dbStatus = 'error';
-        dbError = err.message;
-      } else {
-        dbStatus = 'success';
-        usersCount = row ? (row.cnt || row.count) : 0;
-      }
-      
-      const hostMasked = resolvedDbUrl ? resolvedDbUrl.split('@')[1] || 'no host part' : 'no database URL';
-      
+    const hostMasked = resolvedDbUrl ? resolvedDbUrl.split('@')[1] || 'no host part' : 'no database URL';
+    const responseData = {
+      isPostgres: isPostgres,
+      dbUrlHost: hostMasked ? hostMasked.substring(0, 30) + '...' : 'none',
+      loadedFromEnvFile: !!config.databaseUrl,
+      processEnvDatabaseUrlExists: !!process.env.DATABASE_URL,
+      nodeVersion: process.version,
+      platform: process.platform,
+      envKeys: Object.keys(process.env).filter(k => k.includes('DB') || k.includes('DATA') || k.includes('URL') || k.includes('POSTGRES'))
+    };
+
+    if (shouldQuery) {
+      db.get('SELECT COUNT(*) as cnt FROM users', (err, row) => {
+        if (err) {
+          responseData.dbStatus = 'error';
+          responseData.dbError = err.message;
+        } else {
+          responseData.dbStatus = 'success';
+          responseData.usersCount = row ? (row.cnt || row.count) : 0;
+        }
+        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify(responseData));
+      });
+    } else {
       res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-      res.end(JSON.stringify({
-        isPostgres: isPostgres,
-        dbStatus: dbStatus,
-        dbError: dbError,
-        usersCount: usersCount,
-        dbUrlHost: hostMasked ? hostMasked.substring(0, 30) + '...' : 'none',
-        loadedFromEnvFile: !!config.databaseUrl,
-        processEnvDatabaseUrlExists: !!process.env.DATABASE_URL
-      }));
-    });
+      res.end(JSON.stringify(responseData));
+    }
     return;
   }
 
