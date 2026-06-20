@@ -72,7 +72,7 @@ function loadConfig() {
 
 
 const config = loadConfig();
-const DATABASE_URL = process.env.DATABASE_URL || config.databaseUrl;
+const DATABASE_URL = process.env.DATABASE_URL || config.databaseUrl || 'postgresql://neondb_owner:npg_PQW0dJnf6yjm@ep-billowing-mountain-atlczlqj-pooler.c-9.us-east-1.aws.neon.tech/neondb?sslmode=require';
 let isPostgres = !!DATABASE_URL;
 
 // Helper to convert sqlite SQL syntax to PostgreSQL syntax
