@@ -17,6 +17,7 @@ EXPOSE 3000
 
 # Set environment to production
 ENV NODE_ENV=production
+ENV DATABASE_URL=postgresql://neondb_owner:npg_PQW0dJnf6yjm@ep-billowing-mountain-atlczlqj-pooler.c-9.us-east-1.aws.neon.tech/neondb?sslmode=require
 
 # Start the application
 CMD [ "node", "server.js" ]
