@@ -2151,42 +2151,6 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // GET /api/debug_db - Diagnose database connection status
-  if (pathname === '/api/debug_db' && req.method === 'GET') {
-    const config = loadConfig();
-    const resolvedDbUrl = process.env.DATABASE_URL || config.databaseUrl;
-    const shouldQuery = reqUrl.query.query === 'true';
-    
-    const hostMasked = resolvedDbUrl ? resolvedDbUrl.split('@')[1] || 'no host part' : 'no database URL';
-    const responseData = {
-      isPostgres: isPostgres,
-      dbUrlHost: hostMasked ? hostMasked.substring(0, 30) + '...' : 'none',
-      loadedFromEnvFile: !!config.databaseUrl,
-      processEnvDatabaseUrlExists: !!process.env.DATABASE_URL,
-      nodeVersion: process.version,
-      platform: process.platform,
-      envKeys: Object.keys(process.env).filter(k => k.includes('DB') || k.includes('DATA') || k.includes('URL') || k.includes('POSTGRES'))
-    };
-
-    if (shouldQuery) {
-      db.get('SELECT COUNT(*) as cnt FROM users', (err, row) => {
-        if (err) {
-          responseData.dbStatus = 'error';
-          responseData.dbError = err.message;
-        } else {
-          responseData.dbStatus = 'success';
-          responseData.usersCount = row ? (row.cnt || row.count) : 0;
-        }
-        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-        res.end(JSON.stringify(responseData));
-      });
-    } else {
-      res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-      res.end(JSON.stringify(responseData));
-    }
-    return;
-  }
-
 
   // 1. API: Settings GET
   if (pathname === '/api/settings' && req.method === 'GET') {
