@@ -2144,6 +2144,14 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  // GET /api/healthz or /healthz - Simple keep-alive health check
+  if ((pathname === '/api/healthz' || pathname === '/healthz') && req.method === 'GET') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ status: 'ok', message: 'Server is active and awake!', timestamp: new Date() }));
+    return;
+  }
+
+
   // 1. API: Settings GET
   if (pathname === '/api/settings' && req.method === 'GET') {
     fs.readFile(SETTINGS_FILE, 'utf8', (err, data) => {
