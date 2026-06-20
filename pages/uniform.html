@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>الزي العسكري الرسمي | الأمن العام</title>
+  <link rel="stylesheet" href="../assets/css/main.css?v=1.0.5">
+  <link rel="stylesheet" href="../assets/css/navbar.css?v=1.0.5">
+  <link rel="stylesheet" href="../assets/css/sidebar.css?v=1.0.5">
+  <link rel="stylesheet" href="../assets/css/footer.css">
+  <style>
+    /* Premium Styling for Uniform Page */
+    .page-header-section {
+      text-align: center;
+      padding: var(--space-12) 0 var(--space-8);
+      position: relative;
+      background: radial-gradient(ellipse at center, rgba(201,162,39,0.08) 0%, transparent 60%);
+    }
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-2);
+      font-size: var(--font-size-xs);
+      color: var(--color-text-secondary);
+      margin-bottom: var(--space-4);
+    }
+    .breadcrumb a:hover {
+      color: var(--color-gold-primary);
+    }
+    .breadcrumb-separator {
+      color: var(--color-text-muted);
+    }
+
+    /* Uniform Section Layout */
+    .uniform-container {
+      max-width: var(--content-max);
+      margin: 0 auto;
+      padding: 0 var(--space-6) var(--space-6);
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    /* Stacked Uniform Card */
+    .uniform-card-stacked {
+      background: rgba(10, 18, 50, 0.45);
+      border: 1px solid rgba(201, 162, 39, 0.15);
+      border-radius: 20px;
+      padding: 28px;
+      display: grid;
+      grid-template-columns: 1fr 1.3fr;
+      gap: 36px;
+      align-items: center;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(10px);
+      transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+    }
+    .uniform-card-stacked:hover {
+      transform: translateY(-4px);
+      border-color: rgba(201, 162, 39, 0.35);
+      box-shadow: 0 15px 40px rgba(201, 162, 39, 0.12);
+    }
+    
+    /* Make alternating image positions for premium flow */
+    .uniform-card-stacked:nth-child(even) {
+      grid-template-columns: 1.3fr 1fr;
+    }
+    .uniform-card-stacked:nth-child(even) .uniform-img-column {
+      order: 2;
+    }
+    .uniform-card-stacked:nth-child(even) .uniform-info-column {
+      order: 1;
+    }
+
+    .uniform-img-column {
+      width: 100%;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid rgba(201, 162, 39, 0.15);
+      cursor: pointer;
+      aspect-ratio: 4/5;
+      max-height: 480px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+      background: #050a1e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .uniform-img-column img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      transition: transform 0.5s ease;
+    }
+    .uniform-img-column:hover img {
+      transform: scale(1.04);
+    }
+    
+    .uniform-info-column {
+      text-align: right;
+      display: flex;
+      flex-direction: column;
+    }
+    .badge-pill {
+      background: rgba(201, 162, 39, 0.12);
+      border: 1px solid rgba(201, 162, 39, 0.25);
+      color: var(--color-gold-light);
+      font-size: 11px;
+      font-weight: 800;
+      padding: 6px 16px;
+      border-radius: 30px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      width: fit-content;
+      margin-bottom: 16px;
+    }
+    .uniform-title {
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: #fff;
+      margin: 0 0 16px 0;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    }
+    .uniform-desc {
+      font-size: 0.95rem;
+      color: rgba(255, 255, 255, 0.7);
+      line-height: 1.8;
+      margin-bottom: 20px;
+    }
+    
+    /* Details List */
+    .details-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+    .detail-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.85);
+      line-height: 1.5;
+    }
+    .detail-icon {
+      font-size: 1.1rem;
+      color: var(--color-gold-primary);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    /* Guidelines & Prohibitions Styling */
+    .instructions-section {
+      background: rgba(10, 18, 50, 0.45);
+      border: 1px solid rgba(201, 162, 39, 0.15);
+      border-radius: 20px;
+      padding: 32px;
+      max-width: var(--content-max);
+      margin: 40px auto;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(10px);
+    }
+    .instructions-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid rgba(201, 162, 39, 0.15);
+      padding-bottom: 16px;
+      justify-content: flex-start;
+    }
+    .instructions-header h2 {
+      font-size: 1.6rem;
+      font-weight: 900;
+      color: #fff;
+      margin: 0;
+    }
+    .instructions-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 32px;
+    }
+    .instruction-block {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: right;
+    }
+    .instruction-block.prohibitions {
+      background: rgba(239, 68, 68, 0.03);
+      border-color: rgba(239, 68, 68, 0.15);
+    }
+    .block-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .instruction-block.general .block-title {
+      color: var(--color-gold-light);
+    }
+    .instruction-block.prohibitions .block-title {
+      color: #ef4444;
+    }
+    .instruction-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding: 0;
+      margin: 0;
+      list-style: none;
+    }
+    .instruction-list li {
+      font-size: 0.95rem;
+      color: rgba(255, 255, 255, 0.85);
+      line-height: 1.7;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .instruction-list li span.num {
+      background: rgba(201, 162, 39, 0.15);
+      color: var(--color-gold-primary);
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 800;
+      flex-shrink: 0;
+      margin-top: 2px;
+      border: 1px solid rgba(201, 162, 39, 0.25);
+    }
+    .instruction-block.prohibitions .instruction-list li span.num {
+      background: rgba(239, 68, 68, 0.15);
+      color: #ef4444;
+      border-color: rgba(239, 68, 68, 0.25);
+    }
+    .instruction-list li span.text {
+      flex-grow: 1;
+    }
+
+    /* Insignia Section Header */
+    .section-divider-title {
+      text-align: center;
+      margin: 60px auto 30px;
+      max-width: var(--content-max);
+      position: relative;
+    }
+    .section-divider-title h2 {
+      font-size: 2rem;
+      font-weight: 900;
+      color: #fff;
+      display: inline-block;
+      padding: 0 24px;
+      background: #05091e;
+      position: relative;
+      z-index: 2;
+    }
+    .section-divider-title::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 50%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(201, 162, 39, 0.4), transparent);
+      z-index: 1;
+    }
+
+    /* Insignia Grid */
+    .insignia-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      max-width: var(--content-max);
+      margin: 0 auto 60px;
+      padding: 0 var(--space-6);
+    }
+    .insignia-card {
+      background: rgba(10, 18, 50, 0.4);
+      border: 1px solid rgba(201, 162, 39, 0.15);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      backdrop-filter: blur(10px);
+    }
+    .insignia-card:hover {
+      transform: translateY(-5px);
+      border-color: var(--color-gold-primary);
+      box-shadow: 0 12px 30px rgba(201, 162, 39, 0.18), 0 0 20px rgba(201, 162, 39, 0.05);
+    }
+    .insignia-card-img-wrap {
+      width: 100%;
+      aspect-ratio: 4/3;
+      overflow: hidden;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(201, 162, 39, 0.12);
+      background: #050a1e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .insignia-card-img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+    .insignia-card.contain-img .insignia-card-img-wrap img {
+      object-fit: contain;
+      padding: 10px;
+    }
+    .insignia-card:hover .insignia-card-img-wrap img {
+      transform: scale(1.04);
+    }
+    .insignia-card-body {
+      padding: 20px;
+      text-align: right;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .insignia-card-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 10px;
+    }
+    .insignia-card-desc {
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.65);
+      line-height: 1.6;
+      margin-bottom: 0;
+    }
+
+    /* Lightbox style */
+    .lightbox-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 9, 30, 0.95);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      padding: 20px;
+    }
+    .lightbox-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .lightbox-content {
+      position: relative;
+      max-width: 900px;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .lightbox-img {
+      max-width: 100%;
+      max-height: 75vh;
+      border-radius: 12px;
+      border: 2px solid var(--color-gold-primary);
+      box-shadow: 0 0 45px rgba(201, 162, 39, 0.35);
+      background: #050a1e;
+    }
+    .lightbox-caption {
+      margin-top: 15px;
+      color: #fff;
+      font-size: 1.25rem;
+      font-weight: 800;
+      text-align: center;
+      font-family: 'Tajawal', sans-serif;
+    }
+    .lightbox-close {
+      position: absolute;
+      top: -45px;
+      right: 0;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.8rem;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .lightbox-close:hover {
+      transform: scale(1.1);
+    }
+
+    @media (max-width: 992px) {
+      .insignia-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 900px) {
+      .uniform-card-stacked, .uniform-card-stacked:nth-child(even) {
+        grid-template-columns: 1fr;
+      }
+      .uniform-img-column, .uniform-card-stacked:nth-child(even) .uniform-img-column {
+        order: 1;
+        max-width: 320px;
+        margin: 0 auto;
+      }
+      .uniform-info-column, .uniform-card-stacked:nth-child(even) .uniform-info-column {
+        order: 2;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .insignia-grid {
+        grid-template-columns: 1fr;
+      }
+      .instructions-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div id="toast-container"></div>
+
+<!-- Image Lightbox Overlay -->
+<div class="lightbox-overlay" id="uniform-lightbox" onclick="closeLightbox()">
+  <div class="lightbox-content" onclick="event.stopPropagation()">
+    <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+    <img class="lightbox-img" id="lightbox-image-el" src="" alt="">
+    <div class="lightbox-caption" id="lightbox-caption-el"></div>
+  </div>
+</div>
+
+<!-- Header Section -->
+<div class="page-header-section">
+  <div class="page-header-bg"></div>
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="../index.html">الرئيسية</a>
+      <span class="breadcrumb-separator">/</span>
+      <span>الزي العسكري</span>
+    </div>
+    <div class="page-header-badge animate-fade-in"><i class="fa-solid fa-shirt"></i> دليل الزي العسكري الرسمي</div>
+    <h1 class="page-header-title animate-fade-up">
+      <span class="gradient-text">الزي الرسمي للأمن العام</span>
+    </h1>
+  </div>
+</div>
+
+<div class="uniform-container">
+  
+  <!-- Important Notes & Guidelines Section -->
+  <section class="instructions-section" style="margin-top: 0; margin-bottom: 10px;">
+    <div class="instructions-header">
+      <h2>📋 تعليمات وملاحظات الزي العسكري</h2>
+    </div>
+    <div class="instructions-grid">
+      <!-- Block 1: General Instructions -->
+      <div class="instruction-block general">
+        <div class="block-title"><i class="fa-solid fa-lightbulb"></i> الملاحظات العامة:</div>
+        <ul class="instruction-list">
+          <li>
+            <span class="num">١</span>
+            <span class="text">الالتزام بالزي الرسمي المحدد للأقسام والمراكز أثناء العمل الميداني.</span>
+          </li>
+          <li>
+            <span class="num">٢</span>
+            <span class="text">المحافظة على الهيبة والوقار العسكري والهندام اللائق في كل الأوقات.</span>
+          </li>
+          <li>
+            <span class="num">٣</span>
+            <span class="text">ارتداء غطاء الرأس المعتمد (البيريه) في الميدان بشكل دائم وتطبيقه بالشكل الصحيح.</span>
+          </li>
+          <li>
+            <span class="num">٤</span>
+            <span class="text">الالتزام بـ الريشة أو الياقة المحددة حسب رتبتك ( الذهبية = من جندي الى مقدم ركن ، الحمراء = عقيد وعميد ، الحمراء التي تليها = لواء وأعلى ).</span>
+          </li>
+          <li>
+            <span class="num">٥</span>
+            <span class="text">استخدام الأنواط والونقات المستحقة فقط.</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Block 2: Prohibitions -->
+      <div class="instruction-block prohibitions">
+        <div class="block-title">⚠️ يُمنع منعاً باتاً:</div>
+        <ul class="instruction-list">
+          <li>
+            <span class="num">١</span>
+            <span class="text">ارتداء أي رتبة أو ريشة أو نوط أو ونق غير مستحقة لك.</span>
+          </li>
+          <li>
+            <span class="num">٢</span>
+            <span class="text">التعديل أو التغيير على الزي الرسمي بأي شكل من الأشكال.</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+  
+  <!-- 1. OFFICIAL OFFICERS UNIFORM -->
+  <div class="uniform-card-stacked animate-fade-in">
+    <div class="uniform-img-column" onclick="openLightbox('../assets/img/uniform/uniform_official.png', 'زي الضباط الرسمي للأمن العام')">
+      <img src="../assets/img/uniform/uniform_official.png" alt="زي الضباط الرسمي">
+    </div>
+    <div class="uniform-info-column">
+      <div class="badge-pill"><i class="fa-solid fa-shield-halved"></i> الزي التشريفي للضباط</div>
+      <h2 class="uniform-title">زي الضباط الرسمي</h2>
+      <p class="uniform-desc">
+        هو اللباس المعتمد والرمزي لضباط الأمن العام بمدينة الـ90 في المناسبات الرسمية والتشريفية والميدانية المعتادة. يتميز بتصميمه المهيب باللون الأسود الكامل والأزرار الذهبية، مع إبراز ريش الكتف المذهبة ورتب الضباط على الأكتاف بشكل واضح.
+      </p>
+      
+      <div class="details-list">
+        <div class="detail-item">
+          <span class="detail-icon"><i class="fa-solid fa-star-of-life"></i></span>
+          <span><strong>التجهيزات:</strong> قفازات جلدية سوداء مفتوحة الأصابع، ونظارات شمسية رسمية متناسقة.</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-icon"><i class="fa-solid fa-star-of-life"></i></span>
+          <span><strong>الشارات والريش:</strong> تثبت الرتبة العسكرية على الكتف باللونين الذهبي والأحمر مع الريشة التشريفية للضباط.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. WINTER OFFICERS UNIFORM -->
+  <div class="uniform-card-stacked animate-fade-in">
+    <div class="uniform-img-column" onclick="openLightbox('../assets/img/uniform/uniform_winter.png', 'زي الضباط الشتوي')">
+      <img src="../assets/img/uniform/uniform_winter.png" alt="زي الضباط الشتوي">
+    </div>
+    <div class="uniform-info-column">
+      <div class="badge-pill"><i class="fa-solid fa-snowflake"></i> الزي الشتوي للضباط</div>
+      <h2 class="uniform-title">زي الضباط الشتوي</h2>
+      <p class="uniform-desc">
+        الزي المخصص للضباط خلال فترات البرد والأجواء الشتوية الميدانية. يتكون من قميص صوف شتوي مغلق الرقبة (High Neck) بلون أسود كامل، متناسق مع البيريه الميدانية ذات الشعار الذهبي، ويوفر الحماية مع الحفاظ على الهيبة العسكرية والمظهر الرسمي للضابط.
+      </p>
+      
+      <div class="details-list">
+        <div class="detail-item">
+          <span class="detail-icon"><i class="fa-solid fa-star-of-life"></i></span>
+          <span><strong>التصميم:</strong> قميص شتوي مغلق بياقة عالية لتدفئة الرقبة تحت السترة العسكرية.</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-icon"><i class="fa-solid fa-star-of-life"></i></span>
+          <span><strong>غطاء الرأس:</strong> يرتدى معه البيريه العسكرية السوداء ذات الشعار الرسمي الذهبي للأمن العام.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. STAFF UNIFORM (ARKAN) -->
+  <div class="uniform-card-stacked animate-fade-in">
+    <div class="uniform-img-column" onclick="openLightbox('../assets/img/uniform/uniform_arkan.png', 'زي الأركان للأمن العام')">
+      <img src="../assets/img/uniform/uniform_arkan.png" alt="زي الأركان">
+    </div>
+    <div class="uniform-info-column">
+      <div class="badge-pill">⭐ زي الأركان</div>
+      <h2 class="uniform-title">زي الأركان</h2>
+      <p class="uniform-desc">
+        السترة الشتوية الفاخرة المخصصة لضباط الأركان بإدارة الأمن العام. تتميز بتصميم جاكيت شتوي سميك مبطن بالكامل للعمل الميداني والقيادي المتقدم في الأجواء الباردة، ومزود بجهاز الاتصال الميداني على الصدر لضمان سرعة التنسيق والتوجيه في الميدان.
+      </p>
+      
+      <div class="details-list">
+        <div class="detail-item">
+          <span class="detail-icon"><i class="fa-solid fa-star-of-life"></i></span>
+          <span><strong>نوع السترة:</strong> جاكيت شتوي سميك ومقاوم للعوامل الجوية الميدانية.</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-icon"><i class="fa-solid fa-star-of-life"></i></span>
+          <span><strong>المميزات:</strong> مزود بحامل راديو مدمج على الصدر لتوجيه العمليات بشكل مستمر ومباشر.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. LONG SLEEVE (SERGEANT FIRST CLASS+) -->
+  <div class="uniform-card-stacked animate-fade-in">
+    <div class="uniform-img-column" onclick="openLightbox('../assets/img/uniform/uniform_long_sleeve.png', 'الزي ذو الكم الطويل')">
+      <img src="../assets/img/uniform/uniform_long_sleeve.png" alt="الكم الطويل">
+    </div>
+    <div class="uniform-info-column">
+      <div class="badge-pill"><i class="fa-solid fa-user-tie"></i> الكم الطويل - رتب خاصة</div>
+      <h2 class="uniform-title">الزي ذو الكم الطويل</h2>
+      <p class="uniform-desc">
+        هو اللباس الميداني الانتقالي المتميز بالكم الطويل لرجال الأمن. هذا الإصدار مسموح ومخصص حصرياً للارتداء بدءاً من رتبة **رقيب أول** فما فوق. ويتميز بوجود شارات الرتب المقلمة باللون الأبيض على الذراع بشكل جانبي بارز، مع الحزام الميداني ذي المشبك المذهب.
+      </p>
+      
+      <div class="details-list">
+        <div class="detail-item">
+          <span class="detail-icon"><i class="fa-solid fa-star-of-life"></i></span>
+          <span><strong>شرط الارتداء:</strong> مسموح به حصراً لرتبة رقيب أول فما فوق لتمييز القيادات الميدانية من ضباط الصف.</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-icon"><i class="fa-solid fa-star-of-life"></i></span>
+          <span><strong>التفاصيل:</strong> شارات الرتب البيضاء على الأكمام مع الحزام العسكري الذهبي ذي الشعار الرسمي.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. ENLISTED UNIFORM (SOLDIER AND ABOVE) -->
+  <div class="uniform-card-stacked animate-fade-in">
+    <div class="uniform-img-column" onclick="openLightbox('../assets/img/uniform/uniform_enlisted.png', 'زي الأفراد من جندي وفوق')">
+      <img src="../assets/img/uniform/uniform_enlisted.png" alt="زي الأفراد">
+    </div>
+    <div class="uniform-info-column">
+      <div class="badge-pill"><i class="fa-solid fa-user-shield"></i> زي الأفراد الميداني</div>
+      <h2 class="uniform-title">زي الأفراد (من جندي وفوق)</h2>
+      <p class="uniform-desc">
+        هو الزي الميداني الرسمي المعتمد لجميع أفراد وضباط صف الأمن العام من رتبة جندي وحتى رقيب. ويتميز بتصميمه ذي الأكمام القصيرة لتسهيل الحركة والتعامل السريع في المهام اليومية ونقاط التفتيش والدوريات الأمنية الميدانية.
+      </p>
+      
+      <div class="details-list">
+        <div class="detail-item">
+          <span class="detail-icon"><i class="fa-solid fa-star-of-life"></i></span>
+          <span><strong>التصميم:</strong> قميص ميداني ذو كم قصير مريح ومناسب للحركة السريعة والمهام الميدانية الشاقة.</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-icon"><i class="fa-solid fa-star-of-life"></i></span>
+          <span><strong>الملحقات المعتمدة:</strong> يرتدى معه الحزام الميداني المذهب والقفازات الجلدية السوداء لحماية اليدين.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+
+<!-- Section Divider for Insignia -->
+<div class="section-divider-title" id="insignias">
+  <h2><i class="fa-solid fa-medal"></i> الشارات التشريفية والأوسمة</h2>
+</div>
+
+<!-- Insignia Cards Grid -->
+<div class="insignia-grid">
+  <!-- 1. WINGS & SPECIALTIES -->
+  <div class="insignia-card animate-fade-in" onclick="openLightbox('../assets/img/uniform/uniform_wings.png', 'الونقات')">
+    <div class="insignia-card-img-wrap">
+      <img src="../assets/img/uniform/uniform_wings.png" alt="الونقات">
+    </div>
+    <div class="insignia-card-body">
+      <h3 class="insignia-card-title">الونقات</h3>
+      <p class="insignia-card-desc">
+        شارات التخصص الميداني والمهارة الممنوحة لرجال الأمن العام، مثل شارة الرماية، مكافحة الإرهاب، العمليات الخاصة، المظليين، وتخصص المتفجرات. تُثبّت بشكل أساسي على الصدر فوق الجيب الأيسر.
+      </p>
+    </div>
+  </div>
+
+  <!-- 2. RIBBONS & MEDALS -->
+  <div class="insignia-card animate-fade-in" onclick="openLightbox('../assets/img/uniform/uniform_medals.jpg', 'الأنواط والأوسمة الميدانية')">
+    <div class="insignia-card-img-wrap">
+      <img src="../assets/img/uniform/uniform_medals.jpg" alt="الأنواط">
+    </div>
+    <div class="insignia-card-body">
+      <h3 class="insignia-card-title">الأنواط والأوسمة الميدانية</h3>
+      <p class="insignia-card-desc">
+        الأوسمة والأنواط التشريفية التي تمنح لرجال الأمن العام كتقدير لشجاعتهم وإخلاصهم في حفظ الأمن وتقديم الخدمات الاستثنائية والجهود المتميزة في الميدان.
+      </p>
+    </div>
+  </div>
+
+  <!-- 3. OFFICER BADGE / FEATHER -->
+  <div class="insignia-card contain-img animate-fade-in" onclick="openLightbox('../assets/img/uniform/badge_officer.png', 'الريشة المخصصة للضباط')">
+    <div class="insignia-card-img-wrap">
+      <img src="../assets/img/uniform/badge_officer.png" alt="ريشة الضباط">
+    </div>
+    <div class="insignia-card-body">
+      <h3 class="insignia-card-title">الريشة المخصصة للضباط</h3>
+      <p class="insignia-card-desc">
+        الشارة الدائرية الذهبية الفاخرة التي تحمل الشعار الوطني (السيفين والنخلة) مع التاج الملكي وعبارة "الأمن العام"، وهي ريشة مخصصة لارتداء الضباط على ياقة الزي العسكري.
+      </p>
+    </div>
+  </div>
+
+  <!-- 4. ENLISTED BADGE / FEATHER -->
+  <div class="insignia-card contain-img animate-fade-in" onclick="openLightbox('../assets/img/uniform/badge_enlisted.png', 'الريشة المخصصة للأفراد')">
+    <div class="insignia-card-img-wrap">
+      <img src="../assets/img/uniform/badge_enlisted.png" alt="ريشة الأفراد">
+    </div>
+    <div class="insignia-card-body">
+      <h3 class="insignia-card-title">الريشة المخصصة للأفراد</h3>
+      <p class="insignia-card-desc">
+        الشارة المعدنية الدائرية المذهبة الخالية من التاج، وتثبت كرموز وريش مخصصة للأفراد وضباط الصف على الياقة لتمييز فئاتهم العسكرية في الميدان.
+      </p>
+    </div>
+  </div>
+
+  <!-- 5. FEATHER MAJOR GENERAL+ -->
+  <div class="insignia-card contain-img animate-fade-in" onclick="openLightbox('../assets/img/uniform/uniform_feather_lwaa.png', 'الريشة المخصصة لرتبة لواء فما فوق')">
+    <div class="insignia-card-img-wrap">
+      <img src="../assets/img/uniform/uniform_feather_lwaa.png" alt="ريشة رتبة لواء فما فوق">
+    </div>
+    <div class="insignia-card-body">
+      <h3 class="insignia-card-title">الريشة المخصصة لرتبة لواء فما فوق</h3>
+      <p class="insignia-card-desc">
+        الريشة المطرزة الفاخرة للكتف العسكري المخصصة لرتبي القيادة العليا (لواء، فريق، فريق أول) ذات التصميم المورق العريض المطرز بالخيوط الذهبية على خلفية حمراء.
+      </p>
+    </div>
+  </div>
+
+  <!-- 6. FEATHER COLONEL / BRIGADIER -->
+  <div class="insignia-card contain-img animate-fade-in" onclick="openLightbox('../assets/img/uniform/uniform_feather_aqeed.png', 'الريشة المخصصة لرتبة عقيد وعميد')">
+    <div class="insignia-card-img-wrap">
+      <img src="../assets/img/uniform/uniform_feather_aqeed.png" alt="ريشة رتبة عقيد وعميد">
+    </div>
+    <div class="insignia-card-body">
+      <h3 class="insignia-card-title">الريشة المخصصة لرتبة عقيد وعميد</h3>
+      <p class="insignia-card-desc">
+        شارة الكتف والريشة الطولية ذات الخطين المطرزة بالخيوط الذهبية لضباط القيادة الوسطى والعليا برتبتي عقيد وعميد.
+      </p>
+    </div>
+  </div>
+</div>
+
+
+<script src="../assets/js/storage.js?v=1.0.5"></script>
+<script src="../assets/js/data.js?v=1.0.5"></script>
+<script src="../assets/js/auth.js?v=1.0.5"></script>
+<script src="../assets/js/components.js"></script>
+<script src="../assets/js/app.js?v=1.0.5"></script>
+<script>
+  // Inject navbar and sidebar and footer
+  document.write(Components.navbar('uniform'));
+  document.write(Components.sidebar('uniform'));
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // Inject Footer
+    const body = document.body;
+    const footerDiv = document.createElement('div');
+    footerDiv.innerHTML = Components.footer();
+    body.appendChild(footerDiv.firstElementChild);
+  });
+
+  // Lightbox functions
+  function openLightbox(imgSrc, title) {
+    const lightbox = document.getElementById('uniform-lightbox');
+    const imgEl = document.getElementById('lightbox-image-el');
+    const captionEl = document.getElementById('lightbox-caption-el');
+    if (lightbox && imgEl && captionEl) {
+      imgEl.src = imgSrc;
+      captionEl.textContent = title;
+      lightbox.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  function closeLightbox() {
+    const lightbox = document.getElementById('uniform-lightbox');
+    if (lightbox) {
+      lightbox.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+  }
+</script>
+</body>
+</html>

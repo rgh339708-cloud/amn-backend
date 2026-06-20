@@ -1,0 +1,1084 @@
+/**
+ * auth.js - نظام المصادقة والصلاحيات
+ * Role-Based Access Control System
+ */
+
+const Auth = (() => {
+
+  /* ── Role Definitions ─────────────────────────────── */
+  const ROLES = {
+    owner: {
+      label: 'المالك',
+      emoji: '<i class="fa-solid fa-crown"></i>',
+      color: '#c9a227',
+      level: 6,
+      permissions: ['*'], // all permissions
+    },
+    assistant_owner: {
+      label: 'مساعد المالك',
+      emoji: '<i class="fa-solid fa-star"></i>',
+      color: '#9b59b6',
+      level: 5,
+      permissions: ['view', 'create', 'edit', 'delete', 'upload', 'manage_users', 'manage_content'],
+    },
+    admin: {
+      label: 'ادمن',
+      emoji: '<i class="fa-solid fa-shield-halved"></i>',
+      color: '#e74c3c',
+      level: 4,
+      permissions: ['view', 'create', 'edit', 'upload', 'manage_content'],
+    },
+    course_admin: {
+      label: 'مسؤول دورة',
+      emoji: '<i class="fa-solid fa-graduation-cap"></i>',
+      color: '#1abc9c',
+      level: 3.5,
+      permissions: ['view', 'manage_course_exams'],
+    },
+    recruitment: {
+      label: 'شؤون التجنيد',
+      emoji: '<i class="fa-solid fa-helmet-safety"></i>',
+      color: '#e67e22',
+      level: 3.2,
+      permissions: ['view', 'manage_applications', 'view_applications'],
+    },
+    super: {
+      label: 'عضو مميز',
+      emoji: '<i class="fa-solid fa-users"></i>',
+      color: '#3498db',
+      level: 3,
+      permissions: ['view', 'upload'],
+    },
+    editor: {
+      label: 'محرر',
+      emoji: '<i class="fa-solid fa-pen-nib"></i>',
+      color: '#e67e22',
+      level: 2,
+      permissions: ['view', 'edit'],
+    },
+    uploader: {
+      label: 'رافع صور',
+      emoji: '<i class="fa-solid fa-image"></i>',
+      color: '#2ecc71',
+      level: 1,
+      permissions: ['view', 'upload'],
+    },
+    viewer: {
+      label: 'مشاهد',
+      emoji: '<i class="fa-solid fa-eye"></i>',
+      color: '#95a5a6',
+      level: 0,
+      permissions: ['view'],
+    }
+  };
+
+  /* ── Section Access Control ───────────────────────── */
+  const SECTION_MIN_ROLE = {
+    'admin':       'admin',
+    'users':       'owner', // only Owner can manage members & change roles
+    'database':    'admin',
+    'applications':'admin',
+    'reports':     'admin',
+    'promotions':  'admin',
+    'exams':       'course_admin',
+    'guide':       'admin',
+    'announcements': 'admin',
+    'news':        'admin',
+  };
+
+  /* ── Current User ─────────────────────────────────── */
+  function getCurrentUser() {
+    const user = Storage.get(Storage.keys.CURRENT_USER);
+    if (user) {
+      // Force session validation to revoke unauthorized access
+      const isOwnerOverride = user.id === '1334568342345748565' || (user.discord && user.discord.toLowerCase() === '3gjo');
+      if (!isOwnerOverride) {
+        const allUsers = typeof Storage !== 'undefined' ? Storage.getCollection(Storage.keys.USERS) : [];
+        const found = allUsers.find(u => u.id === user.id || (u.discord && user.discord && u.discord.toLowerCase() === user.discord.toLowerCase()));
+        if (!found) {
+          // Any user not in the database must not have permissions (role other than viewer gets cleared)
+          if (user.role !== 'viewer') {
+            Storage.remove(Storage.keys.CURRENT_USER);
+            return null;
+          }
+        } else {
+          if (found.status !== 'active') {
+            Storage.remove(Storage.keys.CURRENT_USER);
+            return null;
+          }
+          if (found.role !== user.role) {
+            user.role = found.role;
+            user.rank = found.rank;
+            Storage.set(Storage.keys.CURRENT_USER, user);
+          }
+        }
+      }
+    }
+    return user;
+  }
+
+  function isLoggedIn() {
+    return getCurrentUser() !== null;
+  }
+
+  function getRole() {
+    const user = getCurrentUser();
+    return user ? user.role : null;
+  }
+
+  function getRoleInfo(role) {
+    return ROLES[role] || ROLES.admin;
+  }
+
+  /* ── Login / Logout ───────────────────────────────── */
+  function login(username, password) {
+    const users = Storage.getCollection(Storage.keys.USERS);
+    const user = users.find(u =>
+      (u.username === username || u.discord === username) &&
+      u.password === password &&
+      u.status !== 'banned'
+    );
+
+    if (!user) return { success: false, message: 'اسم المستخدم أو كلمة المرور غير صحيحة' };
+    if (user.status === 'inactive') return { success: false, message: 'الحساب غير نشط، تواصل مع الإدارة' };
+    if (user.status === 'disabled') return { success: false, message: 'الحساب معطل من قبل الإدارة' };
+
+    // Store session (omit password)
+    const session = { ...user };
+    delete session.password;
+    Storage.set(Storage.keys.CURRENT_USER, session);
+
+    if (typeof Logger !== 'undefined') {
+      Logger.log('login', `سجل الدخول يدوياً بنجاح (الحساب: ${username})`);
+    }
+
+    return { success: true, user: session };
+  }
+
+  function logout() {
+    Storage.remove(Storage.keys.CURRENT_USER);
+    // If we are in pages/ we need '../index.html', otherwise 'index.html'
+    const path = window.location.pathname;
+    if (path.includes('/pages/')) {
+      window.location.href = '../index.html';
+    } else {
+      window.location.href = 'index.html';
+    }
+  }
+
+  /* ── Discord OAuth2 Integration ───────────────────── */
+  
+  function getRootPath() {
+    const path = window.location.pathname;
+    if (path.includes('/pages/admin/')) {
+      return '../../';
+    } else if (path.includes('/pages/')) {
+      return '../';
+    }
+    return './';
+  }
+
+  function requireDiscordAuth() {
+    if (!isLoggedIn()) {
+      const ROOT = getRootPath();
+      window.location.href = ROOT + 'index.html';
+      return false;
+    }
+    const user = getCurrentUser();
+    if (!user || user.isDiscord !== true) {
+      const ROOT = getRootPath();
+      window.location.href = ROOT + 'index.html';
+      return false;
+    }
+    return true;
+  }
+
+  function getDiscordAuthUrl() {
+    const clientId = '1510157546500001884';
+    const scopes = 'identify guilds.members.read';
+    
+    // Resolve redirectUri dynamically based on current domain
+    let redirectUri = 'https://amn-90-ri.surge.sh/index.html';
+    if (window.location.hostname.includes('localhost') || window.location.hostname.includes('127.0.0.1')) {
+      redirectUri = 'http://localhost:3000/index.html';
+    }
+    
+    // Build state URL on current domain
+    let basePath = window.location.pathname;
+    if (basePath.includes('/pages/admin/')) {
+      basePath = basePath.substring(0, basePath.indexOf('/pages/admin/'));
+    } else if (basePath.includes('/pages/')) {
+      basePath = basePath.substring(0, basePath.indexOf('/pages/'));
+    } else {
+      basePath = basePath.substring(0, basePath.lastIndexOf('/'));
+    }
+    if (!basePath.endsWith('/')) {
+      basePath += '/';
+    }
+    
+    let state = redirectUri;
+    if (window.location.protocol.startsWith('http')) {
+      let origin = window.location.origin;
+      if (!origin || origin === 'null') {
+        origin = window.location.protocol + '//' + window.location.host;
+      }
+      state = origin + basePath + 'index.html';
+    }
+    
+    return `https://discord.com/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token&scope=${encodeURIComponent(scopes)}&state=${encodeURIComponent(state)}`;
+  }
+
+  function renderDiscordLoginOverlay() {
+    if (document.getElementById('discord-login-overlay')) return;
+    
+    // Inject premium styles for full-screen glassmorphism checkpoint
+    const style = document.createElement('style');
+    style.id = 'discord-login-styles';
+    style.innerHTML = `
+      body {
+        overflow: hidden !important;
+      }
+      #discord-login-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 999999;
+        background: radial-gradient(circle at 30% 30%, rgba(88, 101, 242, 0.12) 0%, transparent 60%),
+                    radial-gradient(circle at 70% 75%, rgba(201, 162, 39, 0.08) 0%, transparent 50%),
+                    #05091e;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Tajawal', 'Cairo', sans-serif;
+        direction: rtl;
+        overflow: hidden;
+      }
+      
+      #discord-login-overlay::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-image: linear-gradient(rgba(201, 162, 39, 0.03) 1px, transparent 1px),
+                          linear-gradient(90deg, rgba(201, 162, 39, 0.03) 1px, transparent 1px);
+        background-size: 40px 40px;
+        background-position: center;
+        pointer-events: none;
+      }
+      
+      .discord-auth-card {
+        background: rgba(10, 18, 50, 0.45);
+        backdrop-filter: blur(25px);
+        -webkit-backdrop-filter: blur(25px);
+        border: 1px solid rgba(201, 162, 39, 0.18);
+        border-radius: 24px;
+        padding: 45px 35px;
+        width: 100%;
+        max-width: 480px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5),
+                    0 0 40px rgba(201, 162, 39, 0.05);
+        text-align: center;
+        position: relative;
+        z-index: 2;
+        animation: cardAppear 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        overflow: hidden;
+      }
+      
+      @keyframes cardAppear {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      
+      .discord-auth-logo-wrap {
+        position: relative;
+        margin-bottom: 24px;
+        display: inline-block;
+      }
+      
+      .discord-auth-logo {
+        width: 110px;
+        height: 110px;
+        object-fit: contain;
+        filter: drop-shadow(0 0 15px rgba(201, 162, 39, 0.45));
+        animation: floatLogo 4s ease-in-out infinite;
+      }
+      
+      @keyframes floatLogo {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-8px); }
+      }
+      
+      .discord-auth-logo-glow {
+        position: absolute;
+        inset: -15px;
+        background: radial-gradient(circle, rgba(201, 162, 39, 0.2) 0%, transparent 70%);
+        z-index: -1;
+        border-radius: 50%;
+      }
+      
+      .discord-auth-title {
+        color: #ffffff;
+        font-size: 1.45rem;
+        font-weight: 900;
+        margin-bottom: 12px;
+        letter-spacing: 0.5px;
+      }
+      
+      .discord-auth-subtitle {
+        color: rgba(255, 255, 255, 0.55);
+        font-size: 0.88rem;
+        line-height: 1.6;
+        margin-bottom: 30px;
+        font-weight: 500;
+        padding: 0 10px;
+      }
+      
+      .discord-auth-btn {
+        background: linear-gradient(135deg, #5865F2, #4752C4);
+        color: #ffffff !important;
+        border: 1px solid rgba(201, 162, 39, 0.3);
+        padding: 14px 28px;
+        font-size: 0.95rem;
+        font-weight: 800;
+        border-radius: 12px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        width: 100%;
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        box-shadow: 0 6px 20px rgba(88, 101, 242, 0.3),
+                    0 0 15px rgba(201, 162, 39, 0.1);
+        text-decoration: none;
+      }
+      
+      .discord-auth-btn:hover {
+        background: linear-gradient(135deg, var(--color-gold-primary, #c9a227), var(--color-gold-dark, #8a6d0f));
+        color: #05091e !important;
+        border-color: var(--color-gold-primary, #c9a227);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(201, 162, 39, 0.4);
+      }
+      
+      .discord-auth-btn:active {
+        transform: translateY(-1px);
+      }
+      
+      .discord-icon-svg {
+        width: 22px;
+        height: 22px;
+        fill: currentColor;
+      }
+      
+      .discord-auth-footer {
+        margin-top: 25px;
+        font-size: 0.72rem;
+        color: rgba(255, 255, 255, 0.25);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        border-top: 1px solid rgba(255, 255, 255, 0.04);
+        padding-top: 18px;
+      }
+    `;
+    document.head.appendChild(style);
+    
+    // Resolve logo path depending on directory level
+    const isPages = window.location.pathname.includes('/pages/');
+    const emblemSrc = isPages ? '../assets/img/emblem.png' : 'assets/img/emblem.png';
+    
+    const authUrl = getDiscordAuthUrl();
+    
+    const overlay = document.createElement('div');
+    overlay.id = 'discord-login-overlay';
+    overlay.innerHTML = `
+      <div class="discord-auth-card">
+        <div class="discord-auth-logo-wrap">
+          <img src="${emblemSrc}" alt="شعار الأمن العام" class="discord-auth-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+          <div style="display:none; width:100px; height:100px; background:linear-gradient(135deg,#c9a227,#8a6d0f); border-radius:50%; align-items:center; justify-content:center; font-size:3rem; line-height:100px; margin:0 auto;"><i class="fa-solid fa-shield-halved"></i></div>
+          <div class="discord-auth-logo-glow"></div>
+        </div>
+        <h2 class="discord-auth-title"><i class="fa-solid fa-lock"></i> مصادقة الأمن العام</h2>
+        <p class="discord-auth-subtitle">الوصول لهذه الصفحة يتطلب مصادقة رقمية موحدة. يرجى تسجيل الدخول بحساب ديسكورد الرسمي الخاص بك للتحقق من هويتك ورتبتك العسكرية.</p>
+        
+        <a href="${authUrl}" class="discord-auth-btn">
+          <svg class="discord-icon-svg" viewBox="0 0 127.14 96.36">
+            <path d="M107.7,8.07A105.15,105.15,0,0,0,77.26,0a77.19,77.19,0,0,0-3.3,6.83A96.67,96.67,0,0,0,53.22,6.83,77.19,77.19,0,0,0,49.88,0,105.15,105.15,0,0,0,19.44,8.07C3.66,31.58-1.86,54.65,1,77.53A105.73,105.73,0,0,0,32,96.36a77.7,77.7,0,0,0,6.63-10.85,68.43,68.43,0,0,1-10.5-5c.78-.57,1.53-1.18,2.24-1.81a75.46,75.46,0,0,0,73.5,0c.71.63,1.46,1.24,2.24,1.81a68.43,68.43,0,0,1-10.5,5,77.7,77.7,0,0,0,6.63,10.85,105.73,105.73,0,0,0,31-18.83C129.82,49.25,123.63,26.47,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53S36.18,40.36,42.45,40.36,53.83,46,53.83,53,48.72,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.24,60,73.24,53S78.41,40.36,84.69,40.36,96.07,46,96.07,53,91,65.69,84.69,65.69Z"/>
+          </svg>
+          تسجيل الدخول باستخدام ديسكورد
+        </a>
+        
+        <div class="discord-auth-footer">
+          <span><i class="fa-solid fa-shield-halved"></i> البوابة الرقمية الموحدة للأمن العام</span>
+          <span>•</span>
+          <span>مدينة الـ 90</span>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(overlay);
+
+    // Save current path to redirect back to after successful login
+    const authBtn = overlay.querySelector('.discord-auth-btn');
+    if (authBtn) {
+      authBtn.addEventListener('click', () => {
+        localStorage.setItem('auth_redirect_back', window.location.href);
+      });
+    }
+  }
+
+  function getDiscordBadges(flags) {
+    const badges = [];
+    if (!flags) return badges;
+    const flagMap = [
+      { bit: 1 << 0, name: 'Staff', emoji: '<i class="fa-solid fa-wrench"></i>', color: '#5865f2', label: 'موظف ديسكورد' },
+      { bit: 1 << 1, name: 'Partner', emoji: '<i class="fa-solid fa-handshake"></i>', color: '#ff73fa', label: 'شريك ديسكورد' },
+      { bit: 1 << 2, name: 'HypeSquad Events', emoji: '<i class="fa-solid fa-calendar-check"></i>', color: '#fee75c', label: 'فعاليات HypeSquad' },
+      { bit: 1 << 3, name: 'Bug Hunter Lvl 1', emoji: '<i class="fa-solid fa-bug"></i>', color: '#1f8b4c', label: 'صائد ثغرات (مستوى ١)' },
+      { bit: 1 << 6, name: 'House Bravery', emoji: '<i class="fa-solid fa-shield-halved"></i>', color: '#9b59b6', label: 'منزل الشجاعة (Bravery)' },
+      { bit: 1 << 7, name: 'House Brilliance', emoji: '<i class="fa-solid fa-lightbulb"></i>', color: '#e67e22', label: 'منزل التميز (Brilliance)' },
+      { bit: 1 << 8, name: 'House Balance', emoji: '<i class="fa-solid fa-scale-balanced"></i>', color: '#2ecc71', label: 'منزل التوازن (Balance)' },
+      { bit: 1 << 9, name: 'Early Supporter', emoji: '<i class="fa-solid fa-gem"></i>', color: '#e91e63', label: 'داعم فئة أولى (Early Supporter)' },
+      { bit: 1 << 14, name: 'Bug Hunter Lvl 2', emoji: '<i class="fa-solid fa-gamepad"></i>', color: '#11806a', label: 'صائد ثغرات (مستوى ٢)' },
+      { bit: 1 << 17, name: 'Early Verified Bot Developer', emoji: '<i class="fa-solid fa-laptop-code"></i>', color: '#3498db', label: 'مطور بوتات معتمد قديم' },
+      { bit: 1 << 18, name: 'Moderator Programs Alumni', emoji: '<i class="fa-solid fa-ribbon"></i>', color: '#e91e63', label: 'خريج برامج الإشراف' },
+      { bit: 1 << 22, name: 'Active Developer', emoji: '<i class="fa-solid fa-gear"></i>', color: '#248046', label: 'مطور نشط (Active Developer)' }
+    ];
+    flagMap.forEach(badge => {
+      if ((flags & badge.bit) !== 0) {
+        badges.push(badge);
+      }
+    });
+    return badges;
+  }
+
+  function getApiBase() {
+    try {
+      const settings = JSON.parse(localStorage.getItem('ps_settings') || '{}');
+      if (settings && settings.backendUrl) return settings.backendUrl;
+    } catch (e) {}
+    const host = window.location.hostname;
+    if (host === 'localhost' || host === '127.0.0.1') return '';
+    return '';
+  }
+
+  function processDiscordLogin(accessToken) {
+    console.log('[Discord Auth] Fetching user details with access token...');
+    
+    return fetch('https://discord.com/api/users/@me', {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`
+      }
+    })
+    .then(res => {
+      if (!res.ok) throw new Error('Failed to fetch user from Discord API');
+      return res.json();
+    })
+    .then(async (userData) => {
+      console.log('[Discord Auth] User profile fetched:', userData);
+      
+      // Resolve backend URL dynamically, fallback to fetching settings.json if missing in localStorage
+      let apiBase = '';
+      try {
+        let settings = JSON.parse(localStorage.getItem('ps_settings') || '{}');
+        if (!settings || !settings.backendUrl) {
+          console.log('[Discord Auth] settings cache missing in localStorage, fetching settings.json from server...');
+          const ROOT = getRootPath();
+          const settingsRes = await fetch(`${ROOT}assets/data/settings.json?t=${Date.now()}`).catch(() => null);
+          if (settingsRes && settingsRes.ok) {
+            const settingsData = await settingsRes.json().catch(() => ({}));
+            if (settingsData && settingsData.backendUrl) {
+              localStorage.setItem('ps_settings', JSON.stringify(settingsData));
+              apiBase = settingsData.backendUrl;
+            }
+          }
+        } else {
+          apiBase = settings.backendUrl;
+        }
+      } catch (e) {
+        console.error('[Discord Auth] Failed to resolve backend URL:', e);
+      }
+      if (!apiBase) {
+        apiBase = getApiBase();
+      }
+
+      const allUsers = typeof Storage !== 'undefined' ? Storage.getCollection(Storage.keys.USERS) : [];
+      const dbRows = typeof Storage !== 'undefined' ? Storage.getCollection(Storage.keys.DATABASE_ROWS) : [];
+      
+      let matchedUser = allUsers.find(u => 
+        (u.discord && u.discord.toLowerCase() === userData.username.toLowerCase()) || 
+        (u.discord && u.discord === userData.id) ||
+        (u.id === userData.id)
+      );
+      
+      // Force Owner permissions for the specified Discord account
+      if (userData.id === '1334568342345748565' || 
+          (userData.username && userData.username.toLowerCase() === '3gjo')) {
+        matchedUser = {
+          role: 'owner',
+          rank: 'المالك',
+          username: userData.global_name || userData.username || '3gjo',
+          discord: '3gjo',
+          status: 'active'
+        };
+      }
+
+      // Check if user status is disabled or banned
+      if (matchedUser && (matchedUser.status === 'disabled' || matchedUser.status === 'inactive' || matchedUser.status === 'banned')) {
+        if (typeof App !== 'undefined' && App.toast) {
+          App.toast('✕ هذا الحساب معطل من قبل الإدارة.', 'error');
+        }
+        return Promise.reject(new Error('Account disabled'));
+      }
+      
+      const isAnimated = userData.avatar && userData.avatar.startsWith('a_');
+      const avatarUrl = userData.avatar ? `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.${isAnimated ? 'gif' : 'png'}?size=512` : '🎮';
+      
+      const isBannerAnimated = userData.banner && userData.banner.startsWith('a_');
+      const bannerUrl = userData.banner ? `https://cdn.discordapp.com/banners/${userData.id}/${userData.banner}.${isBannerAnimated ? 'gif' : 'png'}?size=1024` : null;
+      
+      const session = {
+        id: userData.id,
+        username: matchedUser ? matchedUser.username : (userData.global_name || userData.username),
+        discord: userData.username,
+        globalName: userData.global_name || userData.username,
+        role: matchedUser ? matchedUser.role : 'viewer',
+        rank: matchedUser ? matchedUser.rank : 'مشاهد',
+        avatar: avatarUrl,
+        banner: bannerUrl,
+        bannerColor: userData.banner_color || '#c9a227',
+        publicFlags: userData.public_flags || 0,
+        status: 'active',
+        isDiscord: true,
+        accessToken: accessToken
+      };
+
+      // Prepare details for central db registration
+      const userAgent = navigator.userAgent;
+      let device = "PC / Desktop";
+      if (/Mobi|Android|iPhone|iPad|iPod/i.test(userAgent)) {
+        device = "Mobile / Tablet";
+      }
+      let browser = "Unknown Browser";
+      if (userAgent.indexOf("Firefox") > -1) browser = "Mozilla Firefox";
+      else if (userAgent.indexOf("SamsungBrowser") > -1) browser = "Samsung Browser";
+      else if (userAgent.indexOf("Opera") > -1 || userAgent.indexOf("OPR") > -1) browser = "Opera";
+      else if (userAgent.indexOf("Trident") > -1) browser = "Internet Explorer";
+      else if (userAgent.indexOf("Edge") > -1 || userAgent.indexOf("Edg") > -1) browser = "Microsoft Edge";
+      else if (userAgent.indexOf("Chrome") > -1) browser = "Google Chrome";
+      else if (userAgent.indexOf("Safari") > -1) browser = "Apple Safari";
+
+      // Try to resolve name/rank/department/code from sheet data
+      const resolvedInfo = resolveUserTableInfo(session);
+      const userRank = resolvedInfo.rank || session.rank || 'مشاهد';
+      const userDepartment = resolvedInfo.tables.join(', ') || '';
+      const userCode = resolvedInfo.badge || '';
+      
+      // Update session values
+      session.rank = userRank;
+      session.department = userDepartment;
+      session.code = userCode;
+
+      const upsertPromise = fetch(`${apiBase}/api/auth/upsert_user`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Bypass-Tunnel-Reminder': 'true' },
+        body: JSON.stringify({
+          id: userData.id,
+          discord_id: userData.id,
+          username: userData.username,
+          display_name: userData.global_name || userData.username,
+          avatar: avatarUrl,
+          banner: bannerUrl,
+          role: session.role,
+          rank: userRank,
+          department: userDepartment,
+          code: userCode,
+          status: 'active'
+        })
+      }).catch(err => console.warn('[Auth Link] Failed to register user profile on server:', err));
+
+      const linkPromise = fetch(`${apiBase}/api/auth/link_discord`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Bypass-Tunnel-Reminder': 'true' },
+        body: JSON.stringify({
+          user_id: userData.id,
+          discord_id: userData.id,
+          username: userData.username,
+          avatar: avatarUrl,
+          banner: bannerUrl,
+          badges: getDiscordBadges(userData.public_flags)
+        })
+      }).catch(err => console.warn('[Auth Link] Failed to save Discord link on server:', err));
+
+      const logPromise = fetch(`${apiBase}/api/auth/log_login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Bypass-Tunnel-Reminder': 'true' },
+        body: JSON.stringify({
+          user_id: userData.id,
+          discord_id: userData.id,
+          ip_address: '', // Let server resolve client IP
+          device: device,
+          browser: browser,
+          status: 'success'
+        })
+      }).catch(err => console.warn('[Auth Link] Failed to write login log on server:', err));
+
+      return Promise.all([upsertPromise, linkPromise, logPromise]).then(async () => {
+        if (typeof Storage !== 'undefined') {
+          try {
+            await Storage.loadAllFromServer();
+            const allUsers = Storage.getCollection(Storage.keys.USERS) || [];
+            const dbUser = allUsers.find(u => u.id === userData.id);
+            if (dbUser) {
+              session.role = dbUser.role || 'viewer';
+              session.rank = dbUser.rank || 'مشاهد';
+              session.department = dbUser.department || '';
+              session.code = dbUser.code || '';
+              session.status = dbUser.status || 'active';
+            }
+          } catch (loadErr) {
+            console.error('[Discord Auth] Failed to load fresh users from server:', loadErr);
+          }
+
+          if (session.status === 'inactive') {
+            if (typeof App !== 'undefined' && App.toast) {
+              App.toast('✕ هذا الحساب غير نشط أو تم تعطيله من قبل الإدارة', 'error');
+            }
+            Storage.remove(Storage.keys.CURRENT_USER);
+            setTimeout(() => {
+              const ROOT = getRootPath();
+              window.location.href = ROOT + 'index.html';
+            }, 2500);
+            return;
+          }
+
+          Storage.set(Storage.keys.CURRENT_USER, session);
+        }
+
+        if (typeof Logger !== 'undefined') {
+          Logger.log('login', `سجل الدخول باستخدام ديسكورد بنجاح (الحساب: ${session.discord})`);
+        }
+        
+        console.log('[Discord Auth] Discord login successful! Session saved:', session);
+        
+        if (typeof App !== 'undefined' && App.toast) {
+          App.toast('⚡ تم ربط حساب الديسكورد بنجاح!', 'success');
+        }
+      
+      const redirectBack = typeof localStorage !== 'undefined' ? localStorage.getItem('auth_redirect_back') : null;
+      const isAdminRole = ['owner', 'assistant_owner', 'admin'].includes(session.role);
+      
+      if (redirectBack) {
+        if (typeof localStorage !== 'undefined') {
+          localStorage.removeItem('auth_redirect_back');
+        }
+        if (redirectBack.includes('dashboard.html') && !isAdminRole) {
+          const path = window.location.pathname;
+          const prefix = path.includes('/pages/') ? '../../' : '';
+          window.location.href = prefix + 'index.html';
+        } else {
+          window.location.href = redirectBack;
+        }
+      } else {
+        if (window.location.pathname.includes('login.html')) {
+          if (isAdminRole) {
+            window.location.href = 'dashboard.html';
+          } else {
+            window.location.href = '../../index.html';
+          }
+        } else if (window.location.pathname.includes('callback.html')) {
+          window.location.href = 'index.html';
+        } else {
+          // Reload the page after a brief delay to let user see success message
+          setTimeout(() => {
+            window.location.reload();
+          }, 1500);
+        }
+      }
+    });
+  });
+}
+
+  function handleDiscordCallback() {
+    // 1. Implicit Grant (#access_token=...)
+    const hash = window.location.hash;
+    if (hash && hash.includes('access_token=')) {
+      const params = new URLSearchParams(hash.substring(1));
+      const accessToken = params.get('access_token');
+      const state = params.get('state');
+      
+      // If state origin is different from current origin, redirect to state with the hash!
+      if (state) {
+        try {
+          const stateUrl = new URL(state);
+          if (stateUrl.origin !== window.location.origin) {
+            console.log('[Discord Auth] Redirecting cross-origin session to state:', stateUrl.origin);
+            window.location.href = stateUrl.origin + stateUrl.pathname + hash;
+            return;
+          }
+        } catch (e) {
+          console.error('[Discord Auth] Invalid state URL:', state);
+        }
+      }
+      
+      if (accessToken) {
+        window.history.replaceState({}, document.title, window.location.pathname);
+        processDiscordLogin(accessToken).catch(err => {
+          console.error('[Discord Auth] Error during implicit OAuth process:', err);
+          if (typeof App !== 'undefined' && App.toast) {
+            App.toast('✕ فشلت عملية المصادقة الرقمية مع ديسكورد', 'error');
+          }
+        });
+      }
+    }
+    
+    // 2. Authorization Code Grant (?code=...)
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+    const stateParam = urlParams.get('state');
+    
+    if (stateParam) {
+      try {
+        const stateUrl = new URL(stateParam);
+        if (stateUrl.origin !== window.location.origin) {
+          console.log('[Discord Auth] Redirecting cross-origin auth code to state:', stateUrl.origin);
+          window.location.href = stateUrl.origin + stateUrl.pathname + window.location.search;
+          return;
+        }
+      } catch (e) {
+        console.error('[Discord Auth] Invalid state URL:', stateParam);
+      }
+    }
+    
+    if (code) {
+      // Clean query parameters from address bar
+      window.history.replaceState({}, document.title, window.location.pathname);
+      
+      if (typeof App !== 'undefined' && App.toast) {
+        App.toast('⏳ جاري التحقق من حساب ديسكورد...', 'info');
+      }
+      
+      const tokenUrl = 'https://corsproxy.io/?' + encodeURIComponent('https://discord.com/api/oauth2/token');
+      const bodyParams = new URLSearchParams();
+      bodyParams.append('client_id', '1510157546500001884');
+      bodyParams.append('client_secret', 'OKP7jA0MyAAUx66QejwmVjW-5ozxuUsW');
+      bodyParams.append('grant_type', 'authorization_code');
+      bodyParams.append('code', code);
+      
+      let redirectUri = 'https://amn-90-ri.surge.sh/index.html';
+      if (window.location.hostname.includes('localhost') || window.location.hostname.includes('127.0.0.1')) {
+        redirectUri = 'http://localhost:3000/index.html';
+      }
+      bodyParams.append('redirect_uri', redirectUri);
+      
+      fetch(tokenUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: bodyParams.toString()
+      })
+      .then(res => {
+        if (!res.ok) throw new Error('Token exchange failed: ' + res.statusText);
+        return res.json();
+      })
+      .then(tokenData => {
+        const accessToken = tokenData.access_token;
+        if (!accessToken) throw new Error('No access token returned');
+        return processDiscordLogin(accessToken);
+      })
+      .catch(err => {
+        console.error('[Discord Auth] Error during auth code OAuth process:', err);
+        if (typeof App !== 'undefined' && App.toast) {
+          App.toast('✕ فشلت عملية المصادقة مع ديسكورد', 'error');
+        }
+      });
+    }
+  }
+
+  /* ── Permission Checks ────────────────────────────── */
+  function hasPermission(permission) {
+    const role = getRole();
+    if (!role) return false;
+    const roleInfo = ROLES[role];
+    if (!roleInfo) return false;
+    if (roleInfo.permissions.includes('*')) return true;
+    return roleInfo.permissions.includes(permission);
+  }
+
+  function canAccess(section) {
+    const minRole = SECTION_MIN_ROLE[section];
+    if (!minRole) return true; // public section
+    if (!isLoggedIn()) return false;
+    const roleLevel = getRoleInfo(getRole()).level;
+    const minLevel = getRoleInfo(minRole).level;
+    return roleLevel >= minLevel;
+  }
+
+  function requireAuth(redirectTo = '../pages/admin/login.html') {
+    if (!isLoggedIn()) {
+      window.location.href = redirectTo;
+      return false;
+    }
+    return true;
+  }
+
+  function requireRole(minRole, redirectTo = '../index.html') {
+    if (!isLoggedIn()) {
+      window.location.href = '../pages/admin/login.html';
+      return false;
+    }
+    const userLevel = getRoleInfo(getRole()).level;
+    const minLevel  = getRoleInfo(minRole).level;
+    if (userLevel < minLevel) {
+      window.location.href = redirectTo;
+      return false;
+    }
+    return true;
+  }
+
+  /* ── User Management ──────────────────────────────── */
+  function createUser(userData) {
+    if (!hasPermission('manage_users')) return { success: false, message: 'ليس لديك صلاحية' };
+    const existing = Storage.getCollection(Storage.keys.USERS).find(u => u.discord === userData.discord);
+    if (existing) return { success: false, message: 'المستخدم موجود بالفعل' };
+    const user = Storage.addToCollection(Storage.keys.USERS, {
+      ...userData,
+      status: userData.status || 'active',
+    });
+    return { success: true, user };
+  }
+
+  function updateUser(id, updates) {
+    if (!hasPermission('manage_users')) return { success: false, message: 'ليس لديك صلاحية' };
+    const updated = Storage.updateInCollection(Storage.keys.USERS, id, updates);
+    if (!updated) return { success: false, message: 'المستخدم غير موجود' };
+    return { success: true, user: updated };
+  }
+
+  function deleteUser(id) {
+    if (!hasPermission('manage_users')) return { success: false, message: 'ليس لديك صلاحية' };
+    const currentUser = getCurrentUser();
+    if (currentUser && currentUser.id === id) return { success: false, message: 'لا يمكنك حذف حسابك الخاص' };
+    Storage.deleteFromCollection(Storage.keys.USERS, id);
+    return { success: true };
+  }
+
+  function getAllUsers() {
+    return Storage.getCollection(Storage.keys.USERS).map(u => {
+      const safe = { ...u };
+      delete safe.password;
+      return safe;
+    });
+  }
+
+  /* ── Helpers ──────────────────────────────────────── */
+  function getRoleLabel(role) {
+    return getRoleInfo(role)?.label || role;
+  }
+
+  function getRoleEmoji(role) {
+    return getRoleInfo(role)?.emoji || '🔰';
+  }
+
+  function getRoleColor(role) {
+    return getRoleInfo(role)?.color || '#7f8c8d';
+  }
+
+  // One-time migration to remove permissions from everyone except 3gjo
+  if (typeof Storage !== 'undefined') {
+    if (!Storage.get('permissions_reset_2026_v2')) {
+      const allUsers = Storage.getCollection(Storage.keys.USERS) || [];
+      let updated = false;
+      allUsers.forEach(u => {
+        const isOwner = u.id === '1334568342345748565' || (u.discord && u.discord.toLowerCase() === '3gjo');
+        if (!isOwner && u.role !== 'viewer') {
+          u.role = 'viewer';
+          u.rank = 'مشاهد';
+          updated = true;
+        }
+      });
+      if (updated) {
+        Storage.set(Storage.keys.USERS, allUsers);
+      }
+      Storage.set('permissions_reset_2026_v2', true);
+    }
+  }
+
+  // Cross-reference user with sheet tables dynamically (الأساسي, المعتمدين, الإدارة, الشرطة العسكرية, الشؤون الإدارية والمالية, شؤون التدريب, شؤون التجنيد, الشؤون العسكرية...)
+  function resolveUserTableInfo(user) {
+    if (!user) return { name: '', badge: '', tables: [], rank: '', found: false };
+
+    let sheets = {};
+    try {
+      const cachedData = localStorage.getItem('members_google_sheets_cache');
+      if (cachedData) {
+        sheets = JSON.parse(cachedData);
+      }
+    } catch (e) {
+      console.error('Failed to parse sheets cache:', e);
+    }
+
+    if (!sheets || Object.keys(sheets).length === 0) {
+      const localData = (typeof Storage !== 'undefined') ? Storage.getCollection(Storage.keys.DATABASE_ROWS) : [];
+      sheets = {
+        'جدول الامن العام - الاساسي': localData
+      };
+    }
+
+    const tables = [];
+    let registeredName = user.globalName || user.username || '';
+    let badge = '';
+    let highestRank = user.rank || 'عضو';
+    let found = false;
+
+    const cleanStr = (s) => String(s || '').trim().toLowerCase();
+
+    const checkMatch = (row) => {
+      if (!row) return false;
+      
+      // Compare numeric IDs if present in both row.discord (like <@1334568342345748565>) and user.id (like 1334568342345748565)
+      const getDigits = (s) => String(s || '').replace(/\D/g, '');
+      const rowDigits = getDigits(row.discord);
+      if (rowDigits && user.id && rowDigits === getDigits(user.id)) return true;
+      
+      // Match by discord username/ID
+      if (row.discord && user.discord) {
+        const d1 = cleanStr(row.discord).replace('@', '');
+        const d2 = cleanStr(user.discord).replace('@', '');
+        if (d1 === d2) return true;
+      }
+      // Match by name
+      if (row.name && user.username && cleanStr(row.name) === cleanStr(user.username)) return true;
+      if (row.name && user.globalName && cleanStr(row.name) === cleanStr(user.globalName)) return true;
+      if (row.name && user.name && cleanStr(row.name) === cleanStr(user.name)) return true;
+      return false;
+    };
+
+    // Tabs mapping for clean table names
+    const tabNameMappings = {
+      'جدول الامن العام - الاساسي': 'الأساسي',
+      'جدول الامن العام - الادارة': 'الإدارة',
+      'جدول الامن العام - المنتدبين': 'المعتمدين',
+      'الشرطة العسكرية': 'الشرطة العسكرية',
+      'جدول الادارة العامة لشؤون الادارية والمالية': 'الشؤون الإدارية والمالية',
+      'جدول الادارة العامه لشؤون تدريب الامن العام': 'شؤون التدريب',
+      ' جدول الادارة العامه لشؤون التجنيد': 'شؤون التجنيد',
+      'الإدارة العامة لشؤون العسكرية': 'الشؤون العسكرية'
+    };
+
+    // Filter out non-personnel tabs
+    const ignoredTabs = [' جدول الغرامات 💵', 'نظام الترقيات ⭐️جديد', 'الترقيات المسرعة ', 'الإستقالات <i class="fa-solid fa-crosshairs"></i>'];
+
+    for (const tabName in sheets) {
+      if (ignoredTabs.includes(tabName)) continue;
+      const rows = sheets[tabName] || [];
+      const matchedRow = rows.find(checkMatch);
+      if (matchedRow) {
+        const mappedName = tabNameMappings[tabName] || tabName.replace('جدول ', '');
+        if (!tables.includes(mappedName)) {
+          tables.push(mappedName);
+        }
+        registeredName = matchedRow.name;
+        if (matchedRow.badge) badge = matchedRow.badge;
+        if (matchedRow.rank) highestRank = matchedRow.rank;
+        found = true;
+      }
+    }
+
+    // Special override for owner 3gjo / admin role
+    const isOwner = user.id === '1334568342345748565' || (user.discord && user.discord.toLowerCase() === '3gjo') || (user.role === 'owner');
+    if (isOwner) {
+      found = true;
+      if (tables.length === 0) {
+        tables.push('المالك');
+      }
+      if (!registeredName || registeredName === '3gjo' || registeredName === 'OnlyRyan' || registeredName === 'سداح الحربي') {
+        registeredName = 'ريان بن محمد';
+      }
+      if (!badge || badge === '<i class="fa-solid fa-crown"></i>' || badge === 'M-08') {
+        badge = 'CC | P-20';
+      }
+      if (!highestRank || highestRank === 'عضو') {
+        highestRank = 'المالك';
+      }
+    }
+
+    // Force override "سداح الحربي [M-08]" to "ريان بن محمد [CC | P-20]" for uploader lookups
+    if (registeredName === 'سداح الحربي') {
+      registeredName = 'ريان بن محمد';
+    }
+    if (badge === 'M-08') {
+      badge = 'CC | P-20';
+    }
+
+    return {
+      name: registeredName,
+      badge: badge,
+      tables: tables,
+      rank: highestRank,
+      found: found
+    };
+  }
+
+  function enforceDiscordGate() {
+    const path = window.location.pathname;
+    const isSubpage = path.includes('/pages/');
+    const isCallback = path.includes('callback.html');
+    const isLogin = path.includes('login.html');
+    
+    if (isSubpage && !isLogin && !isCallback) {
+      requireDiscordAuth();
+    }
+  }
+
+  // Pre-load members sheets cache from static JSON if missing in localStorage
+  if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+    const cachedData = localStorage.getItem('members_google_sheets_cache');
+    if (!cachedData) {
+      let prefix = '';
+      const path = window.location.pathname;
+      if (path.includes('/pages/admin/')) {
+        prefix = '../../';
+      } else if (path.includes('/pages/')) {
+        prefix = '../';
+      }
+      const jsonPath = prefix + 'assets/data/members_google_sheets_cache.json';
+      
+      fetch(`${jsonPath}?t=${Date.now()}`)
+        .then(res => {
+          if (!res.ok) throw new Error('Status: ' + res.status);
+          return res.json();
+        })
+        .then(data => {
+          localStorage.setItem('members_google_sheets_cache', JSON.stringify(data));
+          console.log('[Auth] Pre-loaded members sheets cache from server successfully.');
+          if (isLoggedIn()) {
+            window.location.reload();
+          }
+        })
+        .catch(err => {
+          console.error('[Auth] Failed to pre-load sheets cache from server:', err);
+        });
+    }
+  }
+
+  // Automatically execute the callback parser
+  handleDiscordCallback();
+
+  // Enforce Discord Gate
+  enforceDiscordGate();
+
+  return {
+    ROLES,
+    getCurrentUser, isLoggedIn, getRole, getRoleInfo,
+    login, logout,
+    hasPermission, canAccess, requireAuth, requireRole,
+    createUser, updateUser, deleteUser, getAllUsers,
+    getRoleLabel, getRoleEmoji, getRoleColor,
+    requireDiscordAuth, handleDiscordCallback, getDiscordBadges, getDiscordAuthUrl,
+    resolveUserTableInfo
+  };
+})();
+
+window.Auth = Auth;

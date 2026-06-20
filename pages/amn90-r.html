@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>الملف الشخصي الموحد | الأمن العام</title>
+  
+  <link rel="stylesheet" href="../assets/css/main.css?v=1.0.5">
+  <link rel="stylesheet" href="../assets/css/navbar.css?v=1.0.5">
+  <link rel="stylesheet" href="../assets/css/sidebar.css?v=1.0.5">
+  <link rel="stylesheet" href="../assets/css/footer.css">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&family=Orbitron:wght@400;600;700;900&family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --discord-blurple: #5865F2;
+      --discord-blurple-hover: #4752C4;
+      --gold: #c9a227;
+      --gold-light: #f0cb52;
+      --navy: #05091e;
+      --navy-card: rgba(10, 18, 50, 0.45);
+      --border-gold: rgba(201, 162, 39, 0.18);
+    }
+
+    body {
+      font-family: 'Tajawal', 'Cairo', sans-serif;
+      background: radial-gradient(circle at 50% 0%, #0c163b 0%, #05091e 80%);
+      color: #e8e8f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .profile-container {
+      max-width: 1000px;
+      margin: 40px auto;
+      padding: 0 20px;
+      flex: 1;
+      width: 100%;
+    }
+
+    /* ── HEADER CARD (BANNER & AVATAR) ── */
+    .profile-header-card {
+      position: relative;
+      background: var(--navy-card);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      border: 1px solid var(--border-gold);
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+      margin-bottom: 30px;
+      animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    .profile-banner-wrap {
+      height: 200px;
+      width: 100%;
+      position: relative;
+      background-size: cover;
+      background-position: center;
+      border-bottom: 1px solid rgba(201, 162, 39, 0.12);
+      filter: none !important;
+      backdrop-filter: none !important;
+    }
+
+    .profile-avatar-row {
+      padding: 0 35px 25px;
+      display: flex;
+      align-items: flex-end;
+      gap: 25px;
+      margin-top: -60px;
+      position: relative;
+      z-index: 10;
+      flex-wrap: wrap;
+    }
+
+    .profile-avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: 4px solid var(--gold);
+      background: #05091e;
+      object-fit: cover;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+    }
+
+    .profile-meta {
+      flex: 1;
+      min-width: 250px;
+      padding-bottom: 10px;
+    }
+
+    .profile-name {
+      font-size: 1.6rem;
+      font-weight: 900;
+      color: #fff;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .profile-tag {
+      font-size: 0.95rem;
+      color: var(--gold-light);
+      font-family: monospace;
+      font-weight: 700;
+    }
+
+    .profile-badge-rank {
+      background: linear-gradient(135deg, var(--gold), #3465b0);
+      color: #05091e;
+      font-size: 10px;
+      font-weight: 900;
+      padding: 3px 10px;
+      border-radius: 6px;
+      display: inline-block;
+    }
+
+    /* ── DETAILS GRID ── */
+    .profile-details-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      padding: 25px 35px 35px;
+      background: rgba(5, 9, 30, 0.4);
+      border-top: 1px solid rgba(255,255,255,0.03);
+    }
+
+    .profile-detail-item {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.05);
+      padding: 15px;
+      border-radius: 12px;
+    }
+
+    .profile-detail-lbl {
+      font-size: 0.72rem;
+      color: rgba(255,255,255,0.4);
+      margin-bottom: 6px;
+      font-weight: bold;
+    }
+
+    .profile-detail-val {
+      font-size: 0.95rem;
+      color: #fff;
+      font-weight: 800;
+    }
+
+    /* ── TABS ── */
+    .profile-tabs {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 25px;
+      border-bottom: 1px solid rgba(201, 162, 39, 0.15);
+      padding-bottom: 12px;
+    }
+
+    .p-tab-btn {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: rgba(255,255,255,0.6);
+      padding: 10px 22px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s;
+      font-family: inherit;
+    }
+    .p-tab-btn:hover {
+      background: rgba(92, 146, 232, 0.08);
+      border-color: rgba(92, 146, 232, 0.3);
+      color: #fff;
+    }
+    .p-tab-btn.active {
+      background: linear-gradient(135deg, var(--gold), #3465b0);
+      border-color: var(--gold);
+      color: #05091e;
+      box-shadow: 0 4px 15px rgba(92, 146, 232, 0.2);
+    }
+
+    .p-tab-content {
+      display: none;
+      animation: fadeIn 0.4s ease;
+    }
+    .p-tab-content.active {
+      display: block;
+    }
+
+    /* Fines & Promo styling */
+    .fine-card {
+      background: rgba(255, 71, 87, 0.04);
+      border: 1px solid rgba(255, 71, 87, 0.15);
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 15px;
+      position: relative;
+    }
+    .fine-card-badge {
+      position: absolute;
+      top: 15px; left: 15px;
+      font-size: 0.72rem;
+      background: rgba(255, 71, 87, 0.15);
+      color: #ff4757;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+    .fine-card-amount {
+      font-size: 1.15rem;
+      font-weight: 900;
+      color: #ff4757;
+      margin-bottom: 12px;
+    }
+    .fine-card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+    }
+    .fine-card-lbl {
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.4);
+      margin-bottom: 2px;
+    }
+    .fine-card-val {
+      font-size: 0.85rem;
+      color: #fff;
+      font-weight: bold;
+    }
+
+    /* Warning card */
+    .warning-card {
+      background: rgba(201, 162, 39, 0.05);
+      border: 1px solid var(--border-gold);
+      border-radius: 20px;
+      padding: 40px;
+      text-align: center;
+      max-width: 550px;
+      margin: 60px auto;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* ── SKELETON LOADER STYLES ── */
+    .skeleton-banner {
+      height: 200px;
+      width: 100%;
+    }
+    .skeleton-avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50% !important;
+      border: 4px solid rgba(255, 255, 255, 0.05);
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .skeleton-title {
+      width: 200px;
+      height: 28px;
+      margin-bottom: 10px;
+    }
+    .skeleton-tag {
+      width: 120px;
+      height: 18px;
+    }
+    .skeleton-label {
+      width: 140px;
+      height: 14px;
+      margin-bottom: 8px;
+    }
+    .skeleton-value {
+      width: 180px;
+      height: 20px;
+    }
+    .skeleton-section-title {
+      width: 180px;
+      height: 24px;
+      margin-bottom: 15px;
+    }
+    .skeleton-fine-title {
+      width: 100px;
+      height: 22px;
+      margin-bottom: 15px;
+    }
+    .skeleton-fine-lbl {
+      width: 80px;
+      height: 12px;
+      margin-bottom: 6px;
+    }
+    .skeleton-fine-val {
+      width: 120px;
+      height: 16px;
+    }
+  </style>
+</head>
+<body>
+
+<div id="toast-container"></div>
+
+<div class="profile-container">
+  <div id="profile-container-inner">
+    <!-- Shimmering Skeleton Loader initially shown before renderProfile() -->
+    <div class="profile-header-card" style="animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;">
+      <div class="profile-banner-wrap skeleton-banner skeleton"></div>
+      
+      <div class="profile-avatar-row">
+        <div class="profile-avatar skeleton-avatar skeleton"></div>
+        <div class="profile-meta">
+          <div class="skeleton-title skeleton"></div>
+          <div class="skeleton-tag skeleton"></div>
+        </div>
+      </div>
+
+      <div class="profile-details-grid">
+        <div class="profile-detail-item">
+          <div class="skeleton-label skeleton"></div>
+          <div class="skeleton-value skeleton" style="width: 70%;"></div>
+        </div>
+        <div class="profile-detail-item">
+          <div class="skeleton-label skeleton"></div>
+          <div class="skeleton-value skeleton" style="width: 85%;"></div>
+        </div>
+        <div class="profile-detail-item">
+          <div class="skeleton-label skeleton"></div>
+          <div class="skeleton-value skeleton" style="width: 50%;"></div>
+        </div>
+      </div>
+    </div>
+    
+    <div style="margin-top: 25px;">
+      <div class="skeleton-section-title skeleton"></div>
+      <div class="fine-card">
+        <div class="skeleton-fine-title skeleton"></div>
+        <div class="fine-card-grid">
+          <div><div class="skeleton-fine-lbl skeleton"></div><div class="skeleton-fine-val skeleton"></div></div>
+          <div><div class="skeleton-fine-lbl skeleton"></div><div class="skeleton-fine-val skeleton"></div></div>
+          <div><div class="skeleton-fine-lbl skeleton"></div><div class="skeleton-fine-val skeleton"></div></div>
+          <div><div class="skeleton-fine-lbl skeleton"></div><div class="skeleton-fine-val skeleton"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script src="../assets/js/storage.js?v=1.0.9"></script>
+<script src="../assets/js/data.js?v=1.0.9"></script>
+<script src="../assets/js/auth.js?v=1.0.9"></script>
+<script src="../assets/js/components.js"></script>
+<script src="../assets/js/app.js?v=1.0.9"></script>
+
+<script>
+  function resolveImageUrl(url) {
+    if (!url) return '';
+    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
+      return url;
+    }
+    if (url.startsWith('uploads/') || url.startsWith('assets/')) {
+      const isPages = window.location.pathname.includes('/pages/');
+      return isPages ? '../' + url : url;
+    }
+    return url;
+  }
+
+
+  // Inject navbar and sidebar
+  document.write(Components.navbar('profile'));
+  document.write(Components.sidebar('profile'));
+
+  let discordUsersCache = {};
+
+  async function loadDiscordUsersCache() {
+    try {
+      const res = await fetch(`../assets/data/discord_users.json?t=${Date.now()}`);
+      if (res.ok) {
+        discordUsersCache = await res.json();
+        console.log('[Discord Cache] Loaded Discord profiles cache successfully!');
+      }
+    } catch (err) {
+      console.warn('[Discord Cache] Failed to load Discord users cache:', err);
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    // Inject Footer
+    const body = document.body;
+    const footerDiv = document.createElement('div');
+    footerDiv.innerHTML = Components.footer();
+    body.appendChild(footerDiv.firstElementChild);
+
+    // Load Discord users cache first
+    await loadDiscordUsersCache();
+
+    // Initialize seed data if needed
+    SeedData.init();
+
+    // Render profile details
+    renderProfile();
+  });
+
+  function renderProfile() {
+    const container = document.getElementById('profile-container-inner');
+    
+    // Resolve user from URL parameters
+    const params = new URLSearchParams(window.location.search);
+    const qName = params.get('name');
+    const qBadge = params.get('badge');
+    const qDiscord = params.get('discord');
+
+    const allUsers = Storage.getCollection(Storage.keys.USERS) || [];
+    const dbRows = Storage.getCollection(Storage.keys.DATABASE_ROWS) || [];
+
+    let targetUser = null;
+
+    // Helper: search in Google Sheets cache
+    let sheets = {};
+    try {
+      const cachedData = localStorage.getItem('members_google_sheets_cache');
+      if (cachedData) {
+        sheets = JSON.parse(cachedData);
+      }
+    } catch (e) {
+      console.error('Failed to parse sheets cache in profile:', e);
+    }
+
+    function findInSheets(query, type) {
+      if (!sheets) return null;
+      const cleanStr = (s) => String(s || '').trim().toLowerCase();
+      const qClean = cleanStr(query).replace('@', '');
+      
+      for (const tabName in sheets) {
+        if (tabName === ' جدول الغرامات 💵') continue;
+        const rows = sheets[tabName] || [];
+        const found = rows.find(r => {
+          if (type === 'name' && cleanStr(r.name) === cleanStr(query)) return true;
+          if (type === 'badge' && r.badge && cleanStr(r.badge) === cleanStr(query)) return true;
+          if (type === 'discord') {
+            const getDigits = (s) => String(s || '').replace(/\D/g, '');
+            const rowDigits = getDigits(r.discord);
+            const qDigits = getDigits(query);
+            if (rowDigits && qDigits && rowDigits === qDigits) return true;
+            if (r.discord && (cleanStr(r.discord).replace('@', '') === qClean || cleanStr(r.name) === qClean)) return true;
+          }
+          return false;
+        });
+        if (found) {
+          // Add unit based on tab name
+          return {
+            ...found,
+            unit: tabName.replace('جدول الامن العام - ', '')
+          };
+        }
+      }
+      return null;
+    }
+
+    function getMilitaryRankFromSheets(query, type) {
+      if (!sheets) return '';
+      const cleanStr = (s) => String(s || '').trim().toLowerCase();
+      const qClean = cleanStr(query).replace('@', '');
+      const mainTabs = [
+        "جدول الامن العام - الاساسي",
+        "جدول الامن العام - المنتدبين",
+        "جدول الامن العام - الادارة"
+      ];
+      for (const tabName of mainTabs) {
+        const rows = sheets[tabName] || [];
+        const found = rows.find(r => {
+          if (type === 'name' && cleanStr(r.name) === cleanStr(query)) return true;
+          if (type === 'badge' && r.badge && cleanStr(r.badge) === cleanStr(query)) return true;
+          if (type === 'discord') {
+            const getDigits = (s) => String(s || '').replace(/\D/g, '');
+            const rowDigits = getDigits(r.discord);
+            const qDigits = getDigits(query);
+            if (rowDigits && qDigits && rowDigits === qDigits) return true;
+            if (r.discord && (cleanStr(r.discord).replace('@', '') === qClean || cleanStr(r.name) === qClean)) return true;
+          }
+          return false;
+        });
+        if (found && found.rank) {
+          return found.rank;
+        }
+      }
+      return '';
+    }
+
+    if (qName) {
+      targetUser = findInSheets(qName, 'name') || dbRows.find(r => r.name === qName) || allUsers.find(u => u.username === qName);
+    } else if (qBadge) {
+      targetUser = findInSheets(qBadge, 'badge') || dbRows.find(r => r.badge === qBadge);
+    } else if (qDiscord) {
+      targetUser = findInSheets(qDiscord, 'discord') || dbRows.find(r => r.discord === qDiscord) || allUsers.find(u => u.discord === qDiscord);
+    }
+
+    // Fallback to currently logged-in user
+    if (!targetUser && Auth.isLoggedIn()) {
+      const currentUser = Auth.getCurrentUser();
+      const sheetInfo = Auth.resolveUserTableInfo(currentUser);
+      if (sheetInfo && sheetInfo.found && sheetInfo.name) {
+        targetUser = findInSheets(sheetInfo.name, 'name');
+      }
+      if (!targetUser) {
+        targetUser = findInSheets(currentUser.id || currentUser.discord || currentUser.username, 'discord') || currentUser;
+      }
+    }
+
+    if (!targetUser) {
+      container.innerHTML = `
+        <div class="warning-card">
+          <div style="font-size: 3.5rem; margin-bottom: 20px;"><i class="fa-solid fa-user"></i></div>
+          <h2 style="font-weight: 800; color: #fff; margin-bottom: 12px;">ملف شخصي غير محدد</h2>
+          <p style="color: rgba(255,255,255,0.6); font-size: 0.9rem; line-height: 1.6; margin-bottom: 25px;">
+            يرجى تحديد عنصر عسكري لعرض ملفه الشخصي من صفحة قاعدة البيانات، أو تسجيل الدخول بحساب ديسكورد لعرض ملفك الخاص.
+          </p>
+          <a href="../pages/database.html" class="btn btn-gold" style="display:inline-flex; margin: 0 auto;"><i class="fa-solid fa-folder-tree"></i> الذهاب لقاعدة البيانات</a>
+        </div>
+      `;
+      return;
+    }
+
+    // If targetUser matches the logged-in user, merge their Discord session details
+    if (targetUser && Auth.isLoggedIn()) {
+      const currentUser = Auth.getCurrentUser();
+      
+      const getDigits = (s) => String(s || '').replace(/\D/g, '');
+      const targetDigits = getDigits(targetUser.discord || targetUser.id);
+      const currentDigits = getDigits(currentUser.id);
+      
+      const cleanStr = (s) => String(s || '').trim().toLowerCase().replace('@', '');
+      const matchName = targetUser.name && currentUser.username && cleanStr(targetUser.name) === cleanStr(currentUser.username);
+      const matchDiscord = targetUser.discord && currentUser.discord && cleanStr(targetUser.discord) === cleanStr(currentUser.discord);
+      const matchDigits = targetDigits && currentDigits && targetDigits === currentDigits;
+      
+      if (matchDigits || matchDiscord || matchName) {
+        targetUser = {
+          ...targetUser,
+          id: currentUser.id || targetUser.id,
+          avatar: currentUser.avatar || targetUser.avatar,
+          banner: currentUser.banner || targetUser.banner,
+          bannerColor: currentUser.bannerColor || targetUser.bannerColor,
+          discord: currentUser.discord || targetUser.discord
+        };
+      }
+    }
+
+    // Clean and extract numeric Discord ID for lookups
+    let discordId = 'unknown';
+    if (targetUser.id && /^\d{17,20}$/.test(targetUser.id)) {
+      discordId = targetUser.id;
+    } else if (targetUser.discord && targetUser.discord !== 'unknown') {
+      const match = targetUser.discord.match(/\d{17,20}/);
+      if (match) {
+        discordId = match[0];
+      } else if (/^\d{17,20}$/.test(targetUser.discord.trim())) {
+        discordId = targetUser.discord.trim();
+      }
+    }
+
+    // Fallback: If discordId is still unknown, search for the username in discordUsersCache
+    if (discordId === 'unknown' && targetUser.discord && targetUser.discord !== 'unknown') {
+      const cleanDiscordTarget = targetUser.discord.trim().toLowerCase().replace('@', '');
+      const foundEntry = Object.values(discordUsersCache).find(u => 
+        (u.username && u.username.trim().toLowerCase().replace('@', '') === cleanDiscordTarget) ||
+        (u.globalName && u.globalName.trim().toLowerCase().replace('@', '') === cleanDiscordTarget)
+      );
+      if (foundEntry) {
+        discordId = foundEntry.id;
+      }
+    }
+
+    // Retrieve cached Discord user details if available
+    const cachedDiscordUser = discordId !== 'unknown' ? discordUsersCache[discordId] : null;
+
+    // Override with central database user details (ps_users)
+    const dbUser = allUsers.find(u => {
+      const getDigits = (s) => String(s || '').replace(/\D/g, '');
+      const uDigits = getDigits(u.discord_id || u.id);
+      const targetDigits = getDigits(discordId);
+      if (uDigits && targetDigits && uDigits === targetDigits) return true;
+
+      const cleanStr = (s) => String(s || '').trim().toLowerCase().replace('@', '');
+      if (u.username && targetUser.discord && cleanStr(u.username) === cleanStr(targetUser.discord)) return true;
+      if (u.username && targetUser.name && cleanStr(u.username) === cleanStr(targetUser.name)) return true;
+      if (u.display_name && targetUser.name && cleanStr(u.display_name) === cleanStr(targetUser.name)) return true;
+      return false;
+    });
+
+    // Standardize user properties
+    const user = {
+      name: targetUser.name || targetUser.username || 'عضو الأمن العام',
+      badge: dbUser ? (dbUser.code || targetUser.badge || '—') : (targetUser.badge || '—'),
+      discord: targetUser.discord || 'unknown',
+      avatar: targetUser.avatar || '../assets/img/emblem.png',
+      banner: targetUser.banner || null,
+      bannerColor: targetUser.bannerColor || '#121e4b',
+      rank: dbUser ? (dbUser.rank || 'مشاهد') : (getMilitaryRankFromSheets(discordId, 'discord') || getMilitaryRankFromSheets(targetUser.name, 'name') || 'مشاهد'),
+      unit: dbUser ? (dbUser.department || targetUser.unit || 'إدارة العمليات') : (targetUser.unit || 'إدارة العمليات'),
+      joinDate: targetUser.joinDate || '—',
+      status: dbUser ? (dbUser.status || targetUser.status || 'active') : (targetUser.status || 'active'),
+      id: discordId
+    };
+
+    if (dbUser) {
+      user.id = dbUser.discord_id || dbUser.id || user.id;
+    }
+
+    const isOwner = user.id === '1334568342345748565' || (user.discord && user.discord.toLowerCase() === '3gjo') || (dbUser && dbUser.role === 'owner');
+    if (isOwner) {
+      user.rank = 'المالك';
+    }
+
+    let resolvedUsername = '';
+    let resolvedAvatar = '';
+    let resolvedBanner = '';
+    let resolvedBannerColor = '#121e4b';
+
+    if (cachedDiscordUser) {
+      if (cachedDiscordUser.username) resolvedUsername = cachedDiscordUser.username;
+      if (cachedDiscordUser.avatar) resolvedAvatar = cachedDiscordUser.avatar;
+      if (cachedDiscordUser.banner) resolvedBanner = cachedDiscordUser.banner;
+      if (cachedDiscordUser.bannerColor) resolvedBannerColor = cachedDiscordUser.bannerColor;
+    }
+
+    if (dbUser) {
+      if (dbUser.username && !/[\u0600-\u06FF]/.test(dbUser.username)) {
+        if (!resolvedUsername) resolvedUsername = dbUser.username;
+      }
+      if (dbUser.avatar && dbUser.avatar !== '🎮' && !dbUser.avatar.includes('<i') && !dbUser.avatar.includes('fa-') && !dbUser.avatar.includes('emblem.png')) {
+        if (!resolvedAvatar) resolvedAvatar = dbUser.avatar;
+      }
+      if (dbUser.banner && !dbUser.banner.includes('emblem.png')) {
+        if (!resolvedBanner) resolvedBanner = dbUser.banner;
+      }
+      if (dbUser.bannerColor) {
+        resolvedBannerColor = dbUser.bannerColor;
+      } else if (dbUser.banner_color) {
+        resolvedBannerColor = dbUser.banner_color;
+      }
+    }
+
+    if (!resolvedUsername) {
+      resolvedUsername = user.discord && user.discord !== 'unknown' && !/[\u0600-\u06FF]/.test(user.discord)
+        ? user.discord 
+        : user.name.toLowerCase().replace(/\s+/g, '_');
+    }
+    if (!resolvedAvatar) resolvedAvatar = '../assets/img/emblem.png';
+
+    user.discord = resolvedUsername;
+    user.avatar = window.resolveDiscordAsset(resolvedAvatar, 'avatar');
+    user.banner = resolvedBanner ? window.resolveDiscordAsset(resolvedBanner, 'banner') : null;
+    user.bannerColor = resolvedBannerColor;
+
+    if (user.avatar === '🎮' || !user.avatar || user.avatar === '../assets/img/emblem.png') {
+      if (user.id !== 'unknown' && /^\d+$/.test(user.id)) {
+        user.avatar = `https://cdn.discordapp.com/embed/avatars/${parseInt(user.id.substring(user.id.length - 2)) % 5}.png`;
+      } else {
+        user.avatar = '../assets/img/emblem.png';
+      }
+    }
+
+    let discordTag = user.discord;
+    if (discordTag !== 'unknown') {
+      if (discordTag.startsWith('<@') && discordTag.endsWith('>')) {
+        discordTag = user.id !== 'unknown' ? user.id : discordTag.replace(/[<@>]/g, '');
+      } else if (discordTag.includes('@') && !discordTag.startsWith('@')) {
+        discordTag = discordTag.split('@')[0];
+      }
+      if (!discordTag.startsWith('@')) {
+        discordTag = '@' + discordTag;
+      }
+    } else {
+      discordTag = '@' + user.name.toLowerCase().replace(/\s+/g, '_');
+    }
+
+    // Resolve banner background
+    let bannerStyle = '';
+    if (user.banner) {
+      bannerStyle = `background-image: url('${resolveImageUrl(user.banner)}');`;
+    } else if (user.bannerColor && user.bannerColor !== '#121e4b') {
+      bannerStyle = `background: linear-gradient(135deg, ${user.bannerColor}, #050a1e);`;
+    } else {
+      bannerStyle = `background: linear-gradient(135deg, #0d1e40 0%, #070d26 60%, #05091e 100%);`;
+    }
+
+    // Translate status
+    let statusLabel = 'نشط';
+    let statusColor = '#2ecc71';
+    if (user.status === 'on_leave') {
+      statusLabel = 'في إجازة';
+      statusColor = '#f1c40f';
+    } else if (user.status === 'training') {
+      statusLabel = 'قيد التدريب';
+      statusColor = '#3498db';
+    } else if (user.status === 'inactive') {
+      statusLabel = 'غير نشط';
+      statusColor = '#e74c3c';
+    }
+
+
+    // Resolve fines from Sheets cache
+    let finesHTML = '';
+    let totalFineAmount = 0;
+    try {
+      const finesTab = sheets[' جدول الغرامات 💵'] || [];
+      const userFines = finesTab.filter(f =>
+        ((f.name && f.name.trim() === user.name.trim()) || (f.badge && user.badge && f.badge.trim() === user.badge.trim())) &&
+        (f.paid === 'false' || f.paid === false || String(f.paid).toLowerCase() === 'false')
+      );
+
+      totalFineAmount = userFines.reduce((acc, f) => {
+        let fineStr = String(f.fine || '0').replace(/[^\d]/g, '');
+        return acc + (parseInt(fineStr) || 0);
+      }, 0);
+
+      if (!userFines.length) {
+        finesHTML = `<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3);font-size:0.85rem">لا توجد مخالفات أو غرامات غير مسددة مسجلة على العسكري حالياً.</div>`;
+      } else {
+        finesHTML = userFines.map((f, idx) => `
+          <div class="fine-card">
+            <span class="fine-card-badge"># ${idx + 1}</span>
+            <div class="fine-card-amount">${f.fine} ريال</div>
+            <div class="fine-card-grid">
+              <div><div class="fine-card-lbl">⚠️ سبب المخالفة</div><div class="fine-card-val">${f.reason || 'غير محدد'}</div></div>
+              <div><div class="fine-card-lbl"><i class="fa-solid fa-scale-balanced"></i> القاضي / الضابط الحكم</div><div class="fine-card-val">${f.judge || 'غير محدد'}</div></div>
+              <div><div class="fine-card-lbl"><i class="fa-solid fa-landmark"></i> جهة القرار</div><div class="fine-card-val">${f.source || 'شؤون الأفراد'}</div></div>
+              <div><div class="fine-card-lbl"><i class="fa-solid fa-calendar-days"></i> التاريخ</div><div class="fine-card-val">${f.date || '—'}</div></div>
+            </div>
+          </div>
+        `).join('');
+      }
+    } catch (err) {
+      console.error(err);
+      finesHTML = `<div style="text-align:center;padding:20px;color:#e74c3c;">فشل في تحميل بيانات المخالفات.</div>`;
+    }
+
+    // Resolve promotions log
+    let promosHTML = '';
+    try {
+      const promotions = Storage.getCollection(Storage.keys.PROMOTIONS) || [];
+      const userPromos = promotions.filter(p => p.name === user.name);
+
+      if (!userPromos.length) {
+        promosHTML = `<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3);font-size:0.85rem">لا توجد سجلات ترقيات مسجلة باسم هذا العسكري.</div>`;
+      } else {
+        promosHTML = `
+          <div style="background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; overflow: hidden;">
+            <table style="width: 100%; border-collapse: collapse; text-align: right; font-size: 0.85rem;">
+              <thead>
+                <tr style="background: rgba(201, 162, 39, 0.08); border-bottom: 1px solid rgba(201, 162, 39, 0.15);">
+                  <th style="padding: 12px 18px; color: #fff; font-weight: 800;">من رتبة</th>
+                  <th style="padding: 12px 18px; color: #fff; font-weight: 800;">إلى رتبة</th>
+                  <th style="padding: 12px 18px; color: #fff; font-weight: 800;">بواسطة</th>
+                  <th style="padding: 12px 18px; color: #fff; font-weight: 800;">الوحدة</th>
+                  <th style="padding: 12px 18px; color: #fff; font-weight: 800;">التاريخ</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${userPromos.map(p => `
+                  <tr style="border-bottom: 1px solid rgba(255,255,255,0.03);">
+                    <td style="padding: 12px 18px; color: rgba(255,255,255,0.6);">${p.fromRank}</td>
+                    <td style="padding: 12px 18px; color: var(--gold-light); font-weight: bold;">${p.toRank}</td>
+                    <td style="padding: 12px 18px; color: #fff;">${p.promotedBy}</td>
+                    <td style="padding: 12px 18px; color: rgba(255,255,255,0.6);">${p.unit || '—'}</td>
+                    <td style="padding: 12px 18px; color: rgba(255,255,255,0.4);">${p.date}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+      }
+    } catch (e) {
+      promosHTML = `<div style="text-align:center;padding:20px;color:#e74c3c;">فشل في تحميل سجلات الترقيات.</div>`;
+    }
+
+    // Render HTML content
+    container.innerHTML = `
+      <div class="profile-header-card">
+        <div class="profile-banner-wrap" style="${bannerStyle}"></div>
+        
+        <div class="profile-avatar-row">
+          <img src="${resolveImageUrl(user.avatar)}" class="profile-avatar" alt="${user.name}" onerror="window.handleAvatarError(this, '../assets/img/emblem.png')">
+          <div class="profile-meta">
+            <h1 class="profile-name">
+              <span>${user.name}</span>
+              ${user.badge !== '—' ? `<span style="font-size: 1rem; color: rgba(255,255,255,0.5); font-family: monospace;">[ ${user.badge} ]</span>` : ''}
+              <span class="profile-badge-rank">${user.rank}</span>
+            </h1>
+            <div class="profile-tag">${discordTag}</div>
+          </div>
+        </div>
+
+        <div class="profile-details-grid">
+          <div class="profile-detail-item">
+            <div class="profile-detail-lbl"><i class="fa-solid fa-id-badge"></i> معرف الديسكورد (Discord ID)</div>
+            <div class="profile-detail-val" style="font-family: monospace; font-size: 0.85rem; color: rgba(255,255,255,0.6);">${user.id || '—'}</div>
+          </div>
+          <div class="profile-detail-item">
+            <div class="profile-detail-lbl"><i class="fa-brands fa-discord"></i> اسم مستخدم الديسكورد</div>
+            <div class="profile-detail-val" style="font-family: monospace; font-size: 0.85rem; color: var(--gold-light);">${discordTag || '—'}</div>
+          </div>
+          <div class="profile-detail-item">
+            <div class="profile-detail-lbl"><i class="fa-solid fa-medal"></i> الرتبة العسكرية</div>
+            <div class="profile-detail-val" style="font-size: 0.9rem; color: #fff;">${user.rank || '—'}</div>
+          </div>
+          <div class="profile-detail-item">
+            <div class="profile-detail-lbl"><i class="fa-solid fa-barcode"></i> الرقم العسكري (الكود)</div>
+            <div class="profile-detail-val" style="font-size: 0.9rem; color: var(--gold-light); font-weight: 800;">${user.badge !== '—' ? user.badge : '—'}</div>
+          </div>
+
+          <div class="profile-detail-item">
+            <div class="profile-detail-lbl"><i class="fa-solid fa-toggle-on"></i> حالة الحساب عسكرياً</div>
+            <div class="profile-detail-val" style="font-size: 0.9rem; color: ${statusColor}; font-weight: 800;">${statusLabel}</div>
+          </div>
+        </div>
+      </div>
+
+
+    `;
+  }
+
+</script>
+</body>
+</html>

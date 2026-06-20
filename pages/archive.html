@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>أرشيف الاختبارات | الأمن العام</title>
+  <!-- Premium Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600&display=swap" rel="stylesheet">
+  <!-- DataTables CSS (dark theme) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/datatables.net-dt@2.0.7/css/dataTables.dataTables.min.css">
+  <style>
+    body {
+      font-family: 'Outfit', sans-serif;
+      -webkit-user-select: none !important;
+      -moz-user-select: none !important;
+      -ms-user-select: none !important;
+      user-select: none !important;
+    }
+    input, textarea, select {
+      -webkit-user-select: text !important;
+      -moz-user-select: text !important;
+      -ms-user-select: text !important;
+      user-select: text !important;
+    }
+    .datatable-wrapper {margin: 2rem; background: rgba(20,20,30,0.6); backdrop-filter: blur(12px); border-radius: 12px; padding: 1rem;}
+    table.dataTable tbody tr {background: rgba(30,30,45,0.4);} 
+    table.dataTable thead {background: rgba(40,40,55,0.6);}
+    .dataTables_wrapper .dataTables_filter input {border-radius: 8px; background: #151720; color:#fff; border:1px solid #2c2c3a;}
+    .dataTables_wrapper .dataTables_length select {border-radius:8px; background:#151720; color:#fff; border:1px solid #2c2c3a;}
+  </style>
+</head>
+<body>
+  <div class="datatable-wrapper">
+    <table id="examArchive" class="display" style="width:100%">
+      <thead>
+        <tr>
+          <th>الاسم</th>
+          <th>الرتبة</th>
+          <th>الكود</th>
+          <th>اسم الدورة</th>
+          <th>تاريخ البدء</th>
+          <th>تاريخ الانتهاء</th>
+          <th>الدرجة</th>
+          <th>الحالة</th>
+          <th>اسم المختبر</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/datatables.net@2.0.7/js/jquery.dataTables.min.js"></script>
+  <script src="../assets/js/storage.js?v=1.0.5"></script>
+  <script>
+    // Prevent copy, cut, paste, contextmenu, dragstart, key shortcuts
+    (function() {
+      const isEditable = (el) => {
+        if (!el) return false;
+        const tagName = el.tagName ? el.tagName.toLowerCase() : '';
+        return el.isContentEditable || tagName === 'input' || tagName === 'textarea' || tagName === 'select';
+      };
+      const preventDefaultActions = (e) => {
+        if (!isEditable(e.target)) {
+          e.preventDefault();
+        }
+      };
+      document.addEventListener('copy', preventDefaultActions, true);
+      document.addEventListener('cut', preventDefaultActions, true);
+      document.addEventListener('paste', preventDefaultActions, true);
+      document.addEventListener('contextmenu', preventDefaultActions, true);
+      document.addEventListener('dragstart', preventDefaultActions, true);
+      document.addEventListener('keydown', (e) => {
+        if (isEditable(e.target)) return;
+        if ((e.ctrlKey || e.metaKey) && ['c', 'x', 'a', 'C', 'X', 'A'].includes(e.key)) e.preventDefault();
+        if ((e.ctrlKey || e.metaKey) && ['u', 's', 'p', 'U', 'S', 'P'].includes(e.key)) e.preventDefault();
+        if (e.key === 'F12' || ((e.ctrlKey || e.metaKey) && e.shiftKey && ['i', 'j', 'c', 'I', 'J', 'C'].includes(e.key))) e.preventDefault();
+      }, true);
+    })();
+
+    // Initialize DataTable after fetching data
+    $(document).ready(function(){
+      Storage.fetchExamArchive().then(function(exams){
+        const rows = exams.map(e => [
+          e.trainee_name || e.name,
+          e.rank,
+          e.code,
+          e.course_name || e.course,
+          e.start_time,
+          e.end_time,
+          e.score,
+          e.status,
+          e.examiner || e.examiner_name
+        ]);
+        $('#examArchive').DataTable({
+          data: rows,
+          language: {
+            url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/ar.json'
+          },
+          pageLength: 25,
+          order: [[4, 'desc']]
+        });
+      }).catch(err=>{console.error('Failed to load exam archive', err);});
+    });
+  </script>
+</body>
+</html>

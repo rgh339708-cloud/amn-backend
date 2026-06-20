@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مستند دورة البحث والتحري | الأمن العام</title>
+  <link rel="stylesheet" href="../assets/css/main.css?v=1.0.5">
+  <link rel="stylesheet" href="../assets/css/navbar.css?v=1.0.5">
+  <link rel="stylesheet" href="../assets/css/sidebar.css?v=1.0.5">
+  <link rel="stylesheet" href="../assets/css/footer.css">
+  <style>
+    /* Custom Premium Styles for Investigation Document Page */
+    .doc-container {
+      max-width: 960px;
+      margin: 140px auto 100px;
+      padding: 0 var(--space-4);
+    }
+
+    /* Document Body */
+    .doc-content {
+      background: linear-gradient(155deg, rgba(13, 24, 64, 0.25) 0%, rgba(7, 15, 37, 0.35) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      border-radius: 24px;
+      padding: var(--space-8);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Back Button Banner */
+    .back-banner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--space-8);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding-bottom: var(--space-5);
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: 10px 20px;
+      background: rgba(251, 197, 49, 0.1);
+      border: 1px solid rgba(251, 197, 49, 0.3);
+      border-radius: 12px;
+      color: var(--color-gold-light);
+      font-weight: 800;
+      font-size: var(--font-size-sm);
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .back-btn:hover {
+      background: var(--color-gold-primary);
+      color: #000;
+      border-color: var(--color-gold-primary);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px var(--color-gold-glow);
+    }
+
+    /* Main Title & Subtitle */
+    .doc-main-title {
+      font-size: 1.95rem;
+      font-weight: 900;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+
+    .doc-meta-info {
+      display: flex;
+      gap: var(--space-6);
+      flex-wrap: wrap;
+      margin-bottom: var(--space-8);
+    }
+
+    .doc-meta-item {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 10px 18px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--color-text-muted);
+    }
+
+    .doc-meta-item strong {
+      color: #fff;
+      margin-right: 4px;
+    }
+
+    /* Sections */
+    .doc-section {
+      scroll-margin-top: 100px;
+      margin-bottom: var(--space-8);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      padding-bottom: var(--space-6);
+    }
+
+    .doc-section:last-child {
+      border: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .section-title {
+      font-size: 1.35rem;
+      font-weight: 850;
+      color: var(--color-gold-primary);
+      margin-bottom: var(--space-4);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-body {
+      font-size: 0.88rem;
+      color: var(--color-text-secondary);
+      line-height: 1.8;
+      text-align: justify;
+    }
+
+    .styled-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: var(--space-4);
+    }
+
+    .styled-list li {
+      position: relative;
+      padding-right: var(--space-6);
+      font-size: 0.86rem;
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+    }
+
+    .styled-list li::before {
+      content: '⚡';
+      position: absolute;
+      right: 0;
+      color: var(--color-gold-primary);
+      font-size: 0.95rem;
+    }
+
+    /* Callout & Examples */
+    .callout-box {
+      background: rgba(201, 162, 39, 0.03);
+      border-right: 4px solid var(--color-gold-primary);
+      border-radius: 12px;
+      padding: var(--space-5);
+      margin: var(--space-5) 0;
+    }
+
+    .callout-box-title {
+      font-weight: 800;
+      font-size: 0.88rem;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+
+    .callout-box-desc {
+      font-size: 0.82rem;
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+    }
+
+    /* Grid for Lists */
+    .doc-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-4);
+      margin-top: var(--space-4);
+    }
+
+    /* Code Card list */
+    .code-card {
+      background: rgba(255, 255, 255, 0.015);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      border-radius: 12px;
+      padding: var(--space-4);
+      transition: all 0.25s ease;
+    }
+
+    .code-card:hover {
+      background: rgba(201, 162, 39, 0.03);
+      border-color: rgba(201, 162, 39, 0.25);
+    }
+
+    .code-card-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      background: rgba(201, 162, 39, 0.1);
+      border: 1px solid rgba(201, 162, 39, 0.25);
+      color: var(--color-gold-light);
+      border-radius: 8px;
+      font-size: 0.76rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .code-card-desc {
+      font-size: 0.78rem;
+      color: var(--color-text-secondary);
+      line-height: 1.5;
+    }
+
+    /* Prohibitions list */
+    .prohibitions-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-4);
+      margin-top: var(--space-4);
+    }
+
+    .prohibition-item {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-3);
+      font-size: 0.82rem;
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+      background: rgba(192, 57, 43, 0.02);
+      padding: var(--space-4);
+      border-radius: 12px;
+      border: 1px solid rgba(192, 57, 43, 0.08);
+    }
+
+    .prohibition-item span:first-child {
+      color: var(--color-red-alert);
+      font-weight: 900;
+      font-size: 1.1rem;
+      line-height: 1;
+    }
+
+    /* Alert Banner */
+    .alert-banner {
+      background: rgba(192, 57, 43, 0.04);
+      border-right: 4px solid var(--color-red-alert);
+      border-radius: 12px;
+      padding: var(--space-5);
+      margin-bottom: var(--space-6);
+    }
+
+    .alert-banner-title {
+      font-weight: 800;
+      font-size: 0.88rem;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+
+    .alert-banner-desc {
+      font-size: 0.82rem;
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 900px) {
+      .prohibitions-list, .doc-grid-2 {
+        grid-template-columns: 1fr;
+      }
+      .doc-content {
+        padding: var(--space-5);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="toast-container"></div>
+
+  <div class="doc-container">
+
+    <!-- Main Content -->
+    <div class="doc-content animate-fade-up delay-1">
+
+      <!-- Back Banner -->
+      <div class="back-banner">
+        <div class="navbar-logo" style="margin: 0;">
+          <svg viewBox="0 0 100 100" class="nav-logo-img" style="width: 46px; height: 46px;">
+            <circle cx="50" cy="50" r="42" fill="#0d1840" stroke="#c9a227" stroke-width="3"/>
+            <circle cx="50" cy="50" r="30" fill="none" stroke="rgba(201, 162, 39, 0.4)" stroke-width="1.5" stroke-dasharray="3,3"/>
+            <path d="M52,30 C45,30 40,35 40,42 C40,50 52,65 52,65 C52,65 64,50 64,42 C64,35 59,30 52,30 Z" fill="none" stroke="#c9a227" stroke-width="2"/>
+            <circle cx="52" cy="42" r="4" fill="#c9a227"/>
+            <line x1="35" y1="65" x2="48" y2="52" stroke="#c9a227" stroke-width="3" stroke-linecap="round"/>
+          </svg>
+          <div style="display: flex; flex-direction: column; line-height: 1.25; text-align: right; margin-right: 8px;">
+            <span style="font-size: 13px; font-weight: 900; color: #ffffff;">إدارة الأمن العام</span>
+            <span style="font-size: 10px; font-weight: 800; color: #c9a227;">جناح البحث والتحري</span>
+          </div>
+        </div>
+        <button class="back-btn" onclick="window.location.href='college.html'">➡️ رجوع إلى كلية التدريب</button>
+      </div>
+
+      <!-- Main Title -->
+      <h1 class="doc-main-title">دورة البحث والتحري</h1>
+      
+      <!-- Meta Information Banner -->
+      <div class="doc-meta-info">
+        <div class="doc-meta-item">مدير الدورة: <strong>الفريق ركن / بخيت احمد</strong></div>
+        <div class="doc-meta-item">نائب المدير: <strong>العميد ركن / شايع الشهراني</strong></div>
+        <div class="doc-meta-item">الموعد الدوري: <strong>كل شهر</strong></div>
+      </div>
+
+      <!-- Alert callout from board -->
+      <div class="callout-box" style="background: rgba(201, 162, 39, 0.05); margin-bottom: 40px;">
+        <div class="callout-box-title"><i class="fa-solid fa-bullhorn"></i> تنويه من مجلس التدريب</div>
+        <div class="callout-box-desc">الدورات الاستثنائية يُعلن عنها من قبل رئاسة مجلس التدريب بشكل مستقل وحسب جدول الاحتياج الميداني.</div>
+      </div>
+
+      <!-- 1. Definition -->
+      <div class="doc-section" id="sec-definition">
+        <h2 class="section-title"><i class="fa-solid fa-magnifying-glass"></i> تعريف قطاع البحث والتحري (الشرطة السرية)</h2>
+        <div class="section-body">
+          شعبة البحث والتحري هي جهاز شرطة سري تخصصي يتبع للمديرية العامة للأمن العام بمدينة الـ 90. يرتكز عمل هذا الجهاز في البحث السري عن الجرائم، الكشف عن بواعثها، كشف أسرار المنظمات الجنائية، ورصد الأنشطة المخالفة وتمرير المعلومات للوحدات الميدانية لمكافحة الجرائم ورفع مستوى السيطرة الأمنية.
+        </div>
+      </div>
+
+      <!-- 2. Laws and Regulations -->
+      <div class="doc-section" id="sec-rules">
+        <h2 class="section-title"><i class="fa-solid fa-scroll"></i> قوانين وأنظمة العمل الميداني لشعبة البحث والتحري</h2>
+        <div class="section-body">
+          <ol class="styled-list">
+            <li><strong>حظر الترصد بمواقع الممنوعات:</strong> يُمنع منعاً باتاً الترصد أو الوقوف للمراقبة عند أماكن إنتاج أو تصنيع الممنوعات الثابتة.</li>
+            <li><strong>بروتوكول الشارة الأمنية:</strong> يجب عليك إلزاميًا عند المباشرة كوحدة بحث وتحري وضع الشارة الرسمية للبحث من قائمة الـ F6، <strong>ويُحظر إزالتها نهائياً طوال فترة المناوبة</strong>.</li>
+            <li><strong>تتبع تعاميم العمليات:</strong> عند صدور تعميم رسمي من مركز العمليات على مركبة أو شخص، تلتزم وحدات البحث بالبحث والتحري لرصد وتحديد موقع الهدف المعمم عليه.</li>
+            <li><strong>الربط اللاسلكي:</strong> يجب تسجيل اليونت أو الشارة العسكرية الخاصة بك لدى مركز العمليات، والالتزام بدخول الموجة الرئيسية (لوس سانتوس أو الساحل) وعدم مغادرتها نهائياً.</li>
+            <li><strong>تغيير الهوية الشخصية:</strong> يُفضل ويُنصح بتغيير الهوية والمظهر الخارجي بشكل دوري لتجنب كشف هويتك الأمنية من قِبل المواطنين والمشتبه بهم.</li>
+            <li><strong>التبليغ السري أثناء مرافقة المجرمين:</strong> في حال مرافقتك للمجرمين لجمع الأدلة، <strong>يُمنع استخدام الراديو نهائياً</strong>؛ ويتم إبلاغ العمليات سرياً عبر الهاتف الجوال (طريقة البلاغ المعتمدة: <em>"من البحث إلى العمليات، حالياً يوجد سارقين بقالة بمربع 303 أمام حديقة الشهيد يرجى تجهيز الوحدات لضبط المجرمين"</em>).</li>
+            <li><strong>حظر المرافقين غير الحاصلين على الدورة:</strong> يُمنع تماماً اصطحاب أي مرافق معك لا يحمل ترخيص دورة البحث والتحري، سواء كان ضابطاً أو فرداً.</li>
+            <li><strong>بروتوكول الصوت اللاسلكي (الهمس):</strong> يجب الالتزام بوضع مستوى الصوت منخفضاً (<strong>Whispering</strong>) دائماً عند التبليغ اللاسلكي من داخل المركبة، والحرص على الابتعاد عن الأشخاص والمشتبه بهم.</li>
+            <li><strong>تجهيز المركبة الشخصية واللبس:</strong> يجب تركيب لوازم السفتي السري على المركبة، والالتزام التام بارتداء اللباس المدني (يُمنع ارتداء بدلة العمل العسكرية) أثناء أداء مهام البحث والتحري.</li>
+            <li><strong>حظر المبادرة بالبيع والشراء:</strong> يُمنع منعاً باتاً عرض بيع أو شراء الممنوعات على المواطنين لاستدراجهم.</li>
+            <li><strong>المشاركة في البلاغات المسلحة:</strong> يسمح لوحدات البحث المشاركة في المطاردات والتوجه لبلاغات إطلاق النار <strong>بشرط تواجد دعم ميداني كافٍ من الدوريات الرسمية</strong>.</li>
+            <li><strong>حظر الأسلحة البيضاء:</strong> يُمنع منعاً باتاً استخدام المايكرو، أو السكين، أو سائر الأسلحة البيضاء أثناء المباشرة.</li>
+            <li><strong>حظر الدوريات السرية الرسمية:</strong> يُمنع استخدام دوريات الشرطة السرية التابعة للقطاع، ويجب المباشرة والعمل بمركبات مدنية شخصية بالكامل.</li>
+            <li><strong>منع استخدام المركبات المهملة:</strong> يُمنع منعاً باتاً سرقة أو استخدام مركبة مهملة في الطرقات للمباشرة بها، أو استئجار مركبة للعمل.</li>
+            <li><strong>ضوابط استخدام رشاش الكاربين:</strong> يُمنع استخدام رشاش الكاربين نهائياً، <strong>ويُستثنى من ذلك حالات الاستنفار الأمني الشديدة والقصوى فقط</strong>، مع الالتزام بلبس الشارة الرسمية وتركيب السفتي على المركبة.</li>
+            <li><strong>حظر المداهمة وتحرير الرهائن:</strong> لا يحق لوحدات البحث المداهمة لتحرير الرهائن، أو مداهمة سرقات المتاجر، أو سرقات البنوك؛ حيث تُعد هذه العمليات من الاختصاص الحصري للقوات الخاصة والدوريات الأمنية الرسمية.</li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- 3. Division & Limits -->
+      <div class="doc-section" id="sec-divisions">
+        <h2 class="section-title"><i class="fa-solid fa-chart-column"></i> مسميات وتوزيع وحدات البحث والتحري</h2>
+        <div class="section-body">
+          <p class="text-secondary mb-3">يتم تحديد أعداد وتسميات دوريات البحث والتحري في الميدان كالتالي:</p>
+          
+          <div class="doc-grid-2" style="margin-bottom: 24px;">
+            <div class="code-card">
+              <span class="code-card-badge">الوحدة الأولى</span>
+              <div style="font-weight: 800; color: #fff; font-size: 0.95rem; margin-bottom: 4px;">بحث وتحري 1</div>
+              <div class="code-card-desc">الدورية الأساسية الأولى للاستطلاع والرصد الجنائي الميداني.</div>
+            </div>
+
+            <div class="code-card">
+              <span class="code-card-badge">الوحدة الثانية</span>
+              <div style="font-weight: 800; color: #fff; font-size: 0.95rem; margin-bottom: 4px;">بحث وتحري 2</div>
+              <div class="code-card-desc">الدورية المساندة لليونت الأول لربط وتكامل المعلومات الميدانية.</div>
+            </div>
+          </div>
+
+          <div class="alert-banner" style="background: rgba(192, 57, 43, 0.05); margin-bottom: 0;">
+            <div class="alert-banner-title" style="color: var(--color-red-alert);"><i class="fa-solid fa-triangle-exclamation"></i> الحدود الأمنية للتفعيل الميداني:</div>
+            <div class="alert-banner-desc">
+              - الحد الأقصى لوحدات البحث والتحري في كامل قطاعات المدينة هو <strong>وحدتان ( 2 ) فقط لا غير</strong>.
+              <br>- <strong>شرط الحد الأدنى للقوات الميدانية:</strong> يُمنع تفعيل أو المباشرة كـ وحدة بحث وتحري <strong>إذا كان عدد أفراد الأمن العام بالخدمة الميدانية أقل من 7 عساكر (دون احتساب العمليات والنائب)</strong>.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Non-Assigned Duties (Prohibitions) -->
+      <div class="doc-section" id="sec-prohibitions">
+        <h2 class="section-title" style="color: var(--color-red-alert);"><i class="fa-solid fa-ban"></i> المهام والعمليات المحظورة على القطاع</h2>
+        <div class="section-body">
+          <p class="text-secondary mb-3">تُحدد هذه القائمة المهام الميدانية التي <strong>لا تُكلف ولا تُخول بها وحدات البحث والتحري نهائياً</strong>:</p>
+          
+          <div class="prohibitions-list">
+            <div class="prohibition-item">
+              <span>✕</span>
+              <span><strong>الاستيقاف المروري:</strong> يُمنع استيقاف أو تحرير مخالفات مرورية للمواطنين بالمركبة المدنية.</span>
+            </div>
+            <div class="prohibition-item">
+              <span>✕</span>
+              <span><strong>المباشرة بالصدم:</strong> يُحظر الصدم أو مباشرة صدم المركبات الهاربة أثناء المطاردات الجارية.</span>
+            </div>
+            <div class="prohibition-item">
+              <span>✕</span>
+              <span><strong>التفاوض الميداني:</strong> يُحظر استلام التفاوض في سرقات (البنوك - المتاجر - والبارات) نهائياً.</span>
+            </div>
+            <div class="prohibition-item">
+              <span>✕</span>
+              <span><strong>المداهمات المباشرة:</strong> يُمنع اقتحام أو مداهمة مواقع السرقات الجارية (البنوك، البقالات).</span>
+            </div>
+            <div class="prohibition-item" style="grid-column: span 2;">
+              <span>✕</span>
+              <span><strong>تأمين الميناء البحري:</strong> يُمنع منعاً باتاً الذهاب أو التواجد في منطقة الميناء البحري الرئيسي للقيام بمهام أمنية.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Admission Criteria -->
+      <div class="doc-section" id="sec-criteria">
+        <h2 class="section-title">⚡ شروط التقديم والالتحاق بالقطاع</h2>
+        <div class="section-body">
+          <p class="text-secondary mb-3">يُشترط في المتقدم للالتحاق بشعبة البحث والتحري استيفاء المعايير التالية بالكامل:</p>
+          <ul class="styled-list">
+            <li>أن يحمل المتقدم رتبة عسكرية لا تقل عن رتبة <strong>رائد</strong>.</li>
+            <li>إتمام واجتياز كافة الدورات العسكرية الأساسية بنجاح.</li>
+            <li>امتلاك وتوفير سيارات مدنية سريعة ومجهزة ومناسبة لأعمال المراقبة والملاحقة.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 6. Important Admin warnings -->
+      <div class="doc-section" id="sec-warnings" style="border: none; padding-bottom: 0; margin-bottom: 0;">
+        <h2 class="section-title" style="color: var(--color-gold-primary)">⚠️ تنويهات وضوابط إدارية صارمة جداً</h2>
+        <div class="section-body">
+          <div class="alert-banner" style="background: rgba(201, 162, 39, 0.04); border-right-color: var(--color-gold-primary);">
+            <div class="alert-banner-title" style="color: var(--color-gold-light);"><i class="fa-solid fa-lightbulb"></i> بروتوكول تركيب وإزالة السفتي للمركبة الشخصية:</div>
+            <div class="alert-banner-desc"><strong>عند تركيب السفتي على مركبتك المدنية الشخصية، يجب عليك إزالة السفتي بالكامل قبل تخزين المركبة في الكراج. وفي حال المخالفة وعدم إزالته، سيتم حذف وتصفير كافة تعديلات وتزويدات المركبة تلقائياً من نظام المرور (ملاحظة مهمة جداً للتطبيق).</strong></div>
+          </div>
+
+          <ul class="styled-list" style="margin-top: 20px;">
+            <li><strong>تسلسل الرتب الميداني:</strong> عند دخول وتسجيل رتبة عسكرية أعلى منك كبحث وتحري في الميدان واكتمل العدد الأقصى (2)، <strong>يجب عليك فوراً الانسحاب والمباشرة كوحدة عسكرية عادية</strong> (تنسحب الرتبة الأصغر في الخدمة تلقائياً).</li>
+            <li><strong>حزم العقوبات الميدانية:</strong> ارتكاب أي خطأ ميداني أو إداري مهما كان نوعه أو حجمه بالدورة، <strong>يترتب عليه سحب رخصة البحث والتحري فوراً وحرمانك من دخولها مستقبلاً</strong>.</li>
+            <li><strong>فقدان الوحدات العامة:</strong> يُرجى العلم التام بأنه في حال فقدان أو نقص أي من الوحدات الأمنية العامة بالميدان، يتم تلقائياً سحب دورة البحث والتحري وإلغاء تفعيلها ميدانياً.</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="../assets/js/storage.js?v=1.0.5"></script>
+  <script src="../assets/js/data.js?v=1.0.5"></script>
+  <script src="../assets/js/auth.js?v=1.0.5"></script>
+  <script src="../assets/js/components.js"></script>
+  <script src="../assets/js/app.js?v=1.0.5"></script>
+  <script>
+    // Inject navbar and sidebar
+    document.write(Components.navbar('college'));
+    document.write(Components.sidebar('college'));
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Inject Footer
+      const body = document.body;
+      const footerDiv = document.createElement('div');
+      footerDiv.innerHTML = Components.footer();
+      body.appendChild(footerDiv.firstElementChild);
+    });
+  </script>
+</body>
+
+</html>

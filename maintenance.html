@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>صيانة الموقع</title>
+  <!-- Premium font -->
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin:0;display:flex;justify-content:center;align-items:center;height:100vh;
+      background: radial-gradient(circle at 30% 30%, rgba(88,101,242,0.12), transparent 60%),
+                  radial-gradient(circle at 70% 75%, rgba(201,162,39,0.08), transparent 50%),
+                  #05091e;
+      color:#fff;font-family:'Outfit',sans-serif; text-align:center;
+      -webkit-user-select: none !important;
+      -moz-user-select: none !important;
+      -ms-user-select: none !important;
+      user-select: none !important;
+    }
+    .box {
+      background: rgba(20,20,30,0.6);backdrop-filter:blur(12px);
+      padding:2rem 3rem;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,0.5);
+    }
+    h1{font-size:2.2rem;margin-bottom:0.5rem;}
+    p{font-size:1.1rem;opacity:0.9;}
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h1>نحن قيد الصيانة</h1>
+    <p>نعتذر عن الإزعاج، الموقع يعمل حاليًا على تحديثات هامة. يرجى العودة لاحقًا.</p>
+  </div>
+  <script>
+    (function() {
+      const prevent = (e) => e.preventDefault();
+      document.addEventListener('copy', prevent, true);
+      document.addEventListener('cut', prevent, true);
+      document.addEventListener('paste', prevent, true);
+      document.addEventListener('contextmenu', prevent, true);
+      document.addEventListener('dragstart', prevent, true);
+      document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && ['c', 'x', 'a', 'u', 's', 'p', 'C', 'X', 'A', 'U', 'S', 'P'].includes(e.key)) e.preventDefault();
+        if (e.key === 'F12' || ((e.ctrlKey || e.metaKey) && e.shiftKey && ['i', 'j', 'c', 'I', 'J', 'C'].includes(e.key))) e.preventDefault();
+      }, true);
+    })();
+  </script>
+</body>
+</html>

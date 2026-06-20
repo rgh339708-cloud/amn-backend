@@ -1,0 +1,878 @@
+/* =====================================================
+   Navbar Component
+   ===================================================== */
+
+.navbar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: auto; /* Dynamic: grows to include sub-bar */
+  background: rgba(7, 7, 15, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(201, 162, 39, 0.15);
+  z-index: var(--z-navbar);
+  transition: var(--transition-base);
+}
+
+.navbar.scrolled {
+  background: rgba(7, 7, 15, 0.98);
+  border-bottom-color: rgba(201, 162, 39, 0.25);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.6);
+}
+
+/* Top row: logo + actions */
+.navbar-top-row {
+  height: 62px;
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: 0 var(--space-6);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+/* Keep legacy .navbar-inner as alias */
+.navbar-inner {
+  height: 62px;
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: 0 var(--space-6);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+/* ── Sub Navigation Bar ──────────────────────────── */
+.navbar-sub {
+  background: rgba(0, 0, 0, 0.35);
+  border-top: 1px solid rgba(201, 162, 39, 0.08);
+  overflow-x: auto;
+  scrollbar-width: none;
+  white-space: nowrap;
+  direction: rtl;
+}
+
+.navbar-sub::-webkit-scrollbar { display: none; }
+
+.navbar-sub-inner {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: 0 var(--space-6);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-wrap: nowrap;
+  min-width: max-content;
+}
+
+.sub-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 7px 10px;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 10.5px;
+  font-weight: 700;
+  white-space: nowrap;
+  text-decoration: none;
+  position: relative;
+  transition: color 0.2s, background 0.2s;
+  border-radius: 6px;
+  font-family: var(--font-arabic);
+}
+
+.sub-link:hover {
+  color: var(--color-gold-primary);
+  background: var(--color-gold-subtle);
+}
+
+.sub-link.active {
+  color: var(--color-gold-primary);
+  background: var(--color-gold-subtle);
+}
+
+.sub-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  right: 8px;
+  left: 8px;
+  height: 2px;
+  background: var(--color-gold-primary);
+  border-radius: var(--radius-full);
+}
+
+/* Logo */
+.navbar-logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.nav-logo-img {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 8px rgba(201, 162, 39, 0.4));
+  transition: transform 0.3s ease;
+  flex-shrink: 0;
+}
+
+.navbar-logo:hover .nav-logo-img {
+  transform: scale(1.08);
+}
+
+.navbar-logo-icon {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, var(--color-gold-primary), var(--color-gold-dark));
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  box-shadow: 0 0 15px rgba(201, 162, 39, 0.3);
+  animation: goldPulse 3s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+.navbar-logo-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.navbar-logo-title {
+  font-size: var(--font-size-base);
+  font-weight: 800;
+  color: var(--color-gold-primary);
+  letter-spacing: 0.5px;
+}
+
+.navbar-logo-subtitle {
+  font-size: 10px;
+  color: var(--color-silver);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  font-family: var(--font-display);
+}
+
+/* Center Nav Links (legacy - kept for pages that have inline navbar) */
+.navbar-links {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  justify-content: center;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.navbar-links::-webkit-scrollbar {
+  display: none;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  padding: 8px 4px;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 11px;
+  font-weight: 700;
+  transition: var(--transition-fast);
+  white-space: nowrap;
+  text-decoration: none;
+  position: relative;
+}
+
+.nav-link:hover {
+  color: var(--color-gold-primary);
+  background: transparent;
+}
+
+.nav-link.active {
+  color: var(--color-gold-primary);
+  background: transparent;
+}
+
+.nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: -15px;
+  right: 0;
+  left: 0;
+  height: 3px;
+  background: var(--color-gold-primary);
+  border-radius: var(--radius-full);
+}
+
+/* Actions */
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+/* Theme Toggle */
+.theme-toggle {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-glass);
+  border: var(--border-subtle);
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  font-size: 1rem;
+}
+
+.theme-toggle:hover {
+  color: var(--color-gold-primary);
+  background: var(--color-gold-subtle);
+  border-color: rgba(201,162,39,0.3);
+}
+
+/* Admin Button */
+.navbar-admin-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  background: linear-gradient(135deg, var(--color-gold-primary), var(--color-gold-dark));
+  color: #000;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  transition: var(--transition-base);
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  letter-spacing: 0.3px;
+}
+
+.navbar-admin-btn:hover {
+  box-shadow: var(--shadow-glow-gold);
+  transform: translateY(-1px);
+}
+
+/* Menu Toggle (Mobile) */
+.menu-toggle {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-glass);
+  border: var(--border-subtle);
+  color: var(--color-text-secondary);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-direction: column;
+  gap: 5px;
+  padding: 10px;
+  transition: var(--transition-fast);
+}
+
+.menu-toggle:hover { background: var(--color-gold-subtle); color: var(--color-gold-primary); }
+
+.menu-toggle span {
+  display: block;
+  height: 2px;
+  border-radius: var(--radius-full);
+  background: currentColor;
+  transition: var(--transition-base);
+}
+
+.menu-toggle span:nth-child(1) { width: 20px; }
+.menu-toggle span:nth-child(2) { width: 14px; }
+.menu-toggle span:nth-child(3) { width: 18px; }
+
+.menu-toggle.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); width: 18px; }
+.menu-toggle.open span:nth-child(2) { opacity: 0; }
+.menu-toggle.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); width: 18px; }
+
+/* User Badge Group & Pill styling (Matching user screenshot) */
+.navbar-user-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.navbar-user-pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 14px;
+  background: rgba(13, 24, 64, 0.45);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(92, 146, 232, 0.25); /* Subtle steel blue border */
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.navbar-user-pill:hover {
+  border-color: rgba(201, 162, 39, 0.6);
+  background: rgba(201, 162, 39, 0.08);
+  box-shadow: 0 4px 20px rgba(201, 162, 39, 0.2);
+  transform: translateY(-1px);
+}
+
+.navbar-user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(201, 162, 39, 0.5);
+  object-fit: cover;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+}
+
+.navbar-user-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.3px;
+  font-family: var(--font-arabic);
+}
+.navbar-admin-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: rgba(201, 162, 39, 0.08);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(201, 162, 39, 0.25);
+  border-radius: 12px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.navbar-admin-pill:hover {
+  border-color: rgba(201, 162, 39, 0.6);
+  background: rgba(201, 162, 39, 0.15);
+  box-shadow: 0 4px 20px rgba(201, 162, 39, 0.3);
+  transform: translateY(-1px);
+}
+
+.navbar-admin-pill-text {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--color-gold-primary);
+  letter-spacing: 0.3px;
+  font-family: var(--font-arabic);
+}
+
+.navbar-admin-pill-icon {
+  font-size: 1.1rem;
+}
+
+.navbar-logout-btn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(13, 24, 64, 0.45);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(201, 162, 39, 0.25);
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.navbar-logout-btn:hover {
+  border-color: rgba(231, 76, 60, 0.6);
+  background: rgba(231, 76, 60, 0.12);
+  color: #e74c3c;
+  box-shadow: 0 4px 20px rgba(231, 76, 60, 0.25);
+  transform: translateY(-1px);
+}
+
+/* =====================================================
+   Responsive Navbar
+   ===================================================== */
+@media (max-width: 1100px) {
+  /* Legacy inline navbar-links: hide since we have sub-bar */
+  .navbar-links { display: none; }
+  .menu-toggle { display: flex; }
+}
+
+/* Sub-bar is always visible on all sizes */
+@media (max-width: 900px) {
+  .navbar-top-row,
+  .navbar-inner { padding: 0 var(--space-4); }
+  .navbar-sub-inner { padding: 0 var(--space-3); }
+  .sub-link { padding: 6px 8px; font-size: 10px; }
+}
+
+@media (max-width: 600px) {
+  .navbar-logo-text { display: none; }
+  .navbar-admin-btn span:not(:first-child) { display: none; }
+  .navbar-user-name { display: none; }
+  .navbar-admin-pill-text { display: none; }
+  .navbar-inner { padding: 0 var(--space-4); }
+}
+
+/* =====================================================
+   Navbar Maintenance Status Toggle Dropdown
+   ===================================================== */
+.navbar-status-wrapper {
+  position: relative;
+}
+
+.navbar-status-toggle-btn {
+  height: 40px;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(13, 24, 64, 0.45);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(201, 162, 39, 0.25);
+  border-radius: 10px;
+  color: #ffffff;
+  font-family: var(--font-arabic);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.navbar-status-toggle-btn:hover {
+  border-color: var(--color-gold-primary);
+  background: rgba(201, 162, 39, 0.08);
+  box-shadow: 0 4px 20px rgba(201, 162, 39, 0.2);
+  transform: translateY(-1px);
+}
+
+.navbar-status-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  width: 270px;
+  background: rgba(10, 18, 50, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(201, 162, 39, 0.35);
+  border-radius: 12px;
+  padding: 10px;
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 999999;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(201, 162, 39, 0.1);
+  animation: dropdownFadeIn 0.22s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  direction: rtl;
+}
+
+.navbar-status-dropdown.active {
+  display: flex;
+}
+
+.navbar-status-dropdown-header {
+  font-family: var(--font-arabic);
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--color-text-muted);
+  padding: 4px 6px 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  text-align: right;
+}
+
+.status-option-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: right;
+  font-family: var(--font-arabic);
+}
+
+.status-option-item:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.status-option-item.active {
+  background: rgba(201, 162, 39, 0.08);
+  border-color: rgba(201, 162, 39, 0.25);
+}
+
+.status-indicator-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 8px currentColor;
+}
+
+.status-indicator-dot.green {
+  background-color: #2ecc71;
+  color: rgba(46, 204, 113, 0.4);
+}
+
+.status-indicator-dot.red {
+  background-color: #e74c3c;
+  color: rgba(231, 76, 60, 0.4);
+}
+
+.status-option-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.status-option-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.status-option-desc {
+  font-size: 0.65rem;
+  color: var(--color-text-muted);
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =====================================================
+   Restructured Discord Navbar & Dropdown Menu
+   ===================================================== */
+
+.navbar-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2, 6px);
+  padding: var(--space-1, 4px) var(--space-3, 10px);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-full, 20px);
+  font-family: var(--font-arabic);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-text-secondary, #b3b3b3);
+  transition: all 0.3s ease;
+  user-select: none;
+}
+
+.navbar-status-badge.logged-in {
+  background: rgba(46, 204, 113, 0.05);
+  border-color: rgba(46, 204, 113, 0.18);
+  color: #2ecc71;
+}
+
+.navbar-status-badge.logged-out {
+  background: rgba(231, 76, 60, 0.05);
+  border-color: rgba(231, 76, 60, 0.18);
+  color: #e74c3c;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: inline-block;
+}
+
+.status-dot.green {
+  background-color: #2ecc71;
+  box-shadow: 0 0 8px #2ecc71;
+}
+
+.status-dot.red {
+  background-color: #e74c3c;
+  box-shadow: 0 0 8px #e74c3c;
+}
+
+/* Pulsating Glow animation */
+.animate-pulse-glow {
+  animation: pulseGlow 1.8s infinite alternate;
+}
+
+@keyframes pulseGlow {
+  0% {
+    opacity: 0.6;
+    box-shadow: 0 0 4px currentColor;
+  }
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 12px currentColor;
+  }
+}
+
+/* Discord Login Button in Navbar */
+.navbar-discord-login-btn {
+  background: linear-gradient(135deg, #5865F2, #4752C4);
+  color: #ffffff !important;
+  font-family: var(--font-arabic);
+  font-size: 11.5px;
+  font-weight: 800;
+  padding: 8px 16px;
+  border: 1px solid rgba(201, 162, 39, 0.25);
+  border-radius: 10px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  box-shadow: 0 4px 15px rgba(88, 101, 242, 0.25);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.navbar-discord-login-btn:hover {
+  background: linear-gradient(135deg, var(--color-gold-primary, #c9a227), var(--color-gold-dark, #8a6d0f));
+  color: #05091e !important;
+  border-color: var(--color-gold-primary, #c9a227);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(201, 162, 39, 0.35);
+}
+
+.navbar-discord-login-btn:active {
+  transform: translateY(-1px);
+}
+
+/* User Dropdown wrapper & components */
+.navbar-user-dropdown-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.navbar-user-pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 14px;
+  background: rgba(10, 18, 50, 0.5);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(92, 146, 232, 0.22);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  user-select: none;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.navbar-user-pill:hover {
+  border-color: var(--color-gold-primary, #c9a227);
+  background: rgba(201, 162, 39, 0.06);
+  box-shadow: 0 4px 20px rgba(201, 162, 39, 0.15);
+  transform: translateY(-1px);
+}
+
+.dropdown-arrow {
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.5);
+  transition: transform 0.3s ease;
+}
+
+.navbar-user-pill:hover .dropdown-arrow {
+  color: var(--color-gold-primary, #c9a227);
+}
+
+/* Dropdown Menu */
+.navbar-user-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 210px;
+  background: rgba(7, 12, 32, 0.98);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border: 1px solid rgba(201, 162, 39, 0.25);
+  border-radius: 14px;
+  padding: 8px;
+  display: none;
+  flex-direction: column;
+  gap: 3px;
+  z-index: var(--z-dropdown, 999999);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.65), 0 0 25px rgba(201, 162, 39, 0.08);
+  animation: dropdownFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  direction: rtl;
+}
+
+.navbar-user-dropdown-menu.active {
+  display: flex;
+}
+
+/* Dropdown items */
+.dropdown-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.75);
+  font-family: var(--font-arabic);
+  font-size: 12.5px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: right;
+}
+
+.dropdown-item i {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.45);
+  transition: color 0.2s ease;
+}
+
+.dropdown-item:hover {
+  background: rgba(201, 162, 39, 0.08);
+  color: #ffffff;
+  border-color: rgba(201, 162, 39, 0.15);
+}
+
+.dropdown-item:hover i {
+  color: var(--color-gold-primary, #c9a227);
+}
+
+.dropdown-item.admin-link {
+  color: var(--color-gold-primary, #c9a227);
+  background: rgba(201, 162, 39, 0.05);
+}
+
+.dropdown-item.admin-link i {
+  color: var(--color-gold-primary, #c9a227);
+}
+
+.dropdown-item.admin-link:hover {
+  background: rgba(201, 162, 39, 0.12);
+  border-color: rgba(201, 162, 39, 0.25);
+}
+
+.dropdown-divider {
+  border: none;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.06);
+  margin: 6px 4px;
+}
+
+.dropdown-item.logout-btn {
+  color: #ff6b6b;
+}
+
+.dropdown-item.logout-btn i {
+  color: rgba(231, 76, 60, 0.6);
+}
+
+.dropdown-item.logout-btn:hover {
+  background: rgba(231, 76, 60, 0.1);
+  color: #ff4d4d;
+  border-color: rgba(231, 76, 60, 0.22);
+}
+
+.dropdown-item.logout-btn:hover i {
+  color: #ff4d4d;
+}
+
+/* Owner Status Toggle inside dropdown */
+.dropdown-status-toggle {
+  padding: 8px 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.status-toggle-header {
+  font-family: var(--font-arabic);
+  font-size: 10.5px;
+  font-weight: 800;
+  color: rgba(255,255,255,0.4);
+  text-align: right;
+  padding-right: var(--space-1, 4px);
+}
+
+.status-toggle-options {
+  display: flex;
+  gap: var(--space-2, 6px);
+  width: 100%;
+}
+
+.status-toggle-opt {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 6px var(--space-2, 8px);
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 6px;
+  color: rgba(255,255,255,0.6);
+  font-family: var(--font-arabic);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.status-toggle-opt:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+}
+
+.status-toggle-opt.active {
+  background: rgba(201, 162, 39, 0.08);
+  border-color: rgba(201, 162, 39, 0.3);
+  color: var(--color-gold-primary, #c9a227);
+}
+
+/* Media query fixes for responsiveness */
+@media (max-width: 600px) {
+  .navbar-status-badge .status-text {
+    display: none; /* Hide status label text on mobile to save space */
+  }
+  .navbar-discord-login-btn span {
+    display: none; /* Hide login button label on small mobile */
+  }
+  .navbar-discord-login-btn {
+    padding: 8px 12px;
+  }
+  .navbar-status-badge {
+    padding: 6px;
+  }
+}
+

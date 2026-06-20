@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مستند دورة مكافحة المخدرات | الأمن العام</title>
+  <link rel="stylesheet" href="../assets/css/main.css?v=1.0.5">
+  <link rel="stylesheet" href="../assets/css/navbar.css?v=1.0.5">
+  <link rel="stylesheet" href="../assets/css/sidebar.css?v=1.0.5">
+  <link rel="stylesheet" href="../assets/css/footer.css">
+  <style>
+    /* Custom Premium Styles for Narcotics Document Page */
+    .doc-container {
+      max-width: 960px;
+      margin: 140px auto 100px;
+      padding: 0 var(--space-4);
+    }
+
+    /* Document Body */
+    .doc-content {
+      background: linear-gradient(155deg, rgba(13, 24, 64, 0.25) 0%, rgba(7, 15, 37, 0.35) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      border-radius: 24px;
+      padding: var(--space-8);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Back Button Banner */
+    .back-banner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--space-8);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding-bottom: var(--space-5);
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: 10px 20px;
+      background: rgba(251, 197, 49, 0.1);
+      border: 1px solid rgba(251, 197, 49, 0.3);
+      border-radius: 12px;
+      color: var(--color-gold-light);
+      font-weight: 800;
+      font-size: var(--font-size-sm);
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .back-btn:hover {
+      background: var(--color-gold-primary);
+      color: #000;
+      border-color: var(--color-gold-primary);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px var(--color-gold-glow);
+    }
+
+    /* Main Title & Subtitle */
+    .doc-main-title {
+      font-size: 1.95rem;
+      font-weight: 900;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+
+    .doc-meta-info {
+      display: flex;
+      gap: var(--space-6);
+      flex-wrap: wrap;
+      margin-bottom: var(--space-8);
+    }
+
+    .doc-meta-item {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 10px 18px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--color-text-muted);
+    }
+
+    .doc-meta-item strong {
+      color: #fff;
+      margin-right: 4px;
+    }
+
+    /* Sections */
+    .doc-section {
+      scroll-margin-top: 100px;
+      margin-bottom: var(--space-8);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      padding-bottom: var(--space-6);
+    }
+
+    .doc-section:last-child {
+      border: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .section-title {
+      font-size: 1.35rem;
+      font-weight: 850;
+      color: var(--color-gold-primary);
+      margin-bottom: var(--space-4);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-body {
+      font-size: 0.88rem;
+      color: var(--color-text-secondary);
+      line-height: 1.8;
+      text-align: justify;
+    }
+
+    .styled-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: var(--space-4);
+    }
+
+    .styled-list li {
+      position: relative;
+      padding-right: var(--space-6);
+      font-size: 0.86rem;
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+    }
+
+    .styled-list li::before {
+      content: '⚡';
+      position: absolute;
+      right: 0;
+      color: var(--color-gold-primary);
+      font-size: 0.95rem;
+    }
+
+    /* Callout & Examples */
+    .callout-box {
+      background: rgba(201, 162, 39, 0.03);
+      border-right: 4px solid var(--color-gold-primary);
+      border-radius: 12px;
+      padding: var(--space-5);
+      margin: var(--space-5) 0;
+    }
+
+    .callout-box-title {
+      font-weight: 800;
+      font-size: 0.88rem;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+
+    .callout-box-desc {
+      font-size: 0.82rem;
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+    }
+
+    /* Grid for Lists */
+    .doc-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-4);
+      margin-top: var(--space-4);
+    }
+
+    /* Code Card list */
+    .code-card {
+      background: rgba(255, 255, 255, 0.015);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      border-radius: 12px;
+      padding: var(--space-4);
+      transition: all 0.25s ease;
+    }
+
+    .code-card:hover {
+      background: rgba(201, 162, 39, 0.03);
+      border-color: rgba(201, 162, 39, 0.25);
+    }
+
+    .code-card-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      background: rgba(201, 162, 39, 0.1);
+      border: 1px solid rgba(201, 162, 39, 0.25);
+      color: var(--color-gold-light);
+      border-radius: 8px;
+      font-size: 0.76rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .code-card-desc {
+      font-size: 0.78rem;
+      color: var(--color-text-secondary);
+      line-height: 1.5;
+    }
+
+    /* Prohibitions list */
+    .prohibitions-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-4);
+      margin-top: var(--space-4);
+    }
+
+    .prohibition-item {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-3);
+      font-size: 0.82rem;
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+      background: rgba(192, 57, 43, 0.02);
+      padding: var(--space-4);
+      border-radius: 12px;
+      border: 1px solid rgba(192, 57, 43, 0.08);
+    }
+
+    .prohibition-item span:first-child {
+      color: var(--color-red-alert);
+      font-weight: 900;
+      font-size: 1.1rem;
+      line-height: 1;
+    }
+
+    /* Alert Banner */
+    .alert-banner {
+      background: rgba(192, 57, 43, 0.04);
+      border-right: 4px solid var(--color-red-alert);
+      border-radius: 12px;
+      padding: var(--space-5);
+      margin-bottom: var(--space-6);
+    }
+
+    .alert-banner-title {
+      font-weight: 800;
+      font-size: 0.88rem;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+
+    .alert-banner-desc {
+      font-size: 0.82rem;
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 900px) {
+      .prohibitions-list, .doc-grid-2 {
+        grid-template-columns: 1fr;
+      }
+      .doc-content {
+        padding: var(--space-5);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="toast-container"></div>
+
+  <div class="doc-container">
+
+    <!-- Main Content -->
+    <div class="doc-content animate-fade-up delay-1">
+
+      <!-- Back Banner -->
+      <div class="back-banner">
+        <div class="navbar-logo" style="margin: 0;">
+          <img src="../assets/img/narcotics.png" alt="شعار مكافحة المخدرات" class="nav-logo-img" style="width: 46px; height: 46px; object-fit: contain;">
+          <div style="display: flex; flex-direction: column; line-height: 1.25; text-align: right; margin-right: 8px;">
+            <span style="font-size: 13px; font-weight: 900; color: #ffffff;">إدارة الأمن العام</span>
+            <span style="font-size: 10px; font-weight: 800; color: #c9a227;">إدارة مكافحة المخدرات</span>
+          </div>
+        </div>
+        <button class="back-btn" onclick="window.location.href='college.html'">➡️ رجوع إلى كلية التدريب</button>
+      </div>
+
+      <!-- Main Title -->
+      <h1 class="doc-main-title">دورة مكافحة المخدرات</h1>
+      
+      <!-- Meta Information Banner -->
+      <div class="doc-meta-info">
+        <div class="doc-meta-item">مدير الدورة: <strong>النقيب / بتال العنزي</strong></div>
+        <div class="doc-meta-item">نائب المدير: <strong>العميد ركن / احمد العبدلي</strong></div>
+        <div class="doc-meta-item">الموعد الأسبوعي: <strong>الثلاثاء 9:30 م</strong></div>
+      </div>
+
+      <!-- Alert callout from board -->
+      <div class="callout-box" style="background: rgba(201, 162, 39, 0.05); margin-bottom: 40px;">
+        <div class="callout-box-title"><i class="fa-solid fa-bullhorn"></i> تنويه من مجلس التدريب</div>
+        <div class="callout-box-desc">الدورات الاستثنائية يُعلن عنها من قبل رئاسة مجلس التدريب بشكل مستقل وحسب جدول الاحتياج الميداني.</div>
+      </div>
+
+      <!-- 1. Definition -->
+      <div class="doc-section" id="sec-definition">
+        <h2 class="section-title"><i class="fa-solid fa-flask"></i> تعريف قطاع مكافحة المخدرات</h2>
+        <div class="section-body">
+          الإدارة العامة لمكافحة المخدرات هي إحدى الإدارات العامة التخصصية التابعة لمديرية الأمن العام بمدينة الـ 90 إدارياً ومالياً. وتختص الشعبة في مجال رصد وضبط ومكافحة الممنوعات والسموم بكافة أنواعها، <strong>ولا يتم تفعيل العمليات الميدانية لها إلا بوجود منسق حملة مكافحة المخدرات أو من ينوب عنه رسمياً</strong>.
+        </div>
+      </div>
+
+      <!-- 2. Tasks -->
+      <div class="doc-section" id="sec-tasks">
+        <h2 class="section-title"><i class="fa-solid fa-gear"></i> مهام إدارة مكافحة المخدرات</h2>
+        <div class="section-body">
+          <ol class="styled-list">
+            <li><strong>تنفيذ قرارات القيادة:</strong> تنفيذ ومتابعة كافة التوجيهات والقرارات الصادرة عن الجهات العليا المختصة بجهاز الأمن العام.</li>
+            <li><strong>إصدار التعاميم الميدانية:</strong> صياغة وإصدار التعاميم والتعليمات الميدانية حسب نظام المكافحة وتعديلاته بما يحقق المصلحة الأمنية العامة.</li>
+            <li><strong>ضبط عموم السموم والممنوعات:</strong> رصد وضبط ومنع تداول كافة أنواع المخدرات والممنوعات داخل نطاق المدينة.</li>
+            <li><strong>التقيد بالبروتوكولات:</strong> الالتزام والتقيد الكامل بكافة بروتوكولات المكافحة والتعامل الرسمي أثناء مباشرة الحملة واستيقاف المواطنين.</li>
+            <li><strong>تحصيل المخالفات المالية:</strong> تطبيق وتحصيل المخالفات المالية المقررة للممنوعات على كل شخص يُضبط وبحوزته مواد ممنوعة.</li>
+            <li><strong>الجدية والتمثيل الميداني:</strong> تمثيل قطاع المكافحة بشكل متميز وصارم في الميدان، والالتزام بالجدية الكاملة وعدم التساهل أو التهاون مع المواطنين.</li>
+            <li><strong>حظر مداهمة المواقع الثابتة للممنوعات:</strong> <strong style="color: var(--color-red-alert);">يُمنع منعاً باتاً مداهمة مواقع تصنيع الممنوعات مثل (مصنع الشبو - مصنع الحشيش - مزرعة الكوكايين، إلخ)</strong>.</li>
+            <li><strong>الالتزام بالزي الرسمي:</strong> يُحظر تماماً إجراء أي تعديل على اللبس الرسمي المعتمد لإدارة المكافحة ويجب التقيد الكامل به.</li>
+            <li><strong>حظر ترصد اللاعبين:</strong> يُمنع الترصد العشوائي للاعبين؛ ويجب قصر الاستيقاف والتفتيش على المركبات المشتبه بها فقط بناءً على معايير واضحة (مثال: زجاج مظلل بالكامل - شخص يرتدي قناعاً - التواجد في موقع مشبوه).</li>
+            <li><strong>شرط رتب الاستلام:</strong> <strong style="color: var(--color-red-alert);">يُمنع منعاً باتاً إخراج رتب عسكرية أقل من رتبة (رقيب أول مكافحة)</strong> للميدان، ويتم محاسبة الفرد المخالف والمسؤول الإداري الذي سمح بخروجه.</li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- 3. Titles & Ranks -->
+      <div class="doc-section" id="sec-titles">
+        <h2 class="section-title">🏷️ المسميات والنداءات الميدانية المعتمدة</h2>
+        <div class="section-body">
+          <p class="text-secondary mb-3">تُقسم النداءات اللاسلكية والمسؤوليات الميدانية لأعضاء الحملة وفق الرتب كالتالي:</p>
+          
+          <div class="doc-grid-2">
+            <div class="code-card">
+              <span class="code-card-badge" style="background: rgba(231, 76, 60, 0.15); border-color: rgba(231, 76, 60, 0.3); color: #e74c3c;"><i class="fa-solid fa-crown"></i> مكافحة (مدير الدورة ونائبه)</span>
+              <div class="code-card-desc">هو الضابط المسؤول والمنسق الميداني الأول لحملة المكافحة، ويتولى الإشراف والمتابعة المباشرة للوحدات وتدوين الملاحظات. <em>*ملحوظة: يسمح لمدير الدورة أو نائبه بتفعيل الحملة الأمنية مهما كانت رتبتهم العسكرية الحالية.</em></div>
+            </div>
+
+            <div class="code-card">
+              <span class="code-card-badge" style="background: rgba(201, 162, 39, 0.1); border-color: rgba(201, 162, 39, 0.25); color: var(--color-gold-light);"><i class="fa-solid fa-shield-halved"></i> سـيـف (نقيب فما فوق)</span>
+              <div class="code-card-desc">هو الضابط الميداني المسؤول عن إدارة حملة المكافحة والإشراف المباشر على الوحدات المشاركة في الميدان ومتابعة أدائهم. مخصصة لرتبة <strong>نقيب فما فوق</strong>.</div>
+            </div>
+
+            <div class="code-card">
+              <span class="code-card-badge"><i class="fa-solid fa-shield-halved"></i> ميم كاف / م.ك [الرقم]</span>
+              <div class="code-card-desc">هم أعضاء فرقة المداهمة والاستيقاف للحملة. ومهامهم: الإغلاق المروري المحكم بالدوريات على المركبة المشتبه بها، النزول السريع والمباشر، رفع السلاح والتعريف الرسمي بـ <strong>(إدارة مكافحة المخدرات)</strong> مع أمر المشتبه به بعدم المقاومة. مخصصة من رتبة <strong>رقيب أول فما فوق</strong>.</div>
+            </div>
+
+            <div class="code-card">
+              <span class="code-card-badge" style="background: rgba(46, 204, 113, 0.15); border-color: rgba(46, 204, 113, 0.3); color: #2ecc71;"><i class="fa-solid fa-user-secret"></i> رصـد (دورية سرية)</span>
+              <div class="code-card-desc">وحدة دورية سرية مخصصة حصرياً لأعمال المراقبة وجمع المعلومات ورصد المشتبه بهم وإبلاغ الحملة بالموقع، ومساندتهم تكتيكياً إذا لزم الأمر. مخصصة لرتبة <strong>رئيس رقباء</strong>، <strong>ويُسمح بارتداء الزي المدني أثناء استلام نداء رصد</strong>.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Campaign activation rules -->
+      <div class="doc-section" id="sec-activation">
+        <h2 class="section-title"><i class="fa-solid fa-chart-column"></i> قوانين وضوابط تفعيل حملة المكافحة</h2>
+        <div class="section-body">
+          <ul class="styled-list">
+            <li><strong>الإشعار الرسمي للقيادة:</strong> يجب إشعار وإبلاغ مدير الدورة أو نائبه رسمياً عبر تطبيق الدولة قبل تفعيل الحملة بعدد القوات المشاركة واسم مشرف الحملة الميداني.</li>
+            <li><strong>الاكتفاء الميداني:</strong> يتم تفعيل حملات المكافحة في حال اكتفاء الوحدات الأمنية وتغطية المهام الأساسية لقطاع الأمن العام في الميدان أولاً.</li>
+            <li><strong>رتبة الإشراف الميداني:</strong> يجب إلزاميًا أن تضم الحملة مشرفاً ميدانياً يحمل رتبة <strong>نقيب فما فوق</strong> لقيادتها.</li>
+            <li><strong>صلاحيات التفتيش والمكافحة:</strong> تركز الحملة بشكل دقيق على ضبط الممنوعات؛ ويُصرح لأعضائها قانوناً تفتيش الشخص المشتبه به، تفتيش جميع الركاب المتواجدين معه بالمركبة، وتفتيش المركبة بالكامل.</li>
+            <li><strong>حزم التخطيط والتقمص:</strong> يجب على مشرف الحملة التخطيط وتقسيم الأفراد والفرق بشكل دقيق، ومحاسبة وعدم التهاون مع أي فرد لا يلتزم بتقمص الشخصية العسكرية بكل حزم وجدية.</li>
+          </ul>
+
+          <h3 style="font-weight: 850; color: #fff; font-size: 0.95rem; margin-top: 24px; margin-bottom: 8px;"><i class="fa-solid fa-users"></i> هيكل وعدد أفراد الحملة المعتمد:</h3>
+          <ul class="styled-list">
+            <li>المشرف المسؤول عن الحملة (مدير الدورة أو نائبه، أو الضابط المعتمد برتبة نقيب وأعلى).</li>
+            <li>عدد 4 وحدات دورية رسمية مساندة للمشرف.</li>
+            <li>الدورية السرية (<strong>رصد</strong>): اختيارية وغير إلزامية، ويُشترط لتفعيلها استيفاء شروط الدورية السرية.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 5. Vehicle Rules -->
+      <div class="doc-section" id="sec-vehicles">
+        <h2 class="section-title"><i class="fa-solid fa-car"></i> ضوابط وقوانين مركبات حملة المكافحة</h2>
+        <div class="section-body">
+          <ul class="styled-list">
+            <li><strong>المركبات السرية:</strong> تتاح وتُصرح قيادة المركبات السرية للحملة حصرياً لرتبة <strong>رئيس رقباء فما فوق</strong>.</li>
+            <li><strong>التغطية الرسمية الميدانية:</strong> يجب تواجد <strong>4 دوريات رسمية ملونة</strong> على الأقل في الميدان لتأمين الحملة.</li>
+            <li><strong>التظليل واللبس:</strong> يُصرح ويُشترط تظليل زجاج مركبة المكافحة بالكامل لحماية هوية أفرادها، <strong>ويُمنع منعاً باتاً الخروج بالمركبة دون ارتداء الزي الرسمي الخاص بمكافحة المخدرات</strong>.</li>
+            <li><strong>الجهوزية الفنية للمركبة:</strong> الالتزام بتركيب وتجهيز الدورية بكافة اللوازم الأمنية (صدامات أمامية وخلفية مدعمة، وبراقات واضحة وعاملة من الأمام والخلف).</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 6. Dealing with criminal cases -->
+      <div class="doc-section" id="sec-criminal">
+        <h2 class="section-title" style="color: var(--color-red-alert);"><i class="fa-solid fa-triangle-exclamation"></i> التعامل مع الحالات الجنائية والمداهمات</h2>
+        <div class="section-body">
+          <div class="alert-banner">
+            <div class="alert-banner-title">⚠️ ضوابط ومستويات القوة الجسيمة</div>
+            <div class="alert-banner-desc">
+              - يسمح لوحدات المكافحة بوضع نقطة تفتيش مؤقتة (كشك) للتعامل الفوري والمنظم مع الحالات أثناء خروج الحملة.
+              <br>- أولوية المباشرة والتعامل مع عموم القضايا الجنائية بالميدان هي للقطاعات الأساسية مرتبة: <strong>(الأمن العام ⬅️ المهمات والواجبات الخاصة ⬅️ أمن الطرق)</strong>.
+              <br>- في حال عدم توفر الوحدات الميدانية الكافية للقطاعات الثلاثة المذكورة أعلاه، <strong>لا يتم خروج حملة المكافحة نهائياً</strong> لحفظ الاستقرار الميداني.
+              <br>- <strong>بروتوكول الإسقاط الفوري:</strong> في حال مداهمة مشتبه به وقام بالمقاومة الفعلية أو محاولة الفرار من طوق الحملة، يُصرح لأفراد الحملة بإسقاطه فوراً.
+              <br>- يسمح لأعضاء الحملة بسحب رخصة سلاح المشتبه به في حال بادر بتبادل إطلاق النار المباشر مع أفراد الحملة.
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="../assets/js/storage.js?v=1.0.5"></script>
+  <script src="../assets/js/data.js?v=1.0.5"></script>
+  <script src="../assets/js/auth.js?v=1.0.5"></script>
+  <script src="../assets/js/components.js"></script>
+  <script src="../assets/js/app.js?v=1.0.5"></script>
+  <script>
+    // Inject navbar and sidebar
+    document.write(Components.navbar('college'));
+    document.write(Components.sidebar('college'));
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Inject Footer
+      const body = document.body;
+      const footerDiv = document.createElement('div');
+      footerDiv.innerHTML = Components.footer();
+      body.appendChild(footerDiv.firstElementChild);
+    });
+  </script>
+</body>
+
+</html>

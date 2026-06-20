@@ -1,0 +1,7 @@
+node_modules/
+cloudflared.exe
+updated_site.zip
+.env
+*.db
+.vscode/
+test_surge/

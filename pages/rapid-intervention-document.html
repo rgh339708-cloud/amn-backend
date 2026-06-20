@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مستند التدخل السريع | الأمن العام</title>
+  <link rel="stylesheet" href="../assets/css/main.css?v=1.0.5">
+  <link rel="stylesheet" href="../assets/css/navbar.css?v=1.0.5">
+  <link rel="stylesheet" href="../assets/css/sidebar.css?v=1.0.5">
+  <link rel="stylesheet" href="../assets/css/footer.css">
+  <style>
+    /* Custom Premium Styles for Rapid Intervention Document Page */
+    .doc-container {
+      max-width: 960px;
+      margin: 140px auto 100px;
+      padding: 0 var(--space-4);
+    }
+
+    /* Document Body */
+    .doc-content {
+      background: linear-gradient(155deg, rgba(13, 24, 64, 0.25) 0%, rgba(7, 15, 37, 0.35) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      border-radius: 24px;
+      padding: var(--space-8);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Back Button Banner */
+    .back-banner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--space-8);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding-bottom: var(--space-5);
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: 10px 20px;
+      background: rgba(251, 197, 49, 0.1);
+      border: 1px solid rgba(251, 197, 49, 0.3);
+      border-radius: 12px;
+      color: var(--color-gold-light);
+      font-weight: 800;
+      font-size: var(--font-size-sm);
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .back-btn:hover {
+      background: var(--color-gold-primary);
+      color: #000;
+      border-color: var(--color-gold-primary);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px var(--color-gold-glow);
+    }
+
+    /* Main Title & Subtitle */
+    .doc-main-title {
+      font-size: 1.95rem;
+      font-weight: 900;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+
+    .doc-meta-info {
+      display: flex;
+      gap: var(--space-6);
+      flex-wrap: wrap;
+      margin-bottom: var(--space-8);
+    }
+
+    .doc-meta-item {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 10px 18px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--color-text-muted);
+    }
+
+    .doc-meta-item strong {
+      color: #fff;
+      margin-right: 4px;
+    }
+
+    /* Sections */
+    .doc-section {
+      scroll-margin-top: 100px;
+      margin-bottom: var(--space-8);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      padding-bottom: var(--space-6);
+    }
+
+    .doc-section:last-child {
+      border: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .section-title {
+      font-size: 1.35rem;
+      font-weight: 850;
+      color: var(--color-gold-primary);
+      margin-bottom: var(--space-4);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-body {
+      font-size: 0.88rem;
+      color: var(--color-text-secondary);
+      line-height: 1.8;
+      text-align: justify;
+    }
+
+    .styled-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: var(--space-4);
+    }
+
+    .styled-list li {
+      position: relative;
+      padding-right: var(--space-6);
+      font-size: 0.86rem;
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+    }
+
+    .styled-list li::before {
+      content: '⚡';
+      position: absolute;
+      right: 0;
+      color: var(--color-gold-primary);
+      font-size: 0.95rem;
+    }
+
+    /* Red bullet for rules */
+    .styled-list-red li::before {
+      content: '⚠️';
+      color: var(--color-red-alert);
+    }
+
+    /* Callout & Examples */
+    .callout-box {
+      background: rgba(201, 162, 39, 0.03);
+      border-right: 4px solid var(--color-gold-primary);
+      border-radius: 12px;
+      padding: var(--space-5);
+      margin: var(--space-5) 0;
+    }
+
+    .callout-box-title {
+      font-weight: 800;
+      font-size: 0.88rem;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+
+    .callout-box-desc {
+      font-size: 0.82rem;
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+    }
+
+    /* Grid for Lists */
+    .doc-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-4);
+      margin-top: var(--space-4);
+    }
+
+    /* Code Card list */
+    .code-card {
+      background: rgba(255, 255, 255, 0.015);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      border-radius: 12px;
+      padding: var(--space-4);
+      transition: all 0.25s ease;
+    }
+
+    .code-card:hover {
+      background: rgba(201, 162, 39, 0.03);
+      border-color: rgba(201, 162, 39, 0.25);
+    }
+
+    .code-card-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      background: rgba(201, 162, 39, 0.1);
+      border: 1px solid rgba(201, 162, 39, 0.25);
+      color: var(--color-gold-light);
+      border-radius: 8px;
+      font-size: 0.76rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .code-card-desc {
+      font-size: 0.78rem;
+      color: var(--color-text-secondary);
+      line-height: 1.5;
+    }
+
+    /* Template Copyable Block */
+    .template-box {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px dashed rgba(201, 162, 39, 0.25);
+      border-radius: 16px;
+      padding: var(--space-5);
+      font-family: monospace, var(--font-arabic);
+      font-size: 0.8rem;
+      color: var(--color-text-primary);
+      white-space: pre-line;
+      line-height: 1.8;
+      position: relative;
+      margin-top: var(--space-4);
+      text-align: right;
+    }
+
+    /* Alert Banner */
+    .alert-banner {
+      background: rgba(192, 57, 43, 0.04);
+      border-right: 4px solid var(--color-red-alert);
+      border-radius: 12px;
+      padding: var(--space-5);
+      margin-bottom: var(--space-6);
+    }
+
+    .alert-banner-title {
+      font-weight: 800;
+      font-size: 0.88rem;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+
+    .alert-banner-desc {
+      font-size: 0.82rem;
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 900px) {
+      .doc-grid-2 {
+        grid-template-columns: 1fr;
+      }
+      .doc-content {
+        padding: var(--space-5);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="toast-container"></div>
+
+  <div class="doc-container">
+
+    <!-- Main Content -->
+    <div class="doc-content animate-fade-up delay-1">
+
+      <!-- Back Banner -->
+      <div class="back-banner">
+        <div class="navbar-logo" style="margin: 0;">
+          <img src="../assets/img/emblem.png" alt="شعار" class="nav-logo-img" style="width: 46px; height: 46px;">
+          <div style="display: flex; flex-direction: column; line-height: 1.25; text-align: right; margin-right: 8px;">
+            <span style="font-size: 13px; font-weight: 900; color: #ffffff;">إدارة الأمن العام</span>
+            <span style="font-size: 10px; font-weight: 800; color: #c9a227;">مستند التدخل السريع</span>
+          </div>
+        </div>
+        <button class="back-btn" onclick="window.location.href='college.html'">➡️ رجوع إلى كلية التدريب</button>
+      </div>
+
+      <!-- Main Title -->
+      <h1 class="doc-main-title">دورة التدخل السريع</h1>
+      
+      <!-- Meta Information Banner -->
+      <div class="doc-meta-info">
+        <div class="doc-meta-item">القطاع: <strong>قطاع التدخل السريع (SWAT)</strong></div>
+        <div class="doc-meta-item">شعار القطاع: <strong>إحرص على الموت توهب لك الحياة</strong></div>
+      </div>
+
+      <!-- 1. Overview -->
+      <div class="doc-section" id="sec-overview">
+        <h2 class="section-title">⚡ تعريف التدخل السريع</h2>
+        <div class="section-body">
+          إحدى الأفرع الرئيسية الهامة التابعة لإدارة الشرطة وتستخدم التدخل السريع في عمليات حفظ النظام لتفريق المظاهرات، وإنقاذ الرهائن والمخطوفين ومقاومة الاعتصام ومكافحة شتى أنواع الإرهاب والتخريب اللذين يعرضان السلامة العامة للخطر، كما تقوم التدخل السريع الخاصة بأي مهام أخرى تكلف بها كإسناد قوات الشرطة في مختلف المناطق عند الضرورة.
+        </div>
+      </div>
+
+      <!-- 2. Tasks -->
+      <div class="doc-section" id="sec-tasks">
+        <h2 class="section-title"><i class="fa-solid fa-gear"></i> مهام التدخل السريع</h2>
+        <div class="section-body">
+          <p class="text-secondary mb-3">تكلف بالمهام الحساسة والخطرة التي يصعب على باقي الوحدات الميدانية السيطرة عليها وتتضمن:</p>
+          <ol class="styled-list">
+            <li>القيام بالعمليات الخاصة والسريعة لحفظ الأمن الداخلي.</li>
+            <li>مكافحة الإرهاب وتصفية الخلايا الإرهابية.</li>
+            <li>تفريق المظاهرات والشغب العام.</li>
+            <li>إنقاذ الرهائن والمخطوفين ومقاومة الاعتصام.</li>
+            <li>وضع نقاط تفتيش في أماكن عشوائية ومفاجئة عند حدوث حالة خطر في المنطقة.</li>
+            <li>تخطيط واقتحام سرقة البنوك وتأمين الأموال.</li>
+            <li>تمثيل خط الهجوم الأول والمباشر في المداهمات التكتيكية.</li>
+            <li>فرض السيطرة الأمنية وإعادة ضبط المناطق غير المسيطر عليها.</li>
+            <li>فرض الأمن والأمان واستعمال القوة الرادعة ضد كل من يهدد حياة المواطنين أو أفراد الأمن.</li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- 3. Exclusions -->
+      <div class="doc-section" id="sec-exclusions">
+        <h2 class="section-title" style="color: var(--color-red-alert)"><i class="fa-solid fa-ban"></i> أعمال غير مكلف بها قطاع التدخل السريع</h2>
+        <div class="section-body">
+          <p class="text-secondary mb-3">يمنع منعاً باتاً تكليف أفراد أو فرق التدخل السريع بالمهام الاعتيادية التالية:</p>
+          <ul class="styled-list styled-list-red">
+            <li>التحقيقات الأمنية والجنائية بجميع حالاتها وأنواعها.</li>
+            <li>متابعة سرقات البقالات والمتاجر البسيطة.</li>
+            <li>المطاردات المرورية الاعتيادية وضبط السير.</li>
+            <li>التعامل الروتيني مع المواطنين خارج نطاق العمليات التكتيكية.</li>
+            <li>البلاغات البسيطة والحالات الروتينية.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 4. Characteristics -->
+      <div class="doc-section" id="sec-characteristics">
+        <h2 class="section-title"><i class="fa-solid fa-star"></i> خصائص وصلاحيات التدخل السريع</h2>
+        <div class="section-body">
+          <ul class="styled-list">
+            <li><strong>الأسلحة الثقيلة:</strong> استعمال الأسلحة الثقيلة في جميع مهامها، ويجب أن يكون هناك شخص مسؤول عن رفع الاستنفارات وإزالتها.</li>
+            <li><strong>مركبة التدخل السريع:</strong> وجوب وجود مركبة التدخل السريع المخصصة في الميدان لتسهيل العمليات.</li>
+            <li><strong>الدعم الجوي:</strong> لها الحق في استخدام المروحيات، بشرط أن يكون مسؤول المروحية حاصلاً على تصريح الجناح الجوي الرسمي.</li>
+            <li><strong>الدرع الواقي:</strong> يحق للفرقة استخدام الدرع المخصص لها (SWAT) في وقت المداهمات والاقتحام.</li>
+            <li><strong>السترات الواقية:</strong> الصلاحية الكاملة لاستخدام السترات الواقية من الرصاص في جميع الأوقات والمهمات.</li>
+            <li><strong>رشاش الكاربين:</strong> صلاحية استخدام رشاش الكاربين من غير استنفار، وتقدر الحالة الميدانية من قبل قائد الفرقة.</li>
+            <li><strong>فرض السيطرة المطلقة:</strong> لها صلاحية كاملة في فرض السيطرة على أي موقع سرقة أو موقع خلايا إرهابية، ويجب على جميع العسكريين والمدنيين المتواجدين في الموقع الاستماع لتوجيهاتهم بشكل كامل.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 5. Rules -->
+      <div class="doc-section" id="sec-rules">
+        <h2 class="section-title" style="color: var(--color-red-alert)"><i class="fa-solid fa-ban"></i> قوانين وقواعد التدخل السريع</h2>
+        <div class="section-body">
+          <div class="alert-banner">
+            <div class="alert-banner-title">⚠️ تنبيه أمني صارم</div>
+            <div class="alert-banner-desc">
+              تعتبر هذه القوانين ملزمة لجميع أفراد الفرقة، ومخالفتها يترتب عليها سحب تصريح الدورة فوراً وتطبيق العقوبات العسكرية.
+            </div>
+          </div>
+
+          <ol class="styled-list">
+            <li><strong>حمل السلاح المفتوح:</strong> يجب رفع السلاح في جميع الأوقات ويمنع إنزاله من يدك منعاً باتاً. كما يمنع منعاً باتاً استعمال الأسلحة الخفيفة عند الخروج كقوات للتدخل السريع.</li>
+            <li><strong>آلية الخروج الميداني:</strong> خروج وحدات التدخل السريع يكون بمجموع (2) أو (4) وحدات فقط، وفي كل آلية عسكرية عنصرين (2). يسمح بالخروج بمركبة واحدة تضم 2 أو 3 أو 4 عناصر.</li>
+            <li><strong>مركبات الخدمة:</strong> مركبات التدخل السريع المعتمدة تكون مركبة (تاهو مصفح) من رتبة نقيب فما فوق.</li>
+            <li><strong>بروتوكول الصمت:</strong> يمنع منعاً باتاً التحدث مع أي شخص (سواء مواطن، مسعف، أو عسكري خارج القوة) باستثناء قائد الفرقة وقيادات الشرطة.</li>
+            <li><strong>الزي الرسمي:</strong> على جميع أفراد الوحدة الالتزام بالزي الرسمي المحدد وعدم إجراء أي تعديلات عليه نهائياً.</li>
+            <li><strong>سلسلة القيادة:</strong> يكون أعلى رتبة متواجد ميدانياً من فرقة التدخل السريع هو المسؤول الأول والوحيد عن وحداته.</li>
+            <li><strong>قيادة القطاع:</strong> قائد التدخل السريع يكون من رتبة نقيب فما فوق، ويسمح لباقي الرتب بالالتحاق بالفرقة كأعضاء تحت قيادته.</li>
+            <li><strong>إذن الخروج الميداني:</strong> يكون إذن خروج القوات في حالات الاستنفار الشديدة من (حزم) أو قيادات الشرطة العليا، أو عند رفع حالة الخطر بالمنطقة.</li>
+            <li><strong>اتباع القيادة الفردية:</strong> يجب اتباع أوامر قائد الفرقة الميداني فقط، ويمنع الانصياع لأوامر العمليات أو الراديو أو أي عسكري آخر باستثناء قائد الفرقة وقيادات الشرطة.</li>
+            <li><strong>التوجيهات والمتحدث الرسمي:</strong> التوجيهات تصدر فقط من قائد الفرقة، ويكون قائد الفرقة هو المتحدث الرسمي الوحيد باسم القوة ويمنع على أي عضو التحدث أو شكر أي جهة خارجية. ويسمح للأعضاء بالكلام مع قائد فرقتهم فقط.</li>
+            <li><strong>الالتزام بالسلاح في الاصطفاف:</strong> يمنع منعاً باتاً إنزال السلاح من يدك في جميع الحالات حتى أثناء وقت الاصطفاف الرسمي.</li>
+            <li><strong>مسميات وتصنيفات القوة:</strong> تسمى القوة ميدانياً (فرقة التدخل السريع)، ويكون مسمى نداء القائد هو: <strong>(قائد فرقة ت.س)</strong>.</li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- 6. Weapons -->
+      <div class="doc-section" id="sec-weapons">
+        <h2 class="section-title"><i class="fa-solid fa-shield-halved"></i> الأسلحة المسموحة لقوات التدخل السريع</h2>
+        <div class="section-body">
+          <p class="text-secondary mb-4">الترسانة العسكرية الحصرية والمصرح بها للاستخدام:</p>
+          <div class="doc-grid-2">
+            <div class="code-card">
+              <span class="code-card-badge"><i class="fa-solid fa-gun"></i> رشاش كاربن</span>
+              <div class="code-card-desc">السلاح الرئيسي للفرقة للمواجهات المباشرة وتصفية الخلايا الإرهابية.</div>
+            </div>
+            <div class="code-card">
+              <span class="code-card-badge"><i class="fa-solid fa-burst"></i> شوزن (Shotgun)</span>
+              <div class="code-card-desc">يستخدم في المداهمات قريبة المدى واقتحام الأبواب المغلقة.</div>
+            </div>
+            <div class="code-card">
+              <span class="code-card-badge"><i class="fa-solid fa-wind"></i> قنابل الغاز</span>
+              <div class="code-card-desc">تستخدم لتفريق المظاهرات، السيطرة على الاعتصامات، وشل حركة المطلوبين.</div>
+            </div>
+            <div class="code-card">
+              <span class="code-card-badge"><i class="fa-solid fa-user-shield"></i> مطاعة عسكرية</span>
+              <div class="code-card-desc">لأدوات حفظ النظام والسيطرة غير القاتلة.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7. Report Template -->
+      <div class="doc-section" id="sec-report">
+        <h2 class="section-title">📋 تقرير الخروج الميداني</h2>
+        <div class="section-body">
+          <p class="text-secondary mb-3">يجب التزام جميع الضباط والأفراد بكتابة تقرير خروج مفصل بعد إنهاء المهمة في الروم المخصص لتقارير الضباط (سواء قوات خاصة أو طوارئ) وفق النموذج التالي:</p>
+          
+          <div class="template-box" id="template-copyable">
+            تقرير خروج [نوع الوحدة]
+
+            تم خروج بـ مركبة [نوع المركبة]
+
+            وارتداء زي [ نوع الزي ]
+
+
+            و ذلك اليوم [اليوم] الموافق للتاريخ والوقت [الوقت صباحا\ مساءً]  [التاريخ ميلادي] مـ
+
+            الاحداث : (يجب كتابتها بشكل واضح ودقيق)
+
+            المشرف [المقصود مشرف القوات الخاصة مسؤولين الدورة] : [@] 
+
+            أعضاء القوات الخاصة \ التدخل السريع
+            [@]
+            [@]
+            [@]
+
+            انتهى التقرير ....
+            مقدم التقرير [الرتبة] : [الاسم]
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script src="../assets/js/storage.js?v=1.0.5"></script>
+  <script src="../assets/js/data.js?v=1.0.5"></script>
+  <script src="../assets/js/auth.js?v=1.0.5"></script>
+  <script src="../assets/js/components.js"></script>
+  <script src="../assets/js/app.js?v=1.0.5"></script>
+  <script>
+    // Inject navbar and sidebar
+    document.write(Components.navbar('college'));
+    document.write(Components.sidebar('college'));
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Inject Footer
+      const body = document.body;
+      const footerDiv = document.createElement('div');
+      footerDiv.innerHTML = Components.footer();
+      body.appendChild(footerDiv.firstElementChild);
+    });
+  </script>
+</body>
+
+</html>

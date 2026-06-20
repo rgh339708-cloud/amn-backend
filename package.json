@@ -1,0 +1,16 @@
+{
+  "name": "fg-local-server",
+  "version": "1.0.0",
+  "description": "Local sync server for Security Dashboard settings",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "pg": "^8.21.0",
+    "sqlite3": "^5.1.6"
+  }
+}

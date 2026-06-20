@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>التوجيهات الميدانية | الأمن العام</title>
+  <link rel="stylesheet" href="../assets/css/main.css?v=1.0.5">
+  <link rel="stylesheet" href="../assets/css/navbar.css?v=1.0.5">
+  <link rel="stylesheet" href="../assets/css/sidebar.css?v=1.0.5">
+  <link rel="stylesheet" href="../assets/css/footer.css">
+  <style>
+    .directives-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .directive-card {
+      background: var(--color-bg-card);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 22px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: var(--shadow-card);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .directive-card:hover {
+      border-color: rgba(75, 140, 219, 0.35);
+      transform: translateY(-4px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5), 0 0 15px rgba(75, 140, 219, 0.05);
+    }
+    
+    .directive-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 4px;
+      height: 100%;
+      background: linear-gradient(to bottom, #4b8cdb, #3b82f6);
+    }
+    
+    .directive-card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .directive-card-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: rgba(75, 140, 219, 0.1);
+      border: 1px solid rgba(75, 140, 219, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      color: #4b8cdb;
+    }
+    
+    .directive-card-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #ffffff;
+      font-family: var(--font-arabic);
+    }
+    
+    .directive-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .directive-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--color-text-secondary);
+      transition: all 0.2s ease;
+    }
+    
+    .directive-item:hover {
+      background: rgba(75, 140, 219, 0.05);
+      border-color: rgba(75, 140, 219, 0.15);
+      color: #ffffff;
+      padding-right: 16px;
+    }
+    
+    .directive-item-bullet {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #4b8cdb;
+      box-shadow: 0 0 6px #4b8cdb;
+      flex-shrink: 0;
+    }
+    
+    /* Special status for دعم القطاعات */
+    .directive-card-special {
+      border-color: rgba(231, 76, 60, 0.2);
+    }
+    .directive-card-special::before {
+      background: linear-gradient(to bottom, #e74c3c, #c0392b);
+    }
+    .directive-card-special .directive-card-icon {
+      background: rgba(231, 76, 60, 0.1);
+      border-color: rgba(231, 76, 60, 0.25);
+      color: #e74c3c;
+    }
+    .directive-card-special .directive-item-bullet {
+      background: #e74c3c;
+      box-shadow: 0 0 6px #e74c3c;
+    }
+
+    .title-note {
+      background: rgba(75, 140, 219, 0.04);
+      border: 1px solid rgba(75, 140, 219, 0.15);
+      border-radius: 14px;
+      padding: 20px 24px;
+      margin-top: 10px;
+    }
+    .title-note h4 { color: #4b8cdb; font-weight: 800; margin-bottom: 10px; }
+    .title-note p { color: rgba(255, 255, 255, 0.6); font-size: 0.83rem; line-height: 1.8; }
+  </style>
+</head>
+<body>
+<div id="toast-container"></div>
+
+<script src="../assets/js/storage.js?v=1.0.5"></script>
+<script src="../assets/js/data.js?v=1.0.5"></script>
+<script src="../assets/js/auth.js?v=1.0.5"></script>
+<script src="../assets/js/components.js"></script>
+<script src="../assets/js/app.js?v=1.0.5"></script>
+
+<script>
+  document.write(Components.navbar('field-title'));
+  document.write(Components.sidebar('field-title'));
+</script>
+
+<main class="page-content">
+  <div class="page-header">
+    <div class="page-header-bg"></div>
+    <div class="container">
+      <div class="page-header-badge animate-fade-in">📋 التوجيهات التنظيمية</div>
+      <h1 class="page-header-title animate-fade-up"><span class="gradient-text">التوجيهات الميدانية</span></h1>
+      <p class="page-header-desc animate-fade-up delay-1">الدليل الميداني والمسميات الرسمية لتوزيع القطاعات والفرق في الميدان</p>
+    </div>
+  </div>
+
+  <div class="container page-wrapper">
+    <div class="directives-grid">
+      <!-- Card 1: المكافحة -->
+      <div class="directive-card animate-on-scroll">
+        <div class="directive-card-header">
+          <div class="directive-card-icon"><i class="fa-solid fa-shield-halved"></i></div>
+          <h3 class="directive-card-title">المكافحة</h3>
+        </div>
+        <div class="directive-list">
+          <div class="directive-item"><span class="directive-item-bullet"></span>مكافحه</div>
+          <div class="directive-item"><span class="directive-item-bullet"></span>سيف</div>
+          <div class="directive-item"><span class="directive-item-bullet"></span>م ك</div>
+          <div class="directive-item"><span class="directive-item-bullet"></span>رصد</div>
+        </div>
+      </div>
+
+      <!-- Card 2: المرور -->
+      <div class="directive-card animate-on-scroll">
+        <div class="directive-card-header">
+          <div class="directive-card-icon"><i class="fa-solid fa-traffic-light"></i></div>
+          <h3 class="directive-card-title">المرور</h3>
+        </div>
+        <div class="directive-list">
+          <div class="directive-item"><span class="directive-item-bullet"></span>ساهر</div>
+          <div class="directive-item"><span class="directive-item-bullet"></span>سير</div>
+          <div class="directive-item"><span class="directive-item-bullet"></span>ميم</div>
+          <div class="directive-item"><span class="directive-item-bullet"></span>رصد</div>
+        </div>
+      </div>
+
+      <!-- Card 3: المهمات والواجبات -->
+      <div class="directive-card animate-on-scroll">
+        <div class="directive-card-header">
+          <div class="directive-card-icon"><i class="fa-solid fa-shield-halved"></i></div>
+          <h3 class="directive-card-title">المهمات والواجبات</h3>
+        </div>
+        <div class="directive-list">
+          <div class="directive-item"><span class="directive-item-bullet"></span>شهاب</div>
+          <div class="directive-item"><span class="directive-item-bullet"></span>برق</div>
+          <div class="directive-item"><span class="directive-item-bullet"></span>مهام</div>
+        </div>
+      </div>
+
+      <!-- Card 4: العمليات الميدانية -->
+      <div class="directive-card animate-on-scroll">
+        <div class="directive-card-header">
+          <div class="directive-card-icon"><i class="fa-solid fa-tower-broadcast"></i></div>
+          <h3 class="directive-card-title">العمليات الميدانية</h3>
+        </div>
+        <div class="directive-list">
+          <div class="directive-item"><span class="directive-item-bullet"></span>مركز عمليات الامن العام</div>
+          <div class="directive-item"><span class="directive-item-bullet"></span>نائب مركز عمليات الامن العام</div>
+        </div>
+      </div>
+
+      <!-- Card 5: البحث والتحري -->
+      <div class="directive-card animate-on-scroll">
+        <div class="directive-card-header">
+          <div class="directive-card-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
+          <h3 class="directive-card-title">البحث والتحري</h3>
+        </div>
+        <div class="directive-list">
+          <div class="directive-item"><span class="directive-item-bullet"></span>بحث وتحري 1</div>
+          <div class="directive-item"><span class="directive-item-bullet"></span>بحث وتحري 2</div>
+        </div>
+      </div>
+
+      <!-- Card 6: القيادات -->
+      <div class="directive-card animate-on-scroll">
+        <div class="directive-card-header">
+          <div class="directive-card-icon"><i class="fa-solid fa-crown"></i></div>
+          <h3 class="directive-card-title">القيادات</h3>
+        </div>
+        <div class="directive-list">
+          <div class="directive-item"><span class="directive-item-bullet"></span>قياده 1</div>
+        </div>
+      </div>
+
+      <!-- Card 6b: كبار الضباط -->
+      <div class="directive-card animate-on-scroll">
+        <div class="directive-card-header">
+          <div class="directive-card-icon">⭐</div>
+          <h3 class="directive-card-title">كبار الضباط</h3>
+        </div>
+        <div class="directive-list">
+          <div class="directive-item"><span class="directive-item-bullet"></span>رعد 1</div>
+          <div class="directive-item"><span class="directive-item-bullet"></span>درع 1</div>
+          <div class="directive-item"><span class="directive-item-bullet"></span>حزم 1</div>
+          <div class="directive-item"><span class="directive-item-bullet"></span>مدار 1</div>
+        </div>
+      </div>
+
+      <!-- Card 6c: الضباط -->
+      <div class="directive-card animate-on-scroll">
+        <div class="directive-card-header">
+          <div class="directive-card-icon"><i class="fa-solid fa-medal"></i></div>
+          <h3 class="directive-card-title">الضباط</h3>
+        </div>
+        <div class="directive-list">
+          <div class="directive-item"><span class="directive-item-bullet"></span>تسعين</div>
+        </div>
+      </div>
+
+      <!-- Card 7: التدخل السريع -->
+      <div class="directive-card animate-on-scroll">
+        <div class="directive-card-header">
+          <div class="directive-card-icon">⚡</div>
+          <h3 class="directive-card-title">التدخل السريع</h3>
+        </div>
+        <div class="directive-list">
+          <div class="directive-item"><span class="directive-item-bullet"></span>قائد فرقة التدخل السريع</div>
+          <div class="directive-item"><span class="directive-item-bullet"></span>فرقة التدخل السريع 1</div>
+          <div class="directive-item"><span class="directive-item-bullet"></span>فرقى التدخل السريع 2</div>
+        </div>
+      </div>
+
+      <!-- Card 8: الدوريات الامنية -->
+      <div class="directive-card animate-on-scroll">
+        <div class="directive-card-header">
+          <div class="directive-card-icon"><i class="fa-solid fa-car-on"></i></div>
+          <h3 class="directive-card-title">الدوريات الامنية</h3>
+        </div>
+        <div class="directive-list">
+          <div class="directive-item"><span class="directive-item-bullet"></span>شمال 1</div>
+          <div class="directive-item"><span class="directive-item-bullet"></span>وسط 1</div>
+          <div class="directive-item"><span class="directive-item-bullet"></span>جنوب 1</div>
+          <div class="directive-item"><span class="directive-item-bullet"></span>شرق 1</div>
+          <div class="directive-item"><span class="directive-item-bullet"></span>غرب 1</div>
+        </div>
+      </div>
+
+      <!-- Card 9: ضباط المناطق -->
+      <div class="directive-card animate-on-scroll">
+        <div class="directive-card-header">
+          <div class="directive-card-icon"><i class="fa-solid fa-user-shield"></i></div>
+          <h3 class="directive-card-title">ضباط المناطق</h3>
+        </div>
+        <div class="directive-list">
+          <div class="directive-item"><span class="directive-item-bullet"></span>ضابط شمال</div>
+          <div class="directive-item"><span class="directive-item-bullet"></span>ضابط وسط</div>
+          <div class="directive-item"><span class="directive-item-bullet"></span>ضابط جنوب</div>
+          <div class="directive-item"><span class="directive-item-bullet"></span>ضابط شرق</div>
+          <div class="directive-item"><span class="directive-item-bullet"></span>ضابط غرب</div>
+        </div>
+      </div>
+
+      <!-- Card 10: امن الطرق -->
+      <div class="directive-card animate-on-scroll">
+        <div class="directive-card-header">
+          <div class="directive-card-icon"><i class="fa-solid fa-road"></i></div>
+          <h3 class="directive-card-title">أمن الطرق</h3>
+        </div>
+        <div class="directive-list">
+          <div class="directive-item"><span class="directive-item-bullet"></span>ضبط 1</div>
+          <div class="directive-item"><span class="directive-item-bullet"></span>عين 1</div>
+          <div class="directive-item"><span class="directive-item-bullet"></span>امن 1</div>
+          <div class="directive-item"><span class="directive-item-bullet"></span>رصد 1</div>
+        </div>
+      </div>
+
+      <!-- Card 11: دعم القطاعات -->
+      <div class="directive-card directive-card-special animate-on-scroll">
+        <div class="directive-card-header">
+          <div class="directive-card-icon"><i class="fa-solid fa-handshake"></i></div>
+          <h3 class="directive-card-title">دعم القطاعات (عند التوجه للدعم)</h3>
+        </div>
+        <div class="directive-list">
+          <div class="directive-item"><span class="directive-item-bullet"></span>دعم الامن العام 1</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="title-note animate-on-scroll">
+      <h4><i class="fa-solid fa-thumbtack"></i> ملاحظة هامة</h4>
+      <p>تلتزم جميع الوحدات والفرق الميدانية بالمسميات والتوجيهات المذكورة أعلاه أثناء ممارسة المهام والعمليات الميدانية الرسمية لضمان التنظيم والتنسيق الميداني المتكامل في كافة القطاعات بمدينة الـ 90.</p>
+    </div>
+  </div>
+</main>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    SeedData.init();
+    const footerDiv = document.createElement('div');
+    footerDiv.innerHTML = Components.footer();
+    document.body.appendChild(footerDiv.firstElementChild);
+  });
+</script>
+</body>
+</html>
