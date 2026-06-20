@@ -478,7 +478,7 @@ const Auth = (() => {
   }
 
   function fetchWithTimeout(resource, options = {}) {
-    const { timeout = 3000 } = options;
+    const { timeout = 30000 } = options;
     
     // Fallback if AbortController is not supported
     if (typeof AbortController === 'undefined') {

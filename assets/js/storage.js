@@ -41,7 +41,7 @@
 
 // Global helper to prevent hanging fetch calls (especially useful when localtunnel is offline/slow)
 async function fetchWithTimeout(resource, options = {}) {
-  const { timeout = 1500 } = options;
+  const { timeout = 30000 } = options;
   
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeout);

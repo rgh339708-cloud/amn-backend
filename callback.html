@@ -191,20 +191,39 @@
   <script src="assets/js/app.js?v=1.0.9"></script>
   
   <script>
-    // Safe fallback timeout: if redirect or login hasn't succeeded in 4.5 seconds
-    setTimeout(() => {
+    // Progressive feedback timeout to support waking up the sleeping Render server
+    (function() {
+      let secondsPassed = 0;
       const statusTitle = document.getElementById('status-title');
       const statusDesc = document.getElementById('status-desc');
       const homeBtn = document.getElementById('home-btn');
       const spinner = document.getElementById('loading-spinner');
       
-      if (!Auth.isLoggedIn()) {
-        if (spinner) spinner.style.borderTopColor = '#e74c3c';
-        statusTitle.textContent = '⚠️ تنبيه: انتهت مهلة المصادقة';
-        statusDesc.textContent = 'لم نتمكن من إتمام عملية المصادقة الرقمية مع ديسكورد تلقائياً. يرجى التأكد من اتصالك ومحاولة تسجيل الدخول مرة أخرى.';
-        if (homeBtn) homeBtn.style.display = 'inline-flex';
-      }
-    }, 4500);
+      const interval = setInterval(() => {
+        if (Auth.isLoggedIn()) {
+          clearInterval(interval);
+          return;
+        }
+        
+        secondsPassed += 3;
+        
+        if (secondsPassed === 3) {
+          if (statusDesc) statusDesc.textContent = 'جاري الاتصال بالخادم السحابي... (قد يستغرق إيقاظ الخادم 30 ثانية في أول مرة)';
+        } else if (secondsPassed === 15) {
+          if (statusDesc) statusDesc.textContent = 'الخادم يستيقظ ويقوم بتهيئة البيانات الآن، يرجى الانتظار للحظات إضافية...';
+        } else if (secondsPassed === 30) {
+          if (statusDesc) statusDesc.textContent = 'شارف التحقق على الاكتمال، نقدر صبرك...';
+        } else if (secondsPassed >= 45) {
+          clearInterval(interval);
+          if (!Auth.isLoggedIn()) {
+            if (spinner) spinner.style.borderTopColor = '#e74c3c';
+            if (statusTitle) statusTitle.textContent = '⚠️ تنبيه: انتهت مهلة المصادقة';
+            if (statusDesc) statusDesc.textContent = 'لم نتمكن من إتمام عملية المصادقة الرقمية مع ديسكورد تلقائياً. يرجى التأكد من اتصالك وإعادة المحاولة.';
+            if (homeBtn) homeBtn.style.display = 'inline-flex';
+          }
+        }
+      }, 3000);
+    })();
   </script>
 </body>
 </html>
