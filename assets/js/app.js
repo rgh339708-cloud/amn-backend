@@ -2328,6 +2328,9 @@ const App = (() => {
                                        localSettings.maintenanceMessage !== serverSettings.maintenanceMessage;
                                        
             const merged = { ...localSettings, ...serverSettings };
+            if (serverSettings.backendUrl) {
+              merged.backendUrl = serverSettings.backendUrl;
+            }
             Storage.set(Storage.keys.SETTINGS, merged);
             
             if (maintenanceChanged) {
@@ -2337,6 +2340,9 @@ const App = (() => {
           } else {
             // Static hosting admin bypass: Merge settings with local settings taking precedence
             const merged = { ...serverSettings, ...localSettings };
+            if (serverSettings.backendUrl) {
+              merged.backendUrl = serverSettings.backendUrl;
+            }
             Storage.set(Storage.keys.SETTINGS, merged);
 
             const path = window.location.pathname;

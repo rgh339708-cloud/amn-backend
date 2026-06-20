@@ -444,7 +444,7 @@ const Auth = (() => {
       const settings = JSON.parse(localStorage.getItem('ps_settings') || '{}');
       if (settings && settings.backendUrl) return settings.backendUrl;
     } catch (e) {}
-    return '';
+    return 'https://amn-backend.onrender.com';
   }
 
   async function resolveApiBase() {
@@ -453,28 +453,33 @@ const Auth = (() => {
 
     let apiBase = '';
     try {
-      let settings = JSON.parse(localStorage.getItem('ps_settings') || '{}');
-      if (!settings || !settings.backendUrl) {
-        console.log('[Discord Auth] settings cache missing in localStorage, fetching settings.json from server...');
-        const ROOT = getRootPath();
-        const settingsRes = await fetch(`${ROOT}assets/data/settings.json?t=${Date.now()}`).catch(() => null);
-        if (settingsRes && settingsRes.ok) {
-          const settingsData = await settingsRes.json().catch(() => ({}));
-          if (settingsData && settingsData.backendUrl) {
-            localStorage.setItem('ps_settings', JSON.stringify(settingsData));
-            apiBase = settingsData.backendUrl;
-          }
+      console.log('[Discord Auth] Fetching fresh settings.json from server to prevent stale backend URL cache...');
+      const ROOT = getRootPath();
+      const settingsRes = await fetch(`${ROOT}assets/data/settings.json?t=${Date.now()}`).catch(() => null);
+      if (settingsRes && settingsRes.ok) {
+        const settingsData = await settingsRes.json().catch(() => ({}));
+        if (settingsData && settingsData.backendUrl) {
+          let localSettings = {};
+          try {
+            localSettings = JSON.parse(localStorage.getItem('ps_settings') || '{}');
+          } catch (e) {}
+          localSettings.backendUrl = settingsData.backendUrl;
+          localStorage.setItem('ps_settings', JSON.stringify(localSettings));
+          apiBase = settingsData.backendUrl;
         }
-      } else {
-        apiBase = settings.backendUrl;
       }
     } catch (e) {
-      console.error('[Discord Auth] Failed to resolve backend URL:', e);
+      console.error('[Discord Auth] Failed to fetch settings.json dynamically:', e);
     }
+
     if (!apiBase) {
-      apiBase = getApiBase();
+      try {
+        const settings = JSON.parse(localStorage.getItem('ps_settings') || '{}');
+        apiBase = settings.backendUrl;
+      } catch (e) {}
     }
-    return apiBase;
+
+    return apiBase || 'https://amn-backend.onrender.com';
   }
 
   function fetchWithTimeout(resource, options = {}) {
