@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>لوحة التحكم العليا | الأمن العام</title>
   
-  <link rel="stylesheet" href="../../assets/css/main.css?v=1.0.5">
-  <link rel="stylesheet" href="../../assets/css/admin.css?v=1.0.5">
-  <script src="../../assets/js/storage.js?v=1.0.5"></script>
-  <script src="../../assets/js/data.js?v=1.0.5"></script>
-  <script src="../../assets/js/auth.js?v=1.0.5"></script>
-  <script src="../../assets/js/app.js?v=1.0.5"></script>
+  <link rel="stylesheet" href="../../assets/css/main.css?v=1.1.7">
+  <link rel="stylesheet" href="../../assets/css/admin.css?v=1.1.7">
+  <script src="../../assets/js/storage.js?v=1.1.7"></script>
+  <script src="../../assets/js/data.js?v=1.1.7"></script>
+  <script src="../../assets/js/auth.js?v=1.1.7"></script>
+  <script src="../../assets/js/app.js?v=1.1.7"></script>
   <script>
     // Synchronous route guard to prevent flashing of admin content
     if (!Auth.isLoggedIn() || !['owner', 'assistant_owner', 'academy_affairs', 'admin', 'recruitment'].includes(Auth.getRole())) {
@@ -1238,10 +1238,11 @@
     const badge = document.getElementById('admin-user-badge');
     if (badge && user) {
       const roleLabel = Auth.getRoleLabel(user.role);
-      let displayName = user.username;
+      let displayName = user.globalName || user.discord || user.username || 'عضو';
       if (typeof Auth !== 'undefined' && typeof Auth.resolveUserTableInfo === 'function') {
         const info = Auth.resolveUserTableInfo(user);
-        if (info && info.found && info.name) {
+        const inMainTables = info && info.tables && info.tables.some(t => ['الأساسي', 'المعتمدين', 'الإدارة', 'الادارة'].includes(t));
+        if (inMainTables && info && info.name) {
           displayName = info.name;
         }
       }

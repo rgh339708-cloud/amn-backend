@@ -63,104 +63,11 @@
     }
   }, true);
 
-  // Anti-debugging & Console control in Production
-  if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-    // Check periodically for DevTools debugger trigger
-    setInterval(() => {
-      // Override console logs to hide details from all users
-      console.log = function() {};
-      console.warn = function() {};
-      console.error = function() {};
-      console.info = function() {};
-
-      // Infinite debugger block to freeze devtools
-      (function() {
-        (function a() {
-          try {
-            (function b(i) {
-              if (('' + (i / i)).length !== 1 || i % 20 === 0) {
-                (function() {}).constructor('debugger')();
-              } else {
-                debugger;
-              }
-              b(++i);
-            })(0);
-          } catch (e) {
-            setTimeout(a, 1000);
-          }
-        })();
-      })();
-    }, 1000);
-  }
+  // Anti-debugging disabled for testing and debugging
+  // (Console overrides and infinite debugger loop removed)
 })();
 
-// Global fetch interceptor to bypass localtunnel splash screen and rewrite relative API calls
-(function() {
-  const originalFetch = window.fetch;
-  window.fetch = function (input, init) {
-    let url = '';
-    if (typeof input === 'string') {
-      url = input;
-    } else if (input instanceof URL) {
-      url = input.toString();
-    } else if (input && typeof input === 'object' && input.url) {
-      url = input.url;
-    }
-
-    if (url) {
-      let backendUrl = '';
-      try {
-        const settings = JSON.parse(localStorage.getItem('ps_settings') || '{}');
-        if (settings && settings.backendUrl) {
-          backendUrl = settings.backendUrl;
-        }
-      } catch (e) {}
-
-      // Fallback backend URL for local development/file protocol
-      if (!backendUrl) {
-        const host = window.location.hostname;
-        if (host === 'localhost' || host === '127.0.0.1' || window.location.protocol === 'file:') {
-          backendUrl = 'http://localhost:3000';
-        }
-      }
-
-      // Rewrite relative API calls (e.g. '/api/exams') to point to the backend server
-      const isRelativeApi = !url.startsWith('http://') && !url.startsWith('https://') && url.includes('/api/');
-      if (isRelativeApi && backendUrl) {
-        const idx = url.indexOf('/api/');
-        url = backendUrl + url.substring(idx);
-        
-        if (typeof input === 'string') {
-          input = url;
-        } else if (input instanceof URL) {
-          input = new URL(url);
-        }
-      }
-
-      const isBackendCall = (backendUrl && url.includes(backendUrl)) || url.includes('loca.lt');
-      
-      if (isBackendCall) {
-        init = init || {};
-        init.headers = init.headers || {};
-        
-        if (init.headers instanceof Headers) {
-          init.headers.set('Bypass-Tunnel-Reminder', 'true');
-          init.headers.set('bypass-tunnel-reminder', 'true');
-        } else if (Array.isArray(init.headers)) {
-          const hasHeader = init.headers.some(([k]) => k.toLowerCase() === 'bypass-tunnel-reminder');
-          if (!hasHeader) {
-            init.headers.push(['Bypass-Tunnel-Reminder', 'true']);
-            init.headers.push(['bypass-tunnel-reminder', 'true']);
-          }
-        } else {
-          init.headers['Bypass-Tunnel-Reminder'] = 'true';
-          init.headers['bypass-tunnel-reminder'] = 'true';
-        }
-      }
-    }
-    return originalFetch.call(this, input, init);
-  };
-})();
+// Global fetch interceptor removed in favor of storage.js interceptor
 
 const App = (() => {
 
@@ -357,7 +264,8 @@ const App = (() => {
       let displayName = user.globalName || user.discord || 'عضو';
       if (typeof Auth !== 'undefined' && typeof Auth.resolveUserTableInfo === 'function') {
         const info = Auth.resolveUserTableInfo(user);
-        if (info && info.found && info.name) {
+        const inMainTables = info && info.tables && info.tables.some(t => ['الأساسي', 'المعتمدين', 'الإدارة', 'الادارة'].includes(t));
+        if (inMainTables && info && info.name) {
           displayName = info.name;
         }
       }
@@ -2292,7 +2200,23 @@ const App = (() => {
         }
       }
       if (res.ok) {
-        const serverSettings = await res.json();
+        let serverSettings = null;
+        try {
+          const text = await res.clone().text();
+          if (text.trim().startsWith('<!DOCTYPE') || text.trim().startsWith('<html')) {
+            throw new Error('Response is HTML, not JSON');
+          }
+          serverSettings = await res.json();
+        } catch (jsonErr) {
+          console.warn('[Sync] Failed to parse API response as JSON, falling back to static settings:', jsonErr.message);
+          // Trigger fallback to static settings.json
+          const ROOT = getRootPath();
+          const fallbackRes = await fetchWithTimeout(`${ROOT}assets/data/settings.json?t=${Date.now()}`);
+          if (fallbackRes.ok) {
+            serverSettings = await fallbackRes.json().catch(() => null);
+            isStaticHosting = true;
+          }
+        }
         if (serverSettings && typeof serverSettings === 'object' && Object.keys(serverSettings).length > 0) {
           const localSettings = Storage.get(Storage.keys.SETTINGS, {});
           

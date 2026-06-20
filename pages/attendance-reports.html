@@ -5,9 +5,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>تقارير الحضور بكلية التدريب | الأمن العام</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=1.0.5">
-  <link rel="stylesheet" href="../assets/css/navbar.css?v=1.0.5">
-  <link rel="stylesheet" href="../assets/css/sidebar.css?v=1.0.5">
+  <link rel="stylesheet" href="../assets/css/main.css?v=1.1.7">
+  <link rel="stylesheet" href="../assets/css/navbar.css?v=1.1.7">
+  <link rel="stylesheet" href="../assets/css/sidebar.css?v=1.1.7">
   <link rel="stylesheet" href="../assets/css/footer.css">
   <style>
     /* Premium CSS for Attendance reports Page */
@@ -791,11 +791,11 @@
 
   </div>
 
-  <script src="../assets/js/storage.js?v=1.0.5"></script>
-  <script src="../assets/js/data.js?v=1.0.5"></script>
-  <script src="../assets/js/auth.js?v=1.0.5"></script>
+  <script src="../assets/js/storage.js?v=1.1.7"></script>
+  <script src="../assets/js/data.js?v=1.1.7"></script>
+  <script src="../assets/js/auth.js?v=1.1.7"></script>
   <script src="../assets/js/components.js"></script>
-  <script src="../assets/js/app.js?v=1.0.5"></script>
+  <script src="../assets/js/app.js?v=1.1.7"></script>
   <script>
     // Inject navbar and sidebar
     document.write(Components.navbar('attendance-reports'));
@@ -870,6 +870,7 @@
       const host = window.location.hostname;
       if (host === 'localhost' || host === '127.0.0.1') return 'http://localhost:3000';
 
+      let apiBase = '';
       // Always fetch fresh settings.json first (cloudflare tunnel URL changes on restart)
       try {
         const res = await fetch('../assets/data/settings.json?t=' + Date.now());
@@ -877,7 +878,7 @@
           const settings = await res.json();
           if (settings && settings.backendUrl) {
             localStorage.setItem('ps_settings', JSON.stringify(settings));
-            return settings.backendUrl;
+            apiBase = settings.backendUrl;
           }
         }
       } catch (e) {
@@ -885,12 +886,18 @@
       }
 
       // Fallback to cached localStorage value
-      try {
-        const settings = JSON.parse(localStorage.getItem('ps_settings') || '{}');
-        if (settings && settings.backendUrl) return settings.backendUrl;
-      } catch (e) {}
+      if (!apiBase) {
+        try {
+          const settings = JSON.parse(localStorage.getItem('ps_settings') || '{}');
+          if (settings && settings.backendUrl) apiBase = settings.backendUrl;
+        } catch (e) {}
+      }
 
-      return '';
+      if (!apiBase || apiBase.includes('localhost') || apiBase.includes('127.0.0.1') || apiBase.includes('loca.lt')) {
+        apiBase = 'https://amn-backend.onrender.com';
+      }
+
+      return apiBase;
     }
 
     let attendanceBooks = [];
@@ -930,38 +937,72 @@
 
     async function loadData() {
       let apiBase = await getApiBase();
-      try {
-        // Fetch sheets cache
-        try {
-          const cacheRes = await fetch(`../assets/data/members_google_sheets_cache.json?t=${Date.now()}`);
-          if (cacheRes.ok) {
-            const cacheData = await cacheRes.json();
-            localStorage.setItem('members_google_sheets_cache', JSON.stringify(cacheData));
-          }
-        } catch (cacheErr) {
-          console.warn('Failed to update sheets cache from attendance-reports:', cacheErr);
-        }
-        // Try fetching books with self-healing stale cache recovery
-        let booksRes;
-        try {
-          booksRes = await fetch(`${apiBase}/api/attendance/books`);
-        } catch (fetchErr) {
-          console.warn('Initial fetch failed, clearing ps_settings cache and retrying settings fetch...', fetchErr);
-          // If fetch fails, the cached settings might be stale. Force reload settings.json
-          const freshSettingsRes = await fetch('../assets/data/settings.json?t=' + Date.now()).catch(() => null);
-          if (freshSettingsRes && freshSettingsRes.ok) {
-            const freshSettings = await freshSettingsRes.json().catch(() => null);
-            if (freshSettings && freshSettings.backendUrl) {
-              localStorage.setItem('ps_settings', JSON.stringify(freshSettings));
-              apiBase = freshSettings.backendUrl;
-              // Retry fetching books with the fresh URL
-              booksRes = await fetch(`${apiBase}/api/attendance/books`);
-            }
-          }
-          if (!booksRes) throw fetchErr;
-        }
+      let booksRes = null;
+      let maxRetries = 5;
+      let retryDelay = 7000; // 7 seconds
+      
+      const container = document.getElementById('books-container');
 
-        if (!booksRes.ok) throw new Error('Failed to fetch books');
+      // Check if we should try the primary backend URL (like Cloudflare Tunnel) first
+      let usingTunnel = apiBase.includes('trycloudflare.com') || apiBase.includes('localhost') || apiBase.includes('127.0.0.1');
+
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+          if (container && attempt > 1) {
+            container.innerHTML = `
+              <div class="no-records" style="grid-column: 1 / -1; width: 100%; padding: 40px 20px; text-align: center; background: rgba(201, 162, 39, 0.03); border: 1px dashed rgba(201, 162, 39, 0.2); border-radius: 16px;">
+                <div style="width: 44px; height: 44px; border: 3px solid rgba(201, 162, 39, 0.15); border-top-color: var(--color-gold-primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px;"></div>
+                <div style="color: var(--color-gold-primary); font-size: 1.15rem; font-weight: 850; margin-bottom: 8px;">
+                  جاري إيقاظ خادم الحضور الميداني...
+                </div>
+                <p style="color: var(--color-text-secondary); font-size: 0.88rem; max-width: 500px; margin: 0 auto 12px; line-height: 1.6;">
+                  الخادم العسكري في وضع الاستعداد (الاستيقاظ لأول مرة قد يستغرق 30 ثانية). جاري محاولة الاتصال العسكري تلقائياً...
+                </p>
+                <div style="font-size: 0.8rem; color: rgba(255,255,255,0.4); font-family: monospace;">
+                  المحاولة الميدانية ${attempt} من ${maxRetries}
+                </div>
+                <style>
+                  @keyframes spin { 100% { transform: rotate(360deg); } }
+                </style>
+              </div>
+            `;
+          }
+
+          booksRes = await fetch(`${apiBase}/api/attendance/books`);
+          if (booksRes.ok) {
+            break; // Succeeded!
+          }
+        } catch (fetchErr) {
+          console.warn(`Fetch attempt ${attempt} failed on ${apiBase}:`, fetchErr);
+          
+          // Dynamic fallback: If we tried to connect to a local tunnel and it failed,
+          // switch to the Render backend immediately to save time and prevent lockup.
+          if (usingTunnel) {
+            console.log('[Dynamic Fallback] Local server tunnel offline. Switching to Render backend...');
+            apiBase = 'https://amn-backend.onrender.com';
+            usingTunnel = false;
+            attempt = 0; // Reset attempts to give Render a clean slot
+            continue;
+          }
+
+          if (attempt === maxRetries) {
+            // Self-healing stale cache recovery on final failure
+            if (!sessionStorage.getItem('auto_reloaded_attendance')) {
+              console.log('[Self-Healing] Connection failed. Clearing ps_settings cache and force-reloading...');
+              localStorage.removeItem('ps_settings');
+              sessionStorage.setItem('auto_reloaded_attendance', 'true');
+              window.location.href = window.location.pathname + '?t=' + Date.now();
+              return;
+            }
+            throw fetchErr;
+          }
+          // Wait before retrying
+          await new Promise(resolve => setTimeout(resolve, retryDelay));
+        }
+      }
+
+      try {
+        if (!booksRes || !booksRes.ok) throw new Error('Failed to fetch books after retries');
         attendanceBooks = await booksRes.json();
 
         // 2. Fetch records and logs
@@ -971,30 +1012,59 @@
         attendanceRecords = reportsData.records || [];
         bookActivityLogs = reportsData.logs || [];
 
+        // Save successfully loaded data to local cache
+        localStorage.setItem('ps_attendance_books_cache', JSON.stringify(attendanceBooks));
+        localStorage.setItem('ps_attendance_records_cache', JSON.stringify(attendanceRecords));
+        localStorage.setItem('ps_attendance_logs_cache', JSON.stringify(bookActivityLogs));
+
         // Render everything
         renderBooks();
         renderRecordsTable();
         renderLogsTable();
+        
+        // Success: clear reload state
+        sessionStorage.removeItem('auto_reloaded_attendance');
       } catch (e) {
-        console.error('Failed to load page data:', e);
-        const container = document.getElementById('books-container');
+        console.warn('[Cache Load] Connection failed, attempting cache fallback:', e.message);
+        
+        // Self-healing fallback from localStorage cache
+        try {
+          const cachedBooks = JSON.parse(localStorage.getItem('ps_attendance_books_cache') || '[]');
+          const cachedRecords = JSON.parse(localStorage.getItem('ps_attendance_records_cache') || '[]');
+          const cachedLogs = JSON.parse(localStorage.getItem('ps_attendance_logs_cache') || '[]');
+          
+          if (cachedBooks && cachedBooks.length > 0) {
+            attendanceBooks = cachedBooks;
+            attendanceRecords = cachedRecords;
+            bookActivityLogs = cachedLogs;
+            
+            // Render cached data
+            renderBooks();
+            renderRecordsTable();
+            renderLogsTable();
+            
+            console.log('[Cache Load] Successfully loaded attendance data from local cache!');
+            return; // Exit silently, no warning/failure banner is shown!
+          }
+        } catch (cacheErr) {
+          console.error('[Cache Load] Failed to parse local storage cache:', cacheErr);
+        }
+
+        // If no cache exists, show a friendly status message instead of a red error warning
         if (container) {
           container.innerHTML = `
-            <div class="no-records" style="grid-column: 1 / -1; width: 100%; border: 1px dashed rgba(231,76,60,0.3); padding: 30px; border-radius: 12px; background: rgba(231,76,60,0.05);">
-              <div style="color: #e74c3c; font-size: 1.2rem; font-weight: 800; margin-bottom: 10px;">
-                <i class="fa-solid fa-triangle-exclamation"></i> فشل الاتصال بخادم الحضور الميداني
+            <div class="no-records" style="grid-column: 1 / -1; width: 100%; padding: 40px 20px; text-align: center; background: rgba(255, 255, 255, 0.02); border: 1px dashed rgba(255, 255, 255, 0.08); border-radius: 16px;">
+              <div style="font-size: 1.15rem; font-weight: 850; margin-bottom: 8px; color: var(--color-text-secondary);">
+                ⏳ يرجى تشغيل خادم الاتصال للمزامنة أول مرة
               </div>
-              <p style="color: var(--color-text-secondary); font-size: 0.88rem; margin-bottom: 20px;">
-                لم نتمكن من الاتصال بالخادم الميداني. يرجى محاولة عمل تحديث إجباري للمتصفح.
+              <p style="color: var(--color-text-muted); font-size: 0.88rem; max-width: 500px; margin: 0 auto 15px; line-height: 1.6;">
+                لم نتمكن من الوصول للبيانات حالياً لعدم وجود اتصال نشط بالسيرفر. يرجى التأكد من تشغيل خادم الاتصال وعمل مزامنة.
               </p>
-              <button onclick="window.location.reload(true)" class="btn-attendance checkin-active" style="display: inline-flex; width: auto; padding: 8px 20px; font-size: 0.82rem; margin: 0 auto;">
-                <i class="fa-solid fa-arrows-rotate"></i> تحديث إجباري للموقع
+              <button onclick="localStorage.removeItem('ps_settings'); window.location.href = window.location.pathname + '?t=' + Date.now();" class="btn-attendance checkin-active" style="display: inline-flex; width: auto; padding: 8px 20px; font-size: 0.82rem; margin: 0 auto;">
+                <i class="fa-solid fa-arrows-rotate"></i> تحديث الاتصال للموقع
               </button>
             </div>
           `;
-        }
-        if (window.App && App.toast) {
-          App.toast('✕ فشل تحميل البيانات من السيرفر. يرجى التأكد من تشغيل خادم الاتصال.', 'error');
         }
       }
     }
@@ -1174,22 +1244,40 @@
       const file = event.target.files[0];
       if (!file) return;
 
-      // Validate size (5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        if (window.App && App.toast) App.toast('✕ حجم الصورة أكبر من 5 ميجابايت', 'error');
-        return;
-      }
-
       const reader = new FileReader();
       reader.onload = function(e) {
-        _roomImageBase64 = e.target.result;
-        const preview = document.getElementById('room-img-preview');
-        if (preview) {
-          preview.src = _roomImageBase64;
-          preview.classList.add('visible');
-        }
-        const submitBtn = document.getElementById('btn-room-submit');
-        if (submitBtn) submitBtn.disabled = false;
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          const maxDim = 800;
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Compress to JPEG with 0.6 quality (typically results in ~30-50KB)
+          _roomImageBase64 = canvas.toDataURL('image/jpeg', 0.6);
+
+          const preview = document.getElementById('room-img-preview');
+          if (preview) {
+            preview.src = _roomImageBase64;
+            preview.classList.add('visible');
+          }
+          const submitBtn = document.getElementById('btn-room-submit');
+          if (submitBtn) submitBtn.disabled = false;
+        };
+        img.src = e.target.result;
       };
       reader.readAsDataURL(file);
     }

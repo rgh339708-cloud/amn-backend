@@ -4,9 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>التوجيهات الميدانية | الأمن العام</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=1.0.5">
-  <link rel="stylesheet" href="../assets/css/navbar.css?v=1.0.5">
-  <link rel="stylesheet" href="../assets/css/sidebar.css?v=1.0.5">
+  <link rel="stylesheet" href="../assets/css/main.css?v=1.1.7">
+  <link rel="stylesheet" href="../assets/css/navbar.css?v=1.1.7">
+  <link rel="stylesheet" href="../assets/css/sidebar.css?v=1.1.7">
   <link rel="stylesheet" href="../assets/css/footer.css">
   <style>
     .directives-grid {
@@ -81,6 +81,7 @@
     .directive-item {
       display: flex;
       align-items: center;
+      justify-content: space-between;
       gap: 10px;
       padding: 8px 12px;
       background: rgba(255, 255, 255, 0.02);
@@ -90,6 +91,7 @@
       font-weight: 600;
       color: var(--color-text-secondary);
       transition: all 0.2s ease;
+      cursor: pointer;
     }
     
     .directive-item:hover {
@@ -97,6 +99,31 @@
       border-color: rgba(75, 140, 219, 0.15);
       color: #ffffff;
       padding-right: 16px;
+    }
+
+    .directive-item:hover .copy-btn {
+      color: var(--color-gold-primary);
+      opacity: 1;
+    }
+
+    .copy-btn {
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, 0.35);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      transition: all 0.15s ease;
+      opacity: 0.6;
+    }
+
+    .copy-btn:hover {
+      transform: scale(1.15);
+      background: rgba(255, 255, 255, 0.05);
     }
     
     .directive-item-bullet {
@@ -139,11 +166,11 @@
 <body>
 <div id="toast-container"></div>
 
-<script src="../assets/js/storage.js?v=1.0.5"></script>
-<script src="../assets/js/data.js?v=1.0.5"></script>
-<script src="../assets/js/auth.js?v=1.0.5"></script>
+<script src="../assets/js/storage.js?v=1.1.7"></script>
+<script src="../assets/js/data.js?v=1.1.7"></script>
+<script src="../assets/js/auth.js?v=1.1.7"></script>
 <script src="../assets/js/components.js"></script>
-<script src="../assets/js/app.js?v=1.0.5"></script>
+<script src="../assets/js/app.js?v=1.1.7"></script>
 
 <script>
   document.write(Components.navbar('field-title'));
@@ -345,6 +372,59 @@
     const footerDiv = document.createElement('div');
     footerDiv.innerHTML = Components.footer();
     document.body.appendChild(footerDiv.firstElementChild);
+
+    // Format all directive items to include " || P-000" and setup clipboard copy functionality
+    const items = document.querySelectorAll('.directive-item');
+    items.forEach(item => {
+      // Get the original clean text of the role
+      const originalText = item.textContent.trim();
+      
+      // Check if text already ends with a digit, or contains specific words
+      const hasNumber = /\d+$/.test(originalText) || /[٠-٩]+$/.test(originalText);
+      const isSpecialRole = originalText.includes('قائد') || originalText.includes('نائب') || originalText.includes('مركز') || originalText.includes('ضابط');
+      
+      // Determine formatted text
+      let formattedText = originalText;
+      if (hasNumber || isSpecialRole) {
+        formattedText = `${originalText} || P-000`;
+      } else {
+        formattedText = `${originalText} 1 || P-000`;
+      }
+      
+      // Rebuild the HTML content to push bullet to content and add copy button to the left
+      item.innerHTML = `
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span class="directive-item-bullet"></span>
+          <span>${formattedText}</span>
+        </div>
+        <button class="copy-btn" title="نسخ المسمى">
+          <i class="fa-regular fa-copy"></i>
+        </button>
+      `;
+      
+      // Add click copy event listener
+      item.addEventListener('click', async (e) => {
+        try {
+          await navigator.clipboard.writeText(formattedText);
+          
+          if (window.App && App.toast) {
+            App.toast(`📋 تم نسخ المسمى الميداني: ${formattedText}`, 'success');
+          }
+          
+          const icon = item.querySelector('.copy-btn i');
+          if (icon) {
+            icon.className = 'fa-solid fa-check';
+            icon.style.color = '#2ecc71';
+            setTimeout(() => {
+              icon.className = 'fa-regular fa-copy';
+              icon.style.color = '';
+            }, 1500);
+          }
+        } catch (err) {
+          console.error('Failed to copy text:', err);
+        }
+      });
+    });
   });
 </script>
 </body>

@@ -440,11 +440,16 @@ const Auth = (() => {
     const host = window.location.hostname;
     if (host === 'localhost' || host === '127.0.0.1') return 'http://localhost:3000';
     
+    let backendUrl = '';
     try {
       const settings = JSON.parse(localStorage.getItem('ps_settings') || '{}');
-      if (settings && settings.backendUrl) return settings.backendUrl;
+      if (settings && settings.backendUrl) backendUrl = settings.backendUrl;
     } catch (e) {}
-    return 'https://amn-backend.onrender.com';
+    
+    if (!backendUrl || backendUrl.includes('localhost') || backendUrl.includes('127.0.0.1') || backendUrl.includes('trycloudflare.com') || backendUrl.includes('loca.lt')) {
+      backendUrl = 'https://amn-backend.onrender.com';
+    }
+    return backendUrl;
   }
 
   async function resolveApiBase() {
@@ -479,7 +484,28 @@ const Auth = (() => {
       } catch (e) {}
     }
 
-    return apiBase || 'https://amn-backend.onrender.com';
+    // Check if the URL is a tunnel/local URL and test if it is responsive
+    if (apiBase && (apiBase.includes('trycloudflare.com') || apiBase.includes('localhost') || apiBase.includes('127.0.0.1'))) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 1500);
+        const testRes = await fetch(`${apiBase}/api/healthz`, { signal: controller.signal }).catch(() => null);
+        clearTimeout(timeoutId);
+        if (!testRes || !testRes.ok) {
+          console.warn('[Discord Auth] Local tunnel offline, falling back to Render...');
+          apiBase = 'https://amn-backend.onrender.com';
+        }
+      } catch (pingErr) {
+        console.warn('[Discord Auth] Local tunnel ping failed, falling back to Render:', pingErr.message);
+        apiBase = 'https://amn-backend.onrender.com';
+      }
+    }
+
+    if (!apiBase || apiBase.includes('localhost') || apiBase.includes('127.0.0.1') || apiBase.includes('loca.lt')) {
+      apiBase = 'https://amn-backend.onrender.com';
+    }
+
+    return apiBase;
   }
 
   function fetchWithTimeout(resource, options = {}) {
@@ -589,17 +615,29 @@ const Auth = (() => {
       localStorage.removeItem('auth_redirect_back');
     }
 
+    const currentBaseUrl = window.location.href.split('#')[0].split('?')[0];
+
     if (redirectBack && !redirectBack.includes('login.html') && !redirectBack.includes('login')) {
       if (redirectBack.includes('dashboard.html') && !isAdminRole) {
         window.location.href = ROOT + 'index.html';
       } else {
-        window.location.href = redirectBack;
+        const destBaseUrl = redirectBack.split('#')[0].split('?')[0];
+        if (currentBaseUrl === destBaseUrl) {
+          window.location.reload();
+        } else {
+          window.location.href = redirectBack;
+        }
       }
     } else {
       if (isAdminRole) {
         window.location.href = ROOT + 'pages/admin/dashboard.html';
       } else {
-        window.location.href = ROOT + 'index.html';
+        const destBaseUrl = (window.location.origin + ROOT + 'index.html').split('#')[0].split('?')[0];
+        if (currentBaseUrl === destBaseUrl || currentBaseUrl === window.location.origin + ROOT) {
+          window.location.reload();
+        } else {
+          window.location.href = ROOT + 'index.html';
+        }
       }
     }
   }
@@ -813,11 +851,16 @@ const Auth = (() => {
             }
             let allUsers = Storage.getCollection(Storage.keys.USERS) || [];
             let dbUser = allUsers.find(u => u.id === userData.id || (u.discord && session.discord && u.discord.toLowerCase() === session.discord.toLowerCase()));
-            
+
+            const isOwner = userData.id === '1334568342345748565' || 
+                            (userData.username && userData.username.toLowerCase() === '3gjo') || 
+                            (session.username && session.username.toLowerCase() === '3gjo') ||
+                            (session.discord && session.discord.toLowerCase() === '3gjo');
+
             if (upsertData && upsertData.user) {
               const serverUser = upsertData.user;
-              session.role = serverUser.role || 'viewer';
-              session.rank = serverUser.rank || 'مشاهد';
+              session.role = isOwner ? 'owner' : (serverUser.role || 'viewer');
+              session.rank = isOwner ? 'المالك' : (serverUser.rank || 'مشاهد');
               session.department = serverUser.department || '';
               session.code = serverUser.code || '';
               session.status = serverUser.status || 'active';
@@ -826,8 +869,8 @@ const Auth = (() => {
               session.banner = serverUser.banner || session.banner;
               
               if (dbUser) {
-                dbUser.role = serverUser.role;
-                dbUser.rank = serverUser.rank;
+                dbUser.role = session.role;
+                dbUser.rank = session.rank;
                 dbUser.department = serverUser.department;
                 dbUser.code = serverUser.code;
                 dbUser.status = serverUser.status;
@@ -842,8 +885,8 @@ const Auth = (() => {
                   display_name: serverUser.display_name,
                   avatar: serverUser.avatar,
                   banner: serverUser.banner,
-                  role: serverUser.role,
-                  rank: serverUser.rank,
+                  role: session.role,
+                  rank: session.rank,
                   department: serverUser.department,
                   code: serverUser.code,
                   status: serverUser.status,
@@ -861,8 +904,8 @@ const Auth = (() => {
                   id: userData.id,
                   username: session.username || userData.username,
                   discord: session.discord || userData.username,
-                  role: 'viewer',
-                  rank: userRank || 'مشاهد',
+                  role: isOwner ? 'owner' : 'viewer',
+                  rank: isOwner ? 'المالك' : (userRank || 'مشاهد'),
                   department: userDepartment,
                   code: userCode,
                   status: 'active',
@@ -899,11 +942,16 @@ const Auth = (() => {
                   dbUser.username = session.username;
                   updated = true;
                 }
+                if (isOwner && dbUser.role !== 'owner') {
+                  dbUser.role = 'owner';
+                  dbUser.rank = 'المالك';
+                  updated = true;
+                }
                 if (updated) {
                   Storage.set(Storage.keys.USERS, allUsers);
                 }
-                session.role = dbUser.role || 'viewer';
-                session.rank = dbUser.rank || 'مشاهد';
+                session.role = isOwner ? 'owner' : (dbUser.role || 'viewer');
+                session.rank = isOwner ? 'المالك' : (dbUser.rank || 'مشاهد');
                 session.department = dbUser.department || '';
                 session.code = dbUser.code || '';
                 session.status = dbUser.status || 'active';
@@ -995,8 +1043,16 @@ const Auth = (() => {
       
       if (accessToken) {
         window.history.replaceState({}, document.title, window.location.pathname);
+        
+        const overlay = document.createElement('div');
+        overlay.style = 'position:fixed;inset:0;background:#05091e;z-index:999999;display:flex;align-items:center;justify-content:center;flex-direction:column;font-family:Cairo,sans-serif;color:#fff;';
+        overlay.innerHTML = '<div style="width:60px;height:60px;border:4px solid rgba(201,162,39,0.2);border-top-color:#c9a227;border-radius:50%;animation:spin 1s linear infinite;"></div><h3 style="margin-top:20px;color:#c9a227;">جاري إتمام تسجيل الدخول...</h3><style>@keyframes spin {100%{transform:rotate(360deg)}}</style>';
+        document.body.appendChild(overlay);
+
         processDiscordLogin(accessToken).catch(err => {
+          overlay.remove();
           console.error('[Discord Auth] Error during implicit OAuth process:', err);
+          logDiscordAuthError('implicit_login', err.message, err.stack);
           if (typeof App !== 'undefined' && App.toast) {
             App.toast('✕ فشلت عملية المصادقة الرقمية مع ديسكورد', 'error');
           }
@@ -1025,6 +1081,11 @@ const Auth = (() => {
       // Clean query parameters from address bar
       window.history.replaceState({}, document.title, window.location.pathname);
       
+      const overlay = document.createElement('div');
+      overlay.style = 'position:fixed;inset:0;background:#05091e;z-index:999999;display:flex;align-items:center;justify-content:center;flex-direction:column;font-family:Cairo,sans-serif;color:#fff;';
+      overlay.innerHTML = '<div style="width:60px;height:60px;border:4px solid rgba(201,162,39,0.2);border-top-color:#c9a227;border-radius:50%;animation:spin 1s linear infinite;"></div><h3 style="margin-top:20px;color:#c9a227;">جاري التحقق من حساب ديسكورد...</h3><style>@keyframes spin {100%{transform:rotate(360deg)}}</style>';
+      document.body.appendChild(overlay);
+
       if (typeof App !== 'undefined' && App.toast) {
         App.toast('⏳ جاري التحقق من حساب ديسكورد...', 'info');
       }
@@ -1090,6 +1151,7 @@ const Auth = (() => {
           return processDiscordLogin(accessToken, isFallback);
         })
         .catch(err => {
+          if (typeof overlay !== 'undefined' && overlay) overlay.remove();
           logDiscordAuthError('code_exchange', err.message, err.stack);
           updateCallbackUIError(err.message);
         });

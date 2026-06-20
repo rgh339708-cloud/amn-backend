@@ -80,8 +80,9 @@ function convertSqlToPostgres(sql) {
   let pgSql = sql;
 
   // 1. Replace INSERT OR REPLACE INTO with INSERT INTO ... ON CONFLICT
-  if (/insert\s+or\s+replace\s+into\s+(\w+)\s*\(([^)]+)\)\s*values\s*\(([^)]+)\)/i.test(sql)) {
-    pgSql = sql.replace(/insert\s+or\s+replace\s+into\s+(\w+)\s*\(([^)]+)\)\s*values\s*\(([^)]+)\)/i, (match, tableName, columnsStr, valuesStr) => {
+  const matchRegex = /insert\s+or\s+replace\s+into\s+(\w+)\s*\(([^)]+)\)\s*values\s*\((.*)\)/is;
+  if (matchRegex.test(sql)) {
+    pgSql = sql.replace(matchRegex, (match, tableName, columnsStr, valuesStr) => {
       const cols = columnsStr.split(',').map(c => c.trim().replace(/[\[\]"]/g, ''));
       let primaryKey = 'id';
       if (tableName.toLowerCase() === 'general_collections') {
@@ -2987,7 +2988,7 @@ const server = http.createServer((req, res) => {
         status: r.status,
         entryTime: r.start_time,
         endTime: r.end_time,
-        date: r.created_at ? r.created_at.split(' ')[0].replace(/-/g, '/') : '—',
+        date: r.created_at ? (r.created_at instanceof Date ? `${r.created_at.getFullYear()}/${String(r.created_at.getMonth() + 1).padStart(2, '0')}/${String(r.created_at.getDate()).padStart(2, '0')}` : String(r.created_at).split(/[ T]/)[0].replace(/-/g, '/')) : '—',
         duration: r.duration
       }));
       collections['ps_retake_requests'] = retakeRequests.map(r => ({

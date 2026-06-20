@@ -3,36 +3,85 @@
  * Public Security Portal - Data Persistence Layer
  */
 
-// Intercept all fetch requests globally to inject the Bypass-Tunnel-Reminder header.
-// This ensures that native fetch, fetchWithTimeout, and third-party script fetches targeting
-// our Cloudflare backend are never blocked by the tunnel reminder landing page.
+// Intercept all fetch requests globally to inject the Bypass-Tunnel-Reminder header
+// and rewrite relative API calls (e.g. '/api/exams') to point to the correct backend server.
 (function() {
   const originalFetch = window.fetch;
   window.fetch = function(resource, options = {}) {
     let url = '';
+    let isRequestObject = false;
+
     if (typeof resource === 'string') {
       url = resource;
-    } else if (resource && typeof resource === 'object' && resource.url) {
-      url = resource.url;
+    } else if (resource && typeof resource === 'object') {
+      if (resource.url) {
+        url = resource.url;
+        isRequestObject = true;
+      } else if (typeof resource.toString === 'function') {
+        url = resource.toString();
+      }
     }
 
-    if (url && (url.startsWith('http://') || url.startsWith('https://') || url.includes('trycloudflare.com'))) {
-      options = options || {};
-      if (!options.headers) {
-        options.headers = {};
-      }
-      
-      if (options.headers instanceof Headers) {
-        if (!options.headers.has('Bypass-Tunnel-Reminder')) {
-          options.headers.append('Bypass-Tunnel-Reminder', 'true');
+    if (url) {
+      let backendUrl = '';
+      try {
+        const settings = JSON.parse(localStorage.getItem('ps_settings') || '{}');
+        if (settings && settings.backendUrl) {
+          backendUrl = settings.backendUrl;
         }
-      } else if (Array.isArray(options.headers)) {
-        const hasHeader = options.headers.some(([k]) => k.toLowerCase() === 'bypass-tunnel-reminder');
-        if (!hasHeader) {
-          options.headers.push(['Bypass-Tunnel-Reminder', 'true']);
+      } catch (e) {}
+
+      const host = window.location.hostname;
+      const isProduction = host !== 'localhost' && host !== '127.0.0.1' && window.location.protocol !== 'file:';
+
+      if (isProduction) {
+        if (!backendUrl || backendUrl.includes('localhost') || backendUrl.includes('127.0.0.1') || backendUrl.includes('trycloudflare.com') || backendUrl.includes('loca.lt')) {
+          backendUrl = 'https://amn-backend.onrender.com';
         }
       } else {
-        options.headers['Bypass-Tunnel-Reminder'] = 'true';
+        if (!backendUrl) {
+          backendUrl = 'http://localhost:3000';
+        }
+      }
+
+      // Rewrite relative API calls
+      const isRelativeApi = !url.startsWith('http://') && !url.startsWith('https://') && url.includes('/api/');
+      if (isRelativeApi && backendUrl) {
+        const idx = url.indexOf('/api/');
+        url = backendUrl + url.substring(idx);
+        
+        if (typeof resource === 'string') {
+          resource = url;
+        } else if (isRequestObject) {
+          try {
+            resource = new Request(url, resource);
+          } catch(e) {
+            resource.url = url;
+          }
+        } else {
+          resource = url;
+        }
+      }
+
+      const isBackendCall = (backendUrl && url.includes(backendUrl)) || url.includes('trycloudflare.com') || url.includes('loca.lt');
+      if (isBackendCall) {
+        options = options || {};
+        if (!options.headers) {
+          options.headers = {};
+        }
+        
+        if (options.headers instanceof Headers) {
+          if (!options.headers.has('Bypass-Tunnel-Reminder')) {
+            options.headers.append('Bypass-Tunnel-Reminder', 'true');
+          }
+        } else if (Array.isArray(options.headers)) {
+          const hasHeader = options.headers.some(([k]) => k.toLowerCase() === 'bypass-tunnel-reminder');
+          if (!hasHeader) {
+            options.headers.push(['Bypass-Tunnel-Reminder', 'true']);
+          }
+        } else {
+          options.headers['Bypass-Tunnel-Reminder'] = 'true';
+        }
       }
     }
     return originalFetch.call(this, resource, options);
@@ -207,10 +256,11 @@ const Storage = (() => {
   function getApiBase() {
     try {
       const settings = JSON.parse(localStorage.getItem('ps_settings') || '{}');
-      return (settings && settings.backendUrl) ? settings.backendUrl : '';
-    } catch (e) {
-      return '';
-    }
+      if (settings && settings.backendUrl) return settings.backendUrl;
+    } catch (e) {}
+    const host = window.location.hostname;
+    if (host === 'localhost' || host === '127.0.0.1') return 'http://localhost:3000';
+    return 'https://amn-backend.onrender.com';
   }
 
   function saveExamAttempt(data) {
@@ -299,11 +349,7 @@ const Storage = (() => {
     // Only link if not local session keys
     if (collection === keys.CURRENT_USER) return;
 
-    let apiBase = '';
-    try {
-      const settings = JSON.parse(localStorage.getItem('ps_settings') || '{}');
-      if (settings && settings.backendUrl) apiBase = settings.backendUrl;
-    } catch (e) {}
+    const apiBase = getApiBase();
 
     fetchWithTimeout(`${apiBase}/api/db/sync`, {
       method: 'POST',
@@ -322,11 +368,7 @@ const Storage = (() => {
 
   async function loadAllFromServer() {
     try {
-      let apiBase = '';
-      try {
-        const settings = JSON.parse(localStorage.getItem('ps_settings') || '{}');
-        if (settings && settings.backendUrl) apiBase = settings.backendUrl;
-      } catch (e) {}
+      const apiBase = getApiBase();
 
       const res = await fetchWithTimeout(`${apiBase}/api/db/collections`, {
         headers: { 'Bypass-Tunnel-Reminder': 'true' },
