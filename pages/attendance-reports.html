@@ -968,7 +968,16 @@
             `;
           }
 
-          booksRes = await fetch(`${apiBase}/api/attendance/books`);
+          const controller = new AbortController();
+          const timeoutMs = usingTunnel ? 2500 : 15000; // 2.5 seconds timeout for tunnel, 15 seconds for Render
+          const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+          booksRes = await fetch(`${apiBase}/api/attendance/books`, {
+            signal: controller.signal,
+            headers: { 'Bypass-Tunnel-Reminder': 'true' }
+          });
+          clearTimeout(timeoutId);
+
           if (booksRes.ok) {
             break; // Succeeded!
           }
@@ -1006,7 +1015,13 @@
         attendanceBooks = await booksRes.json();
 
         // 2. Fetch records and logs
-        const reportsRes = await fetch(`${apiBase}/api/attendance/reports`);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+        const reportsRes = await fetch(`${apiBase}/api/attendance/reports`, {
+          signal: controller.signal,
+          headers: { 'Bypass-Tunnel-Reminder': 'true' }
+        });
+        clearTimeout(timeoutId);
         if (!reportsRes.ok) throw new Error('Failed to fetch reports');
         const reportsData = await reportsRes.json();
         attendanceRecords = reportsData.records || [];
