@@ -3,6 +3,29 @@
  * Main Application Bootstrap & Utilities
  */
 
+// Dynamically inject Public Security logo favicon
+(function() {
+  let link = document.querySelector("link[rel~='icon']");
+  const pathname = window.location.pathname;
+  let prefix = '/';
+  if (window.location.protocol === 'file:') {
+    const isPagesAdmin = pathname.includes('/pages/admin/');
+    const isPages = pathname.includes('/pages/') || pathname.includes('/auth/');
+    prefix = isPagesAdmin ? '../../' : (isPages ? '../' : '');
+  }
+  const href = prefix + 'assets/img/emblem.png';
+
+  if (!link) {
+    link = document.createElement('link');
+    link.rel = 'icon';
+    link.type = 'image/png';
+    link.href = href;
+    document.head.appendChild(link);
+  } else {
+    link.href = href;
+  }
+})();
+
 // Dynamically inject FontAwesome CDN stylesheet
 (function() {
   if (!document.getElementById('font-awesome-cdn')) {
