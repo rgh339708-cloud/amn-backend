@@ -2151,6 +2151,40 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  // GET /api/debug_db - Diagnose database connection status
+  if (pathname === '/api/debug_db' && req.method === 'GET') {
+    const config = loadConfig();
+    const resolvedDbUrl = process.env.DATABASE_URL || config.databaseUrl;
+    
+    let dbStatus = 'unknown';
+    let dbError = null;
+    let usersCount = 0;
+    
+    db.get('SELECT COUNT(*) as cnt FROM users', (err, row) => {
+      if (err) {
+        dbStatus = 'error';
+        dbError = err.message;
+      } else {
+        dbStatus = 'success';
+        usersCount = row ? (row.cnt || row.count) : 0;
+      }
+      
+      const hostMasked = resolvedDbUrl ? resolvedDbUrl.split('@')[1] || 'no host part' : 'no database URL';
+      
+      res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({
+        isPostgres: isPostgres,
+        dbStatus: dbStatus,
+        dbError: dbError,
+        usersCount: usersCount,
+        dbUrlHost: hostMasked ? hostMasked.substring(0, 30) + '...' : 'none',
+        loadedFromEnvFile: !!config.databaseUrl,
+        processEnvDatabaseUrlExists: !!process.env.DATABASE_URL
+      }));
+    });
+    return;
+  }
+
 
   // 1. API: Settings GET
   if (pathname === '/api/settings' && req.method === 'GET') {
