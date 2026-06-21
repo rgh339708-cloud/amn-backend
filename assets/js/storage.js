@@ -142,6 +142,7 @@ const Storage = (() => {
   };
 
   const lastWriteTime = {};
+  const activeSyncs = {};
 
   /**
    * Get an item from storage, returns defaultValue if not found/parse error
@@ -356,18 +357,21 @@ const Storage = (() => {
     if (collection === keys.CURRENT_USER) return;
 
     const apiBase = getApiBase();
+    activeSyncs[collection] = (activeSyncs[collection] || 0) + 1;
 
     fetchWithTimeout(`${apiBase}/api/db/sync`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Bypass-Tunnel-Reminder': 'true' },
       body: JSON.stringify({ collection, action, id, item, data }),
-      timeout: 3000
+      timeout: 6000
     }).then(res => res.json())
       .then(resData => {
+        activeSyncs[collection] = Math.max(0, (activeSyncs[collection] || 0) - 1);
         if (!resData.success) {
           console.warn(`[Storage Sync] Failed to sync ${collection} remote action ${action}`);
         }
       }).catch(err => {
+        activeSyncs[collection] = Math.max(0, (activeSyncs[collection] || 0) - 1);
         console.warn(`[Storage Sync] Network error syncing ${collection} to server`);
       });
   }
@@ -388,10 +392,11 @@ const Storage = (() => {
             // Avoid overwriting active session on client
             if (key === keys.CURRENT_USER) return;
             
-            // Skip overwriting if there was a local change within the last 5 seconds to prevent race conditions
+            // Skip overwriting if there is an active sync request in flight, or if it was modified recently (cooldown of 8 seconds)
             const lastWrite = lastWriteTime[key] || 0;
-            if (Date.now() - lastWrite < 5000) {
-              console.log(`[Storage Sync] Skipping overwrite for recently written key: ${key}`);
+            const hasActiveSync = activeSyncs[key] > 0;
+            if (hasActiveSync || (Date.now() - lastWrite < 8000)) {
+              console.log(`[Storage Sync] Skipping overwrite for recently written/syncing key: ${key} (activeSync: ${hasActiveSync})`);
               return;
             }
             
