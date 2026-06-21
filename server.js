@@ -3179,14 +3179,26 @@ const server = http.createServer((req, res) => {
         if (collection === 'ps_users') {
           if (action === 'delete') {
             db.run('DELETE FROM users WHERE id = ?', [id], function(err) {
-              if (err) throw err; else sendSuccess(this.changes);
+              if (err) {
+                console.error('❌ Error deleting user:', err);
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: err.message || 'Failed to delete user' }));
+              } else {
+                sendSuccess(this.changes);
+              }
             });
           } else if (action === 'add' || action === 'update') {
             db.run(`INSERT OR REPLACE INTO users (id, discord_id, username, display_name, avatar, banner, role, rank, department, code, status, updated_at)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))`,
               [item.id || id, item.discord_id || item.discord, item.username, item.display_name || item.username, item.avatar, item.banner, item.role, item.rank, item.department, item.code || '', item.status || 'active'],
               function(err) {
-                if (err) throw err; else sendSuccess(this.changes);
+                if (err) {
+                  console.error('❌ Error saving user:', err);
+                  res.writeHead(500, { 'Content-Type': 'application/json' });
+                  res.end(JSON.stringify({ error: err.message || 'Failed to save user' }));
+                } else {
+                  sendSuccess(this.changes);
+                }
               }
             );
           } else {
@@ -3213,7 +3225,14 @@ const server = http.createServer((req, res) => {
                       code: x.code || '',
                       status: x.status || 'active'
                     };
-                    await new Promise(r => dbInsertOrReplaceStringKey('users', 'id', itemToSave, r));
+                    await new Promise(r => {
+                      dbInsertOrReplaceStringKey('users', 'id', itemToSave, (insertErr) => {
+                        if (insertErr) {
+                          console.error(`❌ Error bulk inserting user ${itemToSave.id}:`, insertErr);
+                        }
+                        r();
+                      });
+                    });
                   }
                 }
                 sendSuccess(data ? data.length : 0);
@@ -3224,7 +3243,13 @@ const server = http.createServer((req, res) => {
         else if (collection === 'ps_exams') {
           if (action === 'delete') {
             db.run('DELETE FROM exams WHERE id = ?', [id], function(err) {
-              if (err) throw err; else sendSuccess(this.changes);
+              if (err) {
+                console.error('❌ Error deleting exam:', err);
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: err.message || 'Failed to delete exam' }));
+              } else {
+                sendSuccess(this.changes);
+              }
             });
           } else if (action === 'add' || action === 'update') {
             const qJson = JSON.stringify(item.questions || []);
@@ -3242,7 +3267,13 @@ const server = http.createServer((req, res) => {
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
               [item.id || id, item.title, item.category, item.questionsCountToShow || 0, item.passingScore || 80, item.isOpen ? 'open' : 'closed', qJson, detJson],
               function(err) {
-                if (err) throw err; else sendSuccess(this.changes);
+                if (err) {
+                  console.error('❌ Error saving exam:', err);
+                  res.writeHead(500, { 'Content-Type': 'application/json' });
+                  res.end(JSON.stringify({ error: err.message || 'Failed to save exam' }));
+                } else {
+                  sendSuccess(this.changes);
+                }
               }
             );
           } else {
@@ -3273,7 +3304,14 @@ const server = http.createServer((req, res) => {
                       questions_json: qJson,
                       details_json: detJson
                     };
-                    await new Promise(r => dbInsertOrReplaceStringKey('exams', 'id', itemToSave, r));
+                    await new Promise(r => {
+                      dbInsertOrReplaceStringKey('exams', 'id', itemToSave, (insertErr) => {
+                        if (insertErr) {
+                          console.error(`❌ Error bulk inserting exam ${itemToSave.id}:`, insertErr);
+                        }
+                        r();
+                      });
+                    });
                   }
                 }
                 sendSuccess(data ? data.length : 0);

@@ -141,6 +141,8 @@ const Storage = (() => {
     DISCORD_LOGS:   `${PREFIX}discord_logs`,
   };
 
+  const lastWriteTime = {};
+
   /**
    * Get an item from storage, returns defaultValue if not found/parse error
    */
@@ -159,6 +161,7 @@ const Storage = (() => {
   function set(key, value) {
     try {
       localStorage.setItem(key, JSON.stringify(value));
+      lastWriteTime[key] = Date.now();
       syncToRemote(key, 'set', null, null, value);
       return true;
     } catch (e) {
@@ -202,6 +205,7 @@ const Storage = (() => {
     };
     collection.unshift(newItem); // newest first
     localStorage.setItem(key, JSON.stringify(collection));
+    lastWriteTime[key] = Date.now();
     syncToRemote(key, 'add', newItem.id, newItem, collection);
     return newItem;
   }
@@ -215,6 +219,7 @@ const Storage = (() => {
     if (idx === -1) return false;
     collection[idx] = { ...collection[idx], ...updates, updatedAt: new Date().toISOString() };
     localStorage.setItem(key, JSON.stringify(collection));
+    lastWriteTime[key] = Date.now();
     syncToRemote(key, 'update', id, collection[idx], collection);
     return collection[idx];
   }
@@ -226,6 +231,7 @@ const Storage = (() => {
     const collection = getCollection(key);
     const filtered = collection.filter(item => item.id !== id);
     localStorage.setItem(key, JSON.stringify(filtered));
+    lastWriteTime[key] = Date.now();
     syncToRemote(key, 'delete', id, null, filtered);
     return filtered.length < collection.length;
   }
@@ -381,6 +387,14 @@ const Storage = (() => {
           Object.keys(json.collections).forEach(key => {
             // Avoid overwriting active session on client
             if (key === keys.CURRENT_USER) return;
+            
+            // Skip overwriting if there was a local change within the last 5 seconds to prevent race conditions
+            const lastWrite = lastWriteTime[key] || 0;
+            if (Date.now() - lastWrite < 5000) {
+              console.log(`[Storage Sync] Skipping overwrite for recently written key: ${key}`);
+              return;
+            }
+            
             localStorage.setItem(key, JSON.stringify(json.collections[key]));
           });
           window.ps_storage_synced = true;
