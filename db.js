@@ -7,6 +7,9 @@ const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   // You can add additional config like ssl if needed
 });
+pool.on('error', (err) => {
+  console.error('Unexpected error on idle client', err);
+});
 
 module.exports = {
   /**

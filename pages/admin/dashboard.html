@@ -5,15 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>لوحة التحكم العليا | الأمن العام</title>
   
-  <link rel="stylesheet" href="../../assets/css/main.css?v=1.1.7">
-  <link rel="stylesheet" href="../../assets/css/admin.css?v=1.1.7">
-  <script src="../../assets/js/storage.js?v=1.1.7"></script>
-  <script src="../../assets/js/data.js?v=1.1.7"></script>
-  <script src="../../assets/js/auth.js?v=1.1.7"></script>
-  <script src="../../assets/js/app.js?v=1.1.7"></script>
+  <link rel="stylesheet" href="../../assets/css/main.css?v=1.1.20">
+  <link rel="stylesheet" href="../../assets/css/admin.css?v=1.1.20">
+  <script src="../../assets/js/storage.js?v=1.1.20"></script>
+  <script src="../../assets/js/data.js?v=1.1.20"></script>
+  <script src="../../assets/js/auth.js?v=1.1.20"></script>
+  <script src="../../assets/js/app.js?v=1.1.20"></script>
   <script>
     // Synchronous route guard to prevent flashing of admin content
-    if (!Auth.isLoggedIn() || !['owner', 'assistant_owner', 'academy_affairs', 'admin', 'recruitment'].includes(Auth.getRole())) {
+    if (!Auth.isLoggedIn() || !['owner', 'assistant_owner', 'academy_affairs', 'admin'].includes(Auth.getRole())) {
       window.location.href = 'login.html';
     }
   </script>
@@ -308,47 +308,70 @@
         </div>
 
         <h3 style="color:#fff; font-weight:800; margin-bottom:16px;"><i class="fa-solid fa-shield-halved"></i> مستويات الصلاحيات المعتمدة للوحة</h3>
-        <div class="roles-grid">
+        <div class="roles-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
           <div class="role-card">
             <div class="role-header">
               <div class="role-icon owner"><i class="fa-solid fa-crown"></i></div>
               <div>
-                <div class="role-name">المالك (Owner)</div>
+                <div class="role-name">المالك</div>
                 <div class="role-desc">المدير العام والقيادة العليا</div>
               </div>
             </div>
             <div class="role-perms">
-              <span class="perm-pill yes">تعديل الصفحات ✓</span>
-              <span class="perm-pill yes">إدارة الاختبارات ✓</span>
-              <span class="perm-pill yes">تغيير الصلاحيات ✓</span>
+              <span class="perm-pill yes">تحكم كامل باللوحة ✓</span>
+              <span class="perm-pill yes">إدارة كاملة للموقع ✓</span>
             </div>
           </div>
           <div class="role-card">
             <div class="role-header">
-              <div class="role-icon admin"><i class="fa-solid fa-shield-halved"></i></div>
+              <div class="role-icon admin"><i class="fa-solid fa-star"></i></div>
               <div>
-                <div class="role-name">مساعد المالك / ادمن</div>
-                <div class="role-desc">الضباط المعتمدين والمشرفين</div>
+                <div class="role-name">قيادة الامن العام</div>
+                <div class="role-desc">التحكم والقيادة العامة</div>
               </div>
             </div>
             <div class="role-perms">
-              <span class="perm-pill yes">تعديل الصفحات ✓</span>
-              <span class="perm-pill yes">إدارة الاختبارات ✓</span>
-              <span class="perm-pill no">تغيير الصلاحيات ✗</span>
+              <span class="perm-pill yes">تحكم كامل بالبوابة ✓</span>
+              <span class="perm-pill yes">إدارة الصلاحيات والقبول ✓</span>
             </div>
           </div>
           <div class="role-card">
             <div class="role-header">
-              <div class="role-icon super"><i class="fa-solid fa-users"></i></div>
+              <div class="role-icon admin" style="background: rgba(142, 68, 173, 0.15); color: #8e44ad;"><i class="fa-solid fa-graduation-cap"></i></div>
               <div>
-                <div class="role-name">أعضاء ومراقبين</div>
-                <div class="role-desc">باقي منسوبي الجهاز الموثقين</div>
+                <div class="role-name">رئاسة تدريب الامن العام</div>
+                <div class="role-desc">إدارة التدريب والصيانة</div>
               </div>
             </div>
             <div class="role-perms">
-              <span class="perm-pill no">تعديل الصفحات ✗</span>
-              <span class="perm-pill no">إدارة الاختبارات ✗</span>
-              <span class="perm-pill no">تغيير الصلاحيات ✗</span>
+              <span class="perm-pill yes">إغلاق وفتح الموقع ✓</span>
+              <span class="perm-pill yes">حذف سجلات الحضور والمخالفات ✓</span>
+            </div>
+          </div>
+          <div class="role-card">
+            <div class="role-header">
+              <div class="role-icon admin" style="background: rgba(231, 76, 60, 0.15); color: #e74c3c;"><i class="fa-solid fa-shield-halved"></i></div>
+              <div>
+                <div class="role-name">شؤون أكاديمية التدريب</div>
+                <div class="role-desc">الإشراف على التدريب والأفراد</div>
+              </div>
+            </div>
+            <div class="role-perms">
+              <span class="perm-pill yes">استعراض الحضور والمخالفات ✓</span>
+              <span class="perm-pill yes">اعتماد فتح الدفاتر ✓</span>
+            </div>
+          </div>
+          <div class="role-card">
+            <div class="role-header">
+              <div class="role-icon super" style="background: rgba(26, 188, 156, 0.15); color: #1abc9c;"><i class="fa-solid fa-graduation-cap"></i></div>
+              <div>
+                <div class="role-name">مسؤول دورة</div>
+                <div class="role-desc">إدارة الدورة الميدانية</div>
+              </div>
+            </div>
+            <div class="role-perms">
+              <span class="perm-pill yes">تحضير أفراد الدورة ✓</span>
+              <span class="perm-pill yes">إدارة اختبارات الدورة ✓</span>
             </div>
           </div>
         </div>
@@ -385,6 +408,27 @@
       <!-- ── TAB 4: THEME / HOME SETTINGS ── -->
       <section id="tab-theme" class="tab-content">
         <form id="theme-settings-form">
+          <!-- Maintenance Mode Control Panel -->
+          <div class="admin-content-card" style="padding:24px; margin-bottom:24px; border: 1px solid rgba(231, 76, 60, 0.25); background: rgba(231, 76, 60, 0.03);">
+            <h3 style="color:#e74c3c; margin-bottom:20px; font-weight:800; display:flex; align-items:center; gap:8px;">
+              <i class="fa-solid fa-triangle-exclamation"></i> وضع الصيانة والتحكم بالنظام (Maintenance Mode)
+            </h3>
+            
+            <div style="display:flex; flex-direction:column; gap:16px;">
+              <div style="display:flex; align-items:center; gap:10px;">
+                <input type="checkbox" id="maintenance-mode-checkbox" style="width:20px; height:20px; cursor:pointer;">
+                <label for="maintenance-mode-checkbox" style="cursor:pointer; font-weight:700; font-size:1rem; color:#fff;">تفعيل وضع الصيانة (إغلاق الموقع للعامة)</label>
+              </div>
+              <p style="color:var(--color-text-secondary); font-size:0.88rem; margin:0; line-height:1.6;">
+                عند تفعيل هذا الخيار، سيتم حظر جميع واجهات الموقع العامة وتحويلها إلى صفحة صيانة مخصصة. يسمح فقط بالوصول لطلبات الـ API. (يتطلب صلاحية رئاسة تدريب الامن العام فما فوق).
+              </p>
+              <div class="form-group" id="maintenance-msg-group" style="display:none; margin-top:10px;">
+                <label class="form-label" for="maintenance-msg-input" style="color: #fff; font-weight:600;">رسالة الصيانة المخصصة</label>
+                <input class="form-input" type="text" id="maintenance-msg-input" placeholder="مثال: البوابة الإلكترونية مغلقة مؤقتاً لأعمال الصيانة والتحديث الفني الميداني.">
+              </div>
+            </div>
+          </div>
+
           <div class="admin-content-card" style="padding:24px; margin-bottom:24px;">
             <h3 style="color:var(--color-gold-primary); margin-bottom:20px; font-weight:800;">تخصيص نصوص ومحتوى الصفحة الرئيسية</h3>
             
@@ -969,13 +1013,10 @@
         <div class="form-group">
           <label class="form-label" for="new-user-role">الصلاحية الممنوحة <i class="fa-solid fa-shield-halved"></i></label>
           <select class="form-select" id="new-user-role" required>
-            <option value="assistant_owner">مساعد المالك <i class="fa-solid fa-star"></i></option>
-            <option value="academy_affairs">شؤون اكاديمية التدريب <i class="fa-solid fa-graduation-cap"></i></option>
-            <option value="admin" selected>ادمن <i class="fa-solid fa-shield-halved"></i></option>
+            <option value="assistant_owner">قيادة الامن العام <i class="fa-solid fa-star"></i></option>
+            <option value="academy_affairs">رئاسة تدريب الامن العام <i class="fa-solid fa-graduation-cap"></i></option>
+            <option value="admin" selected>شؤون أكاديمية التدريب <i class="fa-solid fa-shield-halved"></i></option>
             <option value="course_admin">مسؤول دورة <i class="fa-solid fa-graduation-cap"></i></option>
-            <option value="super">عضو مميز <i class="fa-solid fa-users"></i></option>
-            <option value="editor">محرر <i class="fa-solid fa-pen-nib"></i></option>
-            <option value="uploader">رافع صور <i class="fa-solid fa-image"></i></option>
             <option value="viewer">مشاهد <i class="fa-solid fa-eye"></i></option>
           </select>
         </div>
@@ -1270,8 +1311,8 @@
   };
 
   document.addEventListener('DOMContentLoaded', () => {
-    // 1. Secure Route - check if owner, assistant_owner, or admin
-    if (!Auth.isLoggedIn() || !['owner', 'assistant_owner', 'academy_affairs', 'admin', 'recruitment'].includes(Auth.getRole())) {
+    // 1. Secure Route - check if owner, assistant_owner, academy_affairs, or admin
+    if (!Auth.isLoggedIn() || !['owner', 'assistant_owner', 'academy_affairs', 'admin'].includes(Auth.getRole())) {
       window.location.href = 'login.html';
       return;
     }
@@ -1280,24 +1321,28 @@
     setupUserBadge();
     loadDiscordUsers();
 
-    // Show users and logs management tab only if Owner
-    if (user && user.role === 'owner') {
-      const navUsers = document.getElementById('nav-item-users');
-      if (navUsers) navUsers.style.display = 'flex';
+    // Show logs management tab for owner, assistant_owner, and academy_affairs
+    if (user && ['owner', 'assistant_owner', 'academy_affairs'].includes(user.role)) {
       const navLogs = document.getElementById('nav-item-logs');
       if (navLogs) navLogs.style.display = 'flex';
+      filterAndRenderLogs();
+    }
+
+    // Show users and discord diagnostics tab only if Owner or Assistant Owner
+    if (user && ['owner', 'assistant_owner'].includes(user.role)) {
+      const navUsers = document.getElementById('nav-item-users');
+      if (navUsers) navUsers.style.display = 'flex';
       const navDiscord = document.getElementById('nav-item-discord');
       if (navDiscord) navDiscord.style.display = 'flex';
       
       renderUsersTable();
-      filterAndRenderLogs();
       if(typeof renderDiscordDiagnostics === 'function') renderDiscordDiagnostics();
     }
 
-    // Show recruitment tab if owner/admin/recruitment
+    // Show recruitment tab if owner, assistant_owner, academy_affairs, or admin
     const userRole = user ? user.role : '';
     const isOwnerOrAdmin = ['owner', 'assistant_owner', 'academy_affairs', 'admin'].includes(userRole);
-    if (isOwnerOrAdmin || userRole === 'recruitment') {
+    if (isOwnerOrAdmin) {
       const navRec = document.getElementById('nav-item-recruitment');
       if (navRec) navRec.style.display = 'flex';
       
@@ -1307,18 +1352,12 @@
       document.getElementById('filter-recruitment-status')?.addEventListener('change', renderRecruitmentTable);
     }
 
-    // Limit recruitment role dashboard access to recruitment tab ONLY
-    if (userRole === 'recruitment') {
-      // Hide other navigation buttons
-      ['overview', 'pages', 'theme', 'users', 'logs'].forEach(tab => {
-        const item = document.getElementById(`nav-item-${tab}`);
-        if (item) item.style.display = 'none';
+    // Hide clear log buttons for roles with level < 4.5
+    const roleInfo = Auth.getRoleInfo(userRole);
+    if (roleInfo && roleInfo.level < 4.5) {
+      document.querySelectorAll('button[onclick^="clearLogTable"]').forEach(btn => {
+        btn.style.display = 'none';
       });
-      // Switch to recruitment tab
-      setTimeout(() => {
-        const navRec = document.getElementById('nav-item-recruitment');
-        if (navRec) navRec.click();
-      }, 50);
     }
     
     // 3. Tab switching
@@ -1612,6 +1651,43 @@
     
     if (S.animationStyle) document.getElementById('animation-select').value = S.animationStyle;
     if (S.animationSpeed) document.getElementById('animation-speed').value = S.animationSpeed;
+
+    const maintenanceCheckbox = document.getElementById('maintenance-mode-checkbox');
+    const maintenanceMsgInput = document.getElementById('maintenance-msg-input');
+    const maintenanceMsgGroup = document.getElementById('maintenance-msg-group');
+
+    if (maintenanceCheckbox) {
+      maintenanceCheckbox.checked = !!S.maintenanceMode;
+      if (maintenanceMsgGroup) {
+        maintenanceMsgGroup.style.display = S.maintenanceMode ? 'block' : 'none';
+      }
+      
+      // Toggle logic
+      maintenanceCheckbox.onchange = (e) => {
+        if (maintenanceMsgGroup) {
+          maintenanceMsgGroup.style.display = e.target.checked ? 'block' : 'none';
+        }
+      };
+    }
+    if (maintenanceMsgInput) {
+      maintenanceMsgInput.value = S.maintenanceMessage || 'البوابة الإلكترونية مغلقة مؤقتاً لأعمال الصيانة والتحديث الفني الميداني.';
+    }
+
+    // Role level check to restrict toggle: only levels >= 4.5
+    const user = Auth.getCurrentUser();
+    const roleInfo = Auth.getRoleInfo(user.role);
+    if (roleInfo.level < 4.5) {
+      if (maintenanceCheckbox) {
+        maintenanceCheckbox.disabled = true;
+        if (maintenanceCheckbox.parentElement) {
+          maintenanceCheckbox.parentElement.style.opacity = '0.5';
+          maintenanceCheckbox.parentElement.style.cursor = 'not-allowed';
+        }
+      }
+      if (maintenanceMsgInput) {
+        maintenanceMsgInput.disabled = true;
+      }
+    }
   }
 
   function handleThemeFormSubmit(e) {
@@ -1628,6 +1704,17 @@
     S.imgbbApiKey = document.getElementById('imgbb-apikey-input').value.trim();
     S.animationStyle = document.getElementById('animation-select').value;
     S.animationSpeed = parseFloat(document.getElementById('animation-speed').value);
+    
+    const maintenanceCheckbox = document.getElementById('maintenance-mode-checkbox');
+    const maintenanceMsgInput = document.getElementById('maintenance-msg-input');
+    
+    // Save maintenance mode if authorized (level >= 4.5)
+    const user = Auth.getCurrentUser();
+    const roleInfo = Auth.getRoleInfo(user.role);
+    if (roleInfo.level >= 4.5) {
+      if (maintenanceCheckbox) S.maintenanceMode = maintenanceCheckbox.checked;
+      if (maintenanceMsgInput) S.maintenanceMessage = maintenanceMsgInput.value.trim();
+    }
     
     Storage.set(Storage.keys.SETTINGS, S);
     
@@ -1824,14 +1911,11 @@
         `<span style="color:var(--color-gold-primary); font-weight:bold;">المالك العام (محمي)</span>` : 
         `
         <select class="form-select" style="padding:4px 8px; font-size:0.78rem; width:auto; display:inline-block;" onchange="changeUserRole('${u.id}', this.value)">
-          <option value="assistant_owner" ${u.role === 'assistant_owner' ? 'selected' : ''}>مساعد المالك <i class="fa-solid fa-star"></i></option>
-          <option value="academy_affairs" ${u.role === 'academy_affairs' ? 'selected' : ''}>شؤون اكاديمية التدريب <i class="fa-solid fa-graduation-cap"></i></option>
-          <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>ادمن <i class="fa-solid fa-shield-halved"></i></option>
+          <option value="assistant_owner" ${u.role === 'assistant_owner' ? 'selected' : ''}>قيادة الامن العام <i class="fa-solid fa-star"></i></option>
+          <option value="academy_affairs" ${u.role === 'academy_affairs' ? 'selected' : ''}>رئاسة تدريب الامن العام <i class="fa-solid fa-graduation-cap"></i></option>
+          <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>شؤون أكاديمية التدريب <i class="fa-solid fa-shield-halved"></i></option>
           <option value="course_admin" ${u.role === 'course_admin' ? 'selected' : ''}>مسؤول دورة <i class="fa-solid fa-graduation-cap"></i></option>
-          <option value="super" ${u.role === 'super' ? 'selected' : ''}>عضو مميز</option>
-          <option value="editor" ${u.role === 'editor' ? 'selected' : ''}>محرر</option>
-          <option value="uploader" ${u.role === 'uploader' ? 'selected' : ''}>رافع صور</option>
-          <option value="viewer" ${u.role === 'viewer' ? 'selected' : ''}>مشاهد</option>
+          <option value="viewer" ${u.role === 'viewer' ? 'selected' : ''}>مشاهد <i class="fa-solid fa-eye"></i></option>
         </select>
         `;
         
@@ -2437,12 +2521,11 @@
      ─────────────────────────────────────────────────── */
   const SYSTEM_ROLES = [
     { id: 'owner', label: 'المالك' },
-    { id: 'assistant_owner', label: 'مساعد المالك' },
-    { id: 'academy_affairs', label: 'شؤون اكاديمية التدريب' },
-    { id: 'admin', label: 'ادمن' },
-    { id: 'recruitment', label: 'مسؤول تجنيد' },
+    { id: 'assistant_owner', label: 'قيادة الامن العام' },
+    { id: 'academy_affairs', label: 'رئاسة تدريب الامن العام' },
+    { id: 'admin', label: 'شؤون أكاديمية التدريب' },
     { id: 'course_admin', label: 'مسؤول دورة' },
-    { id: 'viewer', label: 'عضو' }
+    { id: 'viewer', label: 'مشاهد' }
   ];
 
   function renderTablePermissions() {

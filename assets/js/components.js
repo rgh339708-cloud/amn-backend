@@ -31,14 +31,10 @@ const Components = (() => {
       'academy_affairs': 4.5,
       'admin': 4,
       'course_admin': 3.5,
-      'recruitment': 3.2,
-      'super': 3,
-      'editor': 2,
-      'uploader': 1,
       'viewer': 0
     };
     const isAuthorizedForAttendance = currentUser && (
-      currentUser.id === '1334568342345748565' ||
+      ['1334568342345748565', '1120142432554713261', '821825761673478144'].includes(currentUser.id) ||
       (ROLE_LEVELS[userRole] >= 3.5) ||
       (userRank && (
         userRank.includes('ادارة تدريب') ||
@@ -117,14 +113,10 @@ const Components = (() => {
       'academy_affairs': 4.5,
       'admin': 4,
       'course_admin': 3.5,
-      'recruitment': 3.2,
-      'super': 3,
-      'editor': 2,
-      'uploader': 1,
       'viewer': 0
     };
     const isAuthorizedForAttendance = currentUser && (
-      currentUser.id === '1334568342345748565' ||
+      ['1334568342345748565', '1120142432554713261', '821825761673478144'].includes(currentUser.id) ||
       (ROLE_LEVELS[userRole] >= 3.5) ||
       (userRank && (
         userRank.includes('ادارة تدريب') ||
@@ -348,3 +340,75 @@ ${scriptTags}
 })();
 
 window.Components = Components;
+
+// Automatically inject Preview Mode Widget and Banner for the Owner on all pages
+(function() {
+  function injectPreviewWidget() {
+    if (typeof Auth !== 'undefined' && typeof Auth.isActualOwner === 'function' && Auth.isActualOwner()) {
+      // Inject a sticky top warning banner if preview mode is active (preview role is not 'owner')
+      const currentPreview = Auth.getPreviewRole();
+      if (currentPreview && currentPreview !== 'owner') {
+        if (!document.getElementById('ps-preview-banner')) {
+          const banner = document.createElement('div');
+          banner.id = 'ps-preview-banner';
+          banner.style.position = 'sticky';
+          banner.style.top = '0';
+          banner.style.width = '100%';
+          banner.style.zIndex = '1000000';
+          banner.style.background = 'linear-gradient(90deg, #c9a227, #e5c158)';
+          banner.style.color = '#000';
+          banner.style.textAlign = 'center';
+          banner.style.padding = '8px 16px';
+          banner.style.fontWeight = '800';
+          banner.style.fontSize = '0.88rem';
+          banner.style.display = 'flex';
+          banner.style.justifyContent = 'center';
+          banner.style.alignItems = 'center';
+          banner.style.gap = '15px';
+          banner.style.boxShadow = '0 3px 10px rgba(0,0,0,0.3)';
+          banner.style.direction = 'rtl';
+          banner.style.fontFamily = 'inherit';
+
+          const roleLabels = {
+            'assistant_owner': 'قيادة الامن العام',
+            'academy_affairs': 'رئاسة تدريب الامن العام',
+            'admin': 'شؤون أكاديمية التدريب',
+            'course_admin': 'مسؤول دورة',
+            'viewer': 'مشاهد'
+          };
+          const previewLabel = roleLabels[currentPreview] || 'مشاهد';
+
+          const textSpan = document.createElement('span');
+          textSpan.innerHTML = `⚠️ <strong>وضع المعاينة نشط:</strong> أنت تتصفح الموقع حالياً بصلاحيات رتبة <strong>[ ${previewLabel} ]</strong>`;
+
+          const exitBtn = document.createElement('button');
+          exitBtn.textContent = 'إنهاء المعاينة ✕';
+          exitBtn.style.background = '#000';
+          exitBtn.style.color = '#fff';
+          exitBtn.style.border = 'none';
+          exitBtn.style.borderRadius = '4px';
+          exitBtn.style.padding = '4px 10px';
+          exitBtn.style.fontSize = '0.78rem';
+          exitBtn.style.fontWeight = '800';
+          exitBtn.style.cursor = 'pointer';
+          exitBtn.style.transition = 'opacity 0.2s';
+          exitBtn.addEventListener('click', () => {
+            Auth.setPreviewRole('owner');
+          });
+
+          banner.appendChild(textSpan);
+          banner.appendChild(exitBtn);
+          
+          document.body.insertBefore(banner, document.body.firstChild);
+        }
+      }
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', injectPreviewWidget);
+  } else {
+    injectPreviewWidget();
+  }
+})();
+

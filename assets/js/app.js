@@ -237,6 +237,75 @@ const App = (() => {
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') closeSidebar();
     });
+
+    // Handle Owner Preview Select in Sidebar
+    if (typeof Auth !== 'undefined' && typeof Auth.isActualOwner === 'function' && Auth.isActualOwner()) {
+      const sidebarBody = sidebar.querySelector('.sidebar-body');
+      if (sidebarBody && !sidebarBody.querySelector('#sidebar-preview-role-select')) {
+        const currentPreview = Auth.getPreviewRole() || 'owner';
+        
+        const divider = document.createElement('div');
+        divider.className = 'sidebar-divider';
+        
+        const sectionLabel = document.createElement('div');
+        sectionLabel.className = 'sidebar-section-label';
+        sectionLabel.innerHTML = `<i class="fa-solid fa-eye" style="color: var(--color-gold-primary); margin-left: 6px;"></i>معاينة رتب الموقع`;
+        
+        const selectContainer = document.createElement('div');
+        selectContainer.style.cssText = `
+          padding: 8px 24px;
+          direction: rtl;
+        `;
+        
+        const select = document.createElement('select');
+        select.id = 'sidebar-preview-role-select';
+        select.style.cssText = `
+          width: 100%;
+          background: rgba(255, 255, 255, 0.04);
+          border: 1px solid rgba(201, 162, 39, 0.3);
+          border-radius: 6px;
+          color: #fff;
+          padding: 8px 12px;
+          font-size: 13px;
+          font-weight: 700;
+          cursor: pointer;
+          outline: none;
+          font-family: inherit;
+          direction: rtl;
+          transition: border-color 0.2s;
+        `;
+        
+        const roles = [
+          { value: 'owner', label: 'المالك (الأساسي)' },
+          { value: 'assistant_owner', label: 'قيادة الامن العام' },
+          { value: 'academy_affairs', label: 'رئاسة تدريب الامن العام' },
+          { value: 'admin', label: 'شؤون أكاديمية التدريب' },
+          { value: 'course_admin', label: 'مسؤول دورة' },
+          { value: 'viewer', label: 'مشاهد' }
+        ];
+        
+        roles.forEach(role => {
+          const opt = document.createElement('option');
+          opt.value = role.value;
+          opt.textContent = role.label;
+          opt.style.background = '#0d122b';
+          opt.style.color = '#fff';
+          if (role.value === currentPreview) {
+            opt.selected = true;
+          }
+          select.appendChild(opt);
+        });
+        
+        select.addEventListener('change', (e) => {
+          Auth.setPreviewRole(e.target.value);
+        });
+        
+        selectContainer.appendChild(select);
+        sidebarBody.appendChild(divider);
+        sidebarBody.appendChild(sectionLabel);
+        sidebarBody.appendChild(selectContainer);
+      }
+    }
   }
 
   /* ── Active Nav Link ──────────────────────────────── */
@@ -358,6 +427,29 @@ const App = (() => {
         `;
       }
 
+      let ownerPreviewToggleHtml = '';
+      if (typeof Auth !== 'undefined' && typeof Auth.isActualOwner === 'function' && Auth.isActualOwner()) {
+        const currentPreview = Auth.getPreviewRole() || 'owner';
+        ownerPreviewToggleHtml = `
+          <div class="dropdown-status-toggle">
+            <div class="status-toggle-header" style="display: flex; align-items: center; gap: 6px;">
+              <i class="fa-solid fa-eye" style="color: #c9a227; font-size: 11px;"></i>
+              <span>معاينة رتب الموقع</span>
+            </div>
+            <div style="width: 100%;">
+              <select id="dropdown-preview-role-select" style="width: 100%; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(201, 162, 39, 0.3); border-radius: 6px; color: #fff; padding: 6px 10px; font-size: 11.5px; font-weight: 700; cursor: pointer; outline: none; font-family: var(--font-arabic); direction: rtl;">
+                <option value="owner" ${currentPreview === 'owner' ? 'selected' : ''} style="background: #0d122b; color: #fff;">المالك (الأساسي)</option>
+                <option value="assistant_owner" ${currentPreview === 'assistant_owner' ? 'selected' : ''} style="background: #0d122b; color: #fff;">قيادة الامن العام</option>
+                <option value="academy_affairs" ${currentPreview === 'academy_affairs' ? 'selected' : ''} style="background: #0d122b; color: #fff;">رئاسة تدريب الامن العام</option>
+                <option value="admin" ${currentPreview === 'admin' ? 'selected' : ''} style="background: #0d122b; color: #fff;">شؤون أكاديمية التدريب</option>
+                <option value="course_admin" ${currentPreview === 'course_admin' ? 'selected' : ''} style="background: #0d122b; color: #fff;">مسؤول دورة</option>
+                <option value="viewer" ${currentPreview === 'viewer' ? 'selected' : ''} style="background: #0d122b; color: #fff;">مشاهد</option>
+              </select>
+            </div>
+          </div>
+        `;
+      }
+
       userBadge.innerHTML = `
         <div class="navbar-status-badge logged-in" title="الحالة: متصل بالديسكورد">
           <span class="status-dot green animate-pulse-glow"></span>
@@ -376,6 +468,7 @@ const App = (() => {
             </a>
             ${adminBtnHtml}
             ${ownerStatusToggleHtml}
+            ${ownerPreviewToggleHtml}
             <hr class="dropdown-divider">
             <button type="button" class="dropdown-item logout-btn" id="nav-dropdown-logout-btn">
               <i class="fa-solid fa-right-from-bracket"></i>
@@ -477,6 +570,15 @@ const App = (() => {
             }
           });
         });
+      }
+
+      if (typeof Auth !== 'undefined' && typeof Auth.isActualOwner === 'function' && Auth.isActualOwner()) {
+        const previewSelect = userBadge.querySelector('#dropdown-preview-role-select');
+        if (previewSelect) {
+          previewSelect.addEventListener('change', (e) => {
+            Auth.setPreviewRole(e.target.value);
+          });
+        }
       }
 
       // Show Edit Mode switch strictly for the Owner
@@ -1044,8 +1146,8 @@ const App = (() => {
     const opts = {
       full:  { year: 'numeric', month: 'long', day: 'numeric' },
       short: { year: 'numeric', month: 'short', day: 'numeric' },
-      time:  { hour: '2-digit', minute: '2-digit' },
-      datetime: { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' },
+      time:  { hour: '2-digit', minute: '2-digit', hour12: true },
+      datetime: { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true },
     };
 
     return date.toLocaleDateString('ar-SA', opts[format] || opts.full);
@@ -1686,16 +1788,13 @@ const App = (() => {
     const ROLE_LEVELS = {
       'owner': 6,
       'assistant_owner': 5,
+      'academy_affairs': 4.5,
       'admin': 4,
       'course_admin': 3.5,
-      'recruitment': 3.2,
-      'super': 3,
-      'editor': 2,
-      'uploader': 1,
       'viewer': 0
     };
     const isAuthorized = currentUser && (
-      currentUser.id === '1334568342345748565' ||
+      ['1334568342345748565', '1120142432554713261', '821825761673478144'].includes(currentUser.id) ||
       (ROLE_LEVELS[userRole] >= 3.5) ||
       (userRank && (
         userRank.includes('ادارة تدريب') ||

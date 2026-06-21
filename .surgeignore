@@ -17,3 +17,9 @@ migrate.js
 package.json
 package-lock.json
 deploy.html
+Dockerfile
+test_surge
+test_api.js
+test_db.js
+test_debug_api.js
+test_insert.js

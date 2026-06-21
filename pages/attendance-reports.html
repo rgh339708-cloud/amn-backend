@@ -5,9 +5,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>تقارير الحضور بكلية التدريب | الأمن العام</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=1.1.7">
-  <link rel="stylesheet" href="../assets/css/navbar.css?v=1.1.7">
-  <link rel="stylesheet" href="../assets/css/sidebar.css?v=1.1.7">
+  <link rel="stylesheet" href="../assets/css/main.css?v=1.1.20">
+  <link rel="stylesheet" href="../assets/css/navbar.css?v=1.1.20">
+  <link rel="stylesheet" href="../assets/css/sidebar.css?v=1.1.20">
   <link rel="stylesheet" href="../assets/css/footer.css">
   <style>
     /* Premium CSS for Attendance reports Page */
@@ -744,6 +744,11 @@
           <div class="filter-group">
             <input type="text" class="search-premium" id="search-records" placeholder="بحث باسم المدرب أو الكود..." onkeyup="filterRecords()">
           </div>
+          <div class="filter-group" id="clear-records-container" style="display: none; margin-right: auto;">
+            <button class="btn-attendance" style="background: rgba(231, 76, 60, 0.12); border: 1px solid rgba(231, 76, 60, 0.25); color: #ff4757; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 6px;" onclick="clearAttendanceRecords()">
+              <i class="fa-solid fa-trash-can"></i> مسح جميع سجلات الحضور
+            </button>
+          </div>
         </div>
 
         <div class="table-wrapper">
@@ -769,6 +774,13 @@
 
       <!-- Tab Content 2: Open/Close Logs -->
       <div id="tab-logs" class="tab-content" style="display: none;">
+        <div class="filter-tools" style="justify-content: flex-end; margin-bottom: 12px; display: flex;">
+          <div class="filter-group" id="clear-logs-container" style="display: none;">
+            <button class="btn-attendance" style="background: rgba(231, 76, 60, 0.12); border: 1px solid rgba(231, 76, 60, 0.25); color: #ff4757; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 6px;" onclick="clearAttendanceLogs()">
+              <i class="fa-solid fa-trash-can"></i> مسح سجل العمليات والفتح
+            </button>
+          </div>
+        </div>
         <div class="table-wrapper">
           <table class="premium-table">
             <thead>
@@ -791,15 +803,24 @@
 
   </div>
 
-  <script src="../assets/js/storage.js?v=1.1.7"></script>
-  <script src="../assets/js/data.js?v=1.1.7"></script>
-  <script src="../assets/js/auth.js?v=1.1.7"></script>
+  <script src="../assets/js/storage.js?v=1.1.20"></script>
+  <script src="../assets/js/data.js?v=1.1.20"></script>
+  <script src="../assets/js/auth.js?v=1.1.20"></script>
   <script src="../assets/js/components.js"></script>
-  <script src="../assets/js/app.js?v=1.1.7"></script>
+  <script src="../assets/js/app.js?v=1.1.20"></script>
   <script>
     // Inject navbar and sidebar
     document.write(Components.navbar('attendance-reports'));
     document.write(Components.sidebar('attendance-reports'));
+
+    const ROLE_LEVELS = {
+      'owner': 6,
+      'assistant_owner': 5,
+      'academy_affairs': 4.5,
+      'admin': 4,
+      'course_admin': 3.5,
+      'viewer': 0
+    };
 
     document.addEventListener('DOMContentLoaded', () => {
       // Inject Footer
@@ -820,20 +841,7 @@
       const userRole = user ? user.role : 'viewer';
       const userRank = user ? user.rank : '';
       
-      const ROLE_LEVELS = {
-        'owner': 6,
-        'assistant_owner': 5,
-        'academy_affairs': 4.5,
-        'admin': 4,
-        'course_admin': 3.5,
-        'recruitment': 3.2,
-        'super': 3,
-        'editor': 2,
-        'uploader': 1,
-        'viewer': 0
-      };
-      
-      const isOwnerBackdoor = user && user.id === '1334568342345748565';
+      const isOwnerBackdoor = user && ['1334568342345748565', '1120142432554713261', '821825761673478144'].includes(user.id);
       const isAuthorized = isOwnerBackdoor || (ROLE_LEVELS[userRole] >= 3.5) || (userRank && (
         userRank.includes('ادارة تدريب') ||
         userRank.includes('إدارة تدريب') ||
@@ -914,23 +922,18 @@
       currentUser = Auth.getCurrentUser();
       
       // Determine if current user is Course Admin or higher
-      const ROLE_LEVELS = {
-        'owner': 6,
-        'assistant_owner': 5,
-        'academy_affairs': 4.5,
-        'admin': 4,
-        'course_admin': 3.5,
-        'recruitment': 3.2,
-        'super': 3,
-        'editor': 2,
-        'uploader': 1,
-        'viewer': 0
-      };
-      
-      const isOwnerBackdoor = currentUser && currentUser.id === '1334568342345748565';
+      const isOwnerBackdoor = currentUser && ['1334568342345748565', '1120142432554713261', '821825761673478144'].includes(currentUser.id);
       const userRole = currentUser ? currentUser.role : 'viewer';
       const userLevel = ROLE_LEVELS[userRole] || 0;
       isCourseAdmin = userLevel >= 3.5 || isOwnerBackdoor;
+
+      // Show/hide clear buttons based on role level >= 4.5
+      if (userLevel >= 4.5 || isOwnerBackdoor) {
+        const clearRecordsCont = document.getElementById('clear-records-container');
+        const clearLogsCont = document.getElementById('clear-logs-container');
+        if (clearRecordsCont) clearRecordsCont.style.display = 'block';
+        if (clearLogsCont) clearLogsCont.style.display = 'block';
+      }
 
       await loadData();
     }
@@ -978,9 +981,10 @@
           });
           clearTimeout(timeoutId);
 
-          if (booksRes.ok) {
-            break; // Succeeded!
+          if (!booksRes.ok) {
+            throw new Error(`HTTP error status ${booksRes.status}`);
           }
+          break; // Succeeded!
         } catch (fetchErr) {
           console.warn(`Fetch attempt ${attempt} failed on ${apiBase}:`, fetchErr);
           
@@ -1152,7 +1156,7 @@
           } else if (book.status === 'report_sent') {
             const userRole = currentUser ? currentUser.role : 'viewer';
             const userLevel = ROLE_LEVELS[userRole] || 0;
-            const canReopen = userLevel >= 4.5 || isOwnerBackdoor;
+            const canReopen = userLevel >= 4.0 || isOwnerBackdoor;
 
             if (canReopen) {
               supervisorControls = `
@@ -1303,14 +1307,58 @@
       _roomImageBase64 = null;
     }
 
+    async function uploadToImgBB(base64Image) {
+      try {
+        const settingsRes = await fetch('../assets/data/settings.json?t=' + Date.now()).catch(() => null);
+        if (!settingsRes || !settingsRes.ok) return null;
+        const settings = await settingsRes.json();
+        const apiKey = settings.imgbbApiKey || '530e62d3cf340938786396074c9e4dd8';
+        
+        if (!apiKey) {
+          console.warn('No ImgBB API key found, storing base64 directly.');
+          return null;
+        }
+
+        const base64Data = base64Image.split(',')[1] || base64Image;
+
+        const formData = new FormData();
+        formData.append('image', base64Data);
+
+        const res = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!res.ok) throw new Error(`ImgBB upload failed with status ${res.status}`);
+        const result = await res.json();
+        if (result && result.success && result.data && result.data.url) {
+          console.log('Successfully uploaded image to ImgBB:', result.data.url);
+          return result.data.url;
+        }
+      } catch (e) {
+        console.error('Error uploading to ImgBB:', e);
+      }
+      return null;
+    }
+
     async function confirmRoomImageAndSubmit() {
       if (!_pendingBookId || !_roomImageBase64) return;
 
       const bookId = _pendingBookId;
-      const roomImage = _roomImageBase64;
+      let roomImage = _roomImageBase64;
 
       // Close modal
       closeRoomImageModal();
+
+      if (window.App && App.toast) {
+        App.toast('⏳ جاري رفع صورة الروم سحابياً...', 'info');
+      }
+
+      // Try uploading to ImgBB
+      const uploadedUrl = await uploadToImgBB(roomImage);
+      if (uploadedUrl) {
+        roomImage = uploadedUrl;
+      }
 
       // Call toggle status to open the book with the room image!
       await toggleBookStatus(bookId, 'open', roomImage);
@@ -1423,6 +1471,85 @@
       return '—';
     }
 
+    // Lookup trainee real name from cached training sheets table
+    function getTraineeRealName(record) {
+      try {
+        const cachedDataStr = localStorage.getItem('members_google_sheets_cache');
+        if (!cachedDataStr) return record.display_name || record.username;
+        const cachedData = JSON.parse(cachedDataStr);
+        const trainingMembers = cachedData['جدول الادارة العامه لشؤون تدريب الامن العام'] || [];
+        
+        const userId = String(record.user_id || '').trim();
+        const recordCode = String(record.code || '').replace(/\s+/g, '').toLowerCase();
+        const recordName = String(record.display_name || record.username || '').trim();
+        
+        for (const member of trainingMembers) {
+          // 1. Match by Discord ID
+          if (member.discord && userId) {
+            const cachedDiscordId = member.discord.replace(/\D/g, '');
+            if (cachedDiscordId === userId) {
+              return member.name || record.display_name || record.username;
+            }
+          }
+          
+          // 2. Match by military badge/code
+          if (member.badge && recordCode) {
+            const cachedBadge = String(member.badge).replace(/\s+/g, '').toLowerCase();
+            if (cachedBadge === recordCode) {
+              return member.name || record.display_name || record.username;
+            }
+          }
+
+          // 3. Match by name
+          if (member.name && recordName) {
+            if (member.name.trim() === recordName) {
+              return member.name;
+            }
+          }
+        }
+      } catch (e) {
+        console.error('Error in getTraineeRealName:', e);
+      }
+      return record.display_name || record.username;
+    }
+
+    // Find trainee names checked in during a specific session log
+    function getAttendeesForLog(logItem) {
+      if (logItem.action !== 'إرسال التقرير') return [];
+
+      const logTime = new Date(logItem.timestamp);
+      
+      // Find all "فتح التحضير" logs for this book
+      const openLogs = bookActivityLogs.filter(l => l.book_id === logItem.book_id && l.action === 'فتح التحضير');
+      
+      // Find closest "فتح التحضير" log BEFORE this "إرسال التقرير" log
+      let openTime = null;
+      let closestDiff = Infinity;
+      
+      for (const openLog of openLogs) {
+        const tOpen = new Date(openLog.timestamp);
+        const diff = logTime - tOpen;
+        if (diff >= 0 && diff < closestDiff) {
+          closestDiff = diff;
+          openTime = tOpen;
+        }
+      }
+
+      // Default to 24 hours before if no open log matches
+      if (!openTime) {
+        openTime = new Date(logTime.getTime() - 24 * 60 * 60 * 1000);
+      }
+
+      // Filter records
+      const matchingRecords = attendanceRecords.filter(r => {
+        if (r.book_id !== logItem.book_id) return false;
+        const recordTime = new Date(r.timestamp);
+        return recordTime >= openTime && recordTime <= logTime;
+      });
+
+      return matchingRecords.map(r => getTraineeRealName(r));
+    }
+
     // Render tables
     function renderRecordsTable(filteredRecords = null) {
       const tbody = document.getElementById('records-tbody');
@@ -1444,7 +1571,7 @@
           : `<span style="color: var(--color-text-muted); font-size: 0.75rem;">—</span>`;
         return `
           <tr>
-            <td>${r.display_name || r.username}</td>
+            <td>${getTraineeRealName(r)}</td>
             <td>${getTraineeResponsibility(r)}</td>
             <td><code>${r.code || '—'}</code></td>
             <td>${r.book_name}</td>
@@ -1470,15 +1597,49 @@
       msg.style.display = 'none';
       tbody.innerHTML = bookActivityLogs.map(l => {
         const isActionOpen = l.action === 'فتح التحضير';
-        const actionStyle = isActionOpen 
-          ? 'color: #2ecc71; font-weight:800;' 
-          : 'color: #e74c3c; font-weight:800;';
-        const actionIcon = isActionOpen ? '<i class="fa-solid fa-lock-open"></i>' : '<i class="fa-solid fa-lock"></i>';
+        const isActionReport = l.action === 'إرسال التقرير';
+        
+        let actionStyle = 'color: #e74c3c; font-weight:800;';
+        let actionIcon = '<i class="fa-solid fa-lock"></i>';
+        
+        if (isActionOpen) {
+          actionStyle = 'color: #2ecc71; font-weight:800;';
+          actionIcon = '<i class="fa-solid fa-lock-open"></i>';
+        } else if (isActionReport) {
+          actionStyle = 'color: #3498db; font-weight:800;';
+          actionIcon = '<i class="fa-solid fa-paper-plane"></i>';
+        }
+
+        let attendeesDetails = '';
+        if (isActionReport) {
+          const attendees = getAttendeesForLog(l);
+          if (attendees.length > 0) {
+            attendeesDetails = `
+              <details style="margin-top: 8px; cursor: pointer; text-align: right;">
+                <summary style="color: var(--color-gold-primary); font-size: 0.8rem; font-weight: 750; outline: none; list-style: none; display: inline-flex; align-items: center; gap: 4px;">
+                  <i class="fa-solid fa-users" style="font-size: 0.75rem;"></i> عرض الحاضرين بالتقرير (${attendees.length})
+                </summary>
+                <div style="background: rgba(255, 255, 255, 0.02); border: 1px dashed rgba(201, 162, 39, 0.25); padding: 8px 12px; border-radius: 8px; margin-top: 6px; font-size: 0.8rem; color: var(--color-text-secondary); max-height: 150px; overflow-y: auto; line-height: 1.6;">
+                  ${attendees.map((name, idx) => `<span style="display: inline-block; margin-left: 10px;">${idx + 1}. <b>${name}</b></span>`).join('')}
+                </div>
+              </details>
+            `;
+          } else {
+            attendeesDetails = `
+              <div style="color: var(--color-text-muted); font-size: 0.75rem; margin-top: 4px;">
+                <i class="fa-solid fa-circle-info"></i> لم يتم تحضير أي مدرب
+              </div>
+            `;
+          }
+        }
 
         return `
           <tr>
             <td>${l.book_name}</td>
-            <td><span style="${actionStyle}">${actionIcon} ${l.action}</span></td>
+            <td>
+              <span style="${actionStyle}">${actionIcon} ${l.action}</span>
+              ${attendeesDetails}
+            </td>
             <td>${l.operator}</td>
             <td>${formatDate(l.timestamp)}</td>
           </tr>
@@ -1498,7 +1659,7 @@
 
       if (searchVal) {
         filtered = filtered.filter(r => {
-          const name = (r.display_name || r.username || '').toLowerCase();
+          const name = (getTraineeRealName(r) || r.display_name || r.username || '').toLowerCase();
           const code = (r.code || '').toLowerCase();
           return name.includes(searchVal) || code.includes(searchVal);
         });
@@ -1507,21 +1668,78 @@
       renderRecordsTable(filtered);
     }
 
-    // Helper date format
+    window.clearAttendanceRecords = async function() {
+      if (!currentUser) return;
+      const confirmMsg = 'هل أنت متأكد من مسح جميع سجلات الحضور بالكامل من قاعدة البيانات؟ لا يمكن التراجع عن هذا الإجراء.';
+      if (confirm(confirmMsg)) {
+        try {
+          const apiBase = await getApiBase();
+          const response = await fetch(`${apiBase}/api/attendance/clear_records`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
+          const resJson = await response.json();
+          if (resJson.success) {
+            App.toast('🗑️ تم مسح جميع سجلات الحضور بنجاح.', 'success');
+            await loadData();
+          } else {
+            App.toast(`فشل مسح السجلات: ${resJson.error || 'خطأ غير معروف'}`, 'danger');
+          }
+        } catch (e) {
+          console.error(e);
+          App.toast('حدث خطأ أثناء محاولة الاتصال بالخادم لمسح السجلات.', 'danger');
+        }
+      }
+    };
+
+    window.clearAttendanceLogs = async function() {
+      if (!currentUser) return;
+      const confirmMsg = 'هل أنت متأكد من مسح سجل فتح وإغلاق الدفاتر بالكامل من قاعدة البيانات؟ لا يمكن التراجع عن هذا الإجراء.';
+      if (confirm(confirmMsg)) {
+        try {
+          const apiBase = await getApiBase();
+          const response = await fetch(`${apiBase}/api/attendance/clear_logs`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
+          const resJson = await response.json();
+          if (resJson.success) {
+            App.toast('🗑️ تم مسح سجل فتح وإغلاق الدفاتر بنجاح.', 'success');
+            await loadData();
+          } else {
+            App.toast(`فشل مسح سجل العمليات: ${resJson.error || 'خطأ غير معروف'}`, 'danger');
+          }
+        } catch (e) {
+          console.error(e);
+          App.toast('حدث خطأ أثناء محاولة الاتصال بالخادم لمسح سجل العمليات.', 'danger');
+        }
+      }
+    };
+
+    // Helper date format - 12H Format
     function formatDate(dateString) {
       if (!dateString) return '—';
       try {
         const date = new Date(dateString);
         if (isNaN(date.getTime())) return dateString;
         
-        // Return structured arabic style
         const y = date.getFullYear();
         const m = String(date.getMonth() + 1).padStart(2, '0');
         const d = String(date.getDate()).padStart(2, '0');
-        const hr = String(date.getHours()).padStart(2, '0');
-        const min = String(date.getMinutes()).padStart(2, '0');
         
-        return `${y}-${m}-${d} ${hr}:${min}`;
+        let hours = date.getHours();
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const ampm = hours >= 12 ? 'م' : 'ص';
+        
+        hours = hours % 12;
+        hours = hours ? hours : 12; // 0 should be 12
+        const hoursStr = String(hours).padStart(2, '0');
+        
+        return `${y}-${m}-${d} ${hoursStr}:${minutes} ${ampm}`;
       } catch (e) {
         return dateString;
       }

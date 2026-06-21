@@ -15,25 +15,25 @@ const Auth = (() => {
       permissions: ['*'], // all permissions
     },
     assistant_owner: {
-      label: 'مساعد المالك',
+      label: 'قيادة الامن العام',
       emoji: '<i class="fa-solid fa-star"></i>',
       color: '#9b59b6',
       level: 5,
-      permissions: ['view', 'create', 'edit', 'delete', 'upload', 'manage_users', 'manage_content'],
+      permissions: ['view', 'create', 'edit', 'delete', 'upload', 'manage_users', 'manage_content', 'manage_course_exams', 'manage_applications'],
     },
     academy_affairs: {
-      label: 'شؤون اكاديمية التدريب',
+      label: 'رئاسة تدريب الامن العام',
       emoji: '<i class="fa-solid fa-graduation-cap"></i>',
       color: '#8e44ad',
       level: 4.5,
-      permissions: ['view', 'create', 'edit', 'upload', 'manage_content', 'manage_course_exams'],
+      permissions: ['view', 'create', 'edit', 'delete', 'upload', 'manage_content', 'manage_course_exams', 'view_attendance', 'manage_attendance', 'delete_attendance_logs', 'delete_attendance_records', 'manage_maintenance', 'delete_violations'],
     },
     admin: {
-      label: 'ادمن',
+      label: 'شؤون أكاديمية التدريب',
       emoji: '<i class="fa-solid fa-shield-halved"></i>',
       color: '#e74c3c',
       level: 4,
-      permissions: ['view', 'create', 'edit', 'upload', 'manage_content'],
+      permissions: ['view', 'upload', 'view_attendance', 'reopen_attendance', 'view_violations', 'toggle_exams', 'view_exams'],
     },
     course_admin: {
       label: 'مسؤول دورة',
@@ -42,40 +42,12 @@ const Auth = (() => {
       level: 3.5,
       permissions: ['view', 'manage_course_exams'],
     },
-    recruitment: {
-      label: 'شؤون التجنيد',
-      emoji: '<i class="fa-solid fa-helmet-safety"></i>',
-      color: '#e67e22',
-      level: 3.2,
-      permissions: ['view', 'manage_applications', 'view_applications'],
-    },
-    super: {
-      label: 'عضو مميز',
-      emoji: '<i class="fa-solid fa-users"></i>',
-      color: '#3498db',
-      level: 3,
-      permissions: ['view', 'upload'],
-    },
-    editor: {
-      label: 'محرر',
-      emoji: '<i class="fa-solid fa-pen-nib"></i>',
-      color: '#e67e22',
-      level: 2,
-      permissions: ['view', 'edit'],
-    },
-    uploader: {
-      label: 'رافع صور',
-      emoji: '<i class="fa-solid fa-image"></i>',
-      color: '#2ecc71',
-      level: 1,
-      permissions: ['view', 'upload'],
-    },
     viewer: {
       label: 'مشاهد',
       emoji: '<i class="fa-solid fa-eye"></i>',
       color: '#95a5a6',
       level: 0,
-      permissions: ['view'],
+      permissions: ['view', 'take_exams'],
     }
   };
 
@@ -87,7 +59,7 @@ const Auth = (() => {
     'applications':'admin',
     'reports':     'admin',
     'promotions':  'admin',
-    'exams':       'course_admin',
+    'exams':       'viewer',
     'guide':       'admin',
     'announcements': 'admin',
     'news':        'admin',
@@ -104,11 +76,45 @@ const Auth = (() => {
 
   function getRole() {
     const user = getCurrentUser();
-    return user ? user.role : null;
+    if (!user) return null;
+    
+    // Preview Mode for Owner
+    if (user.role === 'owner') {
+      const previewRole = sessionStorage.getItem('ps_preview_role');
+      if (previewRole) {
+        return previewRole;
+      }
+    }
+    return user.role;
+  }
+
+  function isActualOwner() {
+    const user = getCurrentUser();
+    return user && user.role === 'owner';
+  }
+
+  function setPreviewRole(role) {
+    if (!isActualOwner()) return;
+    if (!role || role === 'owner') {
+      sessionStorage.removeItem('ps_preview_role');
+    } else {
+      sessionStorage.setItem('ps_preview_role', role);
+    }
+    window.location.reload();
+  }
+
+  function getPreviewRole() {
+    return sessionStorage.getItem('ps_preview_role');
   }
 
   function getRoleInfo(role) {
-    return ROLES[role] || ROLES.admin;
+    return ROLES[role] || {
+      label: 'مشاهد',
+      emoji: '<i class="fa-solid fa-eye"></i>',
+      color: '#95a5a6',
+      level: 0,
+      permissions: ['view']
+    };
   }
 
   /* ── Login / Logout ───────────────────────────────── */
@@ -680,14 +686,16 @@ const Auth = (() => {
         (u.id === userData.id)
       );
       
-      // Force Owner permissions for the specified Discord account
-      if (userData.id === '1334568342345748565' || 
-          (userData.username && userData.username.toLowerCase() === '3gjo')) {
+      // Force Owner permissions for the specified Discord accounts
+      const ownerIds = ['1334568342345748565', '1120142432554713261', '821825761673478144'];
+      const ownerUsernames = ['3gjo', 'z6tw', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'];
+      if (ownerIds.includes(userData.id) || 
+          (userData.username && ownerUsernames.includes(userData.username.toLowerCase()))) {
         matchedUser = {
           role: 'owner',
           rank: 'المالك',
-          username: userData.global_name || userData.username || '3gjo',
-          discord: '3gjo',
+          username: userData.global_name || userData.username || userData.username,
+          discord: userData.username,
           status: 'active'
         };
       }
@@ -852,14 +860,20 @@ const Auth = (() => {
             let allUsers = Storage.getCollection(Storage.keys.USERS) || [];
             let dbUser = allUsers.find(u => u.id === userData.id || (u.discord && session.discord && u.discord.toLowerCase() === session.discord.toLowerCase()));
 
-            const isOwner = userData.id === '1334568342345748565' || 
-                            (userData.username && userData.username.toLowerCase() === '3gjo') || 
-                            (session.username && session.username.toLowerCase() === '3gjo') ||
-                            (session.discord && session.discord.toLowerCase() === '3gjo');
+            const ownerIds = ['1334568342345748565', '1120142432554713261', '821825761673478144'];
+            const ownerUsernames = ['3gjo', 'z6tw', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'];
+            const isOwner = ownerIds.includes(userData.id) || 
+                            (userData.username && ownerUsernames.includes(userData.username.toLowerCase())) || 
+                            (session.username && ownerUsernames.includes(session.username.toLowerCase())) ||
+                            (session.discord && ownerUsernames.includes(session.discord.toLowerCase()));
 
             if (upsertData && upsertData.user) {
               const serverUser = upsertData.user;
-              session.role = isOwner ? 'owner' : (serverUser.role || 'viewer');
+              let resolvedRole = serverUser.role || 'viewer';
+              if (resolvedRole === 'viewer') {
+                resolvedRole = resolveRoleFromRank(userRank, 'viewer');
+              }
+              session.role = isOwner ? 'owner' : resolvedRole;
               session.rank = isOwner ? 'المالك' : (serverUser.rank || 'مشاهد');
               session.department = serverUser.department || '';
               session.code = serverUser.code || '';
@@ -950,7 +964,11 @@ const Auth = (() => {
                 if (updated) {
                   Storage.set(Storage.keys.USERS, allUsers);
                 }
-                session.role = isOwner ? 'owner' : (dbUser.role || 'viewer');
+                let resolvedRole = dbUser.role || 'viewer';
+                if (resolvedRole === 'viewer') {
+                  resolvedRole = resolveRoleFromRank(userRank, 'viewer');
+                }
+                session.role = isOwner ? 'owner' : resolvedRole;
                 session.rank = isOwner ? 'المالك' : (dbUser.rank || 'مشاهد');
                 session.department = dbUser.department || '';
                 session.code = dbUser.code || '';
@@ -1236,6 +1254,17 @@ const Auth = (() => {
   }
 
   /* ── Helpers ──────────────────────────────────────── */
+  function resolveRoleFromRank(rank, currentRole = 'viewer') {
+    if (!rank) return currentRole;
+    const r = String(rank).trim();
+    if (r.includes('المالك') || r.includes('owner')) return 'owner';
+    if (r.includes('قيادة الامن العام') || r.includes('assistant_owner')) return 'assistant_owner';
+    if (r.includes('رئاسة تدريب الامن العام') || r.includes('academy_affairs')) return 'academy_affairs';
+    if (r.includes('شؤون أكاديمية التدريب') || r.includes('admin')) return 'admin';
+    if (r.includes('مسؤول دورة') || r.includes('مسؤول الدورة') || r.includes('course_admin')) return 'course_admin';
+    return currentRole;
+  }
+
   function getRoleLabel(role) {
     return getRoleInfo(role)?.label || role;
   }
@@ -1250,12 +1279,13 @@ const Auth = (() => {
 
   // One-time migration to remove permissions from everyone except 3gjo
   if (typeof Storage !== 'undefined') {
-    if (!Storage.get('permissions_reset_2026_v2')) {
+    if (!Storage.get('permissions_reset_2026_v4')) {
       const allUsers = Storage.getCollection(Storage.keys.USERS) || [];
       let updated = false;
       allUsers.forEach(u => {
-        const isOwner = u.id === '1334568342345748565' || (u.discord && u.discord.toLowerCase() === '3gjo');
-        if (!isOwner && u.role !== 'viewer') {
+        const isOwner = ['1334568342345748565', '1120142432554713261', '821825761673478144'].includes(u.id) || (u.discord && ['3gjo', 'z6tw', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(u.discord.toLowerCase()));
+        const isAdminRole = ['owner', 'assistant_owner', 'academy_affairs', 'admin', 'course_admin'].includes(u.role);
+        if (!isOwner && !isAdminRole) {
           u.role = 'viewer';
           u.rank = 'مشاهد';
           updated = true;
@@ -1264,7 +1294,7 @@ const Auth = (() => {
       if (updated) {
         Storage.set(Storage.keys.USERS, allUsers);
       }
-      Storage.set('permissions_reset_2026_v2', true);
+      Storage.set('permissions_reset_2026_v4', true);
     }
   }
 
@@ -1356,14 +1386,20 @@ const Auth = (() => {
     }
 
     // Special override for owner 3gjo / admin role
-    const isOwner = user.id === '1334568342345748565' || (user.discord && user.discord.toLowerCase() === '3gjo') || (user.role === 'owner');
+    const isOwner = ['1334568342345748565', '1120142432554713261', '821825761673478144'].includes(user.id) || (user.discord && ['3gjo', 'z6tw', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(user.discord.toLowerCase())) || (user.role === 'owner');
     if (isOwner) {
       found = true;
       if (tables.length === 0) {
         tables.push('المالك');
       }
-      if (!registeredName || registeredName === '3gjo' || registeredName === 'OnlyRyan' || registeredName === 'سداح الحربي') {
-        registeredName = 'ريان بن محمد';
+      if (!registeredName || registeredName === '3gjo' || registeredName === 'OnlyRyan' || registeredName === 'سداح الحربي' || registeredName === 'z6tw' || registeredName === 'ifm711') {
+        if (user.id === '1120142432554713261' || (user.discord && user.discord.toLowerCase() === 'z6tw')) {
+          registeredName = 'إبراهيم بن علي';
+        } else if (user.id === '821825761673478144' || (user.discord && user.discord.toLowerCase() === 'ifm711')) {
+          registeredName = 'عمر المالكي';
+        } else {
+          registeredName = 'ريان بن محمد';
+        }
       }
       if (!badge || badge === '<i class="fa-solid fa-crown"></i>' || badge === 'M-08') {
         badge = 'CC | P-20';
@@ -1462,6 +1498,22 @@ const Auth = (() => {
 
           let roleChanged = false;
           let otherChanged = false;
+
+          // Protect Owner accounts from silent session downgrades
+          const ownerIds = ['1334568342345748565', '1120142432554713261', '821825761673478144'];
+          const ownerUsernames = ['3gjo', 'z6tw', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'];
+          const isOwner = ownerIds.includes(user.id) || 
+                          (user.username && ownerUsernames.includes(user.username.toLowerCase())) || 
+                          (user.discord && ownerUsernames.includes(user.discord.toLowerCase()));
+          
+          if (isOwner) {
+            dbUser.role = 'owner';
+            dbUser.rank = 'المالك';
+          } else {
+            // Automatically resolve role from rank if rank was updated on server
+            dbUser.role = resolveRoleFromRank(dbUser.rank, dbUser.role);
+          }
+
           if (dbUser.role !== user.role) { user.role = dbUser.role; roleChanged = true; }
           if (dbUser.rank !== user.rank) { user.rank = dbUser.rank; otherChanged = true; }
           if (dbUser.display_name !== user.username) { user.username = dbUser.display_name; otherChanged = true; }
@@ -1516,7 +1568,8 @@ const Auth = (() => {
     createUser, updateUser, deleteUser, getAllUsers,
     getRoleLabel, getRoleEmoji, getRoleColor,
     requireDiscordAuth, handleDiscordCallback, getDiscordBadges, getDiscordAuthUrl,
-    resolveUserTableInfo, validateSessionOnline
+    resolveUserTableInfo, validateSessionOnline,
+    isActualOwner, setPreviewRole, getPreviewRole
   };
 })();
 

@@ -186,7 +186,7 @@ const Storage = (() => {
    */
   function getCollection(key) {
     const val = get(key, []);
-    return Array.isArray(val) ? val : [];
+    return Array.isArray(val) ? val.filter(Boolean) : [];
   }
 
   /**

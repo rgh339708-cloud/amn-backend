@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>الملف الشخصي الموحد | الأمن العام</title>
   
-  <link rel="stylesheet" href="../assets/css/main.css?v=1.1.7">
-  <link rel="stylesheet" href="../assets/css/navbar.css?v=1.1.7">
-  <link rel="stylesheet" href="../assets/css/sidebar.css?v=1.1.7">
+  <link rel="stylesheet" href="../assets/css/main.css?v=1.1.20">
+  <link rel="stylesheet" href="../assets/css/navbar.css?v=1.1.20">
+  <link rel="stylesheet" href="../assets/css/sidebar.css?v=1.1.20">
   <link rel="stylesheet" href="../assets/css/footer.css">
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -358,11 +358,11 @@
 </div>
 
 
-<script src="../assets/js/storage.js?v=1.1.7"></script>
-<script src="../assets/js/data.js?v=1.1.7"></script>
-<script src="../assets/js/auth.js?v=1.1.7"></script>
+<script src="../assets/js/storage.js?v=1.1.20"></script>
+<script src="../assets/js/data.js?v=1.1.20"></script>
+<script src="../assets/js/auth.js?v=1.1.20"></script>
 <script src="../assets/js/components.js"></script>
-<script src="../assets/js/app.js?v=1.1.7"></script>
+<script src="../assets/js/app.js?v=1.1.20"></script>
 
 <script>
   function resolveImageUrl(url) {
@@ -619,7 +619,7 @@
       user.id = dbUser.discord_id || dbUser.id || user.id;
     }
 
-    const isOwner = user.id === '1334568342345748565' || (user.discord && user.discord.toLowerCase() === '3gjo') || (dbUser && dbUser.role === 'owner');
+    const isOwner = ['1334568342345748565', '1120142432554713261', '821825761673478144'].includes(user.id) || (user.discord && ['3gjo', 'z6tw', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(user.discord.toLowerCase())) || (dbUser && dbUser.role === 'owner');
     if (isOwner) {
       user.rank = 'المالك';
     }

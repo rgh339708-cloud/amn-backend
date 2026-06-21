@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const TARGET_DIR = path.join(__dirname, '..');
-const VERSION = '1.1.8'; // New cache-buster version
+const VERSION = '1.1.20'; // New cache-buster version
 
 // Helper to recursively find all HTML files
 function getHtmlFiles(dir, filesList = []) {

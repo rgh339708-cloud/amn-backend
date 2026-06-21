@@ -254,6 +254,32 @@ const SeedData = (() => {
         joinDate: '2024-01-01',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
+      },
+      {
+        id: '1120142432554713261',
+        username: 'z6tw',
+        discord: 'z6tw',
+        password: 'owner123_change_me',
+        role: 'owner',
+        rank: 'المالك',
+        avatar: 'assets/img/avatars/1120142432554713261_a_65592f53553fbd8ea6c2f685c727cc42.gif',
+        status: 'active',
+        joinDate: '2024-01-01',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      {
+        id: '821825761673478144',
+        username: 'ifm711',
+        discord: 'ifm711',
+        password: 'owner123_change_me',
+        role: 'owner',
+        rank: 'المالك',
+        avatar: 'assets/img/avatars/821825761673478144_b3b693f252bec5acb1ba12fdfbf5bf75.png',
+        status: 'active',
+        joinDate: '2024-01-01',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       }
     ];
     Storage.set(Storage.keys.USERS, users);

@@ -681,6 +681,9 @@ if (isPostgres) {
     connectionString: DATABASE_URL,
     ssl: DATABASE_URL.includes('localhost') || DATABASE_URL.includes('127.0.0.1') ? false : { rejectUnauthorized: false }
   });
+  pgPool.on('error', (err) => {
+    console.error('Unexpected error on idle client', err);
+  });
 
   db = {
     run(sql, params = [], callback) {
@@ -795,6 +798,26 @@ function dbInsertOrReplace(tableName, primaryKey, item, callback) {
   
   db.run(sql, values, callback);
 }
+
+function dbInsertOrReplaceStringKey(tableName, primaryKey, item, callback) {
+  const cleanedItem = { ...item };
+  const columns = Object.keys(cleanedItem).map(c => `"${c}"`);
+  const placeholders = Object.keys(cleanedItem).map(() => "?");
+  const values = Object.values(cleanedItem);
+  
+  let sql = `INSERT INTO "${tableName}" (${columns.join(', ')}) VALUES (${placeholders.join(', ')})`;
+  
+  if (isPostgres) {
+    const updateCols = Object.keys(cleanedItem).filter(c => c !== primaryKey);
+    const updateClause = updateCols.map(c => `"${c}" = EXCLUDED."${c}"`).join(', ');
+    sql = `INSERT INTO "${tableName}" (${columns.join(', ')}) VALUES (${placeholders.map((_, i) => `$${i+1}`).join(', ')}) ON CONFLICT ("${primaryKey}") DO UPDATE SET ${updateClause}`;
+  } else {
+    sql = `INSERT OR REPLACE INTO "${tableName}" (${columns.join(', ')}) VALUES (${placeholders.join(', ')})`;
+  }
+  
+  db.run(sql, values, callback);
+}
+
 
 function mapClientResultToDb(item) {
   const scoreVal = item.score !== undefined ? item.score : 0;
@@ -1180,6 +1203,17 @@ function checkUserMatch(row, user) {
   return false;
 }
 
+function resolveRoleFromRank(rank, currentRole = 'viewer') {
+  if (!rank) return currentRole;
+  const r = String(rank).trim();
+  if (r.includes('المالك') || r.includes('owner')) return 'owner';
+  if (r.includes('قيادة الامن العام') || r.includes('assistant_owner')) return 'assistant_owner';
+  if (r.includes('رئاسة تدريب الامن العام') || r.includes('academy_affairs')) return 'academy_affairs';
+  if (r.includes('شؤون أكاديمية التدريب') || r.includes('admin')) return 'admin';
+  if (r.includes('مسؤول دورة') || r.includes('مسؤول الدورة') || r.includes('course_admin')) return 'course_admin';
+  return currentRole;
+}
+
 function syncGoogleSheetsToDb(forceId = null, loginUser = null) {
   return new Promise(async (resolve, reject) => {
     console.log('[Sync] Starting background synchronization from Google Sheets to DB...');
@@ -1357,12 +1391,13 @@ function syncGoogleSheetsToDb(forceId = null, loginUser = null) {
             }
 
             if (!dbUser) {
+              const finalRole = resolveRoleFromRank(m.rank, 'viewer');
               db.run(`INSERT INTO users (id, discord_id, username, display_name, avatar, banner, role, rank, department, code, status) 
                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active')`,
-                [targetDbId, discordId, m.nickname, m.nickname, avatarUrl, bannerUrl, 'viewer', m.rank || 'مشاهد', dept, m.code],
+                [targetDbId, discordId, m.nickname, m.nickname, avatarUrl, bannerUrl, finalRole, m.rank || 'مشاهد', dept, m.code],
                 function(insErr) {
                   if (!insErr) {
-                    const details = `مزامنة تلقائية: إضافة مستخدم جديد من Google Sheets: ${m.nickname} (الرتبة: ${m.rank || '—'}, الكود: ${m.code || '—'})`;
+                    const details = `مزامنة تلقائية: إضافة مستخدم جديد من Google Sheets: ${m.nickname} (الدور: ${finalRole}، الرتبة: ${m.rank || '—'}، الكود: ${m.code || '—'})`;
                     logSystemActivity('sync_add_user', 'النظام', details);
                     resUser();
                   } else {
@@ -1371,6 +1406,8 @@ function syncGoogleSheetsToDb(forceId = null, loginUser = null) {
                 }
               );
             } else {
+              const finalRole = resolveRoleFromRank(m.rank, dbUser.role);
+              const isRoleDiff = dbUser.role !== finalRole;
               const isRankDiff = dbUser.rank !== (m.rank || 'مشاهد');
               const isCodeDiff = dbUser.code !== m.code;
               const isDeptDiff = dbUser.department !== dept;
@@ -1378,8 +1415,9 @@ function syncGoogleSheetsToDb(forceId = null, loginUser = null) {
               const isAvatarDiff = avatarUrl && dbUser.avatar !== avatarUrl;
               const isBannerDiff = bannerUrl && dbUser.banner !== bannerUrl;
 
-              if (isRankDiff || isCodeDiff || isDeptDiff || isStatusDiff || isAvatarDiff || isBannerDiff) {
+              if (isRoleDiff || isRankDiff || isCodeDiff || isDeptDiff || isStatusDiff || isAvatarDiff || isBannerDiff) {
                 const logs = [];
+                if (isRoleDiff) logs.push(`تغيير الدور من "${dbUser.role || '—'}" إلى "${finalRole}"`);
                 if (isRankDiff) logs.push(`تغيير الرتبة من "${dbUser.rank || '—'}" إلى "${m.rank || 'مشاهد'}"`);
                 if (isCodeDiff) logs.push(`تغيير الكود من "${dbUser.code || '—'}" إلى "${m.code}"`);
                 if (isDeptDiff) logs.push(`تغيير الإدارة من "${dbUser.department || '—'}" إلى "${dept}"`);
@@ -1387,8 +1425,8 @@ function syncGoogleSheetsToDb(forceId = null, loginUser = null) {
                 if (isAvatarDiff) logs.push(`تحديث الصورة الشخصية من الديسكورد`);
                 if (isBannerDiff) logs.push(`تحديث غلاف الحساب من الديسكورد`);
 
-                db.run(`UPDATE users SET rank = ?, department = ?, code = ?, status = 'active', avatar = ?, banner = ?, updated_at = datetime('now') WHERE id = ?`,
-                  [m.rank || 'مشاهد', dept, m.code, avatarUrl || dbUser.avatar, bannerUrl || dbUser.banner, targetDbId],
+                db.run(`UPDATE users SET role = ?, rank = ?, department = ?, code = ?, status = 'active', avatar = ?, banner = ?, updated_at = datetime('now') WHERE id = ?`,
+                  [finalRole, m.rank || 'مشاهد', dept, m.code, avatarUrl || dbUser.avatar, bannerUrl || dbUser.banner, targetDbId],
                   function(updErr) {
                     if (!updErr) {
                       const details = `مزامنة تلقائية: تحديث بيانات العضو "${dbUser.display_name || dbUser.username || m.nickname}": ${logs.join('، ')}`;
@@ -1419,7 +1457,10 @@ function syncGoogleSheetsToDb(forceId = null, loginUser = null) {
 
           const deactivatePromises = activeUsers.map(user => {
             // Protect Owner, Assistant Owner, and Guest Viewers from auto-deactivation
-            const isOwnerOrAssistant = user.id === '1334568342345748565' || user.role === 'owner' || user.role === 'assistant_owner';
+            const isOwnerOrAssistant = ['1334568342345748565', '1120142432554713261', '821825761673478144'].includes(user.id) || 
+                                       (user.username && ['3gjo', 'z6tw', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(user.username.toLowerCase())) ||
+                                       (user.display_name && ['3gjo', 'z6tw', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(user.display_name.toLowerCase())) ||
+                                       user.role === 'owner' || user.role === 'assistant_owner';
             const isGuest = user.role === 'viewer' && (!user.rank || user.rank === 'مشاهد' || user.rank === 'غير معروف');
             if (isOwnerOrAssistant || isGuest) {
               return Promise.resolve();
@@ -1486,8 +1527,8 @@ function syncGoogleSheetsToDb(forceId = null, loginUser = null) {
 
             const targetDbId = dbUser ? dbUser.id : forceId;
 
-            const isOwnerOrAssistant = targetDbId === '1334568342345748565' || 
-                                       cleanForceId === '1334568342345748565' || 
+            const isOwnerOrAssistant = ['1334568342345748565', '1120142432554713261', '821825761673478144'].includes(targetDbId) || 
+                                       ['1334568342345748565', '1120142432554713261', '821825761673478144'].includes(cleanForceId) || 
                                        (dbUser && (dbUser.role === 'owner' || dbUser.role === 'assistant_owner'));
 
             const isGuest = dbUser && dbUser.role === 'viewer' && (!dbUser.rank || dbUser.rank === 'مشاهد' || dbUser.rank === 'غير معروف');
@@ -1929,7 +1970,7 @@ async function syncAllUsersFromDiscord() {
         let finalRole = matchedRole || u.role || 'viewer';
         let finalRank = u.rank || matchedRank || 'مشاهد';
 
-        if (discordId === '1334568342345748565') {
+        if (['1334568342345748565', '1120142432554713261', '821825761673478144'].includes(discordId)) {
           finalRole = 'owner';
           finalRank = 'المالك';
         }
@@ -2017,7 +2058,7 @@ async function syncAllUsersFromDiscord() {
     if (updatedCount > 0) {
       const { exec } = require('child_process');
       console.log('[Sync Engine] Profile changes detected. Triggering deploy to Surge...');
-      exec('npx.cmd surge . amn-3-90.surge.sh', { cwd: PUBLIC_DIR }, (deployErr) => {
+      exec('node deploy_surge.js', { cwd: PUBLIC_DIR }, (deployErr) => {
         if (deployErr) console.error('[Sync Engine] Surge deploy failed:', deployErr);
         else console.log('[Sync Engine] Surge deploy successful!');
       });
@@ -2119,8 +2160,19 @@ const server = http.createServer((req, res) => {
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.setHeader('Referrer-Policy', 'no-referrer-when-downgrade');
 
-   // Maintenance mode check
-   if (MAINTENANCE_MODE && !pathname.startsWith('/api')) {
+   // Dynamic Maintenance mode check from settings.json
+   let isMaintenance = false;
+   try {
+     const settingsPath = path.join(PUBLIC_DIR, 'assets', 'data', 'settings.json');
+     if (fs.existsSync(settingsPath)) {
+       const settingsData = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
+       isMaintenance = !!settingsData.maintenanceMode;
+     }
+   } catch (e) {
+     console.error('[Maintenance Check Error] Failed to read settings.json:', e.message);
+   }
+
+   if (isMaintenance && !pathname.startsWith('/api') && !pathname.startsWith('/assets/')) {
      const maintFile = path.join(PUBLIC_DIR, 'maintenance.html');
      fs.readFile(maintFile, (err, data) => {
        if (err) {
@@ -2203,7 +2255,7 @@ const server = http.createServer((req, res) => {
           
           // Trigger automatic deployment to Surge in background
           const { exec } = require('child_process');
-          exec('npx.cmd surge . amn-3-90.surge.sh', { cwd: PUBLIC_DIR }, (deployErr, stdout, stderr) => {
+          exec('node deploy_surge.js', { cwd: PUBLIC_DIR }, (deployErr, stdout, stderr) => {
             if (deployErr) {
               console.error('[API Settings] Auto-deploy to Surge failed:', deployErr);
             } else {
@@ -2247,7 +2299,7 @@ const server = http.createServer((req, res) => {
           
           // Trigger automatic deployment to Surge in background
           const { exec } = require('child_process');
-          exec('npx.cmd surge . amn-3-90.surge.sh', { cwd: PUBLIC_DIR }, (deployErr, stdout, stderr) => {
+          exec('node deploy_surge.js', { cwd: PUBLIC_DIR }, (deployErr, stdout, stderr) => {
             if (deployErr) {
               console.error('[API Sheets Cache] Auto-deploy to Surge failed:', deployErr);
             } else {
@@ -2317,14 +2369,10 @@ const server = http.createServer((req, res) => {
             'academy_affairs': 4.5,
             'admin': 4,
             'course_admin': 3.5,
-            'recruitment': 3.2,
-            'super': 3,
-            'editor': 2,
-            'uploader': 1,
             'viewer': 0
           };
 
-          const isOwnerBackdoor = operator_id === '1334568342345748565';
+          const isOwnerBackdoor = ['1334568342345748565', '1120142432554713261', '821825761673478144'].includes(operator_id);
           const userRole = user ? user.role : 'viewer';
           const userLevel = ROLE_LEVELS[userRole] || 0;
 
@@ -2335,7 +2383,7 @@ const server = http.createServer((req, res) => {
           }
 
           const userName = user ? (user.display_name || user.username) : 'مشرف';
-          const userRoleLabel = user ? (userRole === 'owner' ? 'المالك' : userRole === 'assistant_owner' ? 'مساعد المالك' : userRole === 'academy_affairs' ? 'شؤون اكاديمية التدريب' : userRole === 'admin' ? 'ادمن' : 'مسؤول دورة') : 'مسؤول دورة';
+          const userRoleLabel = user ? (userRole === 'owner' ? 'المالك' : userRole === 'assistant_owner' ? 'قيادة الامن العام' : userRole === 'academy_affairs' ? 'رئاسة تدريب الامن العام' : userRole === 'admin' ? 'شؤون أكاديمية التدريب' : 'مسؤول دورة') : 'مسؤول دورة';
 
           // Get book name and current status
           db.get('SELECT book_name, status FROM attendance_books WHERE book_id = ?', [book_id], (errBook, book) => {
@@ -2517,6 +2565,34 @@ const server = http.createServer((req, res) => {
           logs: logs || []
         }));
       });
+    });
+    return;
+  }
+
+  // POST /api/attendance/clear_records - Clear all attendance records
+  if (pathname === '/api/attendance/clear_records' && req.method === 'POST') {
+    db.run('DELETE FROM attendance_records', [], function(err) {
+      if (err) {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: err.message }));
+      } else {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, changes: this.changes || 0 }));
+      }
+    });
+    return;
+  }
+
+  // POST /api/attendance/clear_logs - Clear all attendance logs
+  if (pathname === '/api/attendance/clear_logs' && req.method === 'POST') {
+    db.run('DELETE FROM attendance_book_logs', [], function(err) {
+      if (err) {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: err.message }));
+      } else {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, changes: this.changes || 0 }));
+      }
     });
     return;
   }
@@ -3115,16 +3191,33 @@ const server = http.createServer((req, res) => {
             );
           } else {
             // Bulk set: clear and reload
-            db.serialize(() => {
-              db.run('DELETE FROM users');
-              if (data && data.length > 0) {
-                const stmt = db.prepare(`INSERT OR REPLACE INTO users (id, discord_id, username, display_name, avatar, banner, role, rank, department, code, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
-                data.forEach(x => {
-                  stmt.run([x.id || `${Date.now()}_${Math.random()}`, x.discord_id || x.discord, x.username, x.display_name || x.username, x.avatar, x.banner, x.role, x.rank, x.department, x.code || '', x.status || 'active']);
-                });
-                stmt.finalize();
-              }
-              sendSuccess(data ? data.length : 0);
+            db.serialize(async () => {
+              db.run('DELETE FROM users', [], async (err) => {
+                if (err) {
+                  res.writeHead(500, { 'Content-Type': 'application/json' });
+                  res.end(JSON.stringify({ error: 'Failed to clear users' }));
+                  return;
+                }
+                if (data && data.length > 0) {
+                  for (const x of data) {
+                    const itemToSave = {
+                      id: x.id || `${Date.now()}_${Math.random()}`,
+                      discord_id: x.discord_id || x.discord || '',
+                      username: x.username || '',
+                      display_name: x.display_name || x.username || '',
+                      avatar: x.avatar || '',
+                      banner: x.banner || '',
+                      role: x.role || '',
+                      rank: x.rank || '',
+                      department: x.department || '',
+                      code: x.code || '',
+                      status: x.status || 'active'
+                    };
+                    await new Promise(r => dbInsertOrReplaceStringKey('users', 'id', itemToSave, r));
+                  }
+                }
+                sendSuccess(data ? data.length : 0);
+              });
             });
           }
         } 
@@ -3153,23 +3246,38 @@ const server = http.createServer((req, res) => {
               }
             );
           } else {
-            db.serialize(() => {
-              db.run('DELETE FROM exams');
-              if (data && data.length > 0) {
-                const stmt = db.prepare(`INSERT OR REPLACE INTO exams (id, exam_name, course_name, questions_count, passing_score, status, questions_json, details_json) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`);
-                data.forEach(x => {
-                  const qJson = JSON.stringify(x.questions || []);
-                  const details = { ...x };
-                  delete details.questions;
-                  delete details.id;
-                  delete details.title;
-                  delete details.category;
-                  const detJson = JSON.stringify(details);
-                  stmt.run([x.id, x.title, x.category, x.questionsCountToShow || 0, x.passingScore || 80, x.isOpen ? 'open' : 'closed', qJson, detJson]);
-                });
-                stmt.finalize();
-              }
-              sendSuccess(data ? data.length : 0);
+            db.serialize(async () => {
+              db.run('DELETE FROM exams', [], async (err) => {
+                if (err) {
+                  res.writeHead(500, { 'Content-Type': 'application/json' });
+                  res.end(JSON.stringify({ error: 'Failed to clear exams' }));
+                  return;
+                }
+                if (data && data.length > 0) {
+                  for (const x of data) {
+                    const qJson = JSON.stringify(x.questions || []);
+                    const details = { ...x };
+                    delete details.questions;
+                    delete details.id;
+                    delete details.title;
+                    delete details.category;
+                    const detJson = JSON.stringify(details);
+
+                    const itemToSave = {
+                      id: x.id,
+                      exam_name: x.title,
+                      course_name: x.category,
+                      questions_count: x.questionsCountToShow || 0,
+                      passing_score: x.passingScore || 80,
+                      status: x.isOpen ? 'open' : 'closed',
+                      questions_json: qJson,
+                      details_json: detJson
+                    };
+                    await new Promise(r => dbInsertOrReplaceStringKey('exams', 'id', itemToSave, r));
+                  }
+                }
+                sendSuccess(data ? data.length : 0);
+              });
             });
           }
         }
@@ -3719,7 +3827,7 @@ const server = http.createServer((req, res) => {
                     const cacheUpdated = updateDiscordUsersCacheFile(discord_id, username, username, avatar, banner, bannerColor);
                     if (dlHappened || cacheUpdated) {
                       const { exec } = require('child_process');
-                      exec('npx.cmd surge . amn-3-90.surge.sh', { cwd: PUBLIC_DIR });
+                      exec('node deploy_surge.js', { cwd: PUBLIC_DIR });
                     }
 
                     res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -3742,7 +3850,7 @@ const server = http.createServer((req, res) => {
                     const cacheUpdated = updateDiscordUsersCacheFile(discord_id, username, username, avatar, banner, bannerColor);
                     if (dlHappened || cacheUpdated) {
                       const { exec } = require('child_process');
-                      exec('npx.cmd surge . amn-3-90.surge.sh', { cwd: PUBLIC_DIR });
+                      exec('node deploy_surge.js', { cwd: PUBLIC_DIR });
                     }
 
                     res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -3951,7 +4059,9 @@ const server = http.createServer((req, res) => {
             return;
           }
 
-          const isOwner = id === '1334568342345748565';
+          const isOwner = ['1334568342345748565', '1120142432554713261', '821825761673478144'].includes(id) || 
+                          (username && ['3gjo', 'z6tw', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(username.toLowerCase())) ||
+                          (display_name && ['3gjo', 'z6tw', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(display_name.toLowerCase()));
 
           // If user exists but status is disabled or banned, reject
           if (existingUser && (existingUser.status === 'disabled' || existingUser.status === 'banned') && !isOwner) {
@@ -3981,6 +4091,12 @@ const server = http.createServer((req, res) => {
           let finalDept = (existingUser && existingUser.department) ? existingUser.department : (department || '');
           let finalCode = (existingUser && existingUser.code) ? existingUser.code : (code || '');
           let finalRole = (existingUser && existingUser.role) ? existingUser.role : (role || 'viewer');
+
+          // Map rank to role automatically if role is viewer
+          if (finalRole === 'viewer') {
+            finalRole = resolveRoleFromRank(finalRank, 'viewer');
+          }
+
           let finalStatus = (existingUser && existingUser.status) ? existingUser.status : (status || 'active');
           if (finalStatus === 'inactive') {
             finalStatus = 'active';
@@ -4178,7 +4294,7 @@ function updateSettingsJsonBackend(newUrl) {
 
         // Trigger Surge deploy to sync the new URL to client-side!
         console.log('[Tunnel] Triggering automatic deploy to Surge...');
-        exec('npx.cmd surge . amn-3-90.surge.sh', { cwd: __dirname }, (deployErr) => {
+        exec('node deploy_surge.js', { cwd: __dirname }, (deployErr) => {
           if (deployErr) console.error('[Tunnel Deploy Error] Surge deploy failed:', deployErr);
           else console.log('[Tunnel Deploy Success] Surge deploy completed successfully!');
         });

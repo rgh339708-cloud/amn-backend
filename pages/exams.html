@@ -6,9 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>اختبارات الدورات | الأمن العام</title>
 
-  <link rel="stylesheet" href="../assets/css/main.css?v=1.1.7">
-  <link rel="stylesheet" href="../assets/css/navbar.css?v=1.1.7">
-  <link rel="stylesheet" href="../assets/css/sidebar.css?v=1.1.7">
+  <link rel="stylesheet" href="../assets/css/main.css?v=1.1.20">
+  <link rel="stylesheet" href="../assets/css/navbar.css?v=1.1.20">
+  <link rel="stylesheet" href="../assets/css/sidebar.css?v=1.1.20">
   <link rel="stylesheet" href="../assets/css/footer.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -836,11 +836,11 @@
   <div id="toast-container"></div>
 
   <!-- Write shared components -->
-  <script src="../assets/js/storage.js?v=1.1.7"></script>
-  <script src="../assets/js/data.js?v=1.1.7"></script>
-  <script src="../assets/js/auth.js?v=1.1.7"></script>
+  <script src="../assets/js/storage.js?v=1.1.20"></script>
+  <script src="../assets/js/data.js?v=1.1.20"></script>
+  <script src="../assets/js/auth.js?v=1.1.20"></script>
   <script src="../assets/js/components.js"></script>
-  <script src="../assets/js/app.js?v=1.1.7"></script>
+  <script src="../assets/js/app.js?v=1.1.20"></script>
 
   <script>
     document.write(Components.navbar('exams'));
@@ -1327,8 +1327,11 @@
       // Initial sync with server
       try {
         await App.syncSettingsWithServer();
+        if (typeof Storage !== 'undefined' && Storage.loadAllFromServer) {
+          await Storage.loadAllFromServer();
+        }
       } catch (e) {
-        console.warn('[Sync] Initial settings sync failed:', e);
+        console.warn('[Sync] Initial settings/database sync failed:', e);
       }
 
       // Periodic sync every 3 seconds for supervisor data if active
@@ -1407,26 +1410,48 @@
     let isExamActive = false;
     let violationsCount = 0;
 
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
       if (!Auth.requireDiscordAuth()) {
         const mainContent = document.querySelector('.exams-page');
         if (mainContent) mainContent.style.display = 'none';
         return;
       }
 
-      init();
-
-      // Clean up mock results from storage if they exist
-      let results = Storage.getCollection(Storage.keys.EXAM_RESULTS) || [];
-      const hadMock = results.some(r => r.id === 'res_1' || r.id === 'res_2' || r.id === 'res_3');
-      if (hadMock) {
-        results = results.filter(r => r.id !== 'res_1' && r.id !== 'res_2' && r.id !== 'res_3');
-        Storage.set(Storage.keys.EXAM_RESULTS, results);
+      try {
+        await init();
+      } catch (err) {
+        console.error('[DOMContentLoaded] Failed during init():', err);
       }
 
-      renderExamsList();
-      renderSupervisorPanel();
-      restoreExamProgress();
+      try {
+        // Clean up mock results from storage if they exist
+        let results = Storage.getCollection(Storage.keys.EXAM_RESULTS) || [];
+        const hadMock = results.some(r => r && (r.id === 'res_1' || r.id === 'res_2' || r.id === 'res_3'));
+        if (hadMock) {
+          results = results.filter(r => r && r.id !== 'res_1' && r.id !== 'res_2' && r.id !== 'res_3');
+          Storage.set(Storage.keys.EXAM_RESULTS, results);
+        }
+      } catch (err) {
+        console.error('[DOMContentLoaded] Failed cleaning mock results:', err);
+      }
+
+      try {
+        renderExamsList();
+      } catch (err) {
+        console.error('[DOMContentLoaded] Failed rendering exams list:', err);
+      }
+
+      try {
+        renderSupervisorPanel();
+      } catch (err) {
+        console.error('[DOMContentLoaded] Failed rendering supervisor panel:', err);
+      }
+
+      try {
+        restoreExamProgress();
+      } catch (err) {
+        console.error('[DOMContentLoaded] Failed restoring exam progress:', err);
+      }
 
       // Wire quiz screen buttons
       document.getElementById('quiz-btn-prev').addEventListener('click', prevQuestion);
@@ -1553,7 +1578,11 @@
 
     function renderSupervisorPanel() {
       const panel = document.getElementById('supervisor-panel');
-      const isSuper = Auth.isLoggedIn() && ['owner', 'assistant_owner', 'admin', 'course_admin'].includes(Auth.getRole());
+      const userRole = Auth.getRole();
+      const roleInfo = Auth.getRoleInfo(userRole);
+      const isSuper = Auth.isLoggedIn() && roleInfo && roleInfo.level >= 3.5;
+
+      console.log('[renderSupervisorPanel] isLoggedIn:', Auth.isLoggedIn(), 'userRole:', userRole, 'roleInfo:', roleInfo, 'isSuper:', isSuper);
 
       if (!isSuper) {
         panel.style.display = 'none';
@@ -1562,11 +1591,11 @@
 
       panel.style.display = 'block';
 
-      const isOwner = Auth.getRole() === 'owner';
+      const isAuthorizedToCreate = roleInfo && roleInfo.level >= 4.0;
       const createBtn = document.getElementById('btn-create-exam');
-      if (createBtn) createBtn.style.display = isOwner ? 'inline-block' : 'none';
+      if (createBtn) createBtn.style.display = isAuthorizedToCreate ? 'inline-block' : 'none';
       const clearBtn = document.getElementById('btn-clear-results');
-      if (clearBtn) clearBtn.style.display = isOwner ? 'inline-block' : 'none';
+      if (clearBtn) clearBtn.style.display = (roleInfo && roleInfo.level >= 3.5) ? 'inline-block' : 'none';
 
       // Populate course filter dropdown
       const filterDropdown = document.getElementById('archive-course-filter');
@@ -1585,6 +1614,8 @@
     function renderSupervisorResults() {
       const tbody = document.getElementById('supervisor-tbody');
       const filterVal = document.getElementById('archive-course-filter').value || 'all';
+      const userRole = Auth.getRole();
+      const roleInfo = Auth.getRoleInfo(userRole);
 
       Storage.fetchExamArchive()
         .then(exams => {
@@ -1643,8 +1674,8 @@
               statusBadge = `<span class="status-badge-el pending">⏳ معلق</span>`;
             }
 
-            const isOwner = Auth.getRole() === 'owner';
-            const deleteBtn = isOwner ? `<button class="action-btn-el reject" style="background:rgba(231, 76, 60, 0.1); border-color:rgba(231, 76, 60, 0.25);" onclick="deleteExamResult('${r.id}')">🗑️ حذف</button>` : '';
+            const canDeleteResults = roleInfo && roleInfo.level >= 3.5;
+            const deleteBtn = canDeleteResults ? `<button class="action-btn-el reject" style="background:rgba(231, 76, 60, 0.1); border-color:rgba(231, 76, 60, 0.25);" onclick="deleteExamResult('${r.id}')">🗑️ حذف</button>` : '';
 
             let approveBtn = '';
             if (r.status === 'pending' && r.passed) {
@@ -1705,8 +1736,10 @@
     }
 
     function deleteExamResult(id) {
-      if (Auth.getRole() !== 'owner') {
-        App.toast('عذراً، المالك فقط يستطيع حذف النتائج!', 'error');
+      const userRole = Auth.getRole();
+      const roleInfo = Auth.getRoleInfo(userRole);
+      if (!roleInfo || roleInfo.level < 3.5) {
+        App.toast('عذراً، غير مصرح لك بحذف النتائج!', 'error');
         return;
       }
       if (confirm('هل أنت متأكد من حذف هذه المحاولة بشكل نهائي؟')) {
@@ -1723,8 +1756,10 @@
     }
 
     function clearAllExamResults() {
-      if (Auth.getRole() !== 'owner') {
-        App.toast('عذراً، المالك فقط يستطيع مسح السجلات!', 'error');
+      const userRole = Auth.getRole();
+      const roleInfo = Auth.getRoleInfo(userRole);
+      if (!roleInfo || roleInfo.level < 3.5) {
+        App.toast('عذراً، غير مصرح لك بمسح السجلات!', 'error');
         return;
       }
       if (confirm('هل أنت متأكد من رغبتك في مسح سجل اختبارات العساكر بالكامل؟ لا يمكن التراجع عن هذا الإجراء.')) {
@@ -1742,7 +1777,8 @@
 
     window.setExamStatus = function (resultId, status) {
       const role = Auth.getRole();
-      if (!['owner', 'assistant_owner', 'admin', 'course_admin'].includes(role)) {
+      const roleInfo = Auth.getRoleInfo(role);
+      if (!roleInfo || roleInfo.level < 3.5) {
         App.toast('عذراً، لا تملك الصلاحية الكافية للقيام بهذا الإجراء!', 'error');
         return;
       }
@@ -1941,7 +1977,10 @@
         return;
       }
 
-      const isOwner = Auth.getRole() === 'owner';
+      const role = Auth.getRole();
+      const roleInfo = Auth.getRoleInfo(role);
+      const canManageExams = Auth.isLoggedIn() && roleInfo && (roleInfo.permissions.includes('*') || roleInfo.permissions.includes('manage_course_exams'));
+      const canDeleteExams = Auth.isLoggedIn() && roleInfo && (roleInfo.level >= 4.5);
 
       tbody.innerHTML = exams.map(e => {
         const statusText = e.isOpen ? '<i class="fa-solid fa-circle-check" style="color: #2ecc71;"></i> مفتوح' : '<i class="fa-solid fa-circle-exclamation" style="color: #e74c3c;"></i> مغلق';
@@ -1955,9 +1994,12 @@
           ? `<span style="font-size:0.75rem; color:#2ecc71;">تم الفتح: ${e.openedAt}</span>`
           : (e.closedAt ? `<span style="font-size:0.75rem; color:#ff4757;">أغلق في: ${e.closedAt}</span>` : '<span style="color:rgba(255,255,255,0.25);">—</span>');
 
-        const ownerBtns = isOwner ? `
+        const editBtns = canManageExams ? `
         <button class="action-btn-el approve" style="background:rgba(201,162,39,0.08); border-color:rgba(201,162,39,0.3); color:var(--color-gold-primary);" onclick="openQuestionBankModal('${e.id}')"><i class="fa-solid fa-file-pen"></i> بنك الأسئلة</button>
         <button class="action-btn-el approve" style="background:rgba(255,255,255,0.05); border-color:rgba(255,255,255,0.1); color:#fff;" onclick="openEditExamModal('${e.id}')"><i class="fa-solid fa-gear"></i> الإعدادات</button>
+      ` : '';
+
+        const deleteBtn = canDeleteExams ? `
         <button class="action-btn-el reject" style="background:rgba(231,76,60,0.1); border-color:rgba(231,76,60,0.25);" onclick="deleteExam('${e.id}')">🗑️ حذف</button>
       ` : '';
 
@@ -1970,9 +2012,10 @@
           <td style="font-weight:800;">${statusText}</td>
           <td>${datesText}</td>
           <td>
-            <div class="action-btn-group">
-              ${statusBtn}
-              ${ownerBtns}
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              ${canManageExams ? statusBtn : ''}
+              ${editBtns}
+              ${deleteBtn}
             </div>
           </td>
         </tr>
@@ -2044,8 +2087,10 @@
     }
 
     function deleteExam(examId) {
-      if (Auth.getRole() !== 'owner') {
-        App.toast('عذراً، المالك فقط يملك صلاحية حذف الاختبارات!', 'error');
+      const role = Auth.getRole();
+      const roleInfo = Auth.getRoleInfo(role);
+      if (!roleInfo || roleInfo.level < 4.5) {
+        App.toast('عذراً، غير مصرح لك بحذف الاختبارات!', 'error');
         return;
       }
       if (confirm('هل أنت متأكد من رغبتك في حذف هذا الاختبار نهائياً مع كامل بنك الأسئلة الخاص به؟')) {
@@ -2114,8 +2159,10 @@
 
     /* ── Modal: Exam Details ── */
     function openCreateExamModal() {
-      if (Auth.getRole() !== 'owner') {
-        App.toast('عذراً، المالك فقط يملك هذه الصلاحية!', 'error');
+      const role = Auth.getRole();
+      const roleInfo = Auth.getRoleInfo(role);
+      if (!roleInfo || roleInfo.level < 4.0) {
+        App.toast('عذراً، غير مصرح لك بإنشاء الاختبارات جديدة!', 'error');
         return;
       }
       document.getElementById('edit-exam-id').value = '';
@@ -2132,8 +2179,11 @@
     }
 
     function openEditExamModal(examId) {
-      if (Auth.getRole() !== 'owner') {
-        App.toast('عذراً، المالك فقط يملك هذه الصلاحية!', 'error');
+      const role = Auth.getRole();
+      const roleInfo = Auth.getRoleInfo(role);
+      const canManageExams = Auth.isLoggedIn() && roleInfo && (roleInfo.permissions.includes('*') || roleInfo.permissions.includes('manage_course_exams'));
+      if (!canManageExams) {
+        App.toast('عذراً، غير مصرح لك بتعديل الاختبارات!', 'error');
         return;
       }
       const exam = Storage.findById(Storage.keys.EXAMS, examId);
@@ -2157,8 +2207,11 @@
     }
 
     function saveExamDetails() {
-      if (Auth.getRole() !== 'owner') {
-        App.toast('عذراً، المالك فقط يملك هذه الصلاحية!', 'error');
+      const role = Auth.getRole();
+      const roleInfo = Auth.getRoleInfo(role);
+      const canManageExams = Auth.isLoggedIn() && roleInfo && (roleInfo.permissions.includes('*') || roleInfo.permissions.includes('manage_course_exams'));
+      if (!canManageExams) {
+        App.toast('عذراً، غير مصرح لك بحفظ الاختبارات!', 'error');
         return;
       }
       const id = document.getElementById('edit-exam-id').value;
@@ -2170,6 +2223,11 @@
       const docurl = document.getElementById('edit-exam-docurl').value || '';
       const showcount = document.getElementById('edit-exam-showcount').value ? parseInt(document.getElementById('edit-exam-showcount').value) : null;
       const desc = document.getElementById('edit-exam-desc').value.trim();
+
+      if (!id && roleInfo.level < 4.0) {
+        App.toast('عذراً، غير مصرح لك بإنشاء اختبارات جديدة!', 'error');
+        return;
+      }
 
       if (!title) {
         App.toast('يرجى كتابة عنوان الاختبار!', 'warning');
@@ -2234,8 +2292,11 @@
 
     /* ── Modal: Question Bank ── */
     function openQuestionBankModal(examId) {
-      if (Auth.getRole() !== 'owner') {
-        App.toast('عذراً، المالك فقط يملك هذه الصلاحية!', 'error');
+      const role = Auth.getRole();
+      const roleInfo = Auth.getRoleInfo(role);
+      const canManageExams = Auth.isLoggedIn() && roleInfo && (roleInfo.permissions.includes('*') || roleInfo.permissions.includes('manage_course_exams'));
+      if (!canManageExams) {
+        App.toast('عذراً، غير مصرح لك بإدارة الأسئلة!', 'error');
         return;
       }
       const exam = Storage.findById(Storage.keys.EXAMS, examId);
@@ -2275,24 +2336,34 @@
         return;
       }
 
-      container.innerHTML = exam.questions.map((q, idx) => `
-      <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:8px; padding:12px; margin-bottom:10px; position:relative;">
-        <button onclick="editQuestionInBank(${idx})" style="position:absolute; top:12px; left:60px; background:none; border:none; color:#c9a227; font-size:0.75rem; font-weight:700; cursor:pointer;"><i class="fa-solid fa-file-pen"></i> تعديل</button>
-        <button onclick="deleteQuestionFromBank(${idx})" style="position:absolute; top:12px; left:12px; background:none; border:none; color:#ff4757; font-size:0.75rem; font-weight:700; cursor:pointer;">🗑️ حذف</button>
-        <div style="font-weight:700; color:#fff; margin-bottom:8px; font-size:0.88rem; max-width:80%;">س ${idx + 1}: ${q.q}</div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; font-size:0.78rem;">
-          <div style="color:${q.correct === 0 ? '#2ecc71; font-weight:800;' : 'rgba(255,255,255,0.6)'}">1. ${q.options[0]}</div>
-          <div style="color:${q.correct === 1 ? '#2ecc71; font-weight:800;' : 'rgba(255,255,255,0.6)'}">2. ${q.options[1]}</div>
-          <div style="color:${q.correct === 2 ? '#2ecc71; font-weight:800;' : 'rgba(255,255,255,0.6)'}">3. ${q.options[2]}</div>
-          <div style="color:${q.correct === 3 ? '#2ecc71; font-weight:800;' : 'rgba(255,255,255,0.6)'}">4. ${q.options[3]}</div>
+      const role = Auth.getRole();
+      const roleInfo = Auth.getRoleInfo(role);
+      const canDelete = roleInfo && roleInfo.level >= 3.5;
+
+      container.innerHTML = exam.questions.map((q, idx) => {
+        const deleteBtn = canDelete ? `<button onclick="deleteQuestionFromBank(${idx})" style="position:absolute; top:12px; left:12px; background:none; border:none; color:#ff4757; font-size:0.75rem; font-weight:700; cursor:pointer;">🗑️ حذف</button>` : '';
+        return `
+        <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:8px; padding:12px; margin-bottom:10px; position:relative;">
+          <button onclick="editQuestionInBank(${idx})" style="position:absolute; top:12px; left:60px; background:none; border:none; color:#c9a227; font-size:0.75rem; font-weight:700; cursor:pointer;"><i class="fa-solid fa-file-pen"></i> تعديل</button>
+          ${deleteBtn}
+          <div style="font-weight:700; color:#fff; margin-bottom:8px; font-size:0.88rem; max-width:80%;">س ${idx + 1}: ${q.q}</div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; font-size:0.78rem;">
+            <div style="color:${q.correct === 0 ? '#2ecc71; font-weight:800;' : 'rgba(255,255,255,0.6)'}">1. ${q.options[0]}</div>
+            <div style="color:${q.correct === 1 ? '#2ecc71; font-weight:800;' : 'rgba(255,255,255,0.6)'}">2. ${q.options[1]}</div>
+            <div style="color:${q.correct === 2 ? '#2ecc71; font-weight:800;' : 'rgba(255,255,255,0.6)'}">3. ${q.options[2]}</div>
+            <div style="color:${q.correct === 3 ? '#2ecc71; font-weight:800;' : 'rgba(255,255,255,0.6)'}">4. ${q.options[3]}</div>
+          </div>
         </div>
-      </div>
-    `).join('');
+      `;
+      }).join('');
     }
 
     function editQuestionInBank(questionIndex) {
-      if (Auth.getRole() !== 'owner') {
-        App.toast('عذراً، المالك فقط يملك هذه الصلاحية!', 'error');
+      const role = Auth.getRole();
+      const roleInfo = Auth.getRoleInfo(role);
+      const canManageExams = Auth.isLoggedIn() && roleInfo && (roleInfo.permissions.includes('*') || roleInfo.permissions.includes('manage_course_exams'));
+      if (!canManageExams) {
+        App.toast('عذراً، غير مصرح لك بتعديل الأسئلة!', 'error');
         return;
       }
       const examId = document.getElementById('qbank-exam-id').value;
@@ -2334,8 +2405,11 @@
     }
 
     function addQuestionToBank() {
-      if (Auth.getRole() !== 'owner') {
-        App.toast('عذراً، المالك فقط يملك هذه الصلاحية!', 'error');
+      const role = Auth.getRole();
+      const roleInfo = Auth.getRoleInfo(role);
+      const canManageExams = Auth.isLoggedIn() && roleInfo && (roleInfo.permissions.includes('*') || roleInfo.permissions.includes('manage_course_exams'));
+      if (!canManageExams) {
+        App.toast('عذراً، غير مصرح لك بحفظ الأسئلة!', 'error');
         return;
       }
       const examId = document.getElementById('qbank-exam-id').value;
@@ -2385,8 +2459,10 @@
     }
 
     function deleteQuestionFromBank(questionIndex) {
-      if (Auth.getRole() !== 'owner') {
-        App.toast('عذراً، المالك فقط يملك هذه الصلاحية!', 'error');
+      const role = Auth.getRole();
+      const roleInfo = Auth.getRoleInfo(role);
+      if (!roleInfo || roleInfo.level < 3.5) {
+        App.toast('عذراً، غير مصرح لك بحذف الأسئلة!', 'error');
         return;
       }
       const examId = document.getElementById('qbank-exam-id').value;
@@ -3155,9 +3231,11 @@
           const countSpan = document.getElementById('super-violations-count');
           if (countSpan) countSpan.textContent = `${violations.length} مخالفات`;
 
-          const isOwner = Auth.getRole() === 'owner';
+          const userRole = Auth.getRole();
+          const roleInfo = Auth.getRoleInfo(userRole);
+          const isAuthorizedToClear = roleInfo && roleInfo.level >= 4.5;
           const clearBtn = document.getElementById('btn-clear-violations');
-          if (clearBtn) clearBtn.style.display = isOwner ? 'inline-block' : 'none';
+          if (clearBtn) clearBtn.style.display = isAuthorizedToClear ? 'inline-block' : 'none';
 
           if (violations.length === 0) {
             tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:30px;color:rgba(255,255,255,0.3)">لا توجد مخالفات مسجلة</td></tr>`;
@@ -3165,7 +3243,7 @@
           }
 
           tbody.innerHTML = violations.map(v => {
-            const deleteBtn = isOwner ? `<button class="action-btn-el reject" style="background:rgba(231, 76, 60, 0.1); border-color:rgba(231, 76, 60, 0.25);" onclick="deleteViolation('${v.id}')">🗑️ حذف</button>` : '';
+            const deleteBtn = isAuthorizedToClear ? `<button class="action-btn-el reject" style="background:rgba(231, 76, 60, 0.1); border-color:rgba(231, 76, 60, 0.25);" onclick="deleteViolation('${v.id}')">🗑️ حذف</button>` : '';
 
             let tablesList = [];
             const solved = Auth.resolveUserTableInfo({
@@ -3202,8 +3280,10 @@
     }
 
     window.deleteViolation = function (id) {
-      if (Auth.getRole() !== 'owner') {
-        App.toast('عذراً، المالك فقط يستطيع حذف المخالفات!', 'error');
+      const userRole = Auth.getRole();
+      const roleInfo = Auth.getRoleInfo(userRole);
+      if (!roleInfo || roleInfo.level < 4.5) {
+        App.toast('عذراً، غير مصرح لك بحذف المخالفات!', 'error');
         return;
       }
       if (confirm('هل أنت متأكد من حذف هذه المخالفة من الأرشيف؟')) {
@@ -3220,8 +3300,10 @@
     }
 
     window.clearAllViolations = function () {
-      if (Auth.getRole() !== 'owner') {
-        App.toast('عذراً، المالك فقط يستطيع مسح سجل المخالفات بالكامل!', 'error');
+      const userRole = Auth.getRole();
+      const roleInfo = Auth.getRoleInfo(userRole);
+      if (!roleInfo || roleInfo.level < 4.5) {
+        App.toast('عذراً، غير مصرح لك بمسح سجل المخالفات بالكامل!', 'error');
         return;
       }
       if (confirm('هل أنت متأكد من رغبتك في مسح سجل المخالفات بالكامل؟')) {

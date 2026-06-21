@@ -303,7 +303,7 @@ async function migrate() {
           return val;
         });
         const placeholders = vals.map((_, i) => `$${i + 1}`).join(', ');
-        const query = `INSERT INTO "${table.name}" (${columns}) VALUES (${placeholders})`;
+        const query = `INSERT INTO "${table.name}" (${columns}) VALUES (${placeholders}) ON CONFLICT DO NOTHING`;
         await pgPool.query(query, vals);
       }
 
