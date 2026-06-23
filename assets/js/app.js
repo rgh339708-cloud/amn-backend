@@ -1780,7 +1780,7 @@ const App = (() => {
     });
   }
 
-  /* ── ديناميكية حقن روابط الحضور والأرشيف للأشخاص المصرح لهم ── */
+  /* ── ديناميكية حقن روابط الحضور للأشخاص المصرح لهم ── */
   function injectAttendanceLinkIfNeeded() {
     const currentUser = (typeof Auth !== 'undefined') ? Auth.getCurrentUser() : null;
     const userRole = currentUser ? currentUser.role : null;
@@ -1803,8 +1803,6 @@ const App = (() => {
         userRank.includes('إدارة التدريب')
       ))
     );
-
-    const isArchiveAuthorized = currentUser && (ROLE_LEVELS[userRole] >= 4);
 
     const subInner = document.querySelector('#index-sub-inner, .navbar-sub-inner');
     const sidebarBody = document.querySelector('.sidebar-body');
@@ -1844,38 +1842,12 @@ const App = (() => {
         if (existingLink) existingLink.remove();
       }
 
-      // Archive injection
-      if (isArchiveAuthorized) {
-        const examsLink = Array.from(subInner.querySelectorAll('a')).find(a => {
-          const href = a.getAttribute('href');
-          return href && href.includes('exams.html');
-        });
-        const existingArchiveLink = Array.from(subInner.querySelectorAll('a')).find(a => {
-          const href = a.getAttribute('href');
-          return href && href.includes('archive.html');
-        });
-        if (examsLink && !existingArchiveLink) {
-          const examsHref = examsLink.getAttribute('href');
-          let arcHref = 'pages/archive.html';
-          if (examsHref.startsWith('../')) {
-            arcHref = '../pages/archive.html';
-          } else if (!examsHref.includes('pages/')) {
-            arcHref = 'archive.html';
-          }
-          
-          const arcLink = document.createElement('a');
-          arcLink.href = arcHref;
-          arcLink.className = 'sub-link';
-          arcLink.innerHTML = '<i class="fa-solid fa-box-archive"></i> أرشيف الاختبارات';
-          examsLink.parentNode.insertBefore(arcLink, examsLink.nextSibling);
-        }
-      } else {
-        const existingArchiveLink = Array.from(subInner.querySelectorAll('a')).find(a => {
-          const href = a.getAttribute('href');
-          return href && href.includes('archive.html');
-        });
-        if (existingArchiveLink) existingArchiveLink.remove();
-      }
+      // Always remove archive link if present
+      const existingArchiveLink = Array.from(subInner.querySelectorAll('a')).find(a => {
+        const href = a.getAttribute('href');
+        return href && href.includes('archive.html');
+      });
+      if (existingArchiveLink) existingArchiveLink.remove();
     }
 
     // 2. Sidebar injections
@@ -1913,32 +1885,12 @@ const App = (() => {
         if (existingSidebarLink) existingSidebarLink.remove();
       }
 
-      // Archive injection
-      if (isArchiveAuthorized) {
-        const examsSidebarLink = Array.from(sidebarBody.querySelectorAll('a')).find(a => {
-          const href = a.getAttribute('href');
-          return href && href.includes('exams.html');
-        });
-        const existingArchiveSidebarLink = Array.from(sidebarBody.querySelectorAll('a')).find(a => {
-          const href = a.getAttribute('href');
-          return href && href.includes('archive.html');
-        });
-        if (examsSidebarLink && !existingArchiveSidebarLink) {
-          const examsHref = examsSidebarLink.getAttribute('href');
-          let arcHref = 'pages/archive.html';
-          if (examsHref.startsWith('../')) {
-            arcHref = '../pages/archive.html';
-          } else if (!examsHref.includes('pages/')) {
-            arcHref = 'archive.html';
-          }
-
-          const arcSidebarLink = document.createElement('a');
-          arcSidebarLink.href = arcHref;
-          arcSidebarLink.className = 'sidebar-nav-item';
-          arcSidebarLink.innerHTML = '<div class="sidebar-nav-icon"><i class="fa-solid fa-box-archive"></i></div>أرشيف الاختبارات';
-          examsSidebarLink.parentNode.insertBefore(arcSidebarLink, examsSidebarLink.nextSibling);
-        }
-      }
+      // Always remove archive sidebar link if present
+      const existingArchiveSidebarLink = Array.from(sidebarBody.querySelectorAll('a')).find(a => {
+        const href = a.getAttribute('href');
+        return href && href.includes('archive.html');
+      });
+      if (existingArchiveSidebarLink) existingArchiveSidebarLink.remove();
     }
   }
 

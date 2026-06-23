@@ -6,19 +6,22 @@
 const SeedData = (() => {
 
   async function init() {
-    // Proactively fetch latest exams from static exams.json to ensure offline compatibility
-    try {
-      const ROOT = window.location.pathname.includes('/pages/') ? '../' : './';
-      const examsRes = await fetch(`${ROOT}assets/data/exams.json?t=${Date.now()}`).catch(() => null);
-      if (examsRes && examsRes.ok) {
-        const fileExams = await examsRes.json();
-        if (Array.isArray(fileExams) && fileExams.length > 0) {
-          console.log('[Data] Proactively loaded latest exams from static exams.json:', fileExams.length);
-          Storage.set(Storage.keys.EXAMS, fileExams, false);
+    // Only fetch/load static exams.json if we don't have any exams in Storage yet
+    const existingExamsOnLoad = Storage.getCollection(Storage.keys.EXAMS) || [];
+    if (existingExamsOnLoad.length === 0) {
+      try {
+        const ROOT = window.location.pathname.includes('/pages/') ? '../' : './';
+        const examsRes = await fetch(`${ROOT}assets/data/exams.json?t=${Date.now()}`).catch(() => null);
+        if (examsRes && examsRes.ok) {
+          const fileExams = await examsRes.json();
+          if (Array.isArray(fileExams) && fileExams.length > 0) {
+            console.log('[Data] Seeding exams from static exams.json:', fileExams.length);
+            Storage.set(Storage.keys.EXAMS, fileExams, false);
+          }
         }
+      } catch (e) {
+        console.warn('[Data] Failed to load static exams.json:', e);
       }
-    } catch (e) {
-      console.warn('[Data] Failed to load static exams.json:', e);
     }
 
     if (!Storage.get(Storage.keys.INITIALIZED)) {
