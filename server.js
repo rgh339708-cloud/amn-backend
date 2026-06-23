@@ -788,25 +788,34 @@ function sendAttendanceReportToDiscord(bookName, operatorStr, roomImage, records
 
 let db;
 let pgPool = null;
+let globalSqliteDb = null;
 
-function initializeSqlite() {
-  console.log('🔌 Local database mode: Connecting to SQLite...');
+function initializeSqliteConnection() {
   const DB_PATH = path.join(__dirname, 'assets', 'data', 'exam_archive.db');
-  const sqliteDb = new sqlite3.Database(DB_PATH, (err) => {
+  globalSqliteDb = new sqlite3.Database(DB_PATH, (err) => {
     if (err) {
       console.error('❌ SQLite connection error:', err);
     } else {
       console.log('✅ SQLite DB connected at', DB_PATH);
-      initializeSqliteSchema(sqliteDb);
+      globalSqliteDb.configure('busyTimeout', 10000);
+      globalSqliteDb.run('PRAGMA busy_timeout = 10000', (pragmaErr) => {
+        if (pragmaErr) console.error('❌ Failed to set PRAGMA busy_timeout:', pragmaErr);
+      });
+      initializeSqliteSchema(globalSqliteDb);
     }
   });
+}
 
+function initializeSqlite() {
+  if (!globalSqliteDb) {
+    initializeSqliteConnection();
+  }
   db = {
-    run(sql, params, callback) { sqliteDb.run(sql, params, callback); },
-    get(sql, params, callback) { sqliteDb.get(sql, params, callback); },
-    all(sql, params, callback) { sqliteDb.all(sql, params, callback); },
-    serialize(callback) { sqliteDb.serialize(callback); },
-    prepare(sql) { return sqliteDb.prepare(sql); }
+    run(sql, params, callback) { globalSqliteDb.run(sql, params, callback); },
+    get(sql, params, callback) { globalSqliteDb.get(sql, params, callback); },
+    all(sql, params, callback) { globalSqliteDb.all(sql, params, callback); },
+    serialize(callback) { globalSqliteDb.serialize(callback); },
+    prepare(sql) { return globalSqliteDb.prepare(sql); }
   };
 }
 
@@ -820,6 +829,9 @@ function fallbackToSqlite(next) {
     next();
   }
 }
+
+// Always initialize local SQLite database connection & schema on startup to prevent fallback race conditions
+initializeSqliteConnection();
 
 if (isPostgres) {
   console.log('🔌 Cloud database mode: Connecting to PostgreSQL...');
