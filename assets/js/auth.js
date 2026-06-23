@@ -1560,30 +1560,9 @@ const Auth = (() => {
       { id: 'college', title: 'كلية التدريب', emoji: '🎓', isSystem: true, allowedRoles: ['*'] },
       { id: 'attendance-reports', title: 'تقارير الحضور', emoji: '📋', isSystem: true, allowedRoles: ['owner', 'assistant_owner', 'academy_affairs', 'admin', 'course_admin'] },
       { id: 'exams', title: 'الاختبارات', emoji: '📝', isSystem: true, allowedRoles: ['*'] },
-      { id: 'archive', title: 'أرشيف الاختبارات', emoji: '📚', isSystem: true, allowedRoles: ['owner', 'assistant_owner', 'admin'] },
       { id: 'field-title', title: 'التوجيهات الميدانية', emoji: '🪪', isSystem: true, allowedRoles: ['*'] },
       { id: 'uniform', title: 'الزي العسكري', emoji: '👕', isSystem: true, allowedRoles: ['*'] },
-      { id: 'promotions', title: 'الترقيات', emoji: '⬆️', isSystem: true, allowedRoles: ['*'] },
-      { id: 'announcements', title: 'الإعلانات', emoji: '📢', isSystem: true, allowedRoles: ['*'] },
-      { id: 'apply', title: 'التقديم', emoji: '📨', isSystem: true, allowedRoles: ['*'] },
-      { id: 'database', title: 'قاعدة البيانات', emoji: '🔒', isSystem: true, allowedRoles: ['owner', 'assistant_owner', 'academy_affairs', 'admin'] },
-      { id: 'wings', title: 'أجنحة مدينة الـ 90', emoji: '🦅', isSystem: true, allowedRoles: ['*'] },
-      { id: 'aviation-document', title: 'مستند الجناح الجوي', emoji: '🚁', isSystem: true, parentId: 'wings', allowedRoles: ['*'] },
-      { id: 'counter-terrorism-wing', title: 'مستند جناح مكافحة الإرهاب', emoji: '⚔️', isSystem: true, parentId: 'wings', allowedRoles: ['*'] },
-      { id: 'pursuit-assault-wing', title: 'مستند جناح المداهمة والاقتحام', emoji: '🛡️', isSystem: true, parentId: 'wings', allowedRoles: ['*'] },
-      { id: 'shooting-skills-wing', title: 'جناح الرماية والتدريب الميداني', emoji: '🎯', isSystem: true, parentId: 'wings', allowedRoles: ['*'] },
-      { id: 'roads-document', title: 'مستند جناح أمن الطرق', emoji: '🛣️', isSystem: true, parentId: 'wings', allowedRoles: ['*'] },
-      { id: 'traffic-document', title: 'مستند جناح المرور', emoji: '🚥', isSystem: true, parentId: 'wings', allowedRoles: ['*'] },
-      { id: 'rapid-intervention-document', title: 'مستند جناح التدخل السريع', emoji: '⚡', isSystem: true, parentId: 'wings', allowedRoles: ['*'] },
-      { id: 'special-tasks-document', title: 'مستند جناح المهام الخاصة', emoji: '🔥', isSystem: true, parentId: 'wings', allowedRoles: ['*'] },
-      { id: 'officers-document', title: 'مستند الضباط', emoji: '🎖️', isSystem: true, parentId: 'wings', allowedRoles: ['*'] },
-      { id: 'staff-document', title: 'مستند الأفراد', emoji: '🎖️', isSystem: true, parentId: 'wings', allowedRoles: ['*'] },
-      { id: 'ops-document', title: 'مستند العمليات', emoji: '📞', isSystem: true, parentId: 'wings', allowedRoles: ['*'] },
-      { id: 'regulations-document', title: 'مستند الأنظمة واللوائح', emoji: '📜', isSystem: true, parentId: 'wings', allowedRoles: ['*'] },
-      { id: 'investigation-document', title: 'مستند المباحث', emoji: '🕵️', isSystem: true, parentId: 'wings', allowedRoles: ['*'] },
-      { id: 'narcotics-document', title: 'مستند مكافحة المخدرات', emoji: '💊', isSystem: true, parentId: 'wings', allowedRoles: ['*'] },
-      { id: 'district-officers-document', title: 'مستند قيادة أمن الطرق', emoji: '🛣️', isSystem: true, parentId: 'wings', allowedRoles: ['*'] },
-      { id: 'amn90-r', title: 'مدينة الـ 90 العسكرية', emoji: '🏰', isSystem: true, parentId: 'wings', allowedRoles: ['*'] }
+      { id: 'database', title: 'قاعدة البيانات', emoji: '🔒', isSystem: true, allowedRoles: ['owner', 'assistant_owner', 'academy_affairs', 'admin'] }
     ];
 
     // Cleanup custom pages that duplicate system pages by ID or Title (normalized)

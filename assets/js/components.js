@@ -35,8 +35,8 @@ const Components = (() => {
         .replace(/\s+/g, '');
     }
 
-    const systemPageIds = ['home', 'leadership', 'managers', 'centers', 'guide', 'inventory', 'vehicles', 'college', 'attendance-reports', 'exams', 'archive', 'field-title', 'uniform', 'promotions', 'announcements', 'apply', 'database', 'wings'];
-    const systemNormalizedTitles = ['الرئيسية', 'القيادة', 'مدراء الأقسام', 'المراكز', 'الدليل الشامل', 'العهدة', 'المركبات', 'كلية التدريب', 'تقارير الحضور', 'الاختبارات', 'أرشيف الاختبارات', 'التوجيهات الميدانية', 'الزي العسكري', 'الترقيات', 'الإعلانات', 'التقديم', 'قاعدة البيانات', 'أجنحة مدينة الـ 90'].map(normalizeArabic);
+    const systemPageIds = ['home', 'leadership', 'managers', 'centers', 'guide', 'inventory', 'vehicles', 'college', 'attendance-reports', 'exams', 'field-title', 'uniform', 'database'];
+    const systemNormalizedTitles = ['الرئيسية', 'القيادة', 'مدراء الأقسام', 'المراكز', 'الدليل الشامل', 'العهدة', 'المركبات', 'كلية التدريب', 'تقارير الحضور', 'الاختبارات', 'التوجيهات الميدانية', 'الزي العسكري', 'قاعدة البيانات'].map(normalizeArabic);
 
     rawPages.forEach(p => {
       if (!p || !p.id) return;
@@ -69,7 +69,7 @@ const Components = (() => {
     });
 
     // Sort system pages in correct order, then custom pages
-    const systemOrder = ['home', 'leadership', 'managers', 'centers', 'guide', 'inventory', 'vehicles', 'college', 'attendance-reports', 'exams', 'field-title', 'uniform', 'database', 'wings'];
+    const systemOrder = ['home', 'leadership', 'managers', 'centers', 'guide', 'inventory', 'vehicles', 'college', 'attendance-reports', 'exams', 'field-title', 'uniform', 'database'];
     visiblePages.sort((a, b) => {
       const idxA = systemOrder.indexOf(a.id);
       const idxB = systemOrder.indexOf(b.id);
@@ -133,8 +133,8 @@ const Components = (() => {
         .replace(/\s+/g, '');
     }
 
-    const systemPageIds = ['home', 'leadership', 'managers', 'centers', 'guide', 'inventory', 'vehicles', 'college', 'attendance-reports', 'exams', 'archive', 'field-title', 'uniform', 'promotions', 'announcements', 'apply', 'database', 'wings'];
-    const systemNormalizedTitles = ['الرئيسية', 'القيادة', 'مدراء الأقسام', 'المراكز', 'الدليل الشامل', 'العهدة', 'المركبات', 'كلية التدريب', 'تقارير الحضور', 'الاختبارات', 'أرشيف الاختبارات', 'التوجيهات الميدانية', 'الزي العسكري', 'الترقيات', 'الإعلانات', 'التقديم', 'قاعدة البيانات', 'أجنحة مدينة الـ 90'].map(normalizeArabic);
+    const systemPageIds = ['home', 'leadership', 'managers', 'centers', 'guide', 'inventory', 'vehicles', 'college', 'attendance-reports', 'exams', 'field-title', 'uniform', 'database'];
+    const systemNormalizedTitles = ['الرئيسية', 'القيادة', 'مدراء الأقسام', 'المراكز', 'الدليل الشامل', 'العهدة', 'المركبات', 'كلية التدريب', 'تقارير الحضور', 'الاختبارات', 'التوجيهات الميدانية', 'الزي العسكري', 'قاعدة البيانات'].map(normalizeArabic);
 
     rawPages.forEach(p => {
       if (!p || !p.id) return;
@@ -181,7 +181,7 @@ const Components = (() => {
     });
 
     // 2. Knowledge Section
-    const knowledgeIds = ['guide', 'college', 'attendance-reports', 'exams', 'uniform', 'archive'];
+    const knowledgeIds = ['guide', 'college', 'attendance-reports', 'exams', 'uniform'];
     const knowledgePages = allowedPages.filter(p => knowledgeIds.includes(p.id));
     knowledgePages.sort((a, b) => knowledgeIds.indexOf(a.id) - knowledgeIds.indexOf(b.id));
     
@@ -198,32 +198,8 @@ const Components = (() => {
       });
     }
 
-    // 3. Wings Section (if wings is allowed)
-    const wingsPage = allowedPages.find(p => p.id === 'wings');
-    if (wingsPage) {
-      items.push({ divider: true });
-      items.push({ label: wingsPage.title, section: true });
-      items.push({
-        href: `${BASE}pages/wings.html`,
-        icon: wingsPage.emoji ? (wingsPage.emoji.includes('<i') ? wingsPage.emoji : `<span>${wingsPage.emoji}</span>`) : '🦅',
-        label: 'استعراض الأجنحة',
-        page: 'wings'
-      });
-      // Add subpages under wings
-      const wingSubs = allowedPages.filter(p => p.parentId === 'wings');
-      wingSubs.forEach(sub => {
-        items.push({
-          href: `${BASE}pages/${sub.id}.html`,
-          icon: '↳',
-          label: sub.title,
-          page: sub.id,
-          isSubpage: true
-        });
-      });
-    }
-
-    // 4. Admin & Documentation Section
-    const adminDocsIds = ['inventory', 'promotions', 'field-title'];
+    // 3. Admin & Documentation Section
+    const adminDocsIds = ['inventory', 'field-title'];
     const adminDocsPages = allowedPages.filter(p => adminDocsIds.includes(p.id));
     adminDocsPages.sort((a, b) => adminDocsIds.indexOf(a.id) - adminDocsIds.indexOf(b.id));
     
@@ -231,19 +207,17 @@ const Components = (() => {
       items.push({ divider: true });
       items.push({ label: 'الإدارة والتوثيق', section: true });
       adminDocsPages.forEach(p => {
-        const isBadge = (p.id === 'promotions');
         items.push({
           href: `${BASE}pages/${p.id}.html`,
           icon: p.emoji ? (p.emoji.includes('<i') ? p.emoji : `<span>${p.emoji}</span>`) : '📄',
           label: p.title,
-          page: p.id,
-          badge: isBadge
+          page: p.id
         });
       });
     }
 
-    // 5. Community Section
-    const commIds = ['announcements', 'apply', 'database'];
+    // 4. Community Section
+    const commIds = ['database'];
     const commPages = allowedPages.filter(p => commIds.includes(p.id));
     commPages.sort((a, b) => commIds.indexOf(a.id) - commIds.indexOf(b.id));
     
@@ -251,13 +225,11 @@ const Components = (() => {
       items.push({ divider: true });
       items.push({ label: 'المجتمع', section: true });
       commPages.forEach(p => {
-        const isBadge = (p.id === 'announcements');
         items.push({
           href: `${BASE}pages/${p.id}.html`,
           icon: p.emoji ? (p.emoji.includes('<i') ? p.emoji : `<span>${p.emoji}</span>`) : '📄',
           label: p.title,
-          page: p.id,
-          badge: isBadge
+          page: p.id
         });
       });
     }
@@ -408,7 +380,6 @@ const Components = (() => {
               <div class="footer-links">
                 <a href="${BASE}pages/leadership.html" class="footer-link">القيادة</a>
                 <a href="${BASE}pages/centers.html"    class="footer-link">المراكز</a>
-                <a href="${BASE}pages/promotions.html" class="footer-link">الترقيات</a>
                 <a href="${BASE}pages/inventory.html"  class="footer-link">العهدة</a>
               </div>
             </div>

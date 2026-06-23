@@ -1938,15 +1938,8 @@ const App = (() => {
           arcSidebarLink.innerHTML = '<div class="sidebar-nav-icon"><i class="fa-solid fa-box-archive"></i></div>أرشيف الاختبارات';
           examsSidebarLink.parentNode.insertBefore(arcSidebarLink, examsSidebarLink.nextSibling);
         }
-      } else {
-        const existingArchiveSidebarLink = Array.from(sidebarBody.querySelectorAll('a')).find(a => {
-          const href = a.getAttribute('href');
-          return href && href.includes('archive.html');
-        });
-        if (existingArchiveSidebarLink) existingArchiveSidebarLink.remove();
       }
     }
-  }
   }
 
   /* ── Initialize App ───────────────────────────────── */
