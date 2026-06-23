@@ -453,7 +453,7 @@
     }
 
     .attendance-header-section {
-      padding: 60px 0 40px;
+      padding: 115px 0 40px;
       position: relative;
       background: var(--color-bg-primary);
     }
@@ -803,10 +803,10 @@
 
   </div>
 
-  <script src="../assets/js/storage.js?v=1.1.22"></script>
+  <script src="../assets/js/storage.js?v=1.1.25"></script>
   <script src="../assets/js/data.js?v=1.1.20"></script>
   <script src="../assets/js/auth.js?v=1.1.20"></script>
-  <script src="../assets/js/components.js"></script>
+  <script src="../assets/js/components.js?v=1.1.25"></script>
   <script src="../assets/js/app.js?v=1.1.20"></script>
   <script>
     // Inject navbar and sidebar
@@ -982,11 +982,22 @@
           clearTimeout(timeoutId);
 
           if (!booksRes.ok) {
+            if (booksRes.status === 500) {
+              console.error('Server returned 500. breaking retry loop and falling back to cache...');
+              const err = new Error('HTTP 500 Server Error');
+              err.is500 = true;
+              throw err;
+            }
             throw new Error(`HTTP error status ${booksRes.status}`);
           }
           break; // Succeeded!
         } catch (fetchErr) {
           console.warn(`Fetch attempt ${attempt} failed on ${apiBase}:`, fetchErr);
+          
+          if (fetchErr.is500) {
+            console.log('Skipping remaining retries due to HTTP 500 error.');
+            break;
+          }
           
           // Dynamic fallback: If we tried to connect to a local tunnel and it failed,
           // switch to the Render backend immediately to save time and prevent lockup.

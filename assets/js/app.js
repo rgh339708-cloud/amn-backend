@@ -1780,7 +1780,7 @@ const App = (() => {
     });
   }
 
-  /* ── ديناميكية حقن روابط الحضور للأشخاص المصرح لهم ── */
+  /* ── ديناميكية حقن روابط الحضور والأرشيف للأشخاص المصرح لهم ── */
   function injectAttendanceLinkIfNeeded() {
     const currentUser = (typeof Auth !== 'undefined') ? Auth.getCurrentUser() : null;
     const userRole = currentUser ? currentUser.role : null;
@@ -1804,12 +1804,15 @@ const App = (() => {
       ))
     );
 
+    const isArchiveAuthorized = currentUser && (ROLE_LEVELS[userRole] >= 4);
+
     const subInner = document.querySelector('#index-sub-inner, .navbar-sub-inner');
     const sidebarBody = document.querySelector('.sidebar-body');
 
-    if (isAuthorized) {
-      // 1. Sub-navbar injection
-      if (subInner) {
+    // 1. Sub-navbar injections
+    if (subInner) {
+      // Attendance Reports injection
+      if (isAuthorized) {
         const collegeLink = Array.from(subInner.querySelectorAll('a')).find(a => {
           const href = a.getAttribute('href');
           return href && href.includes('college.html');
@@ -1833,10 +1836,52 @@ const App = (() => {
           attLink.innerHTML = '<i class="fa-solid fa-clipboard-user"></i> تقارير الحضور';
           collegeLink.parentNode.insertBefore(attLink, collegeLink.nextSibling);
         }
+      } else {
+        const existingLink = Array.from(subInner.querySelectorAll('a')).find(a => {
+          const href = a.getAttribute('href');
+          return href && href.includes('attendance-reports.html');
+        });
+        if (existingLink) existingLink.remove();
       }
 
-      // 2. Sidebar injection
-      if (sidebarBody) {
+      // Archive injection
+      if (isArchiveAuthorized) {
+        const examsLink = Array.from(subInner.querySelectorAll('a')).find(a => {
+          const href = a.getAttribute('href');
+          return href && href.includes('exams.html');
+        });
+        const existingArchiveLink = Array.from(subInner.querySelectorAll('a')).find(a => {
+          const href = a.getAttribute('href');
+          return href && href.includes('archive.html');
+        });
+        if (examsLink && !existingArchiveLink) {
+          const examsHref = examsLink.getAttribute('href');
+          let arcHref = 'pages/archive.html';
+          if (examsHref.startsWith('../')) {
+            arcHref = '../pages/archive.html';
+          } else if (!examsHref.includes('pages/')) {
+            arcHref = 'archive.html';
+          }
+          
+          const arcLink = document.createElement('a');
+          arcLink.href = arcHref;
+          arcLink.className = 'sub-link';
+          arcLink.innerHTML = '<i class="fa-solid fa-box-archive"></i> أرشيف الاختبارات';
+          examsLink.parentNode.insertBefore(arcLink, examsLink.nextSibling);
+        }
+      } else {
+        const existingArchiveLink = Array.from(subInner.querySelectorAll('a')).find(a => {
+          const href = a.getAttribute('href');
+          return href && href.includes('archive.html');
+        });
+        if (existingArchiveLink) existingArchiveLink.remove();
+      }
+    }
+
+    // 2. Sidebar injections
+    if (sidebarBody) {
+      // Attendance Reports injection
+      if (isAuthorized) {
         const collegeSidebarLink = Array.from(sidebarBody.querySelectorAll('a')).find(a => {
           const href = a.getAttribute('href');
           return href && href.includes('college.html');
@@ -1860,24 +1905,48 @@ const App = (() => {
           attSidebarLink.innerHTML = '<div class="sidebar-nav-icon"><i class="fa-solid fa-clipboard-user"></i></div>تقارير الحضور';
           collegeSidebarLink.parentNode.insertBefore(attSidebarLink, collegeSidebarLink.nextSibling);
         }
-      }
-    } else {
-      // Clean up links if unauthorized
-      if (subInner) {
-        const existingLink = Array.from(subInner.querySelectorAll('a')).find(a => {
-          const href = a.getAttribute('href');
-          return href && href.includes('attendance-reports.html');
-        });
-        if (existingLink) existingLink.remove();
-      }
-      if (sidebarBody) {
+      } else {
         const existingSidebarLink = Array.from(sidebarBody.querySelectorAll('a')).find(a => {
           const href = a.getAttribute('href');
           return href && href.includes('attendance-reports.html');
         });
         if (existingSidebarLink) existingSidebarLink.remove();
       }
+
+      // Archive injection
+      if (isArchiveAuthorized) {
+        const examsSidebarLink = Array.from(sidebarBody.querySelectorAll('a')).find(a => {
+          const href = a.getAttribute('href');
+          return href && href.includes('exams.html');
+        });
+        const existingArchiveSidebarLink = Array.from(sidebarBody.querySelectorAll('a')).find(a => {
+          const href = a.getAttribute('href');
+          return href && href.includes('archive.html');
+        });
+        if (examsSidebarLink && !existingArchiveSidebarLink) {
+          const examsHref = examsSidebarLink.getAttribute('href');
+          let arcHref = 'pages/archive.html';
+          if (examsHref.startsWith('../')) {
+            arcHref = '../pages/archive.html';
+          } else if (!examsHref.includes('pages/')) {
+            arcHref = 'archive.html';
+          }
+
+          const arcSidebarLink = document.createElement('a');
+          arcSidebarLink.href = arcHref;
+          arcSidebarLink.className = 'sidebar-nav-item';
+          arcSidebarLink.innerHTML = '<div class="sidebar-nav-icon"><i class="fa-solid fa-box-archive"></i></div>أرشيف الاختبارات';
+          examsSidebarLink.parentNode.insertBefore(arcSidebarLink, examsSidebarLink.nextSibling);
+        }
+      } else {
+        const existingArchiveSidebarLink = Array.from(sidebarBody.querySelectorAll('a')).find(a => {
+          const href = a.getAttribute('href');
+          return href && href.includes('archive.html');
+        });
+        if (existingArchiveSidebarLink) existingArchiveSidebarLink.remove();
+      }
     }
+  }
   }
 
   /* ── Initialize App ───────────────────────────────── */

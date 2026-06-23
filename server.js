@@ -139,12 +139,14 @@ async function initializePostgresSchema(pool) {
     department VARCHAR,
     code VARCHAR,
     status VARCHAR DEFAULT 'active',
+    is_manual_role INTEGER DEFAULT 0,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   )`);
   try {
     await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS global_name VARCHAR`);
+    await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS is_manual_role INTEGER DEFAULT 0`);
   } catch(e) {
-    console.warn('[DB Migrate] Postgres users global_name column check warning:', e.message);
+    console.warn('[DB Migrate] Postgres users global_name/is_manual_role column check warning:', e.message);
   }
   await pool.query(`CREATE TABLE IF NOT EXISTS login_logs (
     id SERIAL PRIMARY KEY,
@@ -377,6 +379,7 @@ function initializeSqliteSchema(sqliteDb) {
     department TEXT,
     code TEXT,
     status TEXT DEFAULT 'active',
+    is_manual_role INTEGER DEFAULT 0,
     updated_at TEXT DEFAULT (datetime('now'))
   )`, () => {
     // Migrate: Add columns if not already present
@@ -385,6 +388,7 @@ function initializeSqliteSchema(sqliteDb) {
     sqliteDb.run("ALTER TABLE users ADD COLUMN banner_url TEXT", () => {});
     sqliteDb.run("ALTER TABLE users ADD COLUMN last_sync TEXT", () => {});
     sqliteDb.run("ALTER TABLE users ADD COLUMN global_name TEXT", () => {});
+    sqliteDb.run("ALTER TABLE users ADD COLUMN is_manual_role INTEGER DEFAULT 0", () => {});
   });
 
   // 2. login_logs table
@@ -584,7 +588,9 @@ function initializeSqliteSchema(sqliteDb) {
     room_image TEXT,
     updated_at TEXT DEFAULT (datetime('now'))
   )`, () => {
-    sqliteDb.run("ALTER TABLE attendance_books ADD COLUMN room_image TEXT", () => {});
+    sqliteDb.run("ALTER TABLE attendance_books ADD COLUMN room_image TEXT", () => {
+      initializeAttendanceBooks();
+    });
   });
 
   // 13. attendance_book_logs table
@@ -647,6 +653,137 @@ function initializeAttendanceBooks() {
       }
     });
   });
+  updateOpsExamDescription();
+}
+
+function updateOpsExamDescription() {
+  const examId = 'exam_004';
+  const newCategory = 'جندي فما فوق';
+  const newDesc = `تنويه هام:
+
+* في حال الخروج من الموقع أو إغلاق صفحة الاختبار أثناء تأدية الاختبار، سيتم اعتبار المتقدم راسباً.
+* يجب الالتزام بالموعد المحدد للاختبار وإرساله قبل انتهاء الوقت المخصص.
+* يتحمل المتقدم مسؤولية التأكد من استقرار الاتصال بالإنترنت وعدم مغادرة صفحة الاختبار حتى إتمام عملية الإرسال بنجاح.
+
+مع تحيات
+الإدارة العامة لشؤون تدريب الأمن العام`;
+
+  db.get('SELECT details_json FROM exams WHERE id = ?', [examId], (err, row) => {
+    if (err) {
+      console.error('[DB Upgrade] Error selecting exam details:', err);
+      return;
+    }
+    if (row) {
+      let details = {};
+      try {
+        details = JSON.parse(row.details_json || '{}');
+      } catch (ex) {}
+      
+      details.description = newDesc;
+      const updatedDetailsJson = JSON.stringify(details);
+
+      db.run('UPDATE exams SET course_name = ?, details_json = ? WHERE id = ?',
+        [newCategory, updatedDetailsJson, examId],
+        (updateErr) => {
+          if (updateErr) {
+            console.error('[DB Upgrade] Error updating exam_004:', updateErr);
+          } else {
+            console.log('✅ Successfully updated exam_004 description and category in DB.');
+          }
+        }
+      );
+    }
+  });
+}
+
+function sendDiscordChannelMessage(channelId, payload, botToken) {
+  return new Promise((resolve, reject) => {
+    if (!botToken) {
+      return reject(new Error('Discord Bot Token not configured.'));
+    }
+    const postData = JSON.stringify(payload);
+    const options = {
+      hostname: 'discord.com',
+      path: `/api/v10/channels/${channelId}/messages`,
+      method: 'POST',
+      headers: {
+        'Authorization': `Bot ${botToken}`,
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(postData)
+      }
+    };
+
+    const req = https.request(options, (res) => {
+      let body = '';
+      res.on('data', chunk => { body += chunk; });
+      res.on('end', () => {
+        if (res.statusCode === 200 || res.statusCode === 201) {
+          try {
+            resolve(JSON.parse(body));
+          } catch (e) {
+            resolve(body);
+          }
+        } else {
+          reject(new Error(`Discord API status ${res.statusCode}: ${body}`));
+        }
+      });
+    });
+
+    req.on('error', (err) => {
+      reject(err);
+    });
+
+    req.write(postData);
+    req.end();
+  });
+}
+
+function sendAttendanceReportToDiscord(bookName, operatorStr, roomImage, records) {
+  const botToken = config.discordToken;
+  if (!botToken) {
+    console.warn('[Discord Report Warning] Discord Bot Token not configured. Cannot send message to Discord.');
+    return;
+  }
+
+  const channelId = '1518159865455841340';
+  
+  let attendeesList = '';
+  if (records && records.length > 0) {
+    attendeesList = records.map((r, i) => `**${i + 1}.** ${r.rank} / ${r.display_name} - الكود: \`${r.code || '—'}\``).join('\n');
+  } else {
+    attendeesList = 'لا يوجد حضور مسجل في هذه الفترة.';
+  }
+
+  const embed = {
+    title: '📋 تقرير حضور المدربين',
+    color: 13214247, // Hex #c9a227 (Gold)
+    fields: [
+      { name: 'الدورة / الدفتر', value: bookName, inline: true },
+      { name: 'المشرف المسؤول', value: operatorStr, inline: true },
+      { name: 'عدد الحاضرين', value: String(records ? records.length : 0), inline: true },
+      { name: 'أسماء الحاضرين', value: attendeesList }
+    ],
+    timestamp: new Date().toISOString(),
+    footer: {
+      text: 'شؤون تدريب الأمن العام • مدينة الـ 90'
+    }
+  };
+
+  if (roomImage) {
+    embed.image = { url: roomImage };
+  }
+
+  const payload = {
+    embeds: [embed]
+  };
+
+  sendDiscordChannelMessage(channelId, payload, botToken)
+    .then(response => {
+      console.log('✅ Successfully sent attendance report to Discord channel 1518159865455841340');
+    })
+    .catch(err => {
+      console.error('❌ Failed to send attendance report to Discord:', err.message);
+    });
 }
 
 let db;
@@ -661,7 +798,6 @@ function initializeSqlite() {
     } else {
       console.log('✅ SQLite DB connected at', DB_PATH);
       initializeSqliteSchema(sqliteDb);
-      initializeAttendanceBooks();
     }
   });
 
@@ -674,6 +810,17 @@ function initializeSqlite() {
   };
 }
 
+function fallbackToSqlite(next) {
+  if (isPostgres) {
+    console.warn('⚠️ Postgres query failed or quota limits exceeded. Switching to local SQLite database mode (exam_archive.db)...');
+    isPostgres = false;
+    initializeSqlite();
+  }
+  if (next) {
+    next();
+  }
+}
+
 if (isPostgres) {
   console.log('🔌 Cloud database mode: Connecting to PostgreSQL...');
   const { Pool } = require('pg');
@@ -683,6 +830,7 @@ if (isPostgres) {
   });
   pgPool.on('error', (err) => {
     console.error('Unexpected error on idle client', err);
+    fallbackToSqlite();
   });
 
   db = {
@@ -691,10 +839,17 @@ if (isPostgres) {
         callback = params;
         params = [];
       }
+      if (!isPostgres) {
+        db.run(sql, params, callback);
+        return;
+      }
       const pgSql = convertSqlToPostgres(sql);
       pgPool.query(pgSql, params, (err, res) => {
         if (err) {
-          if (callback) callback(err);
+          console.error(`Postgres error on run: ${err.message}. Retrying query on SQLite...`);
+          fallbackToSqlite(() => {
+            db.run(sql, params, callback);
+          });
         } else {
           const context = {
             lastID: res.rows && res.rows[0] ? (res.rows[0].id || Object.values(res.rows[0])[0]) : null,
@@ -709,10 +864,17 @@ if (isPostgres) {
         callback = params;
         params = [];
       }
+      if (!isPostgres) {
+        db.get(sql, params, callback);
+        return;
+      }
       const pgSql = convertSqlToPostgres(sql);
       pgPool.query(pgSql, params, (err, res) => {
         if (err) {
-          if (callback) callback(err, null);
+          console.error(`Postgres error on get: ${err.message}. Retrying query on SQLite...`);
+          fallbackToSqlite(() => {
+            db.get(sql, params, callback);
+          });
         } else {
           if (callback) callback(null, res.rows ? res.rows[0] : null);
         }
@@ -723,10 +885,17 @@ if (isPostgres) {
         callback = params;
         params = [];
       }
+      if (!isPostgres) {
+        db.all(sql, params, callback);
+        return;
+      }
       const pgSql = convertSqlToPostgres(sql);
       pgPool.query(pgSql, params, (err, res) => {
         if (err) {
-          if (callback) callback(err, null);
+          console.error(`Postgres error on all: ${err.message}. Retrying query on SQLite...`);
+          fallbackToSqlite(() => {
+            db.all(sql, params, callback);
+          });
         } else {
           if (callback) callback(null, res.rows || []);
         }
@@ -817,6 +986,196 @@ function dbInsertOrReplaceStringKey(tableName, primaryKey, item, callback) {
   
   db.run(sql, values, callback);
 }
+
+function getInsertOrReplaceSqlAndValues(tableName, primaryKey, item) {
+  const cleanedItem = { ...item };
+  const columns = Object.keys(cleanedItem).map(c => `"${c}"`);
+  const placeholders = Object.keys(cleanedItem).map(() => "?");
+  const values = Object.values(cleanedItem);
+  
+  let sql = `INSERT INTO "${tableName}" (${columns.join(', ')}) VALUES (${placeholders.join(', ')})`;
+  
+  if (isPostgres) {
+    const updateCols = Object.keys(cleanedItem).filter(c => c !== primaryKey);
+    const updateClause = updateCols.map(c => `"${c}" = EXCLUDED."${c}"`).join(', ');
+    sql = `INSERT INTO "${tableName}" (${columns.join(', ')}) VALUES (${placeholders.map((_, i) => `$${i+1}`).join(', ')}) ON CONFLICT ("${primaryKey}") DO UPDATE SET ${updateClause}`;
+  } else {
+    sql = `INSERT OR REPLACE INTO "${tableName}" (${columns.join(', ')}) VALUES (${placeholders.join(', ')})`;
+  }
+  return { sql, values };
+}
+
+function dumpExamsToFile(callback) {
+  const EXAMS_FILE = path.join(PUBLIC_DIR, 'assets', 'data', 'exams.json');
+  
+  const queryCallback = (err, rows) => {
+    if (err) {
+      console.error('[Backup Exams] Failed to select exams:', err.message);
+      if (callback) callback(err);
+      return;
+    }
+    const examsList = (rows || []).map(e => {
+      let qs = [];
+      try { qs = JSON.parse(e.questions_json || '[]'); } catch (ex) {}
+      let details = {};
+      try { details = JSON.parse(e.details_json || '{}'); } catch (ex) {}
+      return {
+        id: e.id,
+        title: e.exam_name,
+        category: e.course_name,
+        questionsCountToShow: e.questions_count,
+        passingScore: e.passing_score,
+        isOpen: e.status === 'open',
+        questions: qs,
+        ...details
+      };
+    });
+    fs.writeFile(EXAMS_FILE, JSON.stringify(examsList, null, 2), 'utf8', (writeErr) => {
+      if (writeErr) {
+        console.error('[Backup Exams] Failed to write exams.json:', writeErr.message);
+      } else {
+        console.log('[Backup Exams] Successfully updated assets/data/exams.json on disk!');
+      }
+      if (callback) callback(writeErr);
+    });
+  };
+
+  if (isPostgres && pgPool) {
+    pgPool.query('SELECT * FROM exams', [], (err, res) => {
+      if (err) {
+        console.error(`Postgres error on dumpExamsToFile SELECT * FROM exams: ${err.message}. Switching to SQLite fallback.`);
+        fallbackToSqlite(() => {
+          db.all('SELECT * FROM exams', [], (sqliteErr, rows) => {
+            queryCallback(sqliteErr, rows);
+          });
+        });
+      } else {
+        queryCallback(null, res ? res.rows : []);
+      }
+    });
+  } else {
+    // db.all is wrapped or directly available
+    db.all('SELECT * FROM exams', [], (err, rows) => {
+      queryCallback(err, rows);
+    });
+  }
+}
+
+function executeBulkSync(tableName, primaryKey, itemsToSave, callback) {
+  if (isPostgres && pgPool) {
+    pgPool.connect((connectErr, client, release) => {
+      if (connectErr) {
+        console.error(`❌ pgPool connection error for bulk sync transaction on ${tableName}:`, connectErr);
+        console.log('⚠️ Falling back to SQLite bulk sync...');
+        fallbackToSqlite(() => {
+          executeBulkSync(tableName, primaryKey, itemsToSave, callback);
+        });
+        return;
+      }
+      
+      const rollback = (err) => {
+        client.query('ROLLBACK', (rbErr) => {
+          release();
+          console.error(`❌ Postgres transaction error for bulk sync on ${tableName}:`, err.message);
+          console.log('⚠️ Falling back to SQLite bulk sync...');
+          fallbackToSqlite(() => {
+            executeBulkSync(tableName, primaryKey, itemsToSave, callback);
+          });
+        });
+      };
+      
+      client.query('BEGIN', (beginErr) => {
+        if (beginErr) return rollback(beginErr);
+        
+        client.query(`DELETE FROM "${tableName}"`, (deleteErr) => {
+          if (deleteErr) return rollback(deleteErr);
+          
+          if (!itemsToSave || itemsToSave.length === 0) {
+            client.query('COMMIT', (commitErr) => {
+              release();
+              if (commitErr) return callback(commitErr);
+              callback(null, 0);
+            });
+            return;
+          }
+          
+          let insertIndex = 0;
+          const insertNext = () => {
+            if (insertIndex >= itemsToSave.length) {
+              client.query('COMMIT', (commitErr) => {
+                release();
+                if (commitErr) return callback(commitErr);
+                callback(null, itemsToSave.length);
+              });
+              return;
+            }
+            
+            const item = itemsToSave[insertIndex];
+            const { sql, values } = getInsertOrReplaceSqlAndValues(tableName, primaryKey, item);
+            client.query(sql, values, (insertErr) => {
+              if (insertErr) {
+                console.error(`❌ Error bulk inserting item into ${tableName}:`, insertErr);
+                return rollback(insertErr);
+              }
+              insertIndex++;
+              insertNext();
+            });
+          };
+          
+          insertNext();
+        });
+      });
+    });
+  } else {
+    // SQLite mode
+    db.serialize(() => {
+      db.run('BEGIN TRANSACTION', [], (beginErr) => {
+        if (beginErr) return callback(beginErr);
+        
+        db.run(`DELETE FROM "${tableName}"`, [], (deleteErr) => {
+          if (deleteErr) {
+            db.run('ROLLBACK', [], () => {});
+            return callback(deleteErr);
+          }
+          
+          if (!itemsToSave || itemsToSave.length === 0) {
+            db.run('COMMIT', [], (commitErr) => {
+              if (commitErr) return callback(commitErr);
+              callback(null, 0);
+            });
+            return;
+          }
+          
+          let insertIndex = 0;
+          const insertNext = () => {
+            if (insertIndex >= itemsToSave.length) {
+              db.run('COMMIT', [], (commitErr) => {
+                if (commitErr) return callback(commitErr);
+                callback(null, itemsToSave.length);
+              });
+              return;
+            }
+            
+            const item = itemsToSave[insertIndex];
+            const { sql, values } = getInsertOrReplaceSqlAndValues(tableName, primaryKey, item);
+            db.run(sql, values, (insertErr) => {
+              if (insertErr) {
+                console.error(`❌ SQLite bulk insert error for ${tableName}:`, insertErr);
+                db.run('ROLLBACK', [], () => {});
+                return callback(insertErr);
+              }
+              insertIndex++;
+              insertNext();
+            });
+          };
+          
+          insertNext();
+        });
+      });
+    });
+  }
+}
+
 
 
 function mapClientResultToDb(item) {
@@ -1406,9 +1765,11 @@ function syncGoogleSheetsToDb(forceId = null, loginUser = null) {
                 }
               );
             } else {
-              const finalRole = resolveRoleFromRank(m.rank, dbUser.role);
+              const isManual = dbUser.is_manual_role === 1 || dbUser.is_manual_role === true;
+              const finalRole = isManual ? dbUser.role : resolveRoleFromRank(m.rank, dbUser.role);
+              const finalRank = isManual ? dbUser.rank : (m.rank || 'مشاهد');
               const isRoleDiff = dbUser.role !== finalRole;
-              const isRankDiff = dbUser.rank !== (m.rank || 'مشاهد');
+              const isRankDiff = dbUser.rank !== finalRank;
               const isCodeDiff = dbUser.code !== m.code;
               const isDeptDiff = dbUser.department !== dept;
               const isStatusDiff = dbUser.status !== 'active';
@@ -1418,7 +1779,7 @@ function syncGoogleSheetsToDb(forceId = null, loginUser = null) {
               if (isRoleDiff || isRankDiff || isCodeDiff || isDeptDiff || isStatusDiff || isAvatarDiff || isBannerDiff) {
                 const logs = [];
                 if (isRoleDiff) logs.push(`تغيير الدور من "${dbUser.role || '—'}" إلى "${finalRole}"`);
-                if (isRankDiff) logs.push(`تغيير الرتبة من "${dbUser.rank || '—'}" إلى "${m.rank || 'مشاهد'}"`);
+                if (isRankDiff) logs.push(`تغيير الرتبة من "${dbUser.rank || '—'}" إلى "${finalRank}"`);
                 if (isCodeDiff) logs.push(`تغيير الكود من "${dbUser.code || '—'}" إلى "${m.code}"`);
                 if (isDeptDiff) logs.push(`تغيير الإدارة من "${dbUser.department || '—'}" إلى "${dept}"`);
                 if (isStatusDiff) logs.push(`تنشيط الحساب (تغيير الحالة من "${dbUser.status}" إلى "active")`);
@@ -1449,20 +1810,21 @@ function syncGoogleSheetsToDb(forceId = null, loginUser = null) {
     // 2. Disable users NOT in Google Sheets (only if NOT in forceId mode)
     if (!forceId) {
       await new Promise((resDeactAll) => {
-        db.all("SELECT id, username, display_name, status, role, discord_id, rank FROM users WHERE status = 'active'", [], (err, activeUsers) => {
+        db.all("SELECT id, username, display_name, status, role, discord_id, rank, is_manual_role FROM users WHERE status = 'active'", [], (err, activeUsers) => {
           if (err || !activeUsers) {
             resDeactAll();
             return;
           }
 
           const deactivatePromises = activeUsers.map(user => {
-            // Protect Owner, Assistant Owner, and Guest Viewers from auto-deactivation
+            // Protect Owner, Assistant Owner, Guest Viewers, and Manually assigned users from auto-deactivation
             const isOwnerOrAssistant = ['1334568342345748565', '1120142432554713261', '821825761673478144'].includes(user.id) || 
                                        (user.username && ['3gjo', 'z6tw', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(user.username.toLowerCase())) ||
                                        (user.display_name && ['3gjo', 'z6tw', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(user.display_name.toLowerCase())) ||
                                        user.role === 'owner' || user.role === 'assistant_owner';
             const isGuest = user.role === 'viewer' && (!user.rank || user.rank === 'مشاهد' || user.rank === 'غير معروف');
-            if (isOwnerOrAssistant || isGuest) {
+            const isManual = user.is_manual_role === 1 || user.is_manual_role === true;
+            if (isOwnerOrAssistant || isGuest || isManual) {
               return Promise.resolve();
             }
 
@@ -1857,8 +2219,17 @@ async function syncAllUsersFromDiscord() {
     return new Promise((resolve, reject) => {
       if (isPostgres) {
         pgPool.query('SELECT * FROM users', (err, result) => {
-          if (err) reject(err);
-          else resolve(result.rows);
+          if (err) {
+            console.error(`Postgres error on getUsers: ${err.message}. Retrying query on SQLite...`);
+            fallbackToSqlite(() => {
+              db.all('SELECT * FROM users', [], (sqliteErr, rows) => {
+                if (sqliteErr) reject(sqliteErr);
+                else resolve(rows);
+              });
+            });
+          } else {
+            resolve(result.rows);
+          }
         });
       } else {
         db.all('SELECT * FROM users', [], (err, rows) => {
@@ -1967,8 +2338,9 @@ async function syncAllUsersFromDiscord() {
           }
         }
 
-        let finalRole = matchedRole || u.role || 'viewer';
-        let finalRank = u.rank || matchedRank || 'مشاهد';
+        const isManual = u.is_manual_role === 1 || u.is_manual_role === true;
+        let finalRole = isManual ? u.role : (matchedRole || u.role || 'viewer');
+        let finalRank = isManual ? u.rank : (u.rank || matchedRank || 'مشاهد');
 
         if (['1334568342345748565', '1120142432554713261', '821825761673478144'].includes(discordId)) {
           finalRole = 'owner';
@@ -2004,8 +2376,33 @@ async function syncAllUsersFromDiscord() {
                  WHERE id = $10`,
                 [avatarLocalPath || u.avatar, bannerLocalPath || u.banner, avatarUrl || u.avatar_url, bannerUrl || u.banner_url, discordUser.username, displayName, discordUser.global_name, finalRole, finalRank, u.id],
                 (updErr) => {
-                  if (updErr) rejectUpdate(updErr);
-                  else resolveUpdate();
+                  if (updErr) {
+                    console.error(`Postgres error on user update: ${updErr.message}. Switching to SQLite fallback.`);
+                    fallbackToSqlite(() => {
+                      db.run(
+                        `UPDATE users SET 
+                          avatar = ?, 
+                          banner = ?, 
+                          avatar_url = ?, 
+                          banner_url = ?, 
+                          username = ?,
+                          display_name = ?,
+                          global_name = ?,
+                          role = ?,
+                          rank = ?,
+                          last_sync = datetime('now'),
+                          updated_at = datetime('now')
+                         WHERE id = ?`,
+                        [avatarLocalPath || u.avatar, bannerLocalPath || u.banner, avatarUrl || u.avatar_url, bannerUrl || u.banner_url, discordUser.username, displayName, discordUser.global_name, finalRole, finalRank, u.id],
+                        (sqliteErr) => {
+                          if (sqliteErr) rejectUpdate(sqliteErr);
+                          else resolveUpdate();
+                        }
+                      );
+                    });
+                  } else {
+                    resolveUpdate();
+                  }
                 }
               );
             } else {
@@ -2038,7 +2435,16 @@ async function syncAllUsersFromDiscord() {
         } else {
           await new Promise((resolveUpdate) => {
             if (isPostgres) {
-              pgPool.query(`UPDATE users SET last_sync = CURRENT_TIMESTAMP WHERE id = $1`, [u.id], () => resolveUpdate());
+              pgPool.query(`UPDATE users SET last_sync = CURRENT_TIMESTAMP WHERE id = $1`, [u.id], (updErr) => {
+                if (updErr) {
+                  console.error(`Postgres error on update last_sync: ${updErr.message}. Switching to SQLite fallback.`);
+                  fallbackToSqlite(() => {
+                    db.run(`UPDATE users SET last_sync = datetime('now') WHERE id = ?`, [u.id], () => resolveUpdate());
+                  });
+                } else {
+                  resolveUpdate();
+                }
+              });
             } else {
               db.run(`UPDATE users SET last_sync = datetime('now') WHERE id = ?`, [u.id], () => resolveUpdate());
             }
@@ -2386,7 +2792,7 @@ const server = http.createServer((req, res) => {
           const userRoleLabel = user ? (userRole === 'owner' ? 'المالك' : userRole === 'assistant_owner' ? 'قيادة الامن العام' : userRole === 'academy_affairs' ? 'رئاسة تدريب الامن العام' : userRole === 'admin' ? 'شؤون أكاديمية التدريب' : 'مسؤول دورة') : 'مسؤول دورة';
 
           // Get book name and current status
-          db.get('SELECT book_name, status FROM attendance_books WHERE book_id = ?', [book_id], (errBook, book) => {
+          db.get('SELECT book_name, status, room_image FROM attendance_books WHERE book_id = ?', [book_id], (errBook, book) => {
             if (errBook || !book) {
               res.writeHead(500, { 'Content-Type': 'application/json' });
               res.end(JSON.stringify({ error: 'Book not found' }));
@@ -2395,6 +2801,7 @@ const server = http.createServer((req, res) => {
 
             const bookName = book.book_name;
             const currentStatus = book.status || 'closed';
+            const bookRoomImage = book.room_image || null;
 
             // Restrict reopening locked reports: if book status is 'report_sent', only academy_affairs or higher can reopen it
             if (status === 'open' && currentStatus === 'report_sent') {
@@ -2434,6 +2841,19 @@ const server = http.createServer((req, res) => {
                   // Add system audit log
                   const auditMsg = `قام "${userName}" (${userRoleLabel}) بـ ${actionLabel} لـ "${bookName}"`;
                   logSystemActivity('attendance_toggle', operatorStr, auditMsg);
+
+                  // If status is report_sent, fetch attendees and send report to Discord
+                  if (status === 'report_sent') {
+                    db.get(`SELECT timestamp FROM attendance_book_logs WHERE book_id = ? AND action = 'فتح التحضير' ORDER BY id DESC LIMIT 1`, [book_id], (errLog, lastOpenLog) => {
+                      const openTime = lastOpenLog ? lastOpenLog.timestamp : '1970-01-01 00:00:00';
+                      db.all(`SELECT display_name, rank, code, timestamp FROM attendance_records WHERE book_id = ? AND timestamp >= ? ORDER BY timestamp ASC`, [book_id, openTime], (errRecs, records) => {
+                        if (errRecs) {
+                          console.error('Error fetching records for Discord report:', errRecs);
+                        }
+                        sendAttendanceReportToDiscord(bookName, operatorStr, bookRoomImage, records || []);
+                      });
+                    });
+                  }
 
                   res.writeHead(200, { 'Content-Type': 'application/json' });
                   res.end(JSON.stringify({ success: true, status }));
@@ -3202,41 +3622,28 @@ const server = http.createServer((req, res) => {
               }
             );
           } else {
-            // Bulk set: clear and reload
-            db.serialize(async () => {
-              db.run('DELETE FROM users', [], async (err) => {
-                if (err) {
-                  res.writeHead(500, { 'Content-Type': 'application/json' });
-                  res.end(JSON.stringify({ error: 'Failed to clear users' }));
-                  return;
-                }
-                if (data && data.length > 0) {
-                  for (const x of data) {
-                    const itemToSave = {
-                      id: x.id || `${Date.now()}_${Math.random()}`,
-                      discord_id: x.discord_id || x.discord || '',
-                      username: x.username || '',
-                      display_name: x.display_name || x.username || '',
-                      avatar: x.avatar || '',
-                      banner: x.banner || '',
-                      role: x.role || '',
-                      rank: x.rank || '',
-                      department: x.department || '',
-                      code: x.code || '',
-                      status: x.status || 'active'
-                    };
-                    await new Promise(r => {
-                      dbInsertOrReplaceStringKey('users', 'id', itemToSave, (insertErr) => {
-                        if (insertErr) {
-                          console.error(`❌ Error bulk inserting user ${itemToSave.id}:`, insertErr);
-                        }
-                        r();
-                      });
-                    });
-                  }
-                }
-                sendSuccess(data ? data.length : 0);
-              });
+            // Bulk set: clear and reload in transaction
+            const itemsToSave = (data || []).map(x => ({
+              id: x.id || `${Date.now()}_${Math.random()}`,
+              discord_id: x.discord_id || x.discord || '',
+              username: x.username || '',
+              display_name: x.display_name || x.username || '',
+              avatar: x.avatar || '',
+              banner: x.banner || '',
+              role: x.role || '',
+              rank: x.rank || '',
+              department: x.department || '',
+              code: x.code || '',
+              status: x.status || 'active'
+            }));
+            
+            executeBulkSync('users', 'id', itemsToSave, (err, count) => {
+              if (err) {
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: err.message || 'Failed to bulk sync users' }));
+              } else {
+                sendSuccess(count);
+              }
             });
           }
         } 
@@ -3248,7 +3655,9 @@ const server = http.createServer((req, res) => {
                 res.writeHead(500, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({ error: err.message || 'Failed to delete exam' }));
               } else {
-                sendSuccess(this.changes);
+                dumpExamsToFile(() => {
+                  sendSuccess(this.changes);
+                });
               }
             });
           } else if (action === 'add' || action === 'update') {
@@ -3262,7 +3671,7 @@ const server = http.createServer((req, res) => {
             delete details.passingScore;
             delete details.isOpen;
             const detJson = JSON.stringify(details);
-
+ 
             db.run(`INSERT OR REPLACE INTO exams (id, exam_name, course_name, questions_count, passing_score, status, questions_json, details_json)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
               [item.id || id, item.title, item.category, item.questionsCountToShow || 0, item.passingScore || 80, item.isOpen ? 'open' : 'closed', qJson, detJson],
@@ -3272,50 +3681,44 @@ const server = http.createServer((req, res) => {
                   res.writeHead(500, { 'Content-Type': 'application/json' });
                   res.end(JSON.stringify({ error: err.message || 'Failed to save exam' }));
                 } else {
-                  sendSuccess(this.changes);
+                  dumpExamsToFile(() => {
+                    sendSuccess(this.changes);
+                  });
                 }
               }
             );
           } else {
-            db.serialize(async () => {
-              db.run('DELETE FROM exams', [], async (err) => {
-                if (err) {
-                  res.writeHead(500, { 'Content-Type': 'application/json' });
-                  res.end(JSON.stringify({ error: 'Failed to clear exams' }));
-                  return;
-                }
-                if (data && data.length > 0) {
-                  for (const x of data) {
-                    const qJson = JSON.stringify(x.questions || []);
-                    const details = { ...x };
-                    delete details.questions;
-                    delete details.id;
-                    delete details.title;
-                    delete details.category;
-                    const detJson = JSON.stringify(details);
-
-                    const itemToSave = {
-                      id: x.id,
-                      exam_name: x.title,
-                      course_name: x.category,
-                      questions_count: x.questionsCountToShow || 0,
-                      passing_score: x.passingScore || 80,
-                      status: x.isOpen ? 'open' : 'closed',
-                      questions_json: qJson,
-                      details_json: detJson
-                    };
-                    await new Promise(r => {
-                      dbInsertOrReplaceStringKey('exams', 'id', itemToSave, (insertErr) => {
-                        if (insertErr) {
-                          console.error(`❌ Error bulk inserting exam ${itemToSave.id}:`, insertErr);
-                        }
-                        r();
-                      });
-                    });
-                  }
-                }
-                sendSuccess(data ? data.length : 0);
-              });
+            // Bulk set: clear and reload in transaction
+            const itemsToSave = (data || []).map(x => {
+              const qJson = JSON.stringify(x.questions || []);
+              const details = { ...x };
+              delete details.questions;
+              delete details.id;
+              delete details.title;
+              delete details.category;
+              const detJson = JSON.stringify(details);
+ 
+              return {
+                id: x.id,
+                exam_name: x.title,
+                course_name: x.category,
+                questions_count: x.questionsCountToShow || 0,
+                passing_score: x.passingScore || 80,
+                status: x.isOpen ? 'open' : 'closed',
+                questions_json: qJson,
+                details_json: detJson
+              };
+            });
+            
+            executeBulkSync('exams', 'id', itemsToSave, (err, count) => {
+              if (err) {
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: err.message || 'Failed to bulk sync exams' }));
+              } else {
+                dumpExamsToFile(() => {
+                  sendSuccess(count);
+                });
+              }
             });
           }
         }
@@ -3414,35 +3817,30 @@ const server = http.createServer((req, res) => {
               }
             });
           } else {
-            db.serialize(async () => {
-              db.run('DELETE FROM retake_requests', [], async (err) => {
-                if (err) {
-                  res.writeHead(500, { 'Content-Type': 'application/json' });
-                  res.end(JSON.stringify({ error: 'Failed to clear retakes' }));
-                  return;
-                }
-                if (data && data.length > 0) {
-                  for (const x of data) {
-                    const itemToSave = {
-                      id: x.id,
-                      user_id: x.user_id || '',
-                      trainee_name: x.trainee_name || '',
-                      rank: x.rank || '',
-                      code: x.code || '',
-                      course_name: x.course_name || '',
-                      exam_name: x.exam_name || '',
-                      reason: x.reason || '',
-                      status: x.status || 'pending',
-                      request_time: x.request_time || '',
-                      approved_by: x.approved_by || '',
-                      previous_score: x.previous_score !== undefined ? x.previous_score : 0,
-                      exam_id: x.exam_id || ''
-                    };
-                    await new Promise(r => dbInsertOrReplace('retake_requests', 'id', itemToSave, r));
-                  }
-                }
-                sendSuccess(data ? data.length : 0);
-              });
+            // Bulk set: clear and reload in transaction
+            const itemsToSave = (data || []).map(x => ({
+              id: x.id,
+              user_id: x.user_id || '',
+              trainee_name: x.trainee_name || '',
+              rank: x.rank || '',
+              code: x.code || '',
+              course_name: x.course_name || '',
+              exam_name: x.exam_name || '',
+              reason: x.reason || '',
+              status: x.status || 'pending',
+              request_time: x.request_time || '',
+              approved_by: x.approved_by || '',
+              previous_score: x.previous_score !== undefined ? x.previous_score : 0,
+              exam_id: x.exam_id || ''
+            }));
+            
+            executeBulkSync('retake_requests', 'id', itemsToSave, (err, count) => {
+              if (err) {
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: err.message || 'Failed to bulk sync retake requests' }));
+              } else {
+                sendSuccess(count);
+              }
             });
           }
         }
@@ -3478,32 +3876,27 @@ const server = http.createServer((req, res) => {
               }
             });
           } else {
-            db.serialize(async () => {
-              db.run('DELETE FROM exam_violations', [], async (err) => {
-                if (err) {
-                  res.writeHead(500, { 'Content-Type': 'application/json' });
-                  res.end(JSON.stringify({ error: 'Failed to clear violations' }));
-                  return;
-                }
-                if (data && data.length > 0) {
-                  for (const x of data) {
-                    const itemToSave = {
-                      id: x.id,
-                      user_id: x.user_id || '',
-                      trainee_name: x.studentName || x.trainee_name || '',
-                      rank: x.studentRank || x.rank || '',
-                      code: x.studentDiscord || x.code || '',
-                      course_name: x.examTitle || x.course_name || '',
-                      violation_type: x.type || x.violation_type || '',
-                      violation_time: x.timestamp || x.violation_time || '',
-                      details: x.details || '',
-                      exam_id: x.examId || x.exam_id || ''
-                    };
-                    await new Promise(r => dbInsertOrReplace('exam_violations', 'id', itemToSave, r));
-                  }
-                }
-                sendSuccess(data ? data.length : 0);
-              });
+            // Bulk set: clear and reload in transaction
+            const itemsToSave = (data || []).map(x => ({
+              id: x.id,
+              user_id: x.user_id || '',
+              trainee_name: x.studentName || x.trainee_name || '',
+              rank: x.studentRank || x.rank || '',
+              code: x.studentDiscord || x.code || '',
+              course_name: x.examTitle || x.course_name || '',
+              violation_type: x.type || x.violation_type || '',
+              violation_time: x.timestamp || x.violation_time || '',
+              details: x.details || '',
+              exam_id: x.examId || x.exam_id || ''
+            }));
+            
+            executeBulkSync('exam_violations', 'id', itemsToSave, (err, count) => {
+              if (err) {
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: err.message || 'Failed to bulk sync exam violations' }));
+              } else {
+                sendSuccess(count);
+              }
             });
           }
         }
@@ -3537,30 +3930,25 @@ const server = http.createServer((req, res) => {
               }
             });
           } else {
-            db.serialize(async () => {
-              db.run('DELETE FROM login_logs', [], async (err) => {
-                if (err) {
-                  res.writeHead(500, { 'Content-Type': 'application/json' });
-                  res.end(JSON.stringify({ error: 'Failed to clear login logs' }));
-                  return;
-                }
-                if (data && data.length > 0) {
-                  for (const x of data) {
-                    const itemToSave = {
-                      id: x.id,
-                      user_id: x.user_id || '',
-                      discord_id: x.discord_id || '',
-                      ip_address: x.ip_address || '',
-                      device: x.device || '',
-                      browser: x.browser || '',
-                      status: x.status || '',
-                      timestamp: x.timestamp || ''
-                    };
-                    await new Promise(r => dbInsertOrReplace('login_logs', 'id', itemToSave, r));
-                  }
-                }
-                sendSuccess(data ? data.length : 0);
-              });
+            // Bulk set: clear and reload in transaction
+            const itemsToSave = (data || []).map(x => ({
+              id: x.id,
+              user_id: x.user_id || '',
+              discord_id: x.discord_id || '',
+              ip_address: x.ip_address || '',
+              device: x.device || '',
+              browser: x.browser || '',
+              status: x.status || '',
+              timestamp: x.timestamp || ''
+            }));
+            
+            executeBulkSync('login_logs', 'id', itemsToSave, (err, count) => {
+              if (err) {
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: err.message || 'Failed to bulk sync login logs' }));
+              } else {
+                sendSuccess(count);
+              }
             });
           }
         }
@@ -3596,32 +3984,26 @@ const server = http.createServer((req, res) => {
               }
             });
           } else {
-            db.serialize(async () => {
-              db.run('DELETE FROM discord_accounts', [], async (err) => {
-                if (err) {
-                  res.writeHead(500, { 'Content-Type': 'application/json' });
-                  res.end(JSON.stringify({ error: 'Failed to clear discord links' }));
-                  return;
-                }
-                if (data && data.length > 0) {
-                  for (const x of data) {
-                    const badgesStr = JSON.stringify(x.badges || []);
-                    const itemToSave = {
-                      id: x.id,
-                      user_id: x.user_id || '',
-                      discord_id: x.discord_id || '',
-                      username: x.username || '',
-                      avatar: x.avatar || '',
-                      banner: x.banner || '',
-                      badges: badgesStr,
-                      linked_at: x.linked_at || '',
-                      updated_at: x.updated_at || ''
-                    };
-                    await new Promise(r => dbInsertOrReplace('discord_accounts', 'id', itemToSave, r));
-                  }
-                }
-                sendSuccess(data ? data.length : 0);
-              });
+            // Bulk set: clear and reload in transaction
+            const itemsToSave = (data || []).map(x => ({
+              id: x.id,
+              user_id: x.user_id || '',
+              discord_id: x.discord_id || '',
+              username: x.username || '',
+              avatar: x.avatar || '',
+              banner: x.banner || '',
+              badges: JSON.stringify(x.badges || []),
+              linked_at: x.linked_at || '',
+              updated_at: x.updated_at || ''
+            }));
+            
+            executeBulkSync('discord_accounts', 'id', itemsToSave, (err, count) => {
+              if (err) {
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: err.message || 'Failed to bulk sync discord links' }));
+              } else {
+                sendSuccess(count);
+              }
             });
           }
         }
@@ -4229,6 +4611,142 @@ const server = http.createServer((req, res) => {
     });
     return;
   }
+  
+  // POST /api/auth/update_user_permission - Update user rank & role manually
+  if (pathname === '/api/auth/update_user_permission' && req.method === 'POST') {
+    let body = '';
+    req.on('data', chunk => { body += chunk; });
+    req.on('end', () => {
+      try {
+        const data = JSON.parse(body);
+        const { operator_id, target_id, target_discord, role, rank, action } = data;
+        
+        if (!operator_id || !target_id || !role || !rank) {
+          res.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
+          res.end(JSON.stringify({ error: 'جميع الحقول (معرف المسؤول، معرف المستخدم، الدور، الرتبة) مطلوبة.' }));
+          return;
+        }
+
+        // Validate operator permission: Must be Owner or Assistant Owner
+        db.get('SELECT role, display_name, username FROM users WHERE id = ?', [operator_id], (err, opUser) => {
+          if (err) {
+            console.error('❌ Error verifying operator role:', err);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'خطأ في التحقق من صلاحية المسؤول.' }));
+            return;
+          }
+          
+          const opIds = ['1334568342345748565', '1120142432554713261', '821825761673478144'];
+          const opUsernames = ['3gjo', 'z6tw', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'];
+          
+          const isAuthorized = opUser && (opUser.role === 'owner' || opUser.role === 'assistant_owner' || 
+                              opIds.includes(operator_id) ||
+                              (opUser.username && opUsernames.includes(opUser.username.toLowerCase())) ||
+                              (opUser.display_name && opUsernames.includes(opUser.display_name.toLowerCase())));
+                              
+          if (!isAuthorized) {
+            res.writeHead(403, { 'Content-Type': 'application/json; charset=utf-8' });
+            res.end(JSON.stringify({ error: 'غير مصرح لك بإجراء هذه العملية. هذه الصلاحية للمالك وقيادة الأمن العام فقط.' }));
+            return;
+          }
+
+          const opName = opUser ? (opUser.display_name || opUser.username) : 'مسؤول';
+
+          // Query if the target user already exists
+          db.get('SELECT * FROM users WHERE id = ?', [target_id], (err, targetUser) => {
+            if (err) {
+              console.error('❌ Error checking target user:', err);
+              res.writeHead(500, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ error: 'خطأ في قاعدة البيانات.' }));
+              return;
+            }
+
+            const targetName = target_discord || (targetUser ? (targetUser.display_name || targetUser.username) : target_id);
+            const oldRank = targetUser ? (targetUser.rank || 'مشاهد') : 'مشاهد';
+            const oldRole = targetUser ? (targetUser.role || 'viewer') : 'viewer';
+
+            const logActionType = 'permission_change';
+
+            if (action === 'remove') {
+              // Resetting user's manual rank: is_manual_role = 0
+              db.run('UPDATE users SET role = ?, rank = ?, is_manual_role = 0, updated_at = datetime(\'now\') WHERE id = ?',
+                ['viewer', 'مشاهد', target_id],
+                function(updErr) {
+                  if (updErr) {
+                    console.error('❌ Error resetting manual permission:', updErr);
+                    res.writeHead(500, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ error: 'فشل في إزالة الصلاحية.' }));
+                    return;
+                  }
+
+                  const detailsMsg = `قام المسؤول "${opName}" بإزالة الرتبة اليدوية من حساب الديسكورد "${targetName}" (معرف: ${target_id}). تم إرجاع الحساب لوضع المزامنة التلقائي (الرتبة السابقة: ${oldRank})`;
+                  logSystemActivity(logActionType, opName, detailsMsg);
+
+                  // Trigger background sheets sync to restore sheets-defined rank if exists
+                  setImmediate(async () => {
+                    try {
+                      await syncGoogleSheetsToDb(target_id);
+                    } catch (e) {
+                      console.error('[Background Sync After Permission Remove Error]', e);
+                    }
+                  });
+
+                  res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+                  res.end(JSON.stringify({ success: true, message: 'تم إزالة الرتبة اليدوية وإرجاع الحساب للمزامنة التلقائية بنجاح.' }));
+                }
+              );
+            } else {
+              // Granting or updating user rank: is_manual_role = 1
+              if (targetUser) {
+                // Update existing user
+                db.run('UPDATE users SET role = ?, rank = ?, is_manual_role = 1, updated_at = datetime(\'now\') WHERE id = ?',
+                  [role, rank, target_id],
+                  function(updErr) {
+                    if (updErr) {
+                      console.error('❌ Error updating manual permission:', updErr);
+                      res.writeHead(500, { 'Content-Type': 'application/json' });
+                      res.end(JSON.stringify({ error: 'فشل في منح الصلاحية.' }));
+                      return;
+                    }
+
+                    const detailsMsg = `قام المسؤول "${opName}" بمنح/تعديل رتبة حساب الديسكورد "${targetName}" (معرف: ${target_id}) من "${oldRank}" إلى "${rank}" (الدور: ${role})`;
+                    logSystemActivity(logActionType, opName, detailsMsg);
+
+                    res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+                    res.end(JSON.stringify({ success: true, message: 'تم منح/تعديل الرتبة بنجاح.' }));
+                  }
+                );
+              } else {
+                // Insert new user row since they don't exist yet
+                db.run('INSERT INTO users (id, discord_id, username, display_name, role, rank, is_manual_role, status, updated_at) VALUES (?, ?, ?, ?, ?, ?, 1, \'active\', datetime(\'now\'))',
+                  [target_id, target_id, target_discord, target_discord, role, rank],
+                  function(insErr) {
+                    if (insErr) {
+                      console.error('❌ Error inserting new user for manual permission:', insErr);
+                      res.writeHead(500, { 'Content-Type': 'application/json' });
+                      res.end(JSON.stringify({ error: 'فشل في منح الصلاحية للمستخدم الجديد.' }));
+                      return;
+                    }
+
+                    const detailsMsg = `قام المسؤول "${opName}" بمنح رتبة حساب ديسكورد جديد "${targetName}" (معرف: ${target_id}) رتبة "${rank}" (الدور: ${role})`;
+                    logSystemActivity(logActionType, opName, detailsMsg);
+
+                    res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+                    res.end(JSON.stringify({ success: true, message: 'تم منح الرتبة للمستخدم الجديد بنجاح.' }));
+                  }
+                );
+              }
+            }
+          });
+        });
+      } catch (ex) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'بيانات غير صالحة.' }));
+      }
+    });
+    return;
+  }
+
   // Safe path resolution: prevent directory traversal attacks
   let safePath = path.normalize(decodeURIComponent(pathname)).replace(/^(\.\.[\/\\])+/, '');
   let filePath = path.join(PUBLIC_DIR, safePath);
@@ -4349,8 +4867,12 @@ server.listen(PORT, '0.0.0.0', () => {
   console.log(`   --> http://localhost:${PORT}`);
   console.log(`==================================================`);
 
-  // Start cloudflared tunnel automatically
-  startCloudflareTunnel();
+  // Start cloudflared tunnel automatically only if --tunnel flag or START_TUNNEL env is provided
+  if (process.argv.includes('--tunnel') || process.env.START_TUNNEL === 'true') {
+    startCloudflareTunnel();
+  } else {
+    console.log('[Tunnel] Cloudflare Tunnel disabled. Using production backend: https://amn-backend.onrender.com');
+  }
 
   // Start background Google Sheets synchronization:
   // First sync after 10 seconds of startup, then every 5 minutes.
