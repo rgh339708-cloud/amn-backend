@@ -159,11 +159,13 @@ const Storage = (() => {
   /**
    * Save an item to storage
    */
-  function set(key, value) {
+  function set(key, value, syncRemote = true) {
     try {
       localStorage.setItem(key, JSON.stringify(value));
       lastWriteTime[key] = Date.now();
-      syncToRemote(key, 'set', null, null, value);
+      if (syncRemote) {
+        syncToRemote(key, 'set', null, null, value);
+      }
       return true;
     } catch (e) {
       console.error('Storage write error:', e);
@@ -196,7 +198,7 @@ const Storage = (() => {
   /**
    * Add item to a collection (array). Auto-generates id + timestamps
    */
-  function addToCollection(key, item) {
+  function addToCollection(key, item, syncRemote = true) {
     const collection = getCollection(key);
     const newItem = {
       id: item.id || `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -207,33 +209,39 @@ const Storage = (() => {
     collection.unshift(newItem); // newest first
     localStorage.setItem(key, JSON.stringify(collection));
     lastWriteTime[key] = Date.now();
-    syncToRemote(key, 'add', newItem.id, newItem, collection);
+    if (syncRemote) {
+      syncToRemote(key, 'add', newItem.id, newItem, collection);
+    }
     return newItem;
   }
 
   /**
    * Update an item in a collection by id
    */
-  function updateInCollection(key, id, updates) {
+  function updateInCollection(key, id, updates, syncRemote = true) {
     const collection = getCollection(key);
     const idx = collection.findIndex(item => item.id === id);
     if (idx === -1) return false;
     collection[idx] = { ...collection[idx], ...updates, updatedAt: new Date().toISOString() };
     localStorage.setItem(key, JSON.stringify(collection));
     lastWriteTime[key] = Date.now();
-    syncToRemote(key, 'update', id, collection[idx], collection);
+    if (syncRemote) {
+      syncToRemote(key, 'update', id, collection[idx], collection);
+    }
     return collection[idx];
   }
 
   /**
    * Delete an item from a collection by id
    */
-  function deleteFromCollection(key, id) {
+  function deleteFromCollection(key, id, syncRemote = true) {
     const collection = getCollection(key);
     const filtered = collection.filter(item => item.id !== id);
     localStorage.setItem(key, JSON.stringify(filtered));
     lastWriteTime[key] = Date.now();
-    syncToRemote(key, 'delete', id, null, filtered);
+    if (syncRemote) {
+      syncToRemote(key, 'delete', id, null, filtered);
+    }
     return filtered.length < collection.length;
   }
 
@@ -332,10 +340,17 @@ const Storage = (() => {
   }
 
   function saveViolation(data) {
-    return fetchWithTimeout(`${getApiBase()}/api/violations`, {
+    const apiBase = getApiBase();
+    const url = `${apiBase}/api/violations`;
+    const headers = { 'Content-Type': 'application/json' };
+    if (url.startsWith('http')) {
+      headers['Bypass-Tunnel-Reminder'] = 'true';
+    }
+    return fetch(url, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
+      headers: headers,
+      body: JSON.stringify(data),
+      keepalive: true
     }).then(res => res.json()).then(resData => {
       loadAllFromServer();
       return resData;
@@ -484,10 +499,15 @@ const Logger = {
       } catch (e) {}
       const logsApiUrl = backendUrl ? `${backendUrl}/api/logs` : '/api/logs';
 
-      fetchWithTimeout(logsApiUrl, {
+      const headers = { 'Content-Type': 'application/json' };
+      if (logsApiUrl.startsWith('http')) {
+        headers['Bypass-Tunnel-Reminder'] = 'true';
+      }
+      fetch(logsApiUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(logItem)
+        headers: headers,
+        body: JSON.stringify(logItem),
+        keepalive: true
       }).catch(err => console.warn('Failed to send log to server:', err));
 
     } catch (e) {

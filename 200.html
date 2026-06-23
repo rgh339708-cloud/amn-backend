@@ -8,10 +8,10 @@
   <meta property="og:title" content="إدارة الامن العام لمدينة الـ90">
   <title>إدارة الامن العام لمدينة الـ90 | البوابة الرسمية</title>
 
-  <link rel="stylesheet" href="assets/css/main.css?v=1.1.20">
-  <link rel="stylesheet" href="assets/css/navbar.css?v=1.1.20">
-  <link rel="stylesheet" href="assets/css/sidebar.css?v=1.1.20">
-  <link rel="stylesheet" href="assets/css/hero.css?v=1.1.20">
+  <link rel="stylesheet" href="assets/css/main.css?v=1.1.26">
+  <link rel="stylesheet" href="assets/css/navbar.css?v=1.1.26">
+  <link rel="stylesheet" href="assets/css/sidebar.css?v=1.1.26">
+  <link rel="stylesheet" href="assets/css/hero.css?v=1.1.26">
   <link rel="stylesheet" href="assets/css/cards.css">
   <link rel="stylesheet" href="assets/css/footer.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -379,10 +379,10 @@
 </footer>
 
 <!-- ═══════════════ SCRIPTS ═══════════════ -->
-<script src="assets/js/storage.js?v=1.1.22"></script>
-<script src="assets/js/data.js?v=1.1.20"></script>
-<script src="assets/js/auth.js?v=1.1.20"></script>
-<script src="assets/js/app.js?v=1.1.20"></script>
+<script src="assets/js/storage.js?v=1.1.26"></script>
+<script src="assets/js/data.js?v=1.1.26"></script>
+<script src="assets/js/auth.js?v=1.1.26"></script>
+<script src="assets/js/app.js?v=1.1.26"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   // Seed data and settings first if needed
@@ -499,7 +499,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Inject custom pages into root index.html sidebar dynamically
   const sidebarBody = document.querySelector('.sidebar-body');
   if (sidebarBody) {
-    const customPages = Storage.getCollection(Storage.keys.PAGES);
+    const systemPageIds = ['home', 'leadership', 'managers', 'centers', 'guide', 'inventory', 'vehicles', 'college', 'attendance-reports', 'exams', 'archive', 'field-title', 'uniform', 'promotions', 'announcements', 'apply', 'database', 'wings'];
+    const customPages = (Storage.getCollection(Storage.keys.PAGES) || []).filter(p => !systemPageIds.includes(p.id) && !p.parentId);
     if (customPages.length > 0) {
       // Find the divider before community section or insert at the end
       const divider = document.createElement('div');
@@ -642,7 +643,8 @@ function _addCustomPagesToSubBar() {
   const subInner = document.getElementById('index-sub-inner');
   if (!subInner) return;
   const customPages = Storage.getCollection(Storage.keys.PAGES) || [];
-  const parentPages = customPages.filter(p => !p.parentId);
+  const systemPageIds = ['home', 'leadership', 'managers', 'centers', 'guide', 'inventory', 'vehicles', 'college', 'attendance-reports', 'exams', 'archive', 'field-title', 'uniform', 'promotions', 'announcements', 'apply', 'database', 'wings'];
+  const parentPages = customPages.filter(p => !p.parentId && !systemPageIds.includes(p.id));
   parentPages.forEach(p => {
     const a = document.createElement('a');
     a.href = `pages/custom.html?id=${p.id}`;

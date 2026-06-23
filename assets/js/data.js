@@ -6,6 +6,21 @@
 const SeedData = (() => {
 
   async function init() {
+    // Proactively fetch latest exams from static exams.json to ensure offline compatibility
+    try {
+      const ROOT = window.location.pathname.includes('/pages/') ? '../' : './';
+      const examsRes = await fetch(`${ROOT}assets/data/exams.json?t=${Date.now()}`).catch(() => null);
+      if (examsRes && examsRes.ok) {
+        const fileExams = await examsRes.json();
+        if (Array.isArray(fileExams) && fileExams.length > 0) {
+          console.log('[Data] Proactively loaded latest exams from static exams.json:', fileExams.length);
+          Storage.set(Storage.keys.EXAMS, fileExams, false);
+        }
+      }
+    } catch (e) {
+      console.warn('[Data] Failed to load static exams.json:', e);
+    }
+
     if (!Storage.get(Storage.keys.INITIALIZED)) {
       console.log('[Data] ps_initialized is missing. Trying to load collections from server first...');
       try {
@@ -23,6 +38,17 @@ const SeedData = (() => {
     }
 
     if (Storage.get(Storage.keys.INITIALIZED)) {
+      // Force update of exam_004 if old category/description exists
+      const currentExams = Storage.getCollection(Storage.keys.EXAMS) || [];
+      const exam004 = currentExams.find(e => e.id === 'exam_004');
+      const newDesc = `تنويه هام:\n\n* في حال الخروج من الموقع أو إغلاق صفحة الاختبار أثناء تأدية الاختبار، سيتم اعتبار المتقدم راسباً.\n* يجب الالتزام بالموعد المحدد للاختبار وإرساله قبل انتهاء الوقت المخصص.\n* يتحمل المتقدم مسؤولية التأكد من استقرار الاتصال بالإنترنت وعدم مغادرة صفحة الاختبار حتى إتمام عملية الإرسال بنجاح.\n\nمع تحيات\nالإدارة العامة لشؤون تدريب الأمن العام`;
+      if (exam004 && (exam004.category !== 'جندي فما فوق' || !exam004.description || !exam004.description.includes('سيتم اعتبار المتقدم راسباً'))) {
+        console.log('[Data] Patching exam_004 (Field Operations Course) description and category in client storage...');
+        exam004.category = 'جندي فما فوق';
+        exam004.description = newDesc;
+        Storage.set(Storage.keys.EXAMS, currentExams, true);
+      }
+
       // Force update of centers if old ones exist in Storage
       const currentCenters = Storage.get(Storage.keys.CENTERS);
       const ctr002 = currentCenters && currentCenters.find(c => c.id === 'ctr_002');
@@ -39,7 +65,7 @@ const SeedData = (() => {
         || (currentCenters.length === 1 && (currentCenters[0].name === 'المركز الرئيسي' || currentCenters[0].location === 'المنطقة الوسطى' || !currentCenters[0].description));
       if (centersOutdated) {
         console.log('[Data] Resetting centers to latest version...');
-        _seedCenters();
+        _seedCenters(false);
       }
 
       // Clean up default mock users if they exist
@@ -48,7 +74,7 @@ const SeedData = (() => {
       if (hasMockUsers) {
         console.log('[Data] Filtering out default mock users from users collection...');
         const filteredUsers = currentUsers.filter(u => u.id !== 'user_owner_001' && u.id !== 'user_super_001' && u.id !== 'user_admin_001' && u.id !== 'user_editor_001' && u.id !== 'user_viewer_001');
-        Storage.set(Storage.keys.USERS, filteredUsers);
+        Storage.set(Storage.keys.USERS, filteredUsers, false);
       }
 
       const settings = Storage.get(Storage.keys.SETTINGS) || {};
@@ -89,7 +115,7 @@ const SeedData = (() => {
         };
         currentAnnouncements.forEach(a => { if (a.pinned) a.pinned = false; });
         currentAnnouncements.unshift(updateAnn);
-        Storage.set(Storage.keys.ANNOUNCEMENTS, currentAnnouncements);
+        Storage.set(Storage.keys.ANNOUNCEMENTS, currentAnnouncements, false);
       }
 
       if (!currentAnnouncements.some(a => a.id === 'ann_006')) {
@@ -109,7 +135,7 @@ const SeedData = (() => {
           updatedAt: new Date().toISOString(),
         };
         currentAnnouncements.unshift(updateAnn);
-        Storage.set(Storage.keys.ANNOUNCEMENTS, currentAnnouncements);
+        Storage.set(Storage.keys.ANNOUNCEMENTS, currentAnnouncements, false);
       }
 
       if (!currentAnnouncements.some(a => a.id === 'ann_005')) {
@@ -129,7 +155,7 @@ const SeedData = (() => {
           updatedAt: new Date().toISOString(),
         };
         currentAnnouncements.unshift(updateAnn);
-        Storage.set(Storage.keys.ANNOUNCEMENTS, currentAnnouncements);
+        Storage.set(Storage.keys.ANNOUNCEMENTS, currentAnnouncements, false);
       }
 
       const currentNews = Storage.getCollection(Storage.keys.NEWS) || [];
@@ -144,7 +170,7 @@ const SeedData = (() => {
           updatedAt: new Date().toISOString()
         };
         currentNews.unshift(updateNews);
-        Storage.set(Storage.keys.NEWS, currentNews);
+        Storage.set(Storage.keys.NEWS, currentNews, false);
       }
 
       if (!currentNews.some(n => n.id === 'news_006')) {
@@ -158,7 +184,7 @@ const SeedData = (() => {
           updatedAt: new Date().toISOString()
         };
         currentNews.unshift(updateNews);
-        Storage.set(Storage.keys.NEWS, currentNews);
+        Storage.set(Storage.keys.NEWS, currentNews, false);
       }
 
       if (!currentNews.some(n => n.id === 'news_005')) {
@@ -172,52 +198,11 @@ const SeedData = (() => {
           updatedAt: new Date().toISOString()
         };
         currentNews.unshift(updateNews);
-        Storage.set(Storage.keys.NEWS, currentNews);
+        Storage.set(Storage.keys.NEWS, currentNews, false);
       }
-
-      const currentExams = Storage.getCollection(Storage.keys.EXAMS) || [];
-      const seeded = _getSeededExams();
-      const seededOps = seeded.find(e => e.id === 'exam_004');
-      
-      let opExam = null;
-      const otherExams = currentExams.filter(e => {
-        const isOps = e.id === 'exam_004' || (e.title && (e.title.includes('العمليات') || e.title.includes('عمليات')));
-        const isMock = e.id === 'exam_001' || e.id === 'exam_002' || e.id === 'exam_003';
-        if (isOps) {
-          if (!opExam) {
-            opExam = e;
-          }
-          return false;
-        }
-        if (isMock) {
-          return false;
-        }
-        return true;
-      });
-      
-      if (!opExam) {
-        if (seededOps) {
-          otherExams.push(seededOps);
-        }
-      } else {
-        otherExams.push({
-          ...opExam,
-          id: 'exam_004',
-          title: seededOps.title,
-          description: seededOps.description,
-          category: seededOps.category,
-          emoji: seededOps.emoji,
-          duration: seededOps.duration,
-          passingScore: seededOps.passingScore,
-          questionsCountToShow: seededOps.questionsCountToShow,
-          questions: seededOps.questions,
-          documentUrl: seededOps.documentUrl
-        });
-      }
-      Storage.set(Storage.keys.EXAMS, otherExams);
 
       if (updated) {
-        Storage.set(Storage.keys.SETTINGS, settings);
+        Storage.set(Storage.keys.SETTINGS, settings, false);
       }
       return;
     }
@@ -433,8 +418,8 @@ const SeedData = (() => {
       {
         id: 'exam_004',
         title: 'اختبار دورة العمليات الميدانية',
-        description: 'اختبار دورة العمليات الميدانية لقياس كفاءة إدارة الموجه اللاسلكي وتوجيه الوحدات.',
-        category: 'العمليات والتحكم',
+        description: `تنويه هام:\n\n* في حال الخروج من الموقع أو إغلاق صفحة الاختبار أثناء تأدية الاختبار، سيتم اعتبار المتقدم راسباً.\n* يجب الالتزام بالموعد المحدد للاختبار وإرساله قبل انتهاء الوقت المخصص.\n* يتحمل المتقدم مسؤولية التأكد من استقرار الاتصال بالإنترنت وعدم مغادرة صفحة الاختبار حتى إتمام عملية الإرسال بنجاح.\n\nمع تحيات\nالإدارة العامة لشؤون تدريب الأمن العام`,
+        category: 'جندي فما فوق',
         emoji: '<i class="fa-solid fa-tower-broadcast"></i>',
         duration: 15,
         passingScore: 67,
@@ -839,7 +824,7 @@ const SeedData = (() => {
   }
 
   /* ── Centers ──────────────────────────────────────── */
-  function _seedCenters() {
+  function _seedCenters(syncRemote = true) {
     const centers = [
       { 
         id: 'ctr_001', 
@@ -878,7 +863,7 @@ const SeedData = (() => {
         description: 'مركز الأمن العام في بوليتو هو الجهة الأمنية المختصة بحفظ الأمن والاستقرار داخل مدينة بوليتو، ويختص باستقبال البلاغات ومتابعة الحالات الأمنية والجنائية، والاستجابة السريعة للحوادث والطوارئ، وتقديم الدعم الأمني للمواطنين، بما يسهم في تعزيز الأمن والمحافظة على النظام العام.'
       }
     ];
-    Storage.set(Storage.keys.CENTERS, centers);
+    Storage.set(Storage.keys.CENTERS, centers, syncRemote);
   }
 
   /* ── Settings ─────────────────────────────────────── */

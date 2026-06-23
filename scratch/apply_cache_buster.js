@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const TARGET_DIR = path.join(__dirname, '..');
-const VERSION = '1.1.20'; // New cache-buster version
+const VERSION = '1.1.26'; // New cache-buster version
 
 // Helper to recursively find all HTML files
 function getHtmlFiles(dir, filesList = []) {
@@ -26,7 +26,7 @@ console.log(`Found ${htmlFiles.length} HTML files to update.`);
 
 let updatedCount = 0;
 
-const jsFiles = ['storage.js', 'data.js', 'auth.js', 'app.js'];
+const jsFiles = ['storage.js', 'data.js', 'auth.js', 'components.js', 'app.js'];
 const cssFiles = ['main.css', 'hero.css', 'navbar.css', 'sidebar.css', 'admin.css'];
 
 htmlFiles.forEach(filePath => {

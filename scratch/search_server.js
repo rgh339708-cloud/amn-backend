@@ -1,10 +1,8 @@
 const fs = require('fs');
-const content = fs.readFileSync('pages/exams.html', 'utf8');
-
-const regex = /preview|sessionStorage/gi;
-let match;
-while ((match = regex.exec(content)) !== null) {
-  console.log(`Found match at index ${match.index}:`);
-  console.log(content.substring(match.index - 50, match.index + 200));
-  console.log('------------------------------------');
-}
+const content = fs.readFileSync('server.js', 'utf8');
+const lines = content.split('\n');
+lines.forEach((line, index) => {
+  if (line.includes('executeBulkSync')) {
+    console.log(`${index + 1}: ${line.trim()}`);
+  }
+});

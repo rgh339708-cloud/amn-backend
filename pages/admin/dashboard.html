@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>لوحة التحكم العليا | الأمن العام</title>
   
-  <link rel="stylesheet" href="../../assets/css/main.css?v=1.1.20">
-  <link rel="stylesheet" href="../../assets/css/admin.css?v=1.1.20">
-  <script src="../../assets/js/storage.js?v=1.1.22"></script>
-  <script src="../../assets/js/data.js?v=1.1.20"></script>
-  <script src="../../assets/js/auth.js?v=1.1.20"></script>
-  <script src="../../assets/js/app.js?v=1.1.20"></script>
+  <link rel="stylesheet" href="../../assets/css/main.css?v=1.1.26">
+  <link rel="stylesheet" href="../../assets/css/admin.css?v=1.1.26">
+  <script src="../../assets/js/storage.js?v=1.1.26"></script>
+  <script src="../../assets/js/data.js?v=1.1.26"></script>
+  <script src="../../assets/js/auth.js?v=1.1.26"></script>
+  <script src="../../assets/js/app.js?v=1.1.26"></script>
   <script>
     // Synchronous route guard to prevent flashing of admin content
     if (!Auth.isLoggedIn() || !['owner', 'assistant_owner', 'academy_affairs', 'admin'].includes(Auth.getRole())) {
@@ -223,21 +223,19 @@
       <div class="admin-nav-item active" data-tab="overview" id="nav-item-overview">
         <span class="admin-nav-icon"><i class="fa-solid fa-chart-column"></i></span> العامة
       </div>
-      <div class="admin-nav-item" data-tab="pages" id="nav-item-pages">
-        <span class="admin-nav-icon">📄</span> إدارة الصفحات
-      </div>
-      <div class="admin-nav-item" data-tab="theme" id="nav-item-theme">
+
+      <div class="admin-nav-item" data-tab="theme" id="nav-item-theme" style="display:none !important;">
         <span class="admin-nav-icon"><i class="fa-solid fa-palette"></i></span> تخصيص الواجهة
       </div>
-      <div class="admin-nav-item" data-tab="discord" id="nav-item-discord" style="display:none;">
-        <span class="admin-nav-icon"><i class="fa-brands fa-discord"></i></span> تشخيص الديسكورد
-      </div>
+
       <div class="admin-nav-item" data-tab="recruitment" id="nav-item-recruitment" style="display:none;">
         <span class="admin-nav-icon"><i class="fa-solid fa-helmet-safety"></i></span> شؤون التجنيد
       </div>
-      <div class="admin-nav-item" data-tab="users" id="nav-item-users" style="display:none;">
-        <span class="admin-nav-icon"><i class="fa-solid fa-users"></i></span> إدارة الصلاحيات
+
+      <div class="admin-nav-item" data-tab="permissions" id="nav-item-permissions" style="display:none;">
+        <span class="admin-nav-icon"><i class="fa-solid fa-user-shield"></i></span> إدارة الرتب والصلاحيات
       </div>
+
       <div class="admin-nav-item" data-tab="logs" id="nav-item-logs" style="display:none;">
         <span class="admin-nav-icon">📋</span> سجل النشاطات
       </div>
@@ -377,36 +375,12 @@
         </div>
       </section>
 
-      <!-- ── TAB 2: PAGES MANAGER ── -->
-      <section id="tab-pages" class="tab-content">
-        <div class="admin-table-toolbar">
-          <h2 class="admin-card-title">إدارة الصفحات المخصصة</h2>
-          <button class="btn-action primary" onclick="openPageModal()">➕ أضف صفحة جديدة</button>
-        </div>
-        
-        <div class="admin-content-card">
-          <table class="admin-table" id="pages-table">
-            <thead>
-              <tr>
-                <th>شعار/رمز</th>
-                <th>عنوان الصفحة</th>
-                <th>المعرف الفريد (ID)</th>
-                <th>الحالة</th>
-                <th>رابط الصفحة</th>
-                <th>الإجراءات</th>
-              </tr>
-            </thead>
-            <tbody id="pages-table-body">
-              <!-- Rendered via JS -->
-            </tbody>
-          </table>
-        </div>
-      </section>
+
 
 
 
       <!-- ── TAB 4: THEME / HOME SETTINGS ── -->
-      <section id="tab-theme" class="tab-content">
+      <section id="tab-theme" class="tab-content" style="display:none !important;">
         <form id="theme-settings-form">
           <!-- Maintenance Mode Control Panel -->
           <div class="admin-content-card" style="padding:24px; margin-bottom:24px; border: 1px solid rgba(231, 76, 60, 0.25); background: rgba(231, 76, 60, 0.03);">
@@ -506,85 +480,7 @@
         </form>
       </section>
 
-      <!-- ── TAB 5: USERS MANAGER ── -->
-      <section id="tab-users" class="tab-content">
-        <div class="admin-table-toolbar">
-          <h2 class="admin-card-title">إدارة صلاحيات المنسوبين والتحكم بالوصول</h2>
-          <button class="btn-action primary" onclick="openAddUserModal()">➕ منح صلاحية جديدة</button>
-        </div>
-        <div class="admin-content-card" style="padding:24px; margin-bottom:24px; background:linear-gradient(135deg, rgba(13,24,64,0.3) 0%, rgba(5,9,30,0.5) 100%);">
-          <p style="color:var(--color-text-secondary); line-height:1.8; font-size:0.9rem; margin:0">
-            <i class="fa-solid fa-shield-halved"></i> بصفتك <strong>المالك العام للموقع <i class="fa-solid fa-crown"></i></strong>، يتيح لك هذا التبويب الحصري التحكم في الرتب وتعيين صلاحيات أي عضو في الجهاز إلى <strong>مساعد المالك <i class="fa-solid fa-star"></i></strong> أو <strong>ادمن <i class="fa-solid fa-shield-halved"></i></strong>، أو إلغاء تنشيط الحسابات لتأمين البوابة الإلكترونية.
-          </p>
-        </div>
 
-
-        <div class="admin-content-card" style="margin-bottom: 24px;">
-          <h3 style="color:var(--color-gold-primary); margin-bottom:16px; font-weight:800; padding:20px 20px 0;">تحديد الجداول المسموح بعرضها لكل رتبة</h3>
-          <div style="padding: 20px;">
-            <table class="admin-table">
-              <thead>
-                <tr>
-                  <th>الرتبة / الصلاحية</th>
-                  <th>جدول الأساسي</th>
-                  <th>جدول المعتمدين</th>
-                  <th>جدول الإدارة</th>
-                </tr>
-              </thead>
-              <tbody id="table-perms-tbody">
-                <!-- JS Rendered -->
-              </tbody>
-            </table>
-            <div style="margin-top: 15px; text-align: left;">
-              <button class="btn-action primary" onclick="saveTablePermissions()">حفظ صلاحيات الجداول 💾</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Filters & Search for Users -->
-        <div class="admin-content-card" style="padding:16px; margin-bottom:20px; display:flex; flex-wrap:wrap; gap:16px; align-items:center; justify-content:space-between;">
-          <div style="display:flex; gap:12px; align-items:center; flex:1; min-width:300px;">
-            <input type="text" class="form-input" id="search-users" placeholder="🔍 بحث باسم العضو أو ديسكورد..." style="max-width:320px; padding:8px 14px;" oninput="renderUsersTable()">
-            <select class="form-select" id="filter-users-table" style="max-width:240px; padding:8px 12px; background:#0f1530; border:1px solid rgba(255,255,255,0.08); color:#fff; border-radius:8px;" onchange="renderUsersTable()">
-              <option value="">كل الجداول</option>
-              <option value="الأساسي">جدول الأمن العام - الأساسي</option>
-              <option value="المعتمدين">جدول الأمن العام - المعتمدين</option>
-              <option value="الإدارة">جدول الأمن العام - الإدارة</option>
-            </select>
-            <select class="form-select" id="filter-users-status" style="max-width:180px; padding:8px 12px; background:#0f1530; border:1px solid rgba(255,255,255,0.08); color:#fff; border-radius:8px;" onchange="renderUsersTable()">
-              <option value="">كل الحالات</option>
-              <option value="active">نشط</option>
-              <option value="disabled">معطل</option>
-            </select>
-          </div>
-          <div style="display:flex; gap:10px;">
-            <button class="btn-action primary" onclick="triggerManualUserSync()" id="btn-sync-all-users" style="padding:8px 16px; border-radius:8px; background: linear-gradient(135deg, #5865F2 0%, #4752C4 100%); border: none;">
-              <i class="fa-brands fa-discord"></i> مزامنة جميع المستخدمين
-            </button>
-            <button class="btn-action secondary" onclick="renderUsersTable()" style="padding:8px 16px; border-radius:8px;">
-              <i class="fa-solid fa-arrows-rotate"></i> تحديث القائمة
-            </button>
-          </div>
-        </div>
-
-        <div class="admin-content-card">
-          <table class="admin-table">
-            <thead>
-              <tr>
-                <th>الصورة والبنر</th>
-                <th>اسم العضو</th>
-                <th>حساب الديسكورد</th>
-                <th>الرتبة الحالية</th>
-                <th>الحالة</th>
-                <th>الترقية والصلاحيات</th>
-              </tr>
-            </thead>
-            <tbody id="users-table-body">
-              <!-- Rendered via JS -->
-            </tbody>
-          </table>
-        </div>
-      </section>
 
       <!-- ── TAB 6: LOGS MANAGER ── -->
       <section id="tab-logs" class="tab-content">
@@ -787,57 +683,7 @@
         </div>
       </section>
 
-      <!-- ── TAB: DISCORD DIAGNOSTICS ── -->
-      <section id="tab-discord" class="tab-content">
-        <div class="admin-tab-header">
-          <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
-            <div>
-              <h2 class="admin-tab-title"><i class="fa-brands fa-discord" style="color:#5865F2;"></i> تشخيص الديسكورد</h2>
-              <p style="color: var(--color-text-secondary); font-size: 0.85rem; margin-top: 4px;">مراقبة حالة الربط للأعضاء وسجلات الأخطاء وحالة التوكن.</p>
-            </div>
-            <button class="btn-action secondary" onclick="refreshDiscordDiagnostics()">
-              <i class="fa-solid fa-arrows-rotate"></i> تحديث البيانات
-            </button>
-          </div>
-        </div>
 
-        <div style="margin-top: 20px; margin-bottom: 40px;">
-          <h3 style="font-size: 1.1rem; margin-bottom: 15px; color: #fff;">سجلات أخطاء الربط (Error Logs)</h3>
-          <div class="admin-table-container">
-            <table class="admin-table" id="discord-logs-table">
-              <thead>
-                <tr>
-                  <th>التاريخ</th>
-                  <th>الحساب / المعرف</th>
-                  <th>السبب والتفاصيل</th>
-                </tr>
-              </thead>
-              <tbody>
-                <!-- JS Rendered -->
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div style="margin-top: 20px;">
-          <h3 style="font-size: 1.1rem; margin-bottom: 15px; color: #fff;">حالة ربط الأعضاء</h3>
-          <div class="admin-table-container">
-            <table class="admin-table" id="discord-users-table">
-              <thead>
-                <tr>
-                  <th>العضو</th>
-                  <th>Discord ID</th>
-                  <th>صلاحية التوكن</th>
-                  <th>حالة الربط</th>
-                </tr>
-              </thead>
-              <tbody>
-                <!-- JS Rendered -->
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
 
       <!-- ── TAB: RECRUITMENT ── -->
       <section id="tab-recruitment" class="tab-content">
@@ -930,122 +776,221 @@
         </div>
       </section>
 
+      <!-- ── TAB: PERMISSIONS (إدارة الرتب والصلاحيات) ── -->
+      <section id="tab-permissions" class="tab-content">
+        <div class="admin-tab-header">
+          <div>
+            <h2 class="admin-tab-title">إدارة الرتب والصلاحيات العسكرية</h2>
+            <p style="color: var(--color-text-secondary); font-size: 0.85rem; margin-top: 4px;">تعيين الرتب والمسؤوليات الميدانية لأعضاء وعسكريين الأمن العام، والتحكم في صلاحيات الوصول للمستندات والغرف.</p>
+          </div>
+          <button class="btn-action primary" onclick="openGrantPermissionModal()" style="padding: 10px 20px; border-radius: 10px; gap: 8px;">
+            <i class="fa-solid fa-user-plus"></i> منح رتبة عسكرية
+          </button>
+        </div>
+
+        <!-- Permissions Stats cards -->
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:16px; margin-bottom:20px;">
+          <div class="admin-content-card" style="display:flex; align-items:center; gap:16px; padding:16px 20px;">
+            <div style="width:44px; height:44px; border-radius:10px; background:rgba(201,162,39,0.15); display:flex; align-items:center; justify-content:center; color:#c9a227; font-size:1.3rem;">
+              <i class="fa-solid fa-crown"></i>
+            </div>
+            <div>
+              <div style="font-size:0.75rem; color:var(--color-text-secondary);">القيادة والمالك</div>
+              <div style="font-size:1.35rem; font-weight:800;" id="perm-stat-owners">0</div>
+            </div>
+          </div>
+          <div class="admin-content-card" style="display:flex; align-items:center; gap:16px; padding:16px 20px;">
+            <div style="width:44px; height:44px; border-radius:10px; background:rgba(142,68,173,0.15); display:flex; align-items:center; justify-content:center; color:#8e44ad; font-size:1.3rem;">
+              <i class="fa-solid fa-graduation-cap"></i>
+            </div>
+            <div>
+              <div style="font-size:0.75rem; color:var(--color-text-secondary);">رئاسة التدريب</div>
+              <div style="font-size:1.35rem; font-weight:800; color:#8e44ad;" id="perm-stat-academy">0</div>
+            </div>
+          </div>
+          <div class="admin-content-card" style="display:flex; align-items:center; gap:16px; padding:16px 20px;">
+            <div style="width:44px; height:44px; border-radius:10px; background:rgba(231,76,60,0.15); display:flex; align-items:center; justify-content:center; color:#e74c3c; font-size:1.3rem;">
+              <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <div>
+              <div style="font-size:0.75rem; color:var(--color-text-secondary);">أكاديمية التدريب</div>
+              <div style="font-size:1.35rem; font-weight:800; color:#e74c3c;" id="perm-stat-admins">0</div>
+            </div>
+          </div>
+          <div class="admin-content-card" style="display:flex; align-items:center; gap:16px; padding:16px 20px;">
+            <div style="width:44px; height:44px; border-radius:10px; background:rgba(26,188,156,0.15); display:flex; align-items:center; justify-content:center; color:#1abc9c; font-size:1.3rem;">
+              <i class="fa-solid fa-user-gear"></i>
+            </div>
+            <div>
+              <div style="font-size:0.75rem; color:var(--color-text-secondary);">مسؤولو الدورات</div>
+              <div style="font-size:1.35rem; font-weight:800; color:#1abc9c;" id="perm-stat-course-admins">0</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filters & Search Toolbar -->
+        <div class="admin-content-card" style="padding:16px; margin-bottom:20px; display:flex; flex-wrap:wrap; gap:16px; align-items:center; justify-content:space-between;">
+          <div style="display:flex; gap:12px; align-items:center; flex:1; min-width:300px;">
+            <input type="text" class="form-input" id="search-permissions" oninput="renderPermissionsTable()" placeholder="🔍 بحث باسم العضو أو حساب Discord أو المعرف..." style="max-width:340px; padding:8px 14px;">
+            <select class="form-select" id="filter-permissions-role" onchange="renderPermissionsTable()" style="max-width:200px; padding:8px 12px; background:#0f1530; border:1px solid rgba(255,255,255,0.08); color:#fff; border-radius:8px;">
+              <option value="">كل الرتب والمناصب</option>
+              <option value="owner">المالك</option>
+              <option value="assistant_owner">قيادة الأمن العام</option>
+              <option value="academy_affairs">رئاسة تدريب الأمن العام</option>
+              <option value="admin">شؤون أكاديمية التدريب</option>
+              <option value="course_admin">مسؤول دورة</option>
+              <option value="viewer">مشاهد</option>
+            </select>
+            <select class="form-select" id="filter-permissions-type" onchange="renderPermissionsTable()" style="max-width:180px; padding:8px 12px; background:#0f1530; border:1px solid rgba(255,255,255,0.08); color:#fff; border-radius:8px;">
+              <option value="">كل أنواع التعيين</option>
+              <option value="manual">تعيين يدوي (لوحة التحكم)</option>
+              <option value="auto">تلقائي (Google Sheets)</option>
+            </select>
+          </div>
+          <button class="btn-action secondary" onclick="Storage.loadAllFromServer().then(() => { renderPermissionsTable(); App.toast('تم تحديث البيانات من السيرفر!', 'success'); })" style="padding:8px 16px; border-radius:8px;">
+            <i class="fa-solid fa-arrows-rotate"></i> تحديث فوري
+          </button>
+        </div>
+
+        <!-- Users Permissions Table -->
+        <div class="admin-content-card" style="overflow-x:auto; margin-bottom: 30px;">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>العضو</th>
+                <th>حساب Discord</th>
+                <th>المعرف الرقمي (ID)</th>
+                <th>الرتبة العسكرية</th>
+                <th>الدور في النظام</th>
+                <th>طريقة التعيين</th>
+                <th>تاريخ التحديث</th>
+                <th>الإجراءات والعمليات</th>
+              </tr>
+            </thead>
+            <tbody id="table-body-permissions">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Section: Ranks and Permissions Changes Logs -->
+        <div class="admin-tab-header" style="margin-top: 40px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding-bottom: 10px; margin-bottom: 15px;">
+          <div>
+            <h3 class="admin-tab-title" style="font-size: 1.15rem; color: var(--color-gold-primary);"><i class="fa-solid fa-clock-rotate-left"></i> سجل تعديلات الرتب والصلاحيات</h3>
+            <p style="color: var(--color-text-secondary); font-size: 0.8rem; margin-top: 2px;">سجل توثيقي كامل لجميع عمليات منح وتعديل وإلغاء صلاحيات الرتب.</p>
+          </div>
+        </div>
+        <div class="admin-content-card" style="overflow-x:auto;">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>تاريخ ووقت العملية</th>
+                <th>اسم المسؤول</th>
+                <th>حساب Discord المستهدف</th>
+                <th>الرتبة السابقة</th>
+                <th>الرتبة الجديدة / العملية</th>
+                <th>تفاصيل وسجل الحركة بالتفصيل</th>
+              </tr>
+            </thead>
+            <tbody id="table-body-permissions-logs">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
     </div>
   </main>
 </div>
 
 <!-- ═══════════════ MODALS ═══════════════ -->
 
-<!-- Page Edit Modal -->
-<div class="admin-modal-overlay" id="page-modal" onclick="if(event.target===this) closePageModal()">
-  <div class="admin-modal">
+<!-- ── MODAL: GRANT/EDIT PERMISSION (منح وتعديل الرتب) ── -->
+<div class="admin-modal-overlay" id="modal-grant-permission">
+  <div class="admin-modal" style="max-width: 550px;">
     <div class="admin-modal-header">
-      <h3 style="font-weight:800; color:#fff;" id="page-modal-title">أضف صفحة جديدة</h3>
-      <button class="btn-action danger" onclick="closePageModal()" style="padding: 4px 8px; border-radius:50%;">✕</button>
+      <h3 style="font-family: inherit; font-size: 1.15rem; font-weight: 800; color: #fff;" id="permission-modal-title">منح رتبة عسكرية وصلاحيات جديدة</h3>
+      <button onclick="closeGrantPermissionModal()" style="background: none; border: none; color: rgba(255,255,255,0.5); cursor: pointer; font-size: 1.25rem;"><i class="fa-solid fa-xmark"></i></button>
     </div>
-    <form id="page-form">
-      <input type="hidden" id="page-edit-id">
+    <form id="form-grant-permission" onsubmit="handlePermissionFormSubmit(event)">
       <div class="admin-modal-body">
-        <div style="display:grid; grid-template-columns: 2fr 1fr; gap:16px;">
-          <div class="form-group">
-            <label class="form-label" for="page-title">عنوان الصفحة</label>
-            <input class="form-input" type="text" id="page-title" required placeholder="مثال: شروط القبول والتسجيل">
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="page-emoji">رمز تعبيري (Emoji)</label>
-            <input class="form-input" type="text" id="page-emoji" required placeholder="مثال: 📄">
-          </div>
-        </div>
+        <input type="hidden" id="perm-action-type" value="grant">
+        <input type="hidden" id="perm-edit-id" value="">
         
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
-          <div class="form-group">
-            <label class="form-label" for="page-parent">الصفحة الأبوية (إن وجد - لجعلها صفحة فرعية داخلها)</label>
-            <select class="form-select" id="page-parent">
-              <option value="">لا يوجد (صفحة رئيسية في النافبار)</option>
-            </select>
+        <!-- Selection Mode toggle: Choose from dropdown OR Enter manually -->
+        <div class="form-group" style="margin-bottom: 20px;">
+          <label class="form-label" style="margin-bottom: 8px;">طريقة اختيار الحساب:</label>
+          <div style="display: flex; gap: 16px;">
+            <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; color: #fff; font-size: 0.85rem;">
+              <input type="radio" name="account-select-mode" value="dropdown" checked onchange="toggleAccountSelectionMode(this.value)" style="accent-color: var(--color-gold-primary);">
+              اختيار من الحسابات المسجلة
+            </label>
+            <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; color: #fff; font-size: 0.85rem;">
+              <input type="radio" name="account-select-mode" value="manual" onchange="toggleAccountSelectionMode(this.value)" style="accent-color: var(--color-gold-primary);">
+              إدخال حساب ديسكورد يدوياً
+            </label>
           </div>
-          <div class="form-group">
-            <label class="form-label" for="page-visibility">حالة ظهور الصفحة</label>
-            <select class="form-select" id="page-visibility">
-              <option value="visible"><i class="fa-solid fa-eye"></i> ظاهرة في القوائم</option>
-              <option value="hidden"><i class="fa-solid fa-eye"></i>‍🗨️ مخفية من القوائم</option>
-            </select>
-          </div>
-        </div>
-        
-        <div class="form-group">
-          <label class="form-label" for="page-content-input">محتوى الصفحة (HTML / نصوص)</label>
-          <textarea class="form-textarea" id="page-content-input" rows="10" placeholder="أدخل محتوى الصفحة هنا بالكامل، يمكنك استخدام وسوم HTML مثل <h1> و <p> و <ul> لتنسيق الصفحة بشكل فائق..." required></textarea>
-        </div>
-      </div>
-      <div class="admin-modal-footer">
-        <button type="button" class="btn-action secondary" onclick="closePageModal()">إلغاء</button>
-        <button type="submit" class="btn-action primary">💾 حفظ الصفحة</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-
-
-<!-- Add User Modal -->
-<div class="admin-modal-overlay" id="add-user-modal" onclick="if(event.target===this) closeAddUserModal()">
-  <div class="admin-modal" style="max-width: 500px;">
-    <div class="admin-modal-header">
-      <h3 style="font-weight:800; color:#fff;">منح صلاحية جديدة بحساب ديسكورد</h3>
-      <button class="btn-action danger" onclick="closeAddUserModal()" style="padding: 4px 8px; border-radius:50%;">✕</button>
-    </div>
-    <form id="add-user-form">
-      <div class="admin-modal-body">
-        <div class="form-group">
-          <label class="form-label" for="new-user-discord">حساب الديسكورد (اسم المستخدم أو المعرف الرقمي ID) 🎮</label>
-          <input class="form-input" type="text" id="new-user-discord" required placeholder="مثال: Naser#2001 أو 1334568342345748565">
-          <small style="color:var(--color-text-muted); font-size:10.5px; margin-top:4px; display:block;">
-            * سيتم مطابقة هذا المعرف/الاسم تلقائياً عند قيام الشخص بتسجيل الدخول عبر ديسكورد.
-          </small>
-        </div>
-        
-        <div class="form-group">
-          <label class="form-label" for="new-user-name">الاسم الميداني / التعريفي <i class="fa-solid fa-user"></i></label>
-          <input class="form-input" type="text" id="new-user-name" required placeholder="مثال: الملازم ناصر العتيبي">
         </div>
 
-        <div class="form-group">
-          <label class="form-label" for="new-user-role">الصلاحية الممنوحة <i class="fa-solid fa-shield-halved"></i></label>
-          <select class="form-select" id="new-user-role" required>
-            <option value="assistant_owner">قيادة الامن العام <i class="fa-solid fa-star"></i></option>
-            <option value="academy_affairs">رئاسة تدريب الامن العام <i class="fa-solid fa-graduation-cap"></i></option>
-            <option value="admin" selected>شؤون أكاديمية التدريب <i class="fa-solid fa-shield-halved"></i></option>
-            <option value="course_admin">مسؤول دورة <i class="fa-solid fa-graduation-cap"></i></option>
-            <option value="viewer">مشاهد <i class="fa-solid fa-eye"></i></option>
+        <!-- Mode A: Dropdown Selection -->
+        <div class="form-group" id="account-group-dropdown">
+          <label class="form-label" for="perm-user-select">اختر الحساب العسكري المسجل:</label>
+          <select class="form-select" id="perm-user-select" style="width:100%; padding: 12px; background: #0b1232; border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 8px;" onchange="onUserSelectChange(this.value)">
+            <!-- Populated via JS -->
           </select>
+          <span style="font-size: 0.72rem; color: var(--color-text-secondary); margin-top: 4px; display: block;">الحسابات التي قامت بربط حساب Discord الخاص بها مسبقاً بالبوابة.</span>
         </div>
 
+        <!-- Mode B: Manual Entry -->
+        <div id="account-group-manual" style="display: none; gap: 16px; margin-bottom: 20px;">
+          <div class="form-group" style="flex: 1; margin-bottom: 0;">
+            <label class="form-label" for="perm-manual-id">معرف Discord الرقمي (User ID):</label>
+            <input type="text" class="form-input" id="perm-manual-id" placeholder="مثال: 1120142432554713261" style="width:100%; padding: 11px 14px; background: #0b1232; border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 8px;">
+            <span style="font-size: 0.7rem; color: rgba(255,255,255,0.4); margin-top: 4px; display: block;">المعرف الرقمي الفريد للحساب (17-20 رقم).</span>
+          </div>
+          <div class="form-group" style="flex: 1; margin-bottom: 0;">
+            <label class="form-label" for="perm-manual-tag">حساب Discord (Username):</label>
+            <input type="text" class="form-input" id="perm-manual-tag" placeholder="مثال: onlyryan" style="width:100%; padding: 11px 14px; background: #0b1232; border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 8px;">
+            <span style="font-size: 0.7rem; color: rgba(255,255,255,0.4); margin-top: 4px; display: block;">اسم المستخدم لحساب الديسكورد.</span>
+          </div>
+        </div>
+
+        <!-- Selected User Preview Badge -->
+        <div id="perm-user-preview-box" class="admin-content-card" style="display: none; align-items: center; gap: 12px; padding: 10px 14px; margin-bottom: 20px; background: rgba(201,162,39,0.06); border: 1px dashed rgba(201,162,39,0.25);">
+          <img id="perm-preview-avatar" src="" style="width: 38px; height: 38px; border-radius: 50%; object-fit: cover;" onerror="this.src='../../assets/images/avatar-placeholder.png'">
+          <div>
+            <div id="perm-preview-name" style="font-weight: 700; font-size: 0.88rem; color: #fff;">-</div>
+            <div id="perm-preview-details" style="font-size: 0.72rem; color: var(--color-text-secondary);">-</div>
+          </div>
+        </div>
+
+        <!-- Rank Selection -->
         <div class="form-group">
-          <label class="form-label" for="new-user-avatar">رمز تعبيري للأفاتار (Emoji) <i class="fa-solid fa-masks-theater"></i></label>
-          <input class="form-input" type="text" id="new-user-avatar" required value="<i class="fa-solid fa-shield-halved"></i>" placeholder="مثال: <i class="fa-solid fa-shield-halved"></i> أو <i class="fa-solid fa-user"></i>">
+          <label class="form-label" for="perm-rank-select">اختر الرتبة العسكرية لمنحها:</label>
+          <select class="form-select" id="perm-rank-select" style="width:100%; padding: 12px; background: #0b1232; border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 8px;">
+            <option value="owner">المالك (owner)</option>
+            <option value="assistant_owner">قيادة الأمن العام (assistant_owner)</option>
+            <option value="academy_affairs">رئاسة تدريب الأمن العام (academy_affairs)</option>
+            <option value="admin">شؤون أكاديمية التدريب (admin)</option>
+            <option value="course_admin">مسؤول دورة (course_admin)</option>
+            <option value="viewer">مشاهد (viewer)</option>
+          </select>
+          <span style="font-size: 0.72rem; color: var(--color-text-secondary); margin-top: 4px; display: block;">الرتبة العسكرية الرسمية التي تمنح الصلاحيات المقابلة لها فوراً في النظام.</span>
         </div>
       </div>
       <div class="admin-modal-footer">
-        <button type="button" class="btn-action secondary" onclick="closeAddUserModal()">إلغاء</button>
-        <button type="submit" class="btn-action primary">💾 منح الصلاحية</button>
+        <button type="button" class="btn-action secondary" onclick="closeGrantPermissionModal()">إلغاء</button>
+        <button type="submit" class="btn-action primary" id="btn-save-permission">حفظ الصلاحيات</button>
       </div>
     </form>
   </div>
 </div>
 
-<!-- User Details Modal -->
-<div class="admin-modal-overlay" id="user-details-modal" onclick="if(event.target===this) closeUserDetailsModal()">
-  <div class="admin-modal" style="max-width: 550px; overflow: hidden; border-radius: 20px;">
-    <div id="user-details-content">
-      <!-- Rendered dynamically -->
-    </div>
-    <div class="admin-modal-footer" style="background: rgba(0,0,0,0.2); border-top: 1px solid rgba(255,255,255,0.06);">
-      <button type="button" class="btn-action secondary" onclick="closeUserDetailsModal()">إغلاق</button>
-      <button type="button" class="btn-action primary" id="btn-admin-view-profile">🔗 فتح الملف الميداني الكامل</button>
-    </div>
-  </div>
-</div>
+
+
+
+
+
 
 <!-- ═══════════════ SCRIPTS ═══════════════ -->
 
@@ -1087,159 +1032,8 @@
     return 'background: linear-gradient(135deg, #0d1e40 0%, #070d26 60%, #05091e 100%);';
   }
 
-  window.openUserDetailsModal = function(userId) {
-    const users = getUnifiedUsersList();
-    const u = users.find(user => user.id === userId);
-    if (!u) {
-      App.toast('عذراً، لم يتم العثور على بيانات هذا العضو.', 'error');
-      return;
-    }
 
-    const resolvedAvatar = getDiscordAvatar(u);
-    const bannerStyle = getDiscordBannerStyle(u);
-    const roleLabel = Auth.getRoleLabel(u.role);
-    const statusLabel = u.status === 'active' ? '<span style="color:#2ecc71; font-weight:bold;">نشط ✓</span>' : '<span style="color:#e74c3c; font-weight:bold;">معطل ✗</span>';
-    
-    let discordId = u.discord_id || u.id || '—';
-    if (String(discordId).startsWith('sheet_member_')) {
-      discordId = 'غير مرتبط (حساب وهمي)';
-    }
 
-    let discordTag = u.discord || 'unknown';
-    if (discordTag !== 'unknown' && !discordTag.startsWith('@')) {
-      discordTag = '@' + discordTag;
-    }
-
-    let displayName = u.display_name || u.username || '';
-    let globalName = u.global_name || '';
-    const cachedEntry = discordId && discordUsersCache[discordId] ? discordUsersCache[discordId] : null;
-    if (cachedEntry) {
-      if (!globalName) globalName = cachedEntry.globalName || '';
-      if (!displayName && cachedEntry.globalName) displayName = cachedEntry.globalName;
-    }
-    if (!displayName) displayName = u.username || '';
-
-    const contentDiv = document.getElementById('user-details-content');
-    contentDiv.innerHTML = `
-      <div style="position: relative; height: 160px; ${bannerStyle} border-bottom: 1px solid rgba(255,255,255,0.1);"></div>
-      <div style="padding: 0 24px 20px; position: relative;">
-        <!-- Avatar -->
-        <div style="width: 100px; height: 100px; border-radius: 50%; overflow: hidden; border: 4px solid var(--color-bg-secondary); background: #05091e; position: absolute; top: -50px; right: 24px; box-shadow: 0 8px 16px rgba(0,0,0,0.5); z-index: 2;">
-          <img src="${resolvedAvatar}" style="width: 100%; height: 100%; object-fit: cover;" onerror="window.handleAvatarError(this, '../../assets/img/emblem.png');">
-        </div>
-        
-        <!-- Header spacer for avatar -->
-        <div style="height: 60px;"></div>
-        
-        <!-- User Title -->
-        <div style="margin-bottom: 20px;">
-          <h3 style="font-size: 1.4rem; font-weight: 800; color: #fff; margin: 0 0 6px; display: flex; align-items: center; gap: 8px;">
-            <span>${displayName}</span>
-            ${u.code ? `<span style="font-size: 0.95rem; color: rgba(255,255,255,0.5); font-family: monospace;">[ ${u.code} ]</span>` : ''}
-          </h3>
-          <div style="font-size: 0.85rem; color: var(--color-gold-primary); font-family: monospace; direction: ltr; text-align: right; display: flex; gap: 8px; justify-content: flex-end;">
-            <span>${discordTag}</span>
-            ${globalName && globalName !== displayName ? `<span style="color: rgba(255,255,255,0.45);">(${globalName})</span>` : ''}
-          </div>
-        </div>
-
-        <!-- Info Grid -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 16px; border-radius: 12px;">
-          <div>
-            <div style="font-size: 0.72rem; color: rgba(255,255,255,0.4); margin-bottom: 2px;">الرتبة في النظام</div>
-            <div style="font-weight: 700; color: #fff; font-size: 0.9rem;">${roleLabel}</div>
-          </div>
-          <div>
-            <div style="font-size: 0.72rem; color: rgba(255,255,255,0.4); margin-bottom: 2px;">الرتبة العسكرية</div>
-            <div style="font-weight: 700; color: var(--color-gold-primary); font-size: 0.9rem;">${u.rank || 'مشاهد'}</div>
-          </div>
-          <div>
-            <div style="font-size: 0.72rem; color: rgba(255,255,255,0.4); margin-bottom: 2px;">الرقم العسكري (الكود)</div>
-            <div style="font-weight: 700; color: var(--color-gold-light); font-size: 0.9rem; font-family: monospace;">[ ${u.code || '—'} ]</div>
-          </div>
-          <div>
-            <div style="font-size: 0.72rem; color: rgba(255,255,255,0.4); margin-bottom: 2px;">تاريخ التوثيق</div>
-            <div style="font-weight: 700; color: #fff; font-size: 0.9rem;">${u.joinDate || '—'}</div>
-          </div>
-          <div>
-            <div style="font-size: 0.72rem; color: rgba(255,255,255,0.4); margin-bottom: 2px;">القسم / الجداول</div>
-            <div style="font-weight: 700; color: #fff; font-size: 0.9rem;">${u.department || '—'}</div>
-          </div>
-          <div>
-            <div style="font-size: 0.72rem; color: rgba(255,255,255,0.4); margin-bottom: 2px;">حالة الحساب</div>
-            <div style="font-size: 0.9rem;">${statusLabel}</div>
-          </div>
-          <div style="grid-column: span 2;">
-            <div style="font-size: 0.72rem; color: rgba(255,255,255,0.4); margin-bottom: 2px;">معرف ديسكورد (Discord ID)</div>
-            <div style="font-weight: 700; color: #fff; font-size: 0.88rem; font-family: monospace;">${discordId}</div>
-          </div>
-        </div>
-      </div>
-    `;
-
-    // Bind link to the user profile page
-    const viewProfileBtn = document.getElementById('btn-admin-view-profile');
-    if (viewProfileBtn) {
-      viewProfileBtn.onclick = function() {
-        window.open(`../amn90-r.html?name=${encodeURIComponent(u.username)}`, '_blank');
-      };
-    }
-
-    document.getElementById('user-details-modal').classList.add('active');
-  };
-
-  window.closeUserDetailsModal = function() {
-    document.getElementById('user-details-modal').classList.remove('active');
-  };
-
-  async function loadDiscordUsers() {
-    try {
-      const res = await fetch(`../../assets/data/discord_users.json?t=${Date.now()}`);
-      if (res.ok) {
-        discordUsersCache = await res.json();
-      }
-    } catch (e) {
-      console.warn('Failed to load discord users in dashboard:', e);
-    } finally {
-      setupUserBadge();
-      renderUsersTable();
-      renderDiscordDiagnostics();
-    }
-  }
-
-  window.triggerManualUserSync = async function() {
-    const btn = document.getElementById('btn-sync-all-users');
-    if (btn) {
-      btn.disabled = true;
-      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> جاري المزامنة...`;
-    }
-    App.toast('🔄 جاري بدء مزامنة جميع المستخدمين من الديسكورد، قد يستغرق هذا بعض الوقت...', 'info');
-
-    try {
-      const res = await fetch('/api/users/sync_all', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-      const data = await res.json();
-      if (data.success) {
-        App.toast(`✅ تمت المزامنة بنجاح! تم تحديث ${data.updatedCount} من الأعضاء. وفشل ${data.failedCount}.`, 'success');
-        // Reload cache and redraw table
-        await loadDiscordUsers();
-      } else {
-        App.toast(`✕ فشلت عملية المزامنة: ${data.error || 'خطأ غير معروف'}`, 'error');
-      }
-    } catch (e) {
-      console.error('Error during manual sync:', e);
-      App.toast(`✕ حدث خطأ أثناء الاتصال بالسيرفر: ${e.message}`, 'error');
-    } finally {
-      if (btn) {
-        btn.disabled = false;
-        btn.innerHTML = `<i class="fa-brands fa-discord"></i> مزامنة جميع المستخدمين`;
-      }
-    }
-  };
 
   function getDiscordAvatar(u) {
     if (!u) return '../../assets/img/emblem.png';
@@ -1319,24 +1113,12 @@
     
     const user = Auth.getCurrentUser();
     setupUserBadge();
-    loadDiscordUsers();
 
     // Show logs management tab for owner, assistant_owner, and academy_affairs
     if (user && ['owner', 'assistant_owner', 'academy_affairs'].includes(user.role)) {
       const navLogs = document.getElementById('nav-item-logs');
       if (navLogs) navLogs.style.display = 'flex';
       filterAndRenderLogs();
-    }
-
-    // Show users and discord diagnostics tab only if Owner or Assistant Owner
-    if (user && ['owner', 'assistant_owner'].includes(user.role)) {
-      const navUsers = document.getElementById('nav-item-users');
-      if (navUsers) navUsers.style.display = 'flex';
-      const navDiscord = document.getElementById('nav-item-discord');
-      if (navDiscord) navDiscord.style.display = 'flex';
-      
-      renderUsersTable();
-      if(typeof renderDiscordDiagnostics === 'function') renderDiscordDiagnostics();
     }
 
     // Show recruitment tab if owner, assistant_owner, academy_affairs, or admin
@@ -1350,6 +1132,13 @@
       document.getElementById('search-recruitment')?.addEventListener('input', renderRecruitmentTable);
       document.getElementById('filter-recruitment-sector')?.addEventListener('change', renderRecruitmentTable);
       document.getElementById('filter-recruitment-status')?.addEventListener('change', renderRecruitmentTable);
+    }
+
+    // Show permissions management tab if owner or assistant_owner
+    if (user && ['owner', 'assistant_owner'].includes(user.role)) {
+      const navPerms = document.getElementById('nav-item-permissions');
+      if (navPerms) navPerms.style.display = 'flex';
+      renderPermissionsTable();
     }
 
     // Hide clear log buttons for roles with level < 4.5
@@ -1384,10 +1173,10 @@
         // Render tab content on switch
         if (tabId === 'logs') {
           filterAndRenderLogs();
-        } else if (tabId === 'users') {
-          renderUsersTable();
         } else if (tabId === 'recruitment') {
           renderRecruitmentTable();
+        } else if (tabId === 'permissions') {
+          renderPermissionsTable();
         }
       });
     });
@@ -1437,22 +1226,14 @@
       if (activeTab && activeTab.dataset.tab === 'logs') {
         filterAndRenderLogs();
       }
-      if (activeTab && activeTab.dataset.tab === 'users') {
-        renderUsersTable();
-      }
     });
     
     // 4. Load Content
-    renderPagesTable();
     loadThemeSettings();
     updateOverviewStats();
     
     // 5. Wire Forms
-    document.getElementById('page-form').addEventListener('submit', handlePageFormSubmit);
     document.getElementById('theme-settings-form').addEventListener('submit', handleThemeFormSubmit);
-    document.getElementById('add-user-form').addEventListener('submit', handleAddUserFormSubmit);
-    
-
   });
 
   /* ───────────────────────────────────────────────────
@@ -1462,175 +1243,6 @@
     document.getElementById('stat-members-count').textContent = Storage.get(Storage.keys.SETTINGS, {}).totalMembers || 127;
     document.getElementById('stat-exams-count').textContent = Storage.count(Storage.keys.EXAMS);
     document.getElementById('stat-pages-count').textContent = Storage.count(Storage.keys.PAGES);
-  }
-
-  /* ───────────────────────────────────────────────────
-     PAGES MANAGER
-     ─────────────────────────────────────────────────── */
-  function renderPagesTable() {
-    const tableBody = document.getElementById('pages-table-body');
-    if (!tableBody) return;
-    
-    const pages = Storage.getCollection(Storage.keys.PAGES) || [];
-    if (pages.length === 0) {
-      tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--color-text-muted)">لا توجد صفحات مخصصة حالياً. أضف واحدة الآن!</td></tr>`;
-      return;
-    }
-    
-    // Render parents first and their sub-pages immediately underneath
-    const sortedList = [];
-    const parents = pages.filter(p => !p.parentId);
-    parents.forEach(p => {
-      sortedList.push({ ...p, isChild: false });
-      const children = pages.filter(child => child.parentId === p.id);
-      children.forEach(child => {
-        sortedList.push({ ...child, isChild: true });
-      });
-    });
-    
-    // Append orphaned children if any parent is deleted
-    pages.forEach(p => {
-      if (p.parentId && !pages.some(parent => parent.id === p.parentId)) {
-        if (!sortedList.some(item => item.id === p.id)) {
-          sortedList.push({ ...p, isChild: false });
-        }
-      }
-    });
-    
-    tableBody.innerHTML = sortedList.map(p => {
-      const indentStyle = p.isChild ? 'style="padding-right: 32px; font-size: 0.85rem; color:#bbb;"' : 'style="font-weight:700; color:#fff;"';
-      const typeBadge = p.isChild ? `<span class="admin-nav-badge" style="background:rgba(155, 89, 182, 0.12); color:#9b59b6; border:1px solid rgba(155,89,182,0.25); font-size:0.7rem; padding: 2px 6px;">صفحة فرعية</span>` : `<span class="admin-nav-badge" style="background:rgba(39, 174, 96, 0.12); color:#27ae60; border:1px solid rgba(39,174,96,0.25); font-size:0.7rem; padding: 2px 6px;">رئيسية</span>`;
-      const prefix = p.isChild ? `<span style="color:var(--color-gold-primary); font-weight:bold; margin-left:6px;">↳</span>` : '';
-      
-      const statusBadge = p.isHidden ? 
-        `<span class="admin-nav-badge" style="background:rgba(231,76,60,0.12); color:#e74c3c; border:1px solid rgba(231,76,60,0.2); font-size:0.7rem; padding:2px 6px;"><i class="fa-solid fa-eye"></i>‍🗨️ مخفية</span>` : 
-        `<span class="admin-nav-badge" style="background:rgba(46,204,113,0.12); color:#2ecc71; border:1px solid rgba(46,204,113,0.2); font-size:0.7rem; padding:2px 6px;"><i class="fa-solid fa-eye"></i> ظاهرة</span>`;
-      
-      return `
-        <tr>
-          <td style="font-size:1.4rem">${p.emoji || '📄'}</td>
-          <td ${indentStyle}>${prefix}${p.title}</td>
-          <td style="font-family:monospace; font-size:0.8rem; opacity:0.7;">${p.id}</td>
-          <td>${typeBadge} ${statusBadge}</td>
-          <td><a href="../custom.html?id=${p.id}" target="_blank" class="btn-action secondary" style="font-size:0.75rem;">فتح الصفحة <i class="fa-solid fa-link"></i></a></td>
-          <td>
-            <div style="display:flex; gap:8px;">
-              <button class="btn-action secondary" style="font-size:0.75rem;" onclick="editPage('${p.id}')">✏️ تعديل</button>
-              <button class="btn-action danger" style="font-size:0.75rem;" onclick="deletePage('${p.id}')">🗑️ حذف</button>
-              <button class="btn-action secondary" style="font-size:0.75rem; padding:6px 10px;" onclick="movePageUp('${p.id}')">▲</button>
-              <button class="btn-action secondary" style="font-size:0.75rem; padding:6px 10px;" onclick="movePageDown('${p.id}')">▼</button>
-              <button class="btn-action secondary" style="font-size:0.75rem;" onclick="togglePageVisibility('${p.id}', ${!p.isHidden})">${p.isHidden ? '<i class="fa-solid fa-eye"></i> إظهار' : '<i class="fa-solid fa-eye"></i>‍🗨️ إخفاء'}</button>
-            </div>
-          </td>
-        </tr>
-      `;
-    }).join('');
-  }
-
-  function openPageModal() {
-    document.getElementById('page-edit-id').value = '';
-    document.getElementById('page-title').value = '';
-    document.getElementById('page-emoji').value = '📄';
-    document.getElementById('page-visibility').value = 'visible';
-    document.getElementById('page-content-input').value = '';
-    document.getElementById('page-modal-title').textContent = 'أضف صفحة جديدة';
-    
-    // Populate parent dropdown
-    const select = document.getElementById('page-parent');
-    const pages = Storage.getCollection(Storage.keys.PAGES) || [];
-    const parents = pages.filter(p => !p.parentId);
-    select.innerHTML = '<option value="">لا يوجد (صفحة رئيسية في النافبار)</option>' + 
-      parents.map(p => `<option value="${p.id}">${p.emoji || '📄'} ${p.title}</option>`).join('');
-      
-    document.getElementById('page-modal').classList.add('active');
-  }
-
-  function closePageModal() {
-    document.getElementById('page-modal').classList.remove('active');
-  }
-
-  function handlePageFormSubmit(e) {
-    e.preventDefault();
-    const editId = document.getElementById('page-edit-id').value;
-    const title = document.getElementById('page-title').value.trim();
-    const emoji = document.getElementById('page-emoji').value.trim();
-    const parentId = document.getElementById('page-parent').value || null;
-    const isHidden = document.getElementById('page-visibility').value === 'hidden';
-    const content = document.getElementById('page-content-input').value;
-    
-    if (editId) {
-      Storage.updateInCollection(Storage.keys.PAGES, editId, { title, emoji, parentId, isHidden, content });
-      App.toast('تم تحديث الصفحة بنجاح', 'success');
-    } else {
-      Storage.addToCollection(Storage.keys.PAGES, { title, emoji, parentId, isHidden, content });
-      App.toast('تم إنشاء الصفحة بنجاح وتحديث شريط التنقل', 'success');
-    }
-    
-    closePageModal();
-    renderPagesTable();
-    updateOverviewStats();
-  }
-
-  window.editPage = function(id) {
-    const page = Storage.findById(Storage.keys.PAGES, id);
-    if (!page) return;
-    
-    document.getElementById('page-edit-id').value = page.id;
-    document.getElementById('page-title').value = page.title;
-    document.getElementById('page-emoji').value = page.emoji || '📄';
-    document.getElementById('page-visibility').value = page.isHidden ? 'hidden' : 'visible';
-    document.getElementById('page-content-input').value = page.content || '';
-    document.getElementById('page-modal-title').textContent = 'تعديل الصفحة المخصصة';
-    
-    // Populate parent dropdown, excluding self
-    const select = document.getElementById('page-parent');
-    const pages = Storage.getCollection(Storage.keys.PAGES) || [];
-    const parents = pages.filter(p => !p.parentId && p.id !== id);
-    select.innerHTML = '<option value="">لا يوجد (صفحة رئيسية في النافبار)</option>' + 
-      parents.map(p => `<option value="${p.id}" ${p.id === page.parentId ? 'selected' : ''}>${p.emoji || '📄'} ${p.title}</option>`).join('');
-      
-    document.getElementById('page-modal').classList.add('active');
-  }
-
-  window.deletePage = function(id) {
-    if (confirm('هل أنت متأكد من رغبتك في حذف هذه الصفحة بالكامل؟')) {
-      Storage.deleteFromCollection(Storage.keys.PAGES, id);
-      App.toast('تم حذف الصفحة المخصصة بنجاح 🗑️', 'success');
-      renderPagesTable();
-      updateOverviewStats();
-    }
-  }
-
-  window.movePageUp = function(id) {
-    const pages = Storage.getCollection(Storage.keys.PAGES) || [];
-    const idx = pages.findIndex(p => p.id === id);
-    if (idx > 0) {
-      const temp = pages[idx];
-      pages[idx] = pages[idx - 1];
-      pages[idx - 1] = temp;
-      Storage.set(Storage.keys.PAGES, pages);
-      renderPagesTable();
-      App.toast('تم تقديم الترتيب للأعلى ▲', 'success');
-    }
-  }
-
-  window.movePageDown = function(id) {
-    const pages = Storage.getCollection(Storage.keys.PAGES) || [];
-    const idx = pages.findIndex(p => p.id === id);
-    if (idx !== -1 && idx < pages.length - 1) {
-      const temp = pages[idx];
-      pages[idx] = pages[idx + 1];
-      pages[idx + 1] = temp;
-      Storage.set(Storage.keys.PAGES, pages);
-      renderPagesTable();
-      App.toast('تم تأخير الترتيب للأسفل ⬇️', 'success');
-    }
-  }
-
-  window.togglePageVisibility = function(id, isHidden) {
-    Storage.updateInCollection(Storage.keys.PAGES, id, { isHidden });
-    App.toast(isHidden ? 'تم إخفاء الصفحة بنجاح <i class="fa-solid fa-eye"></i>‍عون' : 'تم إظهار الصفحة بنجاح <i class="fa-solid fa-eye"></i>', 'success');
-    renderPagesTable();
   }
 
 
@@ -1843,222 +1455,7 @@
     return unifiedList;
   }
 
-  function findVirtualUserById(userId) {
-    const list = getUnifiedUsersList();
-    return list.find(u => u.id === userId);
-  }
 
-  function renderUsersTable() {
-    const tableBody = document.getElementById('users-table-body');
-    if (!tableBody) return;
-    
-    let users = getUnifiedUsersList();
-    const links = Storage.get('ps_discord_links', []) || [];
-    
-    const searchVal = document.getElementById('search-users') ? document.getElementById('search-users').value.trim().toLowerCase() : '';
-    const tableFilter = document.getElementById('filter-users-table') ? document.getElementById('filter-users-table').value : '';
-    const statusFilter = document.getElementById('filter-users-status') ? document.getElementById('filter-users-status').value : '';
-    
-    if (searchVal) {
-      users = users.filter(u => {
-        let displayName = u.username || '';
-        if (typeof Auth !== 'undefined' && typeof Auth.resolveUserTableInfo === 'function') {
-          const info = Auth.resolveUserTableInfo(u);
-          if (info && info.found && info.name) {
-            displayName = info.name;
-          }
-        }
-        const dn = displayName.toLowerCase();
-        return dn.includes(searchVal) ||
-               (u.username && u.username.toLowerCase().includes(searchVal)) || 
-               (u.discord && u.discord.toLowerCase().includes(searchVal)) ||
-               (u.discord_id && u.discord_id.toLowerCase().includes(searchVal));
-      });
-    }
-    
-    if (tableFilter) {
-      users = users.filter(u => {
-        let dept = u.department || '';
-        if (!dept && typeof Auth !== 'undefined' && typeof Auth.resolveUserTableInfo === 'function') {
-          const info = Auth.resolveUserTableInfo(u);
-          if (info && info.tables) {
-            dept = info.tables.join(', ');
-          }
-        }
-        dept = dept || '';
-        if (tableFilter === 'المعتمدين') {
-          return dept.includes('المعتمدين') || dept.includes('المنتدبين');
-        }
-        return dept.includes(tableFilter);
-      });
-    }
-    
-    if (statusFilter) {
-      users = users.filter(u => u.status === statusFilter);
-    }
-
-    if (users.length === 0) {
-      tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--color-text-muted)">لا يوجد أعضاء يطابقون خيارات البحث والتصفية.</td></tr>`;
-      return;
-    }
-    
-    tableBody.innerHTML = users.map(u => {
-      const isOwner = u.role === 'owner';
-      const statusLabel = u.status === 'active' ? '<i class="fa-solid fa-circle-check" style="color: #2ecc71;"></i> نشط' : '<i class="fa-solid fa-circle-exclamation" style="color: #e74c3c;"></i> معطل';
-      const roleLabel = Auth.getRoleLabel(u.role);
-      
-      const selectHtml = isOwner ? 
-        `<span style="color:var(--color-gold-primary); font-weight:bold;">المالك العام (محمي)</span>` : 
-        `
-        <select class="form-select" style="padding:4px 8px; font-size:0.78rem; width:auto; display:inline-block;" onchange="changeUserRole('${u.id}', this.value)">
-          <option value="assistant_owner" ${u.role === 'assistant_owner' ? 'selected' : ''}>قيادة الامن العام <i class="fa-solid fa-star"></i></option>
-          <option value="academy_affairs" ${u.role === 'academy_affairs' ? 'selected' : ''}>رئاسة تدريب الامن العام <i class="fa-solid fa-graduation-cap"></i></option>
-          <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>شؤون أكاديمية التدريب <i class="fa-solid fa-shield-halved"></i></option>
-          <option value="course_admin" ${u.role === 'course_admin' ? 'selected' : ''}>مسؤول دورة <i class="fa-solid fa-graduation-cap"></i></option>
-          <option value="viewer" ${u.role === 'viewer' ? 'selected' : ''}>مشاهد <i class="fa-solid fa-eye"></i></option>
-        </select>
-        `;
-        
-      const actionHtml = isOwner ? 
-        `—` : 
-        `
-        <div style="display:flex; gap:8px; align-items:center;">
-          <button class="btn-action ${u.status === 'active' ? 'danger' : 'primary'}" style="font-size:0.72rem; padding:4px 8px;" onclick="toggleUserStatus('${u.id}', '${u.status}')">
-            ${u.status === 'active' ? 'تعطيل' : 'تنشيط'}
-          </button>
-          <button class="btn-action danger" style="font-size:0.72rem; padding:4px 8px; background:rgba(231,76,60,0.12); color:#ff4757; border:1px solid rgba(231,76,60,0.25);" onclick="removeUserFromSystem('${u.id}', '${u.username}', '${u.discord}')">
-            🗑️ إزالة
-          </button>
-        </div>
-        `;
-
-      const resolvedAvatar = getDiscordAvatar(u);
-      const bannerStyle = getDiscordBannerStyle(u);
-
-      const isLinked = !u.isVirtual && (u.discord_id || links.some(l => l.user_id === u.id || l.discord_id === u.id));
-      const linkBadgeHtml = isLinked ? 
-        `<span class="badge" style="background: rgba(88, 101, 242, 0.15); color: #5865f2; border: 1px solid rgba(88, 101, 242, 0.3); font-size: 0.72rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; display: inline-flex; align-items: center; gap: 4px;"><i class="fa-brands fa-discord"></i> مرتبط</span>` : 
-        `<span class="badge" style="background: rgba(255, 255, 255, 0.05); color: rgba(255,255,255,0.4); border: 1px solid rgba(255, 255, 255, 0.1); font-size: 0.72rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; display: inline-flex; align-items: center; gap: 4px;"><i class="fa-solid fa-link-slash"></i> غير مرتبط</span>`;
-
-      let displayName = u.username;
-      if (typeof Auth !== 'undefined' && typeof Auth.resolveUserTableInfo === 'function') {
-        const info = Auth.resolveUserTableInfo(u);
-        if (info && info.found && info.name) {
-          displayName = info.name;
-        }
-      }
-
-      const avatarHtml = `<div class="user-avatar-sm" style="width:28px; height:28px; border-radius:50%; overflow:hidden; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.05); display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;">
-        <img src="${resolvedAvatar}" style="width:100%; height:100%; object-fit:cover;" onerror="window.handleAvatarError(this, '../../assets/img/emblem.png');">
-      </div>`;
-
-      const bannerHtml = `<div class="user-banner-preview" style="width:50px; height:20px; border-radius:4px; border:1px solid rgba(255,255,255,0.1); ${bannerStyle} display:inline-block; flex-shrink:0; vertical-align:middle; cursor:pointer;" onclick="openUserDetailsModal('${u.id}')" title="عرض ملف العضو"></div>`;
-
-      return `
-        <tr>
-          <td>
-            <div style="display:flex; align-items:center; gap:8px;">
-              ${bannerHtml}
-              ${avatarHtml}
-            </div>
-          </td>
-          <td>
-            <span onclick="openUserDetailsModal('${u.id}')" style="font-weight: 800; color: #fff; cursor: pointer;" onmouseover="this.style.color='var(--color-gold-primary)'; this.style.textDecoration='underline';" onmouseout="this.style.color='#fff'; this.style.textDecoration='none';">${displayName}</span>
-            ${linkBadgeHtml}
-          </td>
-          <td style="font-family:monospace; font-size:0.82rem;">${u.discord || '—'}</td>
-          <td><strong>${roleLabel}</strong></td>
-          <td>${statusLabel}</td>
-          <td>
-            ${selectHtml}
-            ${isOwner ? '' : ' | '}
-            ${actionHtml}
-          </td>
-        </tr>
-      `;
-    }).join('');
-  }
-
-  window.changeUserRole = function(userId, newRole) {
-    const user = Auth.getCurrentUser();
-    if (!user || user.role !== 'owner') return;
-    
-    if (String(userId).startsWith('sheet_member_')) {
-      const vu = findVirtualUserById(userId);
-      if (vu) {
-        const newUser = {
-          id: vu.id,
-          username: vu.username,
-          discord: vu.discord,
-          role: newRole,
-          rank: Auth.getRoleLabel(newRole),
-          status: 'active',
-          department: vu.department,
-          code: vu.code,
-          joinDate: vu.joinDate || new Date().toISOString().split('T')[0]
-        };
-        Storage.addToCollection(Storage.keys.USERS, newUser);
-      }
-    } else {
-      Storage.updateInCollection(Storage.keys.USERS, userId, { role: newRole, rank: Auth.getRoleLabel(newRole) });
-    }
-    App.toast('تم تحديث رتبة وصلاحيات العضو بنجاح <i class="fa-solid fa-shield-halved"></i>', 'success');
-    renderUsersTable();
-  }
-
-  window.toggleUserStatus = function(userId, currentStatus) {
-    const user = Auth.getCurrentUser();
-    if (!user || user.role !== 'owner') return;
-    
-    const newStatus = currentStatus === 'active' ? 'disabled' : 'active';
-    if (String(userId).startsWith('sheet_member_')) {
-      const vu = findVirtualUserById(userId);
-      if (vu) {
-        const newUser = {
-          id: vu.id,
-          username: vu.username,
-          discord: vu.discord,
-          role: 'viewer',
-          rank: vu.rank || 'مشاهد',
-          status: newStatus,
-          department: vu.department,
-          code: vu.code,
-          joinDate: vu.joinDate || new Date().toISOString().split('T')[0]
-        };
-        Storage.addToCollection(Storage.keys.USERS, newUser);
-      }
-    } else {
-      Storage.updateInCollection(Storage.keys.USERS, userId, { status: newStatus });
-    }
-    App.toast(newStatus === 'active' ? 'تم تنشيط الحساب بنجاح <i class="fa-solid fa-circle-check" style="color: #2ecc71;"></i>' : 'تم تعطيل الحساب بنجاح <i class="fa-solid fa-circle-exclamation" style="color: #e74c3c;"></i>', 'success');
-    renderUsersTable();
-  }
-
-  window.removeUserFromSystem = function(userId, username, discord) {
-    const user = Auth.getCurrentUser();
-    if (!user || user.role !== 'owner') {
-      App.toast('عذراً، المالك فقط يملك صلاحية إزالة الأعضاء!', 'error');
-      return;
-    }
-    
-    if (String(userId).startsWith('sheet_member_')) {
-      App.toast('✕ لا يمكن حذف منسوب قادم من جداول Sheets مباشرة. يجب إزالته من ملف Google Sheets الرئيسي.', 'error');
-      return;
-    }
-    
-    if (confirm(`هل أنت متأكد من رغبتك في إزالة العضو "${username}" (${discord}) وسحب كافة صلاحياته بالكامل؟`)) {
-      const result = Auth.deleteUser(userId);
-      if (result && result.success) {
-        App.toast('✅ تم إزالة العضو وإلغاء صلاحياته بنجاح!', 'success');
-        if (typeof Logger !== 'undefined') {
-          Logger.log('user_delete', `إزالة العضو "${username}" (${discord}) وسحب كافة صلاحياته`);
-        }
-        renderUsersTable();
-      } else {
-        App.toast(`✕ فشل إزالة العضو: ${result?.message || 'خطأ غير معروف'}`, 'error');
-      }
-    }
-  }
 
   /* ───────────────────────────────────────────────────
      SYSTEM LOGS MANAGER
@@ -2464,130 +1861,7 @@
     }
   }
 
-  /* ───────────────────────────────────────────────────
-     ADD USER BY DISCORD MODAL
-     ─────────────────────────────────────────────────── */
-  window.openAddUserModal = function() {
-    document.getElementById('new-user-discord').value = '';
-    document.getElementById('new-user-name').value = '';
-    document.getElementById('new-user-role').value = 'admin';
-    document.getElementById('new-user-avatar').value = '<i class="fa-solid fa-shield-halved"></i>';
-    document.getElementById('add-user-modal').classList.add('active');
-  }
 
-  window.closeAddUserModal = function() {
-    document.getElementById('add-user-modal').classList.remove('active');
-  }
-
-  window.handleAddUserFormSubmit = function(e) {
-    e.preventDefault();
-    const discord = document.getElementById('new-user-discord').value.trim();
-    const name = document.getElementById('new-user-name').value.trim();
-    const role = document.getElementById('new-user-role').value;
-    const avatar = document.getElementById('new-user-avatar').value.trim();
-
-    const rank = Auth.getRoleLabel(role);
-
-    const users = Storage.getCollection(Storage.keys.USERS) || [];
-    const exists = users.some(u => u.discord.toLowerCase() === discord.toLowerCase());
-    if (exists) {
-      App.toast('✕ حساب الديسكورد هذا يمتلك صلاحية بالفعل!', 'error');
-      return;
-    }
-
-    const newUser = {
-      discord: discord,
-      username: name,
-      role: role,
-      rank: rank,
-      avatar: avatar || '<i class="fa-solid fa-user"></i>',
-      status: 'active',
-      joinDate: new Date().toISOString().split('T')[0]
-    };
-
-    Storage.addToCollection(Storage.keys.USERS, newUser);
-    App.toast('✅ تم منح الصلاحية بنجاح وحفظها بحساب الديسكورد!', 'success');
-    
-    if (typeof Logger !== 'undefined') {
-      Logger.log('permission_grant', `منح صلاحية "${Auth.getRoleLabel(role)}" للديسكورد "${discord}" (الاسم الميداني: ${name})`);
-    }
-
-    closeAddUserModal();
-    renderUsersTable();
-  }
-  
-  /* ───────────────────────────────────────────────────
-     TABLE PERMISSIONS ENGINE
-     ─────────────────────────────────────────────────── */
-  const SYSTEM_ROLES = [
-    { id: 'owner', label: 'المالك' },
-    { id: 'assistant_owner', label: 'قيادة الامن العام' },
-    { id: 'academy_affairs', label: 'رئاسة تدريب الامن العام' },
-    { id: 'admin', label: 'شؤون أكاديمية التدريب' },
-    { id: 'course_admin', label: 'مسؤول دورة' },
-    { id: 'viewer', label: 'مشاهد' }
-  ];
-
-  function renderTablePermissions() {
-    const tbody = document.getElementById('table-perms-tbody');
-    if (!tbody) return;
-    
-    // Load from settings or set defaults
-    const settings = Storage.get(Storage.keys.SETTINGS) || {};
-    const perms = settings.tablePermissions || {};
-
-    tbody.innerHTML = SYSTEM_ROLES.map(role => {
-      const rolePerms = perms[role.id] || { basic: true, approved: true, management: true };
-      
-      return `
-        <tr>
-          <td style="font-weight:700;">${role.label}</td>
-          <td>
-            <input type="checkbox" id="perm_${role.id}_basic" ${rolePerms.basic ? 'checked' : ''}>
-          </td>
-          <td>
-            <input type="checkbox" id="perm_${role.id}_approved" ${rolePerms.approved ? 'checked' : ''}>
-          </td>
-          <td>
-            <input type="checkbox" id="perm_${role.id}_management" ${rolePerms.management ? 'checked' : ''}>
-          </td>
-        </tr>
-      `;
-    }).join('');
-  }
-
-  window.saveTablePermissions = function() {
-    const settings = Storage.get(Storage.keys.SETTINGS) || {};
-    const newPerms = {};
-    
-    SYSTEM_ROLES.forEach(role => {
-      newPerms[role.id] = {
-        basic: document.getElementById(`perm_${role.id}_basic`).checked,
-        approved: document.getElementById(`perm_${role.id}_approved`).checked,
-        management: document.getElementById(`perm_${role.id}_management`).checked
-      };
-    });
-    
-    settings.tablePermissions = newPerms;
-    Storage.set(Storage.keys.SETTINGS, settings);
-    
-    App.toast('تم حفظ صلاحيات الجداول بنجاح!', 'success');
-    if (typeof Logger !== 'undefined') {
-      Logger.log('permission_grant', 'تم تحديث صلاحيات الوصول لجداول البيانات للمنسوبين.');
-    }
-  }
-
-  // Hook into initialization to render the table permissions
-  const originalInitDashboard = window.initDashboard || function(){};
-  window.initDashboard = function() {
-    originalInitDashboard();
-    renderTablePermissions();
-  }
-  
-  // Call immediately if tabs are already active
-  document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(renderTablePermissions, 500);
-  });
   
   /* ───────────────────────────────────────────────────
      RECRUITMENT & ADMISSIONS ENGINE
@@ -2711,93 +1985,516 @@
     }
   }
 
-  window.refreshDiscordDiagnostics = function() {
-    renderDiscordDiagnostics();
-    App.toast('✅ تم تحديث بيانات الديسكورد', 'success');
+
+  /* ───────────────────────────────────────────────────
+     RANKS & PERMISSIONS MANAGEMENT ENGINE
+     ─────────────────────────────────────────────────── */
+  
+  // Format Date Helper
+  function formatLogDate(dateStr) {
+    if (!dateStr) return '—';
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr;
+      return d.toLocaleString('ar-EG', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+      });
+    } catch(e) {
+      return dateStr;
+    }
   }
 
-  function renderDiscordDiagnostics() {
-    const logsTbody = document.querySelector('#discord-logs-table tbody');
-    const usersTbody = document.querySelector('#discord-users-table tbody');
-    if (!logsTbody || !usersTbody) return;
+  window.renderPermissionsTable = function() {
+    const tableBody = document.getElementById('table-body-permissions');
+    if (!tableBody) return;
+
+    const searchVal = (document.getElementById('search-permissions')?.value || '').trim().toLowerCase();
+    const filterRole = document.getElementById('filter-permissions-role')?.value || '';
+    const filterType = document.getElementById('filter-permissions-type')?.value || '';
+
+    const users = Storage.get('ps_users', []) || [];
     
-    // Render Logs
-    const logs = typeof Storage !== 'undefined' ? Storage.getCollection('ps_discord_logs') : JSON.parse(localStorage.getItem('ps_discord_logs') || '[]');
-    if (logs.length === 0) {
-      logsTbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:var(--color-text-secondary);">لا توجد أي أخطاء مسجلة حالياً</td></tr>`;
-    } else {
-      let logsHtml = '';
-      logs.slice(0, 50).forEach(log => {
-        const dateStr = new Date(log.timestamp).toLocaleString('ar-SA', { hour12: true });
-        logsHtml += `
-          <tr>
-            <td><span class="user-id-badge" style="background: rgba(255,255,255,0.05); color: #ccc;">${dateStr}</span></td>
-            <td>
-              <div style="display:flex; flex-direction:column; gap:4px;">
-                <span style="font-weight:700;">D-ID: ${log.discordId || 'Unknown'}</span>
-                <span style="font-size:0.75rem; color:#aaa;">U-ID: ${log.userId || 'Unknown'}</span>
-              </div>
-            </td>
-            <td><span style="color: #e74c3c; font-weight:600;"><i class="fa-solid fa-triangle-exclamation"></i> ${log.reason}</span></td>
-          </tr>
-        `;
-      });
-      logsTbody.innerHTML = logsHtml;
+    // Stats calculation
+    let ownersCount = 0;
+    let academyCount = 0;
+    let adminsCount = 0;
+    let courseAdminsCount = 0;
+
+    users.forEach(u => {
+      const r = u.role || 'viewer';
+      if (r === 'owner' || r === 'assistant_owner') ownersCount++;
+      else if (r === 'academy_affairs') academyCount++;
+      else if (r === 'admin') adminsCount++;
+      else if (r === 'course_admin') courseAdminsCount++;
+    });
+
+    const elOwners = document.getElementById('perm-stat-owners');
+    const elAcademy = document.getElementById('perm-stat-academy');
+    const elAdmins = document.getElementById('perm-stat-admins');
+    const elCourseAdmins = document.getElementById('perm-stat-course-admins');
+
+    if (elOwners) elOwners.textContent = ownersCount;
+    if (elAcademy) elAcademy.textContent = academyCount;
+    if (elAdmins) elAdmins.textContent = adminsCount;
+    if (elCourseAdmins) elCourseAdmins.textContent = courseAdminsCount;
+
+    // Filter users list
+    let filtered = users.filter(u => {
+      const nameMatch = String(u.display_name || '').toLowerCase().includes(searchVal) ||
+                        String(u.username || '').toLowerCase().includes(searchVal);
+      const idMatch = String(u.id || '').includes(searchVal) ||
+                      String(u.discord_id || '').includes(searchVal);
+      
+      const matchesSearch = nameMatch || idMatch;
+
+      const matchesRole = !filterRole || u.role === filterRole;
+
+      const isManual = u.is_manual_role === 1 || u.is_manual_role === true;
+      const matchesType = !filterType || 
+                          (filterType === 'manual' && isManual) || 
+                          (filterType === 'auto' && !isManual);
+
+      return matchesSearch && matchesRole && matchesType;
+    });
+
+    // Sort by manual first, then alphabetical
+    filtered.sort((a, b) => {
+      const aManual = a.is_manual_role === 1 || a.is_manual_role === true;
+      const bManual = b.is_manual_role === 1 || b.is_manual_role === true;
+      if (aManual && !bManual) return -1;
+      if (!aManual && bManual) return 1;
+      return String(a.display_name || '').localeCompare(String(b.display_name || ''));
+    });
+
+    if (filtered.length === 0) {
+      tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:var(--color-text-muted)">لا توجد حسابات عسكرية مطابقة للبحث والتصفيات.</td></tr>`;
+      return;
     }
 
-    // Render Users Link Status
-    const allUsers = typeof Storage !== 'undefined' ? Storage.getCollection(Storage.keys.USERS) : [];
-    if (allUsers.length === 0) {
-      usersTbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--color-text-secondary);">لا يوجد أعضاء</td></tr>`;
-    } else {
-      let usersHtml = '';
-      allUsers.forEach(u => {
-        if (u.role === 'owner' || u.discord_id || u.discord) {
-          const isLinked = !!u.discord_id;
-          const statusBadge = isLinked ? 
-            `<span class="status-badge active"><i class="fa-solid fa-link"></i> مرتبط</span>` : 
-            `<span class="status-badge" style="background:rgba(231,76,60,0.1); color:#e74c3c;"><i class="fa-solid fa-unlink"></i> غير مرتبط</span>`;
-            
-          let tokenStatus = '<span style="color:#aaa;">لا يوجد توكن</span>';
-          if (u.discordTokenExpiry) {
-             const expiry = new Date(u.discordTokenExpiry);
-             if (expiry > new Date()) {
-               tokenStatus = `<span style="color:#2ecc71;">صالح حتى: ${expiry.toLocaleDateString('ar-SA')}</span>`;
-             } else {
-               tokenStatus = `<span style="color:#e67e22;">منتهي (في انتظار التجديد)</span>`;
-             }
-          }
+    const currentLoggedInUser = Auth.getCurrentUser();
+    const ownerIds = ['1334568342345748565', '1120142432554713261', '821825761673478144'];
+    const ownerUsernames = ['3gjo', 'z6tw', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'];
 
-          let displayName = u.username;
-          if (typeof Auth !== 'undefined' && typeof Auth.resolveUserTableInfo === 'function') {
-            const info = Auth.resolveUserTableInfo(u);
-            if (info && info.found && info.name) {
-              displayName = info.name;
-            }
-          }
-          const resolvedAvatar = getDiscordAvatar(u);
+    tableBody.innerHTML = filtered.map(u => {
+      const isManual = u.is_manual_role === 1 || u.is_manual_role === true;
+      
+      // Avatar render
+      const avatarHtml = u.avatar && u.avatar !== '🎮' ? 
+        `<img src="${u.avatar}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;" onerror="this.src='../../assets/images/avatar-placeholder.png'">` :
+        `<div style="width: 32px; height: 32px; border-radius: 50%; background: rgba(201,162,39,0.15); display: flex; align-items: center; justify-content: center; color: #c9a227; font-size: 0.95rem; font-weight: bold;">${(u.display_name || 'M').charAt(0).toUpperCase()}</div>`;
 
-          usersHtml += `
-            <tr>
-              <td>
-                <div style="display:flex; align-items:center; gap:10px;">
-                  <img src="${resolvedAvatar}" style="width:32px; height:32px; border-radius:50%; object-fit:cover;" onerror="window.handleAvatarError(this, '../../assets/img/emblem.png');">
-                  <div>
-                    <div style="font-weight:700;">${displayName}</div>
-                    <div style="font-size:0.75rem; color:var(--color-gold-primary);">${u.rank}</div>
-                  </div>
-                </div>
-              </td>
-              <td><span style="font-family:monospace; background:rgba(0,0,0,0.3); padding:4px 8px; border-radius:4px;">${u.discord_id || u.discord || 'غير متوفر'}</span></td>
-              <td>${tokenStatus}</td>
-              <td>${statusBadge}</td>
-            </tr>
-          `;
+      // Role badge style
+      const roleColor = Auth.getRoleColor(u.role || 'viewer');
+      const roleEmoji = Auth.getRoleEmoji(u.role || 'viewer');
+      const roleLabel = Auth.getRoleLabel(u.role || 'viewer');
+
+      const roleBadge = `<span style="display:inline-flex; align-items:center; gap:4px; padding:4px 8px; border-radius:6px; font-size:0.78rem; font-weight:bold; background:${roleColor}20; color:${roleColor}; border:1px solid ${roleColor}35;">${roleEmoji} ${roleLabel}</span>`;
+
+      // Assignment type badge
+      const typeBadge = isManual ?
+        `<span style="background:rgba(201,162,39,0.12); color:#c9a227; border:1px solid rgba(201,162,39,0.25); font-size:0.75rem; padding:3px 8px; border-radius:6px; font-weight:bold; display:inline-flex; align-items:center; gap:4px;"><i class="fa-solid fa-user-gear"></i> تعيين يدوي</span>` :
+        `<span style="background:rgba(255,255,255,0.04); color:rgba(255,255,255,0.55); border:1px solid rgba(255,255,255,0.08); font-size:0.75rem; padding:3px 8px; border-radius:6px; display:inline-flex; align-items:center; gap:4px;"><i class="fa-solid fa-arrows-rotate"></i> تلقائي Sheets</span>`;
+
+      // Check if this row belongs to an owner
+      const isTargetOwner = ownerIds.includes(u.id) || 
+                            (u.username && ownerUsernames.includes(u.username.toLowerCase())) || 
+                            u.role === 'owner';
+
+      // Buttons authorization
+      let actionsHtml = '';
+      if (isTargetOwner) {
+        actionsHtml = `<span style="font-size:0.78rem; color:var(--color-text-muted); font-style:italic;">ملاك البوابة (محمي)</span>`;
+      } else {
+        actionsHtml = `
+          <div style="display:flex; gap:8px;">
+            <button class="btn-action primary" style="font-size:0.75rem; padding:4px 10px; border-radius:6px;" onclick="editUserPermission('${u.id}', '${u.username || u.display_name}', '${u.role}', '${u.rank}')">
+              <i class="fa-solid fa-pen-to-square"></i> تعديل
+            </button>
+            ${isManual ? `
+              <button class="btn-action danger" style="font-size:0.75rem; padding:4px 10px; border-radius:6px;" onclick="removeUserPermission('${u.id}', '${u.username || u.display_name}')">
+                <i class="fa-solid fa-trash-can"></i> إزالة
+              </button>
+            ` : ''}
+          </div>
+        `;
+      }
+
+      return `
+        <tr>
+          <td style="font-weight:700; color:#fff; display:flex; align-items:center; gap:10px;">
+            ${avatarHtml}
+            <span>${u.display_name || u.username || 'عضو غير معروف'}</span>
+          </td>
+          <td style="font-family:monospace; font-size:0.8rem; color:rgba(255,255,255,0.75);">${u.username ? '@' + u.username : '—'}</td>
+          <td style="font-family:monospace; font-size:0.8rem; color:rgba(255,255,255,0.6);">${u.id || u.discord_id || '—'}</td>
+          <td style="font-weight:800; color:#ffd700;">${u.rank || 'مشاهد'}</td>
+          <td>${roleBadge}</td>
+          <td>${typeBadge}</td>
+          <td style="font-size:0.8rem; color:rgba(255,255,255,0.55);">${formatLogDate(u.updated_at || u.last_sync)}</td>
+          <td>${actionsHtml}</td>
+        </tr>
+      `;
+    }).join('');
+
+    renderPermissionsLogs();
+  };
+
+  window.renderPermissionsLogs = function() {
+    const tableBody = document.getElementById('table-body-permissions-logs');
+    if (!tableBody) return;
+
+    const searchVal = (document.getElementById('search-permissions')?.value || '').trim().toLowerCase();
+    const logs = Storage.get('ps_audit_logs', []) || [];
+
+    // Filter audit logs for permission changes
+    const filtered = logs.filter(l => {
+      const isPermissionChange = l.action_type === 'permission_change' || l.action_name === 'permission_change';
+      if (!isPermissionChange) return false;
+
+      return !searchVal || 
+             String(l.username || l.operator || '').toLowerCase().includes(searchVal) ||
+             String(l.details || '').toLowerCase().includes(searchVal);
+    });
+
+    if (filtered.length === 0) {
+      tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--color-text-muted)">لا توجد حركات عسكرية مسجلة مطابقة في السجلات.</td></tr>`;
+      return;
+    }
+
+    tableBody.innerHTML = filtered.map(l => {
+      // Parse details to present old and new ranks cleanly if possible
+      const details = l.details || '';
+      let oldRank = '—';
+      let newRank = '—';
+
+      const matchGrant = details.match(/من "(.*?)" إلى "(.*?)"/);
+      const matchRemove = details.match(/إزالة الرتبة اليدوية.*\(الرتبة السابقة:\s*(.*?)\)/);
+
+      if (matchGrant) {
+        oldRank = matchGrant[1];
+        newRank = matchGrant[2];
+      } else if (matchRemove) {
+        oldRank = matchRemove[1];
+        newRank = `<span style="color:#ff4757; font-weight:bold;">إزالة الصلاحية</span>`;
+      } else if (details.includes('منح رتبة حساب ديسكورد جديد')) {
+        const matchNew = details.match(/رتبة "(.*?)"/);
+        oldRank = 'عضو جديد';
+        newRank = matchNew ? matchNew[1] : '—';
+      }
+
+      // Target Discord resolver
+      let targetDiscord = '—';
+      const targetMatch = details.match(/حساب الديسكورد "(.*?)"/i) || details.match(/حساب ديسكورد جديد "(.*?)"/i) || details.match(/العضو "(.*?)"/i);
+      if (targetMatch) {
+        targetDiscord = '@' + targetMatch[1];
+      } else {
+        const idMatch = details.match(/معرف:\s*(\d+)/) || details.match(/ID:\s*(\d+)/);
+        if (idMatch) targetDiscord = `ID: ${idMatch[1]}`;
+      }
+
+      return `
+        <tr>
+          <td style="font-size:0.8rem; color:rgba(255,255,255,0.6);">${formatLogDate(l.timestamp)}</td>
+          <td style="font-weight:700; color:var(--color-gold-primary);">${l.username || l.operator || 'النظام'}</td>
+          <td style="font-weight:bold; color:#fff;">${targetDiscord}</td>
+          <td style="font-size:0.85rem; color:rgba(255,255,255,0.55);">${oldRank}</td>
+          <td style="font-weight:800; color:#2ecc71;">${newRank}</td>
+          <td style="font-size:0.85rem; max-width:320px; word-break:break-word;">${details}</td>
+        </tr>
+      `;
+    }).join('');
+  };
+
+  // Modal helpers
+  window.openGrantPermissionModal = function() {
+    const modal = document.getElementById('modal-grant-permission');
+    if (!modal) return;
+
+    // Reset Form
+    document.getElementById('form-grant-permission').reset();
+    document.getElementById('perm-action-type').value = 'grant';
+    document.getElementById('perm-edit-id').value = '';
+    document.getElementById('permission-modal-title').textContent = 'منح رتبة عسكرية وصلاحيات جديدة';
+    document.getElementById('btn-save-permission').textContent = 'منح الصلاحيات';
+
+    // Show selection modes
+    const selectModeRadios = document.querySelectorAll('input[name="account-select-mode"]');
+    selectModeRadios.forEach(r => r.disabled = false);
+    
+    // Set checked dropdown
+    const dropRadio = document.querySelector('input[name="account-select-mode"][value="dropdown"]');
+    if (dropRadio) dropRadio.checked = true;
+
+    document.getElementById('account-group-dropdown').style.display = 'block';
+    document.getElementById('account-group-manual').style.display = 'none';
+
+    // Populate dropdown with registered accounts
+    const select = document.getElementById('perm-user-select');
+    if (select) {
+      const users = Storage.get('ps_users', []) || [];
+      const linked = Storage.get('ps_discord_links', []) || [];
+      
+      const uniqueUsers = [];
+      const addedIds = new Set();
+      
+      users.forEach(u => {
+        if (u.id && !addedIds.has(u.id)) {
+          addedIds.add(u.id);
+          uniqueUsers.push({
+            id: u.id,
+            username: u.username || u.display_name,
+            displayName: u.display_name || u.username,
+            avatar: u.avatar || ''
+          });
         }
       });
-      usersTbody.innerHTML = usersHtml || `<tr><td colspan="4" style="text-align:center;">لا يوجد أي ارتباطات</td></tr>`;
+      
+      linked.forEach(l => {
+        const uid = l.user_id || l.discord_id;
+        if (uid && !addedIds.has(uid)) {
+          addedIds.add(uid);
+          uniqueUsers.push({
+            id: uid,
+            username: l.username,
+            displayName: l.username,
+            avatar: l.avatar || ''
+          });
+        }
+      });
+
+      // Sort uniqueUsers alphabetically
+      uniqueUsers.sort((a, b) => String(a.displayName || '').localeCompare(String(b.displayName || '')));
+
+      select.innerHTML = `
+        <option value="">-- اختر حساباً من القائمة --</option>
+        ${uniqueUsers.map(u => `<option value="${u.id}" data-username="${u.username}" data-displayname="${u.displayName}" data-avatar="${u.avatar}">${u.displayName} (@${u.username})</option>`).join('')}
+      `;
     }
-  }
+
+    document.getElementById('perm-user-preview-box').style.display = 'none';
+    modal.classList.add('active');
+  };
+
+  window.closeGrantPermissionModal = function() {
+    const modal = document.getElementById('modal-grant-permission');
+    if (modal) modal.classList.remove('active');
+  };
+
+  window.toggleAccountSelectionMode = function(mode) {
+    if (mode === 'dropdown') {
+      document.getElementById('account-group-dropdown').style.display = 'block';
+      document.getElementById('account-group-manual').style.display = 'none';
+      onUserSelectChange(document.getElementById('perm-user-select').value);
+    } else {
+      document.getElementById('account-group-dropdown').style.display = 'none';
+      document.getElementById('account-group-manual').style.display = 'flex';
+      document.getElementById('perm-user-preview-box').style.display = 'none';
+    }
+  };
+
+  window.onUserSelectChange = function(userId) {
+    const previewBox = document.getElementById('perm-user-preview-box');
+    if (!userId) {
+      previewBox.style.display = 'none';
+      return;
+    }
+
+    const select = document.getElementById('perm-user-select');
+    const selectedOption = select.options[select.selectedIndex];
+    if (!selectedOption) return;
+
+    const username = selectedOption.dataset.username || '';
+    const displayName = selectedOption.dataset.displayname || '';
+    const avatar = selectedOption.dataset.avatar || '';
+
+    document.getElementById('perm-preview-avatar').src = avatar || '';
+    document.getElementById('perm-preview-name').textContent = displayName;
+    document.getElementById('perm-preview-details').textContent = `@${username} | ID: ${userId}`;
+    previewBox.style.display = 'flex';
+  };
+
+  window.editUserPermission = function(userId, username, role, rank) {
+    openGrantPermissionModal();
+
+    // Customize for edit mode
+    document.getElementById('perm-action-type').value = 'edit';
+    document.getElementById('perm-edit-id').value = userId;
+    document.getElementById('permission-modal-title').textContent = `تعديل رتبة العضو: ${username}`;
+    document.getElementById('btn-save-permission').textContent = 'تعديل الرتبة العسكرية';
+
+    // Force selection mode to manual and lock it (or dropdown but hide mode)
+    const selectModeRadios = document.querySelectorAll('input[name="account-select-mode"]');
+    selectModeRadios.forEach(r => r.disabled = true);
+
+    document.getElementById('account-group-dropdown').style.display = 'none';
+    document.getElementById('account-group-manual').style.display = 'none';
+    
+    // Preview selected
+    const previewBox = document.getElementById('perm-user-preview-box');
+    const users = Storage.get('ps_users', []) || [];
+    const matched = users.find(u => u.id === userId);
+    
+    document.getElementById('perm-preview-avatar').src = matched ? (matched.avatar || '') : '';
+    document.getElementById('perm-preview-name').textContent = matched ? (matched.display_name || username) : username;
+    document.getElementById('perm-preview-details').textContent = `@${username} | ID: ${userId}`;
+    previewBox.style.display = 'flex';
+
+    // Preselect rank
+    const selectRank = document.getElementById('perm-rank-select');
+    if (selectRank) {
+      // Find matching option
+      for (let i = 0; i < selectRank.options.length; i++) {
+        const option = selectRank.options[i];
+        if (option.value === role) {
+          selectRank.selectedIndex = i;
+          break;
+        }
+      }
+    }
+  };
+
+  window.handlePermissionFormSubmit = function(e) {
+    e.preventDefault();
+
+    const action = document.getElementById('perm-action-type').value;
+    const operator = Auth.getCurrentUser();
+    const apiBase = App.getApiBase ? App.getApiBase() : window.location.origin;
+
+    let targetId = '';
+    let targetDiscord = '';
+
+    if (action === 'edit') {
+      targetId = document.getElementById('perm-edit-id').value;
+      const previewName = document.getElementById('perm-preview-name').textContent;
+      targetDiscord = previewName;
+    } else {
+      const mode = document.querySelector('input[name="account-select-mode"]:checked').value;
+      if (mode === 'dropdown') {
+        const select = document.getElementById('perm-user-select');
+        targetId = select.value;
+        if (!targetId) {
+          App.toast('يرجى اختيار حساب عسكري مسجل أولاً.', 'error');
+          return;
+        }
+        const option = select.options[select.selectedIndex];
+        targetDiscord = option.dataset.username || option.dataset.displayname;
+      } else {
+        targetId = document.getElementById('perm-manual-id').value.trim();
+        targetDiscord = document.getElementById('perm-manual-tag').value.trim();
+        if (!targetId || !targetDiscord) {
+          App.toast('يرجى إدخال معرف الحساب الرقمي واسم المستخدم الديسكورد.', 'error');
+          return;
+        }
+        if (!/^\d{17,20}$/.test(targetId)) {
+          App.toast('معرف Discord الرقمي يجب أن يتكون من 17 إلى 20 رقماً فقط.', 'error');
+          return;
+        }
+      }
+    }
+
+    const selectRank = document.getElementById('perm-rank-select');
+    const selectedRankOption = selectRank.options[selectRank.selectedIndex];
+    const role = selectedRankOption.value;
+    const rank = selectedRankOption.text;
+
+    const payload = {
+      operator_id: operator ? operator.id : '',
+      target_id: targetId,
+      target_discord: targetDiscord,
+      role: role,
+      rank: rank,
+      action: 'grant'
+    };
+
+    App.toast('<i class="fa-solid fa-circle-notch fa-spin"></i> جاري حفظ الصلاحيات في قاعدة البيانات...', 'info');
+
+    fetch(`${apiBase}/api/auth/update_user_permission`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Bypass-Tunnel-Reminder': 'true'
+      },
+      body: JSON.stringify(payload)
+    })
+    .then(res => {
+      if (!res.ok) {
+        return res.json().then(errData => {
+          throw new Error(errData.error || 'فشل في حفظ الرتبة والصلاحيات.');
+        });
+      }
+      return res.json();
+    })
+    .then(resData => {
+      App.toast('✅ تم منح وتحديث الرتبة العسكرية بنجاح وتطبيق الصلاحيات فورياً!', 'success');
+      closeGrantPermissionModal();
+      
+      // Sync and render
+      setTimeout(() => {
+        Storage.loadAllFromServer().then(() => {
+          renderPermissionsTable();
+        });
+      }, 500);
+    })
+    .catch(err => {
+      App.toast(err.message, 'error');
+    });
+  };
+
+  window.removeUserPermission = function(userId, username) {
+    if (!confirm(`هل أنت متأكد من إلغاء تعيين رتبة العضو "${username}" وإرجاع صلاحياته للوضع التلقائي المستند لـ Google Sheets؟`)) {
+      return;
+    }
+
+    const operator = Auth.getCurrentUser();
+    const apiBase = App.getApiBase ? App.getApiBase() : window.location.origin;
+
+    const payload = {
+      operator_id: operator ? operator.id : '',
+      target_id: userId,
+      target_discord: username,
+      role: 'viewer',
+      rank: 'مشاهد',
+      action: 'remove'
+    };
+
+    App.toast('<i class="fa-solid fa-trash-can fa-spin"></i> جاري إزالة الصلاحية وإرجاع الحساب للمزامنة...', 'info');
+
+    fetch(`${apiBase}/api/auth/update_user_permission`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Bypass-Tunnel-Reminder': 'true'
+      },
+      body: JSON.stringify(payload)
+    })
+    .then(res => {
+      if (!res.ok) {
+        return res.json().then(errData => {
+          throw new Error(errData.error || 'فشل في إزالة الصلاحيات.');
+        });
+      }
+      return res.json();
+    })
+    .then(resData => {
+      App.toast('✅ تم إلغاء الصلاحية العسكرية اليدوية وإرجاع الحساب للمزامنة بنجاح.', 'success');
+      
+      // Sync and render
+      setTimeout(() => {
+        Storage.loadAllFromServer().then(() => {
+          renderPermissionsTable();
+        });
+      }, 500);
+    })
+    .catch(err => {
+      App.toast(err.message, 'error');
+    });
+  };
 
 </script>
 </body>

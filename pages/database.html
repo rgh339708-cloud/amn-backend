@@ -32,9 +32,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>قاعدة البيانات | الأمن العام</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=1.1.20">
-  <link rel="stylesheet" href="../assets/css/navbar.css?v=1.1.20">
-  <link rel="stylesheet" href="../assets/css/sidebar.css?v=1.1.20">
+  <link rel="stylesheet" href="../assets/css/main.css?v=1.1.26">
+  <link rel="stylesheet" href="../assets/css/navbar.css?v=1.1.26">
+  <link rel="stylesheet" href="../assets/css/sidebar.css?v=1.1.26">
   <link rel="stylesheet" href="../assets/css/footer.css">
   <style>
     /* ── Premium Tabs Styling ── */
@@ -747,11 +747,11 @@
 <body>
 <div id="toast-container"></div>
 
-<script src="../assets/js/storage.js?v=1.1.22"></script>
-<script src="../assets/js/data.js?v=1.1.20"></script>
-<script src="../assets/js/auth.js?v=1.1.20"></script>
-<script src="../assets/js/components.js"></script>
-<script src="../assets/js/app.js?v=1.1.20"></script>
+<script src="../assets/js/storage.js?v=1.1.26"></script>
+<script src="../assets/js/data.js?v=1.1.26"></script>
+<script src="../assets/js/auth.js?v=1.1.26"></script>
+<script src="../assets/js/components.js?v=1.1.26"></script>
+<script src="../assets/js/app.js?v=1.1.26"></script>
 
 <script>
   document.write(Components.navbar('database'));
@@ -1313,15 +1313,26 @@
     
     // Special Fines Parsing matching live sheet schema
     if (tabName === ' جدول الغرامات 💵') {
-      const idxDiscord = cols.findIndex(c => c.toLowerCase().includes("دسكورد") || c.includes("الدسكورد") || c.toLowerCase().includes("discord"));
-      const idxName = cols.findIndex(c => c.includes("اسم العسكري") || c.includes("الاسم") || c.includes("العسكري") || c === "الاسم");
-      const idxCode = cols.findIndex(c => c.includes("الكود") || c.includes("كود") || c === "الكود");
-      const idxJudge = cols.findIndex(c => c.includes("القاضي") || c.includes("قاضي") || c === "القاضي");
-      const idxSource = cols.findIndex(c => c.includes("مصدر الحكم") || c.includes("المصدر") || c === "مصدر الحكم");
-      const idxFine = cols.findIndex(c => c.includes("الغرامة") && !c.includes("جدول") && !c.includes("سبب") && !c.includes("الحكم"));
-      const idxReason = cols.findIndex(c => c.includes("سبب الحكم") || c.includes("سبب الغرامة") || c.includes("سبب المخالفة") || c.includes("السبب") || c.includes("سبب"));
-      const idxDate = cols.findIndex(c => c.includes("تاريخ اصدار المخالفة") || c.includes("تاريخ اصدار") || c.includes("تاريخ"));
-      const idxPaid = cols.findIndex(c => c.includes("حالة السداد") || c.includes("السداد") || c.includes("سداد"));
+      let idxDiscord = cols.findIndex(c => c.toLowerCase().includes("دسكورد") || c.includes("الدسكورد") || c.toLowerCase().includes("discord"));
+      let idxName = cols.findIndex(c => c.includes("اسم العسكري") || c.includes("الاسم") || c.includes("العسكري") || c === "الاسم");
+      let idxCode = cols.findIndex(c => c.includes("الكود") || c.includes("كود") || c === "الكود");
+      let idxJudge = cols.findIndex(c => c.includes("القاضي") || c.includes("قاضي") || c === "القاضي");
+      let idxSource = cols.findIndex(c => c.includes("مصدر الحكم") || c.includes("المصدر") || c === "مصدر الحكم");
+      let idxFine = cols.findIndex(c => c.includes("الغرامة") && !c.includes("جدول") && !c.includes("سبب") && !c.includes("الحكم"));
+      let idxReason = cols.findIndex(c => c.includes("سبب الحكم") || c.includes("سبب الغرامة") || c.includes("سبب المخالفة") || c.includes("السبب") || c.includes("سبب"));
+      let idxDate = cols.findIndex(c => c.includes("تاريخ اصدار المخالفة") || c.includes("تاريخ اصدار") || c.includes("تاريخ"));
+      let idxPaid = cols.findIndex(c => c.includes("حالة السداد") || c.includes("السداد") || c.includes("سداد"));
+      
+      // Fallback indices if sheet headers are missing or not detected (e.g. merged cells)
+      if (idxDiscord === -1) idxDiscord = 0;
+      if (idxName === -1) idxName = 2;
+      if (idxCode === -1) idxCode = 3;
+      if (idxJudge === -1) idxJudge = 4;
+      if (idxSource === -1) idxSource = 6;
+      if (idxFine === -1) idxFine = 8;
+      if (idxReason === -1) idxReason = 10;
+      if (idxDate === -1) idxDate = 12;
+      if (idxPaid === -1) idxPaid = 18;
       
       const list = [];
       table.rows.forEach(row => {
@@ -1337,6 +1348,18 @@
         const name = valOf(idxName);
         if (!name || name === "الاسم" || name.includes("الاسم")) return;
         
+        let reason = valOf(idxReason);
+        if (!reason && idxReason === 10) {
+          reason = valOf(9);
+        }
+        reason = reason || "مخالفة تعميم عسكري";
+
+        let date = valOf(idxDate);
+        if (!date && idxDate === 12) {
+          date = valOf(13);
+        }
+        date = date || "2026/05/28";
+        
         list.push({
           name: name,
           discord: valOf(idxDiscord),
@@ -1345,8 +1368,8 @@
           judge: valOf(idxJudge) || "غير معروف",
           source: valOf(idxSource) || "المجلس العسكري",
           fine: valOf(idxFine) || "0",
-          reason: valOf(idxReason) || "مخالفة تعميم عسكري",
-          date: valOf(idxDate) || "2026/05/28",
+          reason: reason,
+          date: date,
           paid: valOf(idxPaid)
         });
       });
@@ -1737,15 +1760,20 @@
   function updateStatsFromList(displayedList) {
     if (currentTab === ' جدول الغرامات 💵') {
       let totalAmount = 0;
+      let unpaidCount = 0;
       displayedList.forEach(f => {
-        totalAmount += extractAmount(f.fine);
+        const isPaid = f.paid === "true" || f.paid === true || String(f.paid).toLowerCase() === "true";
+        if (!isPaid) {
+          totalAmount += extractAmount(f.fine);
+          unpaidCount++;
+        }
       });
       
       document.getElementById('db-stats').innerHTML = `
         <div class="mstat">
           <div class="mstat-icon"><i class="fa-solid fa-scale-balanced"></i></div>
           <div>
-            <div class="mstat-num">${displayedList.length}</div>
+            <div class="mstat-num">${unpaidCount}</div>
             <div class="mstat-label">مخالفة غير مسددة</div>
           </div>
         </div>
@@ -2180,12 +2208,29 @@
           ? `<span class="status-pill active" style="background: rgba(39,174,96,0.12); color: #2ecc71; border: 1px solid rgba(39,174,96,0.25); padding: 3px 9px; border-radius: 20px; font-size: 0.7rem; font-weight: 700;"><i class="fa-solid fa-circle-check" style="color: #2ecc71;"></i> مسددة</span>`
           : `<span class="status-pill on_leave" style="background: rgba(231,76,60,0.12); color: #ff4757; border: 1px solid rgba(231,76,60,0.25); padding: 3px 9px; border-radius: 20px; font-size: 0.7rem; font-weight: 700;"><i class="fa-solid fa-circle-exclamation" style="color: #e74c3c;"></i> غير مسددة</span>`;
 
+        // Attempt to find real rank and badge from main sheets for premium visual resolution
+        let displayRank = r.rank || 'عضو';
+        let displayBadge = r.badge || '—';
+        const cleanName = cleanArabicString(r.name);
+        const mainTabKeys = ['جدول الامن العام - الاساسي', 'جدول الامن العام - المنتدبين', 'جدول الامن العام - الادارة'];
+        let foundPerson = null;
+        for (const tk of mainTabKeys) {
+          if (cachedSheets[tk]) {
+            foundPerson = cachedSheets[tk].find(m => cleanArabicString(m.name) === cleanName);
+            if (foundPerson) break;
+          }
+        }
+        if (foundPerson) {
+          if ((displayRank === "عضو" || !displayRank) && foundPerson.rank) displayRank = foundPerson.rank;
+          if ((displayBadge === "—" || displayBadge === "G-90" || !displayBadge) && foundPerson.badge) displayBadge = foundPerson.badge;
+        }
+
         return `
           <tr>
             ${getDiscordIdInfo(r)}
             <td onclick="_clickedTab=currentTab; showPersonModal('${r.name}')" style="font-weight: 800; color: #fff; cursor: pointer;" onmouseover="this.style.color='var(--color-gold-primary)'; this.style.textDecoration='underline';" onmouseout="this.style.color='#fff'; this.style.textDecoration='none';">${renderMemberAvatarCell(r)}</td>
-            <td><span class="badge-code-left" style="position:static; margin:0; display:inline-block;">${r.badge || '—'}</span></td>
-            <td style="color:var(--color-gold-primary);font-weight:700">${r.rank}</td>
+            <td><span class="badge-code-left" style="position:static; margin:0; display:inline-block;">${displayBadge}</span></td>
+            <td style="color:var(--color-gold-primary);font-weight:700">${displayRank}</td>
             <td>${r.judge}</td>
             <td>${r.source}</td>
             <td style="color:#ff4757; font-weight:700;">${formatFineAmount(r.fine)} ريال</td>

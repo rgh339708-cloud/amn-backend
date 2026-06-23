@@ -186,10 +186,7 @@ const Auth = (() => {
     const scopes = 'identify guilds.members.read guilds';
     
     // Resolve redirectUri dynamically based on current domain
-    let redirectUri = 'https://amn-3-90.surge.sh/index.html';
-    if (window.location.hostname.includes('localhost') || window.location.hostname.includes('127.0.0.1')) {
-      redirectUri = 'http://localhost:3000/index.html';
-    }
+    let redirectUri = window.location.origin + '/index.html';
     
     // Build state URL on current domain
     let basePath = window.location.pathname;
@@ -1549,6 +1546,148 @@ const Auth = (() => {
     }
   }
 
+  function seedSystemPages() {
+    if (typeof Storage === 'undefined') return;
+    let pages = Storage.getCollection(Storage.keys.PAGES) || [];
+    const systemPages = [
+      { id: 'home', title: 'الرئيسية', emoji: '🏠', isSystem: true, allowedRoles: ['*'] },
+      { id: 'leadership', title: 'القيادة', emoji: '👑', isSystem: true, allowedRoles: ['*'] },
+      { id: 'managers', title: 'مدراء الأقسام', emoji: '🏅', isSystem: true, allowedRoles: ['*'] },
+      { id: 'centers', title: 'المراكز', emoji: '🏢', isSystem: true, allowedRoles: ['*'] },
+      { id: 'guide', title: 'الدليل الشامل', emoji: '📖', isSystem: true, allowedRoles: ['*'] },
+      { id: 'inventory', title: 'العهدة', emoji: '📦', isSystem: true, allowedRoles: ['*'] },
+      { id: 'vehicles', title: 'المركبات', emoji: '🚘', isSystem: true, allowedRoles: ['*'] },
+      { id: 'college', title: 'كلية التدريب', emoji: '🎓', isSystem: true, allowedRoles: ['*'] },
+      { id: 'attendance-reports', title: 'تقارير الحضور', emoji: '📋', isSystem: true, allowedRoles: ['owner', 'assistant_owner', 'academy_affairs', 'admin', 'course_admin'] },
+      { id: 'exams', title: 'الاختبارات', emoji: '📝', isSystem: true, allowedRoles: ['*'] },
+      { id: 'archive', title: 'أرشيف الاختبارات', emoji: '📚', isSystem: true, allowedRoles: ['owner', 'assistant_owner', 'admin'] },
+      { id: 'field-title', title: 'التوجيهات الميدانية', emoji: '🪪', isSystem: true, allowedRoles: ['*'] },
+      { id: 'uniform', title: 'الزي العسكري', emoji: '👕', isSystem: true, allowedRoles: ['*'] },
+      { id: 'promotions', title: 'الترقيات', emoji: '⬆️', isSystem: true, allowedRoles: ['*'] },
+      { id: 'announcements', title: 'الإعلانات', emoji: '📢', isSystem: true, allowedRoles: ['*'] },
+      { id: 'apply', title: 'التقديم', emoji: '📨', isSystem: true, allowedRoles: ['*'] },
+      { id: 'database', title: 'قاعدة البيانات', emoji: '🔒', isSystem: true, allowedRoles: ['owner', 'assistant_owner', 'academy_affairs', 'admin'] },
+      { id: 'wings', title: 'أجنحة مدينة الـ 90', emoji: '🦅', isSystem: true, allowedRoles: ['*'] },
+      { id: 'aviation-document', title: 'مستند الجناح الجوي', emoji: '🚁', isSystem: true, parentId: 'wings', allowedRoles: ['*'] },
+      { id: 'counter-terrorism-wing', title: 'مستند جناح مكافحة الإرهاب', emoji: '⚔️', isSystem: true, parentId: 'wings', allowedRoles: ['*'] },
+      { id: 'pursuit-assault-wing', title: 'مستند جناح المداهمة والاقتحام', emoji: '🛡️', isSystem: true, parentId: 'wings', allowedRoles: ['*'] },
+      { id: 'shooting-skills-wing', title: 'جناح الرماية والتدريب الميداني', emoji: '🎯', isSystem: true, parentId: 'wings', allowedRoles: ['*'] },
+      { id: 'roads-document', title: 'مستند جناح أمن الطرق', emoji: '🛣️', isSystem: true, parentId: 'wings', allowedRoles: ['*'] },
+      { id: 'traffic-document', title: 'مستند جناح المرور', emoji: '🚥', isSystem: true, parentId: 'wings', allowedRoles: ['*'] },
+      { id: 'rapid-intervention-document', title: 'مستند جناح التدخل السريع', emoji: '⚡', isSystem: true, parentId: 'wings', allowedRoles: ['*'] },
+      { id: 'special-tasks-document', title: 'مستند جناح المهام الخاصة', emoji: '🔥', isSystem: true, parentId: 'wings', allowedRoles: ['*'] },
+      { id: 'officers-document', title: 'مستند الضباط', emoji: '🎖️', isSystem: true, parentId: 'wings', allowedRoles: ['*'] },
+      { id: 'staff-document', title: 'مستند الأفراد', emoji: '🎖️', isSystem: true, parentId: 'wings', allowedRoles: ['*'] },
+      { id: 'ops-document', title: 'مستند العمليات', emoji: '📞', isSystem: true, parentId: 'wings', allowedRoles: ['*'] },
+      { id: 'regulations-document', title: 'مستند الأنظمة واللوائح', emoji: '📜', isSystem: true, parentId: 'wings', allowedRoles: ['*'] },
+      { id: 'investigation-document', title: 'مستند المباحث', emoji: '🕵️', isSystem: true, parentId: 'wings', allowedRoles: ['*'] },
+      { id: 'narcotics-document', title: 'مستند مكافحة المخدرات', emoji: '💊', isSystem: true, parentId: 'wings', allowedRoles: ['*'] },
+      { id: 'district-officers-document', title: 'مستند قيادة أمن الطرق', emoji: '🛣️', isSystem: true, parentId: 'wings', allowedRoles: ['*'] },
+      { id: 'amn90-r', title: 'مدينة الـ 90 العسكرية', emoji: '🏰', isSystem: true, parentId: 'wings', allowedRoles: ['*'] }
+    ];
+
+    // Cleanup custom pages that duplicate system pages by ID or Title (normalized)
+    function normalizeArabic(str) {
+      if (!str) return '';
+      return str.trim()
+        .replace(/[أإآا]/g, 'ا')
+        .replace(/ة/g, 'ه')
+        .replace(/\s+/g, '');
+    }
+
+    const systemIds = new Set(systemPages.map(s => s.id));
+    const systemNormalizedTitles = new Set(systemPages.map(s => normalizeArabic(s.title)));
+
+    let cleanedPages = [];
+    let wasCleaned = false;
+
+    pages.forEach(p => {
+      if (!p) return;
+      const isSysId = systemIds.has(p.id);
+      const normTitle = normalizeArabic(p.title);
+      const isSysTitle = systemNormalizedTitles.has(normTitle);
+      
+      if (isSysId) {
+        if (!p.isSystem) {
+          p.isSystem = true;
+          wasCleaned = true;
+        }
+      } else if (isSysTitle) {
+        wasCleaned = true;
+        return; // drop duplicate custom page mimicking system page
+      }
+      cleanedPages.push(p);
+    });
+
+    // De-duplicate remaining pages by ID
+    const uniquePages = [];
+    const seenIds = new Set();
+    cleanedPages.forEach(p => {
+      if (p && p.id && !seenIds.has(p.id)) {
+        seenIds.add(p.id);
+        uniquePages.push(p);
+      } else {
+        wasCleaned = true;
+      }
+    });
+
+    pages = uniquePages;
+    let updated = wasCleaned;
+
+    for (const sys of systemPages) {
+      const exists = pages.find(p => p.id === sys.id);
+      if (!exists) {
+        pages.push(sys);
+        updated = true;
+      } else {
+        let sysUpdated = false;
+        if (!exists.isSystem) {
+          exists.isSystem = true;
+          sysUpdated = true;
+        }
+        if (sys.parentId && exists.parentId !== sys.parentId) {
+          exists.parentId = sys.parentId;
+          sysUpdated = true;
+        }
+        if (!exists.allowedRoles) {
+          exists.allowedRoles = sys.allowedRoles;
+          sysUpdated = true;
+        }
+        if (sysUpdated) {
+          updated = true;
+        }
+      }
+    }
+
+    if (updated) {
+      Storage.set(Storage.keys.PAGES, pages);
+    }
+  }
+
+  function checkPageAccess(pageId) {
+    if (typeof Storage === 'undefined') return true;
+    const pages = Storage.getCollection(Storage.keys.PAGES) || [];
+    const page = pages.find(p => p.id === pageId);
+    if (!page) return true; 
+    
+    if (!isLoggedIn()) {
+      return false; 
+    }
+    
+    const user = getCurrentUser();
+    const userRole = getRole();
+    
+    if (user.role === 'owner' && !getPreviewRole()) {
+      return true;
+    }
+    
+    const allowed = page.allowedRoles || ['*'];
+    if (allowed.includes('*')) {
+      return true;
+    }
+    return allowed.includes(userRole);
+  }
+
   // Automatically execute the callback parser
   handleDiscordCallback();
 
@@ -1569,8 +1708,92 @@ const Auth = (() => {
     getRoleLabel, getRoleEmoji, getRoleColor,
     requireDiscordAuth, handleDiscordCallback, getDiscordBadges, getDiscordAuthUrl,
     resolveUserTableInfo, validateSessionOnline,
-    isActualOwner, setPreviewRole, getPreviewRole
+    isActualOwner, setPreviewRole, getPreviewRole,
+    checkPageAccess, seedSystemPages
   };
 })();
 
 window.Auth = Auth;
+
+// Automatically seed and shield pages from unauthorized access
+(function() {
+  function getCurrentPageId() {
+    const path = window.location.pathname;
+    const searchParams = new URLSearchParams(window.location.search);
+    
+    if (path.includes('custom.html')) {
+      const id = searchParams.get('id');
+      return id ? `custom_${id}` : 'custom';
+    }
+    
+    const filename = path.substring(path.lastIndexOf('/') + 1);
+    if (!filename || filename === 'index.html') {
+      return 'home';
+    }
+    
+    return filename.replace('.html', '');
+  }
+
+  function renderAccessDeniedPage() {
+    let ROOT = './';
+    const path = window.location.pathname;
+    if (path.includes('/pages/admin/')) {
+      ROOT = '../../';
+    } else if (path.includes('/pages/')) {
+      ROOT = '../';
+    }
+
+    document.body.innerHTML = `
+      <div style="position: fixed; inset: 0; z-index: 10000000; background: radial-gradient(circle at 50% 50%, rgba(231, 76, 60, 0.1) 0%, transparent 60%), #05091e; display: flex; align-items: center; justify-content: center; font-family: 'Tajawal', sans-serif; direction: rtl; text-align: center; color: #fff; padding: 20px;">
+        <div style="background: rgba(10, 18, 50, 0.45); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(231, 76, 60, 0.3); border-radius: 20px; padding: 40px 30px; max-width: 500px; box-shadow: 0 10px 40px rgba(0,0,0,0.5), 0 0 20px rgba(231, 76, 60, 0.1);">
+          <div style="width: 80px; height: 80px; background: rgba(231, 76, 60, 0.1); border: 2px solid #e74c3c; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; color: #e74c3c; margin: 0 auto 20px;">
+            <i class="fa-solid fa-ban"></i>
+          </div>
+          <h2 style="font-size: 1.6rem; font-weight: 900; margin-bottom: 12px; color: #fff; font-family: inherit;">عذراً، لا تملك الصلاحية للوصول</h2>
+          <p style="font-size: 0.95rem; color: rgba(255,255,255,0.7); line-height: 1.6; margin-bottom: 30px; font-family: inherit;">تم تقييد الوصول لهذه الصفحة العسكرية من قبل الإدارة. يرجى مراجعة قيادة الأمن العام إذا كنت تعتقد أن هذا خطأ.</p>
+          <a href="${ROOT}index.html" style="background: linear-gradient(135deg, #c9a227, #8a6d0f); color: #000; padding: 12px 30px; border-radius: 8px; font-weight: 800; font-size: 0.95rem; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: transform 0.2s; font-family: inherit;">
+            <i class="fa-solid fa-house"></i> العودة للرئيسية
+          </a>
+        </div>
+      </div>
+    `;
+  }
+
+  function checkAccess() {
+    const pageId = getCurrentPageId();
+    const path = window.location.pathname;
+    
+    // Don't intercept access denied page on login/admin dashboard/auth itself
+    if (path.includes('/admin/login.html') || path.includes('/admin/dashboard.html') || path.includes('login.html')) {
+      return;
+    }
+    
+    if (window.Auth) {
+      window.Auth.seedSystemPages();
+      
+      // index.html is the landing/login gateway
+      if (pageId === 'home') {
+        return;
+      }
+      
+      if (!window.Auth.isLoggedIn()) {
+        let ROOT = './';
+        if (path.includes('/pages/')) {
+          ROOT = '../';
+        }
+        window.location.href = ROOT + 'index.html';
+        return;
+      }
+      
+      if (!window.Auth.checkPageAccess(pageId)) {
+        renderAccessDeniedPage();
+      }
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', checkAccess);
+  } else {
+    checkAccess();
+  }
+})();

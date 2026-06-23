@@ -1,0 +1,42 @@
+[
+  {
+    "id": "exam_004",
+    "title": "اختبار دورة العمليات الميدانية",
+    "category": "العمليات والتحكم",
+    "questionsCountToShow": 47,
+    "passingScore": 80,
+    "isOpen": true,
+    "questions": [
+      {
+        "q": "سؤال 1؟",
+        "options": [
+          "A",
+          "B",
+          "C",
+          "D"
+        ],
+        "correct": 0
+      }
+    ]
+  },
+  {
+    "id": "exam_test_1782182016037",
+    "title": "اختبار تجريبي جديد",
+    "category": "التدريب العام",
+    "questionsCountToShow": 1,
+    "passingScore": 70,
+    "isOpen": false,
+    "questions": [
+      {
+        "q": "سؤال تجريبي 1؟",
+        "options": [
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "correct": 1
+      }
+    ]
+  }
+]

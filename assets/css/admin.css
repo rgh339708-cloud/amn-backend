@@ -200,6 +200,48 @@
   flex-wrap: wrap;
 }
 
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: var(--space-4);
+  font-size: var(--font-size-sm);
+  text-align: right;
+}
+
+.admin-table thead {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+  border-bottom: 1px solid rgba(201, 162, 39, 0.2);
+}
+
+.admin-table th {
+  padding: var(--space-4) var(--space-5);
+  font-weight: 700;
+  color: var(--color-gold-primary);
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid rgba(201, 162, 39, 0.2);
+  white-space: nowrap;
+  text-align: right;
+}
+
+.admin-table td {
+  padding: var(--space-4) var(--space-5);
+  border-bottom: var(--border-subtle);
+  color: var(--color-text-secondary);
+  transition: var(--transition-fast);
+  text-align: right;
+  vertical-align: middle;
+}
+
+.admin-table tbody tr {
+  transition: var(--transition-fast);
+}
+
+.admin-table tbody tr:hover td {
+  background: rgba(201, 162, 39, 0.04);
+  color: var(--color-text-primary);
+}
+
 .admin-search {
   position: relative;
   flex: 1;

@@ -67,6 +67,7 @@ async function initializePostgresSchema(pool) {
     department VARCHAR,
     code VARCHAR,
     status VARCHAR DEFAULT 'active',
+    is_manual_role INTEGER DEFAULT 0,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   )`);
   await pool.query(`CREATE TABLE IF NOT EXISTS login_logs (
