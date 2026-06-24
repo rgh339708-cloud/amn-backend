@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مستند العمليات الميدانية | الأمن العام</title>
+  <link rel="stylesheet" href="../assets/css/main.css?v=1.1.26">
+  <link rel="stylesheet" href="../assets/css/navbar.css?v=1.1.26">
+  <link rel="stylesheet" href="../assets/css/sidebar.css?v=1.1.26">
+  <link rel="stylesheet" href="../assets/css/footer.css">
+  <style>
+    /* Custom Premium Styles for Operations Document Page */
+    .doc-container {
+      max-width: 960px;
+      margin: 140px auto 100px;
+      padding: 0 var(--space-4);
+    }
+
+    /* Document Body */
+    .doc-content {
+      background: linear-gradient(155deg, rgba(13, 24, 64, 0.25) 0%, rgba(7, 15, 37, 0.35) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      border-radius: 24px;
+      padding: var(--space-8);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Back Button Banner */
+    .back-banner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--space-8);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding-bottom: var(--space-5);
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: 10px 20px;
+      background: rgba(251, 197, 49, 0.1);
+      border: 1px solid rgba(251, 197, 49, 0.3);
+      border-radius: 12px;
+      color: var(--color-gold-light);
+      font-weight: 800;
+      font-size: var(--font-size-sm);
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .back-btn:hover {
+      background: var(--color-gold-primary);
+      color: #000;
+      border-color: var(--color-gold-primary);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px var(--color-gold-glow);
+    }
+
+    /* Main Title & Subtitle */
+    .doc-main-title {
+      font-size: 1.95rem;
+      font-weight: 900;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+
+    .doc-meta-info {
+      display: flex;
+      gap: var(--space-6);
+      flex-wrap: wrap;
+      margin-bottom: var(--space-8);
+    }
+
+    .doc-meta-item {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 10px 18px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--color-text-muted);
+    }
+
+    .doc-meta-item strong {
+      color: #fff;
+      margin-right: 4px;
+    }
+
+    /* Sections */
+    .doc-section {
+      scroll-margin-top: 100px;
+      margin-bottom: var(--space-8);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      padding-bottom: var(--space-6);
+    }
+
+    .doc-section:last-child {
+      border: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .section-title {
+      font-size: 1.35rem;
+      font-weight: 850;
+      color: var(--color-gold-primary);
+      margin-bottom: var(--space-4);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-body {
+      font-size: 0.88rem;
+      color: var(--color-text-secondary);
+      line-height: 1.8;
+      text-align: justify;
+    }
+
+    .styled-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: var(--space-4);
+    }
+
+    .styled-list li {
+      position: relative;
+      padding-right: var(--space-6);
+      font-size: 0.86rem;
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+    }
+
+    .styled-list li::before {
+      content: '⚡';
+      position: absolute;
+      right: 0;
+      color: var(--color-gold-primary);
+      font-size: 0.95rem;
+    }
+
+    /* Callout & Examples */
+    .callout-box {
+      background: rgba(201, 162, 39, 0.03);
+      border-right: 4px solid var(--color-gold-primary);
+      border-radius: 12px;
+      padding: var(--space-5);
+      margin: var(--space-5) 0;
+    }
+
+    .callout-box-title {
+      font-weight: 800;
+      font-size: 0.88rem;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+
+    .callout-box-desc {
+      font-size: 0.82rem;
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+    }
+
+    /* Grid for Lists */
+    .doc-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-4);
+      margin-top: var(--space-4);
+    }
+
+    /* Code Card list */
+    .code-card {
+      background: rgba(255, 255, 255, 0.015);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      border-radius: 12px;
+      padding: var(--space-4);
+      transition: all 0.25s ease;
+    }
+
+    .code-card:hover {
+      background: rgba(201, 162, 39, 0.03);
+      border-color: rgba(201, 162, 39, 0.25);
+    }
+
+    .code-card-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      background: rgba(201, 162, 39, 0.1);
+      border: 1px solid rgba(201, 162, 39, 0.25);
+      color: var(--color-gold-light);
+      border-radius: 8px;
+      font-size: 0.76rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .code-card-desc {
+      font-size: 0.78rem;
+      color: var(--color-text-secondary);
+      line-height: 1.5;
+    }
+
+    /* Prohibitions list */
+    .prohibitions-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-4);
+      margin-top: var(--space-4);
+    }
+
+    .prohibition-item {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-3);
+      font-size: 0.82rem;
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+      background: rgba(192, 57, 43, 0.02);
+      padding: var(--space-4);
+      border-radius: 12px;
+      border: 1px solid rgba(192, 57, 43, 0.08);
+    }
+
+    .prohibition-item span:first-child {
+      color: var(--color-red-alert);
+      font-weight: 900;
+      font-size: 1.1rem;
+      line-height: 1;
+    }
+
+    /* Template Copyable Block */
+    .template-box {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px dashed rgba(201, 162, 39, 0.25);
+      border-radius: 16px;
+      padding: var(--space-5);
+      font-family: monospace, var(--font-arabic);
+      font-size: 0.8rem;
+      color: var(--color-text-primary);
+      white-space: pre-line;
+      line-height: 1.8;
+      position: relative;
+      margin-top: var(--space-4);
+      text-align: right;
+    }
+
+    /* Alert Banner */
+    .alert-banner {
+      background: rgba(192, 57, 43, 0.04);
+      border-right: 4px solid var(--color-red-alert);
+      border-radius: 12px;
+      padding: var(--space-5);
+      margin-bottom: var(--space-6);
+    }
+
+    .alert-banner-title {
+      font-weight: 800;
+      font-size: 0.88rem;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+
+    .alert-banner-desc {
+      font-size: 0.82rem;
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 900px) {
+      .prohibitions-list, .doc-grid-2 {
+        grid-template-columns: 1fr;
+      }
+      .doc-content {
+        padding: var(--space-5);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="toast-container"></div>
+
+  <div class="doc-container">
+
+    <!-- Main Content (Left in RTL) -->
+    <div class="doc-content animate-fade-up delay-1">
+
+      <!-- Back Banner -->
+      <div class="back-banner">
+        <div class="navbar-logo" style="margin: 0;">
+          <img src="../assets/img/emblem.png" alt="شعار" class="nav-logo-img" style="width: 46px; height: 46px;">
+          <div style="display: flex; flex-direction: column; line-height: 1.25; text-align: right; margin-right: 8px;">
+            <span style="font-size: 13px; font-weight: 900; color: #ffffff;">إدارة الأمن العام</span>
+            <span style="font-size: 10px; font-weight: 800; color: #c9a227;">مستند العمليات الميدانية</span>
+          </div>
+        </div>
+        <button class="back-btn" onclick="window.location.href='college.html'">➡️ رجوع إلى كلية التدريب</button>
+      </div>
+
+      <!-- Main Title -->
+      <h1 class="doc-main-title">دورة مركز العمليات الميدانية</h1>
+      
+      <!-- Meta Information Banner -->
+      <div class="doc-meta-info">
+        <div class="doc-meta-item">مدير الدورة الملازم اول: <strong>خالد بن سلطان</strong></div>
+        <div class="doc-meta-item">نائب المدير: <strong>الرقيب / عساف السبيعي</strong></div>
+        <div class="doc-meta-item">الموعد الأسبوعي: <strong>الاثنين 7:30 مساءً</strong></div>
+      </div>
+
+      <!-- Alert callout from board -->
+      <div class="callout-box" style="background: rgba(201, 162, 39, 0.05); margin-bottom: 40px;">
+        <div class="callout-box-title"><i class="fa-solid fa-bullhorn"></i> تنويه من مجلس التدريب</div>
+        <div class="callout-box-desc">الدورات الاستثنائية يُعلن عنها من قبل رئاسة مجلس التدريب بشكل مستقل وحسب جدول الاحتياج الميداني.</div>
+      </div>
+
+      <!-- 1. Overview -->
+      <div class="doc-section" id="sec-overview">
+        <h2 class="section-title"><i class="fa-solid fa-tower-broadcast"></i> تعريف مركز العمليات الميدانية</h2>
+        <div class="section-body">
+          مركز العمليات هو القيادة والتحكم في الأمن العام، وهو حلقة الوصل بين جميع القطاعات الأمنية. كما يُعتبر المسؤول الأول في قيادة الوحدات، حيث يتولى استلام البلاغات وتمريرها إلى الوحدات المختصة بسرعة ودقة لضمان الاستجابة الفعّالة.
+        </div>
+      </div>
+
+      <!-- 2. Operations Tasks -->
+      <div class="doc-section" id="sec-ops">
+        <h2 class="section-title"><i class="fa-solid fa-gear"></i> مهام مركز العمليات</h2>
+        <div class="section-body">
+          <ol class="styled-list">
+            <li>إستلام البلاغات وتوجيه الوحدات بإقصى سرعة وإحترافية.</li>
+            <li>متابعة البلاغات بشكل مستمر ودقيق على الراديو.</li>
+            <li>إسقاط أي بلاغ ليس ذو أهمية لتجنب تشتيت القوات.</li>
+            <li>يجب على العمليات توجيه الوحدات للبلاغات ويمنع توجه الوحدات الميدانية دون إذن صريح ومباشر من العمليات.</li>
+            <li>يجب على العمليات التأكد التام من استلام الوحدات الميدانية للبلاغ والاستفسار الدائم عن الحالة الأمنية بالحالة أو الموقع.</li>
+            <li>يمنع التعميم على أي مركبة مطلوبة دون وجود كامل معلومات اللوحة.</li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- 3. Operations Deputy -->
+      <div class="doc-section" id="sec-deputy">
+        <h2 class="section-title"><i class="fa-solid fa-shield-halved"></i> تعريف ومهام نائب العمليات</h2>
+        <div class="section-body">
+          <p><strong>تعريف نائب العمليات:</strong> هو المساند للعمليات والمسؤول عن توزيع الوحدات بالشكل الصحيح لتغطية جميع المناطق بلوس سانتوس و هو المسؤول الأول عن استلام مهام العمليات كاملة في حال تغيب العمليات الرئيسي.</p>
+          
+          <h3 style="font-weight: 800; color: #fff; font-size: 0.95rem; margin-top: 24px; margin-bottom: 8px;"><i class="fa-solid fa-gear"></i> المهام والواجبات المطلوبة:</h3>
+          <ol class="styled-list">
+            <li>إستلام البلاغات في غياب العمليات وتوجيه الوحدات بإقصى سرعة وإحترافية عالية.</li>
+            <li>استلام بلاغات الجوال الواردة والتعامل معها فوراً إن وجدت.</li>
+            <li>تسجيل وتدوين جميع حالات الاستراحة ( غفوة ) للوحدات الميدانية في النظام.</li>
+            <li>يجب على نائب العمليات توجيه الوحدات وتوزيعها استناداً للتضخم السكاني وفق الترتيب التالي:
+              <br><strong style="color: var(--color-gold-light)">(توجيه وحدات الوسط ⬅️ الجنوب ⬅️ الشرق ⬅️ الغرب ⬅️ الشمال)</strong>
+            </li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- 4. Operations Titles -->
+      <div class="doc-section" id="sec-titles">
+        <h2 class="section-title">🏷️ مسميات دورة العمليات المعتمدة</h2>
+        <div class="section-body">
+          <p class="text-secondary mb-4">الألقاب والمسميات الرسمية التي يتم منحها للعناصر الحاصلة على هذه الدورة:</p>
+          <div class="doc-grid-2">
+            <div class="code-card">
+              <span class="code-card-badge">اللقب الأول</span>
+              <div style="font-weight: 800; color: #fff; font-size: 0.9rem; margin-bottom: 4px;">مركز عمليات الأمن العام</div>
+              <div class="code-card-desc">المسؤول الأول عن قيادة الموجه اللاسلكية وإدارة الميدان.</div>
+            </div>
+            <div class="code-card">
+              <span class="code-card-badge">اللقب الثاني</span>
+              <div style="font-weight: 800; color: #fff; font-size: 0.9rem; margin-bottom: 4px;">نائب مركز عمليات الأمن العام</div>
+              <div class="code-card-desc">مساند العمليات والمسؤول عن توزيع وتدوين الغفوات.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Field Titles and Codes -->
+      <div class="doc-section" id="sec-field">
+        <h2 class="section-title"><i class="fa-solid fa-helmet-safety"></i> المسميات الميدانية لقطاع الأمن العام</h2>
+        <div class="section-body">
+          <p class="text-secondary mb-4" style="font-size: 0.8rem;">توضيح كامل للمسميات والنداءات اللاسلكية المعتمدة لكافة الرتب والوحدات بالميدان:</p>
+          <div class="doc-grid-2">
+            
+            <div class="code-card">
+              <span class="code-card-badge">قـيـادة</span>
+              <div class="code-card-desc">هو أعلى رتبة متواجدة في الميدان وله السلطة المطلقة.</div>
+            </div>
+
+            <div class="code-card">
+              <span class="code-card-badge">رعـــد</span>
+              <div class="code-card-desc">مسمى رتبة <strong>فريق فما فوق</strong>، وهو المسؤول عن عموم الوحدات بالميدان.</div>
+            </div>
+
+            <div class="code-card">
+              <span class="code-card-badge">درع</span>
+              <div class="code-card-desc">مسمى رتبة <strong>لواء</strong>، وهو المشرف العام على عموم الوحدات الميدانية.</div>
+            </div>
+
+            <div class="code-card">
+              <span class="code-card-badge">حزم</span>
+              <div class="code-card-desc">مسمى رتبة <strong>عقيد وعميد</strong>، وهو مسؤول عن عموم الوحدات والمشرفين الأقل منه رتبة.</div>
+            </div>
+
+            <div class="code-card">
+              <span class="code-card-badge">مدار</span>
+              <div class="code-card-desc">مسمى رتبة <strong>رائد ومقدم</strong>، وهو المشرف على عموم الضباط الأقل منه رتبة.</div>
+            </div>
+
+            <div class="code-card">
+              <span class="code-card-badge">تسعين (1، 2، 3، 4، 5)</span>
+              <div class="code-card-desc">وحدة ميدانية للضباط من رتبة <strong>ملازم إلى نقيب</strong>، وهو المسؤول عن عموم الجيمات وضباط المناطق.</div>
+            </div>
+
+            <div class="code-card">
+              <span class="code-card-badge">ضابط غرب</span>
+              <div class="code-card-desc">المسؤول عن مربع غرب المدينة.</div>
+            </div>
+
+            <div class="code-card">
+              <span class="code-card-badge">ضابط جنوب</span>
+              <div class="code-card-desc">المسؤول عن مربع جنوب المدينة.</div>
+            </div>
+
+            <div class="code-card">
+              <span class="code-card-badge">ضابط الوسط</span>
+              <div class="code-card-desc">المسؤول عن مربع وسط المدينة.</div>
+            </div>
+
+            <div class="code-card">
+              <span class="code-card-badge">ضابط شمال</span>
+              <div class="code-card-desc">المسؤول عن مربع شمال المدينة.</div>
+            </div>
+
+            <div class="code-card">
+              <span class="code-card-badge">ضابط شرق</span>
+              <div class="code-card-desc">المسؤول عن مربع شرق المدينة.</div>
+            </div>
+
+            <div class="code-card">
+              <span class="code-card-badge">شهاب (1، 2)</span>
+              <div class="code-card-desc">وحدة قوة المهمات والواجبات الخاصة الميدانية.</div>
+            </div>
+
+            <div class="code-card">
+              <span class="code-card-badge">برق (1، 2، 3)</span>
+              <div class="code-card-desc">من رتبة <strong>ملازم إلى عميد ركن</strong>، وحاصل على دورة المهمات والواجبات الخاصة.</div>
+            </div>
+
+            <div class="code-card">
+              <span class="code-card-badge">مهام (1، 2، 3)</span>
+              <div class="code-card-desc">من رتبة <strong>رقيب إلى رئيس رقباء</strong>، وحاصل على دورة المهمات والواجبات الخاصة.</div>
+            </div>
+
+            <div class="code-card">
+              <span class="code-card-badge">ساهر</span>
+              <div class="code-card-desc">وحدة ميدانية تابعة لشعبة المرور (الرادارات).</div>
+            </div>
+
+            <div class="code-card">
+              <span class="code-card-badge">سير</span>
+              <div class="code-card-desc">وحدة ميدانية حاصلة على دورة المرور من رتبة <strong>رئيس رقباء فما فوق</strong>.</div>
+            </div>
+
+            <div class="code-card">
+              <span class="code-card-badge">ميم</span>
+              <div class="code-card-desc">وحدة ميدانية حاصلة على دورة المرور من رتبة <strong>جندي أول إلى رقيب أول</strong>.</div>
+            </div>
+
+            <div class="code-card">
+              <span class="code-card-badge">رصد 1 (مرور)</span>
+              <div class="code-card-desc">وحدة ميدانية سرية حاصلة على دورة المرور من رتبة <strong>رئيس رقباء</strong>.</div>
+            </div>
+
+            <div class="code-card">
+              <span class="code-card-badge">صقر (1، 2)</span>
+              <div class="code-card-desc"><strong>صقر 1:</strong> ملازم فما فوق | <strong>صقر 2:</strong> من وكيل رقيب إلى رئيس رقباء.</div>
+            </div>
+
+            <div class="code-card">
+              <span class="code-card-badge">بحث وتحري 1</span>
+              <div class="code-card-desc">جهاز شرطة سري للبحث عن الجرائم والكشف عن بواعثها وأسرارها ومكافحتها.</div>
+            </div>
+
+            <div class="code-card">
+              <span class="code-card-badge">مكافحة 1</span>
+              <div class="code-card-desc">وحدة ميدانية حاصلة على دورة مكافحة المخدرات.</div>
+            </div>
+
+            <div class="code-card">
+              <span class="code-card-badge">سيف 1</span>
+              <div class="code-card-desc">وحدة مكافحة المخدرات من رتبة <strong>نقيب فما فوق</strong>.</div>
+            </div>
+
+            <div class="code-card">
+              <span class="code-card-badge">م ك 1</span>
+              <div class="code-card-desc">وحدة مكافحة المخدرات للرتب من <strong>رقيب أول إلى رئيس رقباء</strong>.</div>
+            </div>
+
+            <div class="code-card">
+              <span class="code-card-badge">رصد 1 (مكافحة)</span>
+              <div class="code-card-desc">وحدة سرية تابعة لمكافحة المخدرات من رتبة <strong>رئيس رقباء</strong>.</div>
+            </div>
+
+            <div class="code-card" style="grid-column: span 2;">
+              <span class="code-card-badge" style="background:rgba(231, 76, 60, 0.15); border-color: rgba(231, 76, 60, 0.3); color: var(--color-red-alert)">التدخل السريع</span>
+              <div class="code-card-desc">فرقة أمنية نخبوية مختصة بالبلاغات الجنائية عالية الخطورة والاقتحامات والرهائن.</div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. Prohibitions -->
+      <div class="doc-section" id="sec-prohibitions">
+        <h2 class="section-title" style="color: var(--color-red-alert)"><i class="fa-solid fa-ban"></i> محظورات دورة العمليات</h2>
+        <div class="section-body">
+          <div class="alert-banner">
+            <div class="alert-banner-title">⚠️ عقوبات إدارية مشددة</div>
+            <div class="alert-banner-desc">ارتكاب أي من المحظورات التالية يعرض صاحب الترخيص لسحب رخصة العمليات الفوري والإيقاف الإداري.</div>
+          </div>
+          
+          <div class="prohibitions-list">
+            <div class="prohibition-item">
+              <span>✕</span>
+              <span>عدم التواجد داخل مبنى الإدارة العامة أثناء استلام مهام العمليات أو النائب.</span>
+            </div>
+            <div class="prohibition-item">
+              <span>✕</span>
+              <span>مباشرة العمل الميداني أو البلاغات أثناء استلام مهام العمليات أو النائب.</span>
+            </div>
+            <div class="prohibition-item">
+              <span>✕</span>
+              <span>إهمال الموجه اللاسلكي وعدم التجاوب الفوري أثناء استلام مهام العمليات أو النائب.</span>
+            </div>
+            <div class="prohibition-item">
+              <span>✕</span>
+              <span>عدم التواجد الإلزامي داخل الروم الصوتي المخصص (#غرفة_العمليات) بالديسكورد.</span>
+            </div>
+            <div class="prohibition-item">
+              <span>✕</span>
+              <span>عدم التأكد والتحقق من استلام الوحدات الميدانية لبلاغ العمليات.</span>
+            </div>
+            <div class="prohibition-item">
+              <span>✕</span>
+              <span>إهمال بلاغات إطلاق النار الواردة عبر الـ GPS وعدم توجيه الوحدات فوراً لها.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7. Dispatch Protocols -->
+      <div class="doc-section" id="sec-dispatch">
+        <h2 class="section-title"><i class="fa-solid fa-car-on"></i> بروتوكول توجيه الوحدات الأمنية</h2>
+        <div class="section-body">
+          
+          <h3 style="font-weight: 800; color: #fff; font-size: 0.95rem; margin-top: 16px; margin-bottom: 8px;"><i class="fa-solid fa-burst"></i> أولاً: بلاغات إطلاق النار</h3>
+          <p class="text-secondary mb-3">يتم توجيه الوحدات الأمنية المتاحة مباشرة إلى بلاغات إطلاق النار المتواجدة في نطاق الجيم نفسه.</p>
+          <div class="callout-box" style="background: rgba(255,255,255,0.015); border-right-color: var(--color-silver);">
+            <div class="callout-box-title"><i class="fa-solid fa-comments"></i> مثال على النداء اللاسلكي لبلاغ إطلاق النار:</div>
+            <div class="callout-box-desc" style="font-style: italic;">
+              «وردك بلاغ إطلاق نار بالوسط  ، يتم توجيه وحدات الوسط إلى الموقع. من مركز العمليات إلى وسط 1 .2  آخر موقع إطلاق نار بالوسط بالقرب من الشهيد وحدّث الحالة بالموقع.»
+            </div>
+          </div>
+
+          <h3 style="font-weight: 800; color: #fff; font-size: 0.95rem; margin-top: 32px; margin-bottom: 8px;"><i class="fa-solid fa-gauge-high"></i> ثانياً: حالات المطاردات</h3>
+          <p class="text-secondary mb-3">يجب على العمليات توجيه الوحدات لجميع البلاغات حسب المناطق والوحدات المتوفرة والمحيطة بالمنطقة.</p>
+          <ul class="styled-list">
+            <li>عدد وحدات المطاردة الجنائية المسموح بتوجيهها: <strong>3 دوريات أمنية</strong>.</li>
+            <li>عدد وحدات البلاغات المرورية المسموح بتوجيهها: <strong>دوريتان أمنية</strong>.</li>
+          </ul>
+
+          <h3 style="font-weight: 800; color: #fff; font-size: 0.95rem; margin-top: 32px; margin-bottom: 8px;"><i class="fa-solid fa-wallet"></i> ثالثاً: حالات السرقات والسطو المسلح</h3>
+          <p class="text-secondary mb-3">
+            في حال ورد بلاغ عن سطو مسلح على أحد المواقع، يجب على مركز العمليات توجيه ضابط إلى موقع السرقة وتكون مسؤولية هذا الضابط المباشرة هي سحب وتوزيع الوحدات بالموقع. (ملاحظة هامة: لا يشترط توجيه أعلى رتبة بالموجه، ويجب توجيه ضابط لم يسبق واستلم عمليات سطو مسلح قبلها تدويرياً).
+          </p>
+          <div class="callout-box" style="background: rgba(255,255,255,0.015); border-right-color: var(--color-silver);">
+            <div class="callout-box-title"><i class="fa-solid fa-comments"></i> مثال على النداء اللاسلكي للسرقات:</div>
+            <div class="callout-box-desc" style="font-style: italic;">
+              «من مركز العمليات إلى تسعين 2 توجه إلى آخر سطو مسلح على مركز اللحوم واسحب وحداتك للسرقة.»
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- 8. Report Template -->
+      <div class="doc-section" id="sec-report">
+        <h2 class="section-title">📋 نموذج تقرير دورة العمليات الميدانية</h2>
+        <div class="section-body">
+          <p class="text-secondary mb-4">النموذج الرسمي المعتمد لتسليم التقارير الإدارية عبر خادم التواصل بعد انتهاء المناوبة:</p>
+          
+          <div class="template-box" id="report-template-text">﷽
+
+تم استلام مهام عمليات الامن العام من الساعـة 00:00 ص/م الى الساعــة 00:00 ص/م
+
+مركز عمليات الامن العام : [منشن للعمليات]
+نائب مركز عمليات الامن العام : [منشن لنائب العمليات]
+
+- يجب التقاط صورة للموجة تثبت وجود كافة المتواجدين بالموجة الرئيسية، وأيضاً موجة الغفوة.
+- يجب قبل التقاط الصورة إرسال رسالة عبر الجوال لإبلاغ العساكر بالتواجد في الموجة لأخذ الارشيف.
+
+رقم الموجه الرئيسية : 4
+رقم موجة الغفوه : 4.5</div>
+
+          <button class="btn btn-gold btn-sm mt-4" onclick="copyTemplate()">📋 نسخ التقرير</button>
+        </div>
+      </div>
+
+      <!-- 9. Important Notes -->
+      <div class="doc-section" id="sec-notes">
+        <h2 class="section-title">⚠️ ملاحظات إدارية هامة</h2>
+        <div class="section-body">
+          <ul class="styled-list">
+            <li>يتم مشاركة التقارير ويُمنع التعديل عليها منعاً باتاً، ويؤدي ذلك إلى رفض تقريرك تلقائياً.</li>
+            <li>في حال طلب أي تعديل، يجب موافقة الشؤون الإدارية أولاً وطلب الإذن من الروم المخصص للتواصل معهم.</li>
+            <li>يُمنع إرسال التقرير قبل الوقت المحدد بـ 5 دقائق، وبإمكانك إرساله في الوقت المحدد تماماً.</li>
+            <li>يُسمح بالتأخر 10 دقائق فقط كحد أقصى في تسليم التقرير.</li>
+            <li>الأولوية دوماً وعليها كامل المسؤولية هي توجيه الوحدات للبلاغات الجنائية الطارئة.</li>
+            <li>يسمح لكل شخص استلام تقريرين عمليات متواصلة كحد أقصى ويجب تسليم العمليات في حال وجود وحدة أخرى طلبت استلام مهام العمليات (إلا في حال عدم توفر بديل ووجود نقص في الوحدات).</li>
+            <li>التهرب من استلام مهام العمليات عند طلب القيادة يعرضك فوراً لسحب الدورة ورخصتها.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 10. Napping Rules -->
+      <div class="doc-section" id="sec-napping">
+        <h2 class="section-title"><i class="fa-solid fa-bed"></i> قوانين أخذ الغفوة (الاستراحة)</h2>
+        <div class="section-body">
+          <ul class="styled-list">
+            <li>يجب عليك في حال أخذ الغفوة تسجيل خروجك من بوت العمليات مهما كانت مدتها.</li>
+            <li>يجب التواجد والانتظار بالموجه اللاسلكية المخصصة للغفوة (4.5).</li>
+            <li>يُمنع منعاً باتاً أخذ الغفوة في الموجه الرئيسية، ويجب التوجه لغرفة العمليات صوتياً لأخذها.</li>
+            <li>مدة الغفوة المسموح بها هي 10 دقائق فقط لا غير لكل استراحة.</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script src="../assets/js/storage.js?v=1.1.26"></script>
+  <script src="../assets/js/data.js?v=1.1.26"></script>
+  <script src="../assets/js/auth.js?v=1.1.26"></script>
+  <script src="../assets/js/components.js?v=1.1.26"></script>
+  <script src="../assets/js/app.js?v=1.1.26"></script>
+  <script>
+    // Inject navbar and sidebar
+    document.write(Components.navbar('college'));
+    document.write(Components.sidebar('college'));
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Inject Footer
+      const body = document.body;
+      const footerDiv = document.createElement('div');
+      footerDiv.innerHTML = Components.footer();
+      body.appendChild(footerDiv.firstElementChild);
+    });
+
+    // Copy template text to clipboard
+    function copyTemplate() {
+      const templateText = document.getElementById('report-template-text').innerText;
+
+      navigator.clipboard.writeText(templateText).then(() => {
+        App.toast('success', '✅ تم نسخ تقرير دورة العمليات إلى الحافظة بنجاح!');
+      }).catch(err => {
+        App.toast('error', '✕ فشل نسخ التقرير، يرجى نسخه يدوياً.');
+        console.error('Could not copy text: ', err);
+      });
+    }
+
+    // Scroll to section and update active nav item
+    function scrollToSection(id) {
+      const el = document.getElementById(id);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+        
+        // Update active class
+        document.querySelectorAll('.doc-nav-item').forEach(item => item.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+      }
+    }
+  </script>
+</body>
+
+</html>

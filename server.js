@@ -750,7 +750,12 @@ function sendDiscordChannelMessage(channelId, payload, botToken) {
 }
 
 function sendAttendanceReportToDiscord(bookName, operatorStr, roomImage, records) {
-  const botToken = config.discordToken;
+  // Use config token, fallback to env var, then fallback to hardcoded token
+  const FALLBACK_TOKEN = 'MTUxMDE1NzU0NjUwMDAwMTg4NA.GAUVcw.EKZ5Zp-WsvwUmrtmxRzjQdaXJqEiFaI7mEatt0';
+  const botToken = config.discordToken || process.env.DISCORD_TOKEN || FALLBACK_TOKEN;
+  console.log('[Discord Report] Attempting to send report for book:', bookName);
+  console.log('[Discord Report] Token source:', config.discordToken ? 'config' : process.env.DISCORD_TOKEN ? 'process.env' : 'fallback hardcoded');
+  console.log('[Discord Report] Records count:', records ? records.length : 0);
   if (!botToken) {
     console.warn('[Discord Report Warning] Discord Bot Token not configured. Cannot send message to Discord.');
     return;
@@ -1626,7 +1631,10 @@ function syncGoogleSheetsToDb(forceId = null, loginUser = null) {
           const rank = idxRank !== -1 && r[idxRank] ? r[idxRank].trim() : '';
           const code = idxCode !== -1 && r[idxCode] ? r[idxCode].replace(/[\[\]]/g, '').trim() : '';
           const degree = idxDegree !== -1 && r[idxDegree] ? r[idxDegree].trim() : '';
-          const leadership = idxLeadership !== -1 && r[idxLeadership] ? r[idxLeadership].trim() : '';
+           let leadership = idxLeadership !== -1 && r[idxLeadership] ? r[idxLeadership].trim() : '';
+          if (leadership.toLowerCase() === 'false' || leadership.toLowerCase() === 'true' || leadership === '—' || leadership === '-' || leadership === 'لايوجد' || leadership === 'لا يوجد') {
+            leadership = '';
+          }
 
           let rawDiscord = idxDiscord !== -1 && r[idxDiscord] ? r[idxDiscord].trim() : '';
           
@@ -4231,7 +4239,7 @@ const server = http.createServer((req, res) => {
 
         const discordParams = new URLSearchParams();
         discordParams.append('client_id', '1510157546500001884');
-        discordParams.append('client_secret', 'bnCML0tExWigqalqq7dXys6ubicb5CFz');
+        discordParams.append('client_secret', 'lCjbu0EP5npQ-i6hbO5ZIn3UCPat2YJ-');
         discordParams.append('grant_type', 'authorization_code');
         discordParams.append('code', code);
         discordParams.append('redirect_uri', redirect_uri);
@@ -4297,7 +4305,7 @@ const server = http.createServer((req, res) => {
 
         const discordParams = new URLSearchParams();
         discordParams.append('client_id', '1510157546500001884');
-        discordParams.append('client_secret', 'bnCML0tExWigqalqq7dXys6ubicb5CFz');
+        discordParams.append('client_secret', 'lCjbu0EP5npQ-i6hbO5ZIn3UCPat2YJ-');
         discordParams.append('grant_type', 'refresh_token');
         discordParams.append('refresh_token', refresh_token);
 
