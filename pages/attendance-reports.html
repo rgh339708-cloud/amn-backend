@@ -5,9 +5,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>تقارير الحضور بكلية التدريب | الأمن العام</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=1.1.26">
-  <link rel="stylesheet" href="../assets/css/navbar.css?v=1.1.26">
-  <link rel="stylesheet" href="../assets/css/sidebar.css?v=1.1.26">
+  <link rel="stylesheet" href="../assets/css/main.css?v=1.1.27">
+  <link rel="stylesheet" href="../assets/css/navbar.css?v=1.1.27">
+  <link rel="stylesheet" href="../assets/css/sidebar.css?v=1.1.27">
   <link rel="stylesheet" href="../assets/css/footer.css">
   <style>
     /* Premium CSS for Attendance reports Page */
@@ -652,6 +652,26 @@
     <div class="room-img-modal">
       <h3><i class="fa-solid fa-camera"></i> رفع صورة الروم لفتح التحضير</h3>
       <p>لتفعيل التحضير في هذه الدورة، يرجى رفع صورة واضحة وموثقة للروم الميداني. ستُعمم هذه الصورة تلقائياً لجميع الحاضرين في الدورة.</p>
+
+      <!-- ── تصنيف الدورة ── -->
+      <div style="margin: 14px 0; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 14px;">
+        <label style="display:block; font-size:0.85rem; color: rgba(255,255,255,0.6); margin-bottom:8px;"><i class="fa-solid fa-tag" style="margin-left:5px;"></i> تصنيف الدورة</label>
+        <div style="display:flex; gap:10px;">
+          <label style="flex:1; cursor:pointer;">
+            <input type="radio" name="course_type" value="أساسية" id="ct-basic" checked onchange="_courseType=this.value" style="display:none;">
+            <div id="ct-basic-btn" onclick="selectCourseType('أساسية')" style="text-align:center; padding:10px; border-radius:8px; border:2px solid #c9a227; background:rgba(201,162,39,0.15); color:#c9a227; font-weight:700; font-size:0.9rem; transition:all 0.2s;">
+              <i class="fa-solid fa-star" style="margin-left:5px;"></i> أساسية
+            </div>
+          </label>
+          <label style="flex:1; cursor:pointer;">
+            <input type="radio" name="course_type" value="استثنائية" id="ct-special" onchange="_courseType=this.value" style="display:none;">
+            <div id="ct-special-btn" onclick="selectCourseType('استثنائية')" style="text-align:center; padding:10px; border-radius:8px; border:2px solid rgba(255,255,255,0.15); background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.5); font-weight:700; font-size:0.9rem; transition:all 0.2s;">
+              <i class="fa-solid fa-bolt" style="margin-left:5px;"></i> استثنائية
+            </div>
+          </label>
+        </div>
+      </div>
+
       <div class="room-img-drop-zone" id="room-img-drop-zone">
         <input type="file" id="room-img-file" accept="image/*" onchange="handleRoomImageSelect(event)">
         <div class="room-img-drop-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
@@ -803,11 +823,11 @@
 
   </div>
 
-  <script src="../assets/js/storage.js?v=1.1.26"></script>
-  <script src="../assets/js/data.js?v=1.1.26"></script>
-  <script src="../assets/js/auth.js?v=1.1.26"></script>
-  <script src="../assets/js/components.js?v=1.1.26"></script>
-  <script src="../assets/js/app.js?v=1.1.26"></script>
+  <script src="../assets/js/storage.js?v=1.1.27"></script>
+  <script src="../assets/js/data.js?v=1.1.27"></script>
+  <script src="../assets/js/auth.js?v=1.1.27"></script>
+  <script src="../assets/js/components.js?v=1.1.28"></script>
+  <script src="../assets/js/app.js?v=1.1.27"></script>
   <script>
     // Inject navbar and sidebar
     document.write(Components.navbar('attendance-reports'));
@@ -917,6 +937,29 @@
     // Room image state
     let _pendingBookId = null;
     let _roomImageBase64 = null;
+    let _courseType = 'أساسية';
+
+    function selectCourseType(type) {
+      _courseType = type;
+      const basicBtn = document.getElementById('ct-basic-btn');
+      const specialBtn = document.getElementById('ct-special-btn');
+      if (!basicBtn || !specialBtn) return;
+      if (type === 'أساسية') {
+        basicBtn.style.border = '2px solid #c9a227';
+        basicBtn.style.background = 'rgba(201,162,39,0.15)';
+        basicBtn.style.color = '#c9a227';
+        specialBtn.style.border = '2px solid rgba(255,255,255,0.15)';
+        specialBtn.style.background = 'rgba(255,255,255,0.05)';
+        specialBtn.style.color = 'rgba(255,255,255,0.5)';
+      } else {
+        specialBtn.style.border = '2px solid #3498db';
+        specialBtn.style.background = 'rgba(52,152,219,0.15)';
+        specialBtn.style.color = '#3498db';
+        basicBtn.style.border = '2px solid rgba(255,255,255,0.15)';
+        basicBtn.style.background = 'rgba(255,255,255,0.05)';
+        basicBtn.style.color = 'rgba(255,255,255,0.5)';
+      }
+    }
 
     async function initAttendancePage() {
       currentUser = Auth.getCurrentUser();
@@ -1356,6 +1399,7 @@
       if (!_pendingBookId || !_roomImageBase64) return;
 
       const bookId = _pendingBookId;
+      const courseType = _courseType || 'أساسية';
       let roomImage = _roomImageBase64;
 
       // Close modal
@@ -1371,8 +1415,8 @@
         roomImage = uploadedUrl;
       }
 
-      // Call toggle status to open the book with the room image!
-      await toggleBookStatus(bookId, 'open', roomImage);
+      // Call toggle status to open the book with the room image and course type!
+      await toggleBookStatus(bookId, 'open', roomImage, courseType);
     }
 
     function openLightbox(src) {
@@ -1387,7 +1431,7 @@
       document.getElementById('lightbox-overlay').classList.remove('active');
     }
 
-    async function toggleBookStatus(bookId, newStatus, roomImage = null) {
+    async function toggleBookStatus(bookId, newStatus, roomImage = null, courseType = null) {
       if (!currentUser) return;
 
       const apiBase = await getApiBase();
@@ -1405,7 +1449,8 @@
             book_id: bookId,
             status: newStatus,
             operator_id: currentUser.id,
-            room_image: roomImage
+            room_image: roomImage,
+            course_type: courseType
           })
         });
 
@@ -1418,6 +1463,11 @@
           App.toast(`✅ تم ${actionLabel} بنجاح!`, 'success');
         }
 
+        // ── إرسال تقرير Discord مباشرة من الفرونتند عند إرسال التقرير ──
+        if (newStatus === 'report_sent') {
+          sendAttendanceToDiscordWebhook(bookId);
+        }
+
         // Reload data to reflect changes
         await loadData();
       } catch (e) {
@@ -1425,6 +1475,77 @@
         if (window.App && App.toast) {
           App.toast(`✕ فشلت العملية: ${e.message}`, 'error');
         }
+      }
+    }
+
+    // ── إرسال تقرير الحضور إلى Discord Webhook مباشرة من المتصفح ──
+    async function sendAttendanceToDiscordWebhook(bookId) {
+      try {
+        const WEBHOOK_URL = 'https://discord.com/api/webhooks/1519343011417559041/kZrlK9SJX5afM8G8u_uFxhnsTjHQpncdZ8BwyZ89Z_a1VX5QPeWKD_Rc5_Ee4Zj3Vo4h';
+        const apiBase = await getApiBase();
+
+        // Get attendance records for this book
+        const reportsRes = await fetch(`${apiBase}/api/attendance/reports`);
+        const reportsData = await reportsRes.json();
+        const allRecords = reportsData.records || [];
+
+        // Find the book
+        const book = attendanceBooks.find(b => b.book_id === bookId);
+        const bookName = book ? book.book_name : bookId;
+        const courseType = book ? (book.course_type || '') : '';
+        const roomImage = book ? book.room_image : null;
+
+        // Get open time for this book
+        const allLogs = reportsData.logs || [];
+        const openLog = allLogs.filter(l => l.book_id === bookId && l.action === 'فتح التحضير').pop();
+        const openTime = openLog ? new Date(openLog.timestamp).getTime() : 0;
+
+        // Filter records for this book after last open
+        const bookRecords = allRecords.filter(r => {
+          if (r.book_id !== bookId) return false;
+          const ts = new Date(r.timestamp).getTime();
+          return ts >= openTime;
+        });
+
+        const operatorName = currentUser ? (currentUser.display_name || currentUser.username || 'مشرف') : 'مشرف';
+        const userRole = currentUser ? currentUser.role : 'viewer';
+        const roleLabel = userRole === 'owner' ? 'المالك' : userRole === 'assistant_owner' ? 'قيادة الامن العام' : userRole === 'academy_affairs' ? 'رئاسة تدريب الامن العام' : userRole === 'admin' ? 'شؤون أكاديمية التدريب' : 'مسؤول دورة';
+        const operatorStr = `${operatorName} (${roleLabel})`;
+
+        let attendeesList = '';
+        if (bookRecords.length > 0) {
+          attendeesList = bookRecords.map((r, i) =>
+            `**${i + 1}.** ${r.rank} / ${r.display_name} - الكود: \`${r.code || '—'}\``
+          ).join('\n');
+          if (attendeesList.length > 1020) attendeesList = attendeesList.substring(0, 1020) + '...';
+        } else {
+          attendeesList = 'لا يوجد حضور مسجل في هذه الفترة.';
+        }
+
+        const courseLabel = courseType ? `${courseType}` : '';
+        const embed = {
+          title: '📋 تقرير حضور المدربين',
+          color: courseType === 'استثنائية' ? 3447003 : 13214247,
+          fields: [
+            { name: '📚 الدورة / الدفتر', value: bookName, inline: true },
+            { name: '🏷️ تصنيف الدورة', value: courseLabel || 'أساسية', inline: true },
+            { name: '👤 المشرف المسؤول', value: operatorStr, inline: true },
+            { name: '✅ عدد الحاضرين', value: String(bookRecords.length), inline: true },
+            { name: '📝 أسماء الحاضرين', value: attendeesList }
+          ],
+          timestamp: new Date().toISOString(),
+          footer: { text: 'شؤون تدريب الأمن العام • مدينة الـ 90' }
+        };
+        if (roomImage) embed.image = { url: roomImage };
+
+        await fetch(WEBHOOK_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ embeds: [embed] })
+        });
+        console.log('✅ Discord webhook sent from frontend!');
+      } catch (err) {
+        console.error('❌ Discord webhook error from frontend:', err);
       }
     }
 
