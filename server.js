@@ -750,34 +750,31 @@ function sendDiscordChannelMessage(channelId, payload, botToken) {
 }
 
 function sendAttendanceReportToDiscord(bookName, operatorStr, roomImage, records) {
-  // Use config token, fallback to env var, then fallback to hardcoded token
-  const FALLBACK_TOKEN = 'MTUxMDE1NzU0NjUwMDAwMTg4NA.GAUVcw.EKZ5Zp-WsvwUmrtmxRzjQdaXJqEiFaI7mEatt0';
-  const botToken = config.discordToken || process.env.DISCORD_TOKEN || FALLBACK_TOKEN;
-  console.log('[Discord Report] Attempting to send report for book:', bookName);
-  console.log('[Discord Report] Token source:', config.discordToken ? 'config' : process.env.DISCORD_TOKEN ? 'process.env' : 'fallback hardcoded');
-  console.log('[Discord Report] Records count:', records ? records.length : 0);
-  if (!botToken) {
-    console.warn('[Discord Report Warning] Discord Bot Token not configured. Cannot send message to Discord.');
-    return;
-  }
+  // Discord Webhook URL - direct and reliable, no bot token needed
+  const WEBHOOK_URL = 'https://discord.com/api/webhooks/1519343011417559041/kZrlK9SJX5afM8G8u_uFxhnsTjHQpncdZ8BwyZ89Z_a1VX5QPeWKD_Rc5_Ee4Zj3Vo4h';
 
-  const channelId = '1518159865455841340';
-  
+  console.log('[Discord Report] Sending report via webhook for book:', bookName);
+  console.log('[Discord Report] Records count:', records ? records.length : 0);
+
   let attendeesList = '';
   if (records && records.length > 0) {
     attendeesList = records.map((r, i) => `**${i + 1}.** ${r.rank} / ${r.display_name} - الكود: \`${r.code || '—'}\``).join('\n');
+    // Discord embed field value limit is 1024 chars
+    if (attendeesList.length > 1020) {
+      attendeesList = attendeesList.substring(0, 1020) + '...';
+    }
   } else {
     attendeesList = 'لا يوجد حضور مسجل في هذه الفترة.';
   }
 
   const embed = {
     title: '📋 تقرير حضور المدربين',
-    color: 13214247, // Hex #c9a227 (Gold)
+    color: 13214247, // Gold #c9a227
     fields: [
-      { name: 'الدورة / الدفتر', value: bookName, inline: true },
-      { name: 'المشرف المسؤول', value: operatorStr, inline: true },
-      { name: 'عدد الحاضرين', value: String(records ? records.length : 0), inline: true },
-      { name: 'أسماء الحاضرين', value: attendeesList }
+      { name: '📚 الدورة / الدفتر', value: bookName, inline: true },
+      { name: '👤 المشرف المسؤول', value: operatorStr, inline: true },
+      { name: '✅ عدد الحاضرين', value: String(records ? records.length : 0), inline: true },
+      { name: '📝 أسماء الحاضرين', value: attendeesList }
     ],
     timestamp: new Date().toISOString(),
     footer: {
@@ -789,17 +786,38 @@ function sendAttendanceReportToDiscord(bookName, operatorStr, roomImage, records
     embed.image = { url: roomImage };
   }
 
-  const payload = {
-    embeds: [embed]
+  const payload = JSON.stringify({ embeds: [embed] });
+
+  // Parse webhook URL
+  const webhookPath = WEBHOOK_URL.replace('https://discord.com', '');
+  const options = {
+    hostname: 'discord.com',
+    path: webhookPath,
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Content-Length': Buffer.byteLength(payload)
+    }
   };
 
-  sendDiscordChannelMessage(channelId, payload, botToken)
-    .then(response => {
-      console.log('✅ Successfully sent attendance report to Discord channel 1518159865455841340');
-    })
-    .catch(err => {
-      console.error('❌ Failed to send attendance report to Discord:', err.message);
+  const req = https.request(options, (res) => {
+    let body = '';
+    res.on('data', chunk => { body += chunk; });
+    res.on('end', () => {
+      if (res.statusCode === 200 || res.statusCode === 204) {
+        console.log('✅ Attendance report sent to Discord via webhook successfully!');
+      } else {
+        console.error('❌ Discord webhook error. Status:', res.statusCode, 'Body:', body);
+      }
     });
+  });
+
+  req.on('error', (err) => {
+    console.error('❌ Failed to send Discord webhook:', err.message);
+  });
+
+  req.write(payload);
+  req.end();
 }
 
 let db;
