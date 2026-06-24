@@ -367,28 +367,119 @@ const Storage = (() => {
 
   // --- Centralized Sync Helper Functions ---
 
+  function getUnsyncedKeys() {
+    try {
+      return JSON.parse(localStorage.getItem('ps_unsynced_keys') || '[]');
+    } catch {
+      return [];
+    }
+  }
+
+  function markKeyUnsynced(key) {
+    const list = getUnsyncedKeys();
+    if (!list.includes(key)) {
+      list.push(key);
+      localStorage.setItem('ps_unsynced_keys', JSON.stringify(list));
+    }
+  }
+
+  function markKeySynced(key) {
+    const list = getUnsyncedKeys();
+    const index = list.indexOf(key);
+    if (index !== -1) {
+      list.splice(index, 1);
+      localStorage.setItem('ps_unsynced_keys', JSON.stringify(list));
+      // Sync success toast removed - syncing happens silently in background
+    }
+  }
+
+  function isKeyUnsynced(key) {
+    return getUnsyncedKeys().includes(key);
+  }
+
   function syncToRemote(collection, action, id, item, data) {
     // Only link if not local session keys
     if (collection === keys.CURRENT_USER) return;
 
     const apiBase = getApiBase();
     activeSyncs[collection] = (activeSyncs[collection] || 0) + 1;
+    
+    // Mark as unsynced initially in case it fails
+    markKeyUnsynced(collection);
 
     fetchWithTimeout(`${apiBase}/api/db/sync`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Bypass-Tunnel-Reminder': 'true' },
       body: JSON.stringify({ collection, action, id, item, data }),
-      timeout: 6000
+      timeout: 60000 // 60 seconds to allow Render cold start
     }).then(res => res.json())
       .then(resData => {
         activeSyncs[collection] = Math.max(0, (activeSyncs[collection] || 0) - 1);
-        if (!resData.success) {
+        if (resData.success) {
+          markKeySynced(collection);
+        } else {
           console.warn(`[Storage Sync] Failed to sync ${collection} remote action ${action}`);
+          if (window.App && window.App.toast) {
+            window.App.toast('⚠️ فشل حفظ التعديلات على الخادم. تم الاحتفاظ بالتعديلات محلياً وسيتم المزامنة تلقائياً.', 'warning');
+          }
         }
       }).catch(err => {
         activeSyncs[collection] = Math.max(0, (activeSyncs[collection] || 0) - 1);
-        console.warn(`[Storage Sync] Network error syncing ${collection} to server`);
+        console.warn(`[Storage Sync] Network error syncing ${collection} to server`, err);
+        if (window.App && window.App.toast) {
+          window.App.toast('⚠️ فشل الاتصال بالخادم لمزامنة التعديلات. تم حفظها محلياً وسيتم المزامنة تلقائياً.', 'warning');
+        }
       });
+  }
+
+  async function retryUnsyncedSyncs() {
+    const list = getUnsyncedKeys();
+    if (list.length === 0) return;
+    
+    console.log('[Storage Sync] Found unsynced keys. Retrying sync for:', list);
+    
+    for (const key of list) {
+      // If we are currently syncing this key through a direct mutation, skip retry
+      if (activeSyncs[key] > 0) continue;
+      
+      const data = get(key);
+      if (data === null) continue;
+      
+      const isArrayKey = key.startsWith('ps_') && 
+                         key !== keys.SETTINGS && 
+                         key !== keys.CURRENT_USER && 
+                         key !== keys.INITIALIZED;
+      
+      const payloadData = isArrayKey ? getCollection(key) : data;
+      
+      try {
+        const apiBase = getApiBase();
+        const res = await fetchWithTimeout(`${apiBase}/api/db/sync`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Bypass-Tunnel-Reminder': 'true' },
+          body: JSON.stringify({ 
+            collection: key, 
+            action: 'set', 
+            id: null, 
+            item: null, 
+            data: payloadData 
+          }),
+          timeout: 60000 // 60 seconds
+        });
+        
+        if (res.ok) {
+          const resData = await res.json();
+          if (resData.success) {
+            console.log(`[Storage Sync] Successfully retried and synced key: ${key}`);
+            markKeySynced(key);
+          } else {
+            console.warn(`[Storage Sync] Retry sync failed on server for key: ${key}`);
+          }
+        }
+      } catch (err) {
+        console.warn(`[Storage Sync] Retry sync network error for key: ${key}`, err);
+      }
+    }
   }
 
   async function loadAllFromServer() {
@@ -397,7 +488,7 @@ const Storage = (() => {
 
       const res = await fetchWithTimeout(`${apiBase}/api/db/collections`, {
         headers: { 'Bypass-Tunnel-Reminder': 'true' },
-        timeout: 2000
+        timeout: 4000
       });
       if (res.ok) {
         const json = await res.json();
@@ -407,11 +498,12 @@ const Storage = (() => {
             // Avoid overwriting active session on client
             if (key === keys.CURRENT_USER) return;
             
-            // Skip overwriting if there is an active sync request in flight, or if it was modified recently (cooldown of 8 seconds)
+            // Skip overwriting if there is an active sync request in flight, if it was modified recently (8s), or if it is unsynced (dirty)
             const lastWrite = lastWriteTime[key] || 0;
             const hasActiveSync = activeSyncs[key] > 0;
-            if (hasActiveSync || (Date.now() - lastWrite < 8000)) {
-              console.log(`[Storage Sync] Skipping overwrite for recently written/syncing key: ${key} (activeSync: ${hasActiveSync})`);
+            const isUnsynced = isKeyUnsynced(key);
+            if (hasActiveSync || isUnsynced || (Date.now() - lastWrite < 8000)) {
+              console.log(`[Storage Sync] Skipping overwrite for recently written/syncing/unsynced key: ${key} (activeSync: ${hasActiveSync}, unsynced: ${isUnsynced})`);
               return;
             }
             
@@ -429,11 +521,20 @@ const Storage = (() => {
   }
 
   let pollingInterval = null;
+  let retryInterval = null;
   function startRealTimePolling(intervalMs = 3000) {
     if (pollingInterval) clearInterval(pollingInterval);
     pollingInterval = setInterval(() => {
       loadAllFromServer();
     }, intervalMs);
+
+    // Also start a retry poll every 15 seconds
+    if (retryInterval) clearInterval(retryInterval);
+    retryInterval = setInterval(() => {
+      retryUnsyncedSyncs();
+    }, 15000);
+    // Trigger immediately on start
+    retryUnsyncedSyncs();
   }
 
   return {
