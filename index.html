@@ -193,94 +193,15 @@
 
 <div id="toast-container"></div>
 
-<!-- ═══════════════ NAVBAR ═══════════════ -->
-<nav class="navbar" id="navbar">
-  <div class="navbar-inner">
-    <a href="index.html" class="navbar-logo">
-      <img src="assets/img/emblem.png" alt="شعار الأمن العام" class="nav-logo-img"
-           onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
-      <!-- SVG Fallback shown only if image fails -->
-      <div style="display:none; width:44px; height:44px; background:linear-gradient(135deg,#c9a227,#8a6d0f); border-radius:10px; align-items:center; justify-content:center; font-size:1.4rem;"><i class="fa-solid fa-shield-halved"></i></div>
-      <div class="navbar-logo-text" style="display: flex; flex-direction: column; line-height: 1.25; text-align: right;">
-        <span style="font-size: 14px; font-weight: 900; color: #ffffff; letter-spacing: 0.5px;">إدارة الأمن العام</span>
-        <span style="font-size: 11px; font-weight: 800; color: #c9a227; margin-top: 1px;">مدينة الـ 90</span>
-      </div>
-    </a>
-
-    <div class="navbar-actions">
-      <button class="menu-toggle" data-action="open-sidebar" aria-label="القائمة">
-        <span></span><span></span><span></span>
-      </button>
-    </div>
-  </div>
-
-  <!-- Sub Navigation Bar -->
-  <div class="navbar-sub">
-    <div class="navbar-sub-inner" id="index-sub-inner">
-      <a href="index.html" class="sub-link active"><i class="fa-solid fa-house"></i> الرئيسية</a>
-      <a href="pages/leadership.html" class="sub-link"><i class="fa-solid fa-crown"></i> القيادة</a>
-      <a href="pages/managers.html" class="sub-link"><i class="fa-solid fa-medal"></i> مدراء الأقسام</a>
-      <a href="pages/centers.html" class="sub-link"><i class="fa-solid fa-building-shield"></i> المراكز</a>
-      <a href="pages/guide.html" class="sub-link"><i class="fa-solid fa-book-open"></i> الدليل الشامل</a>
-      <a href="pages/inventory.html" class="sub-link"><i class="fa-solid fa-box-open"></i> العهدة</a>
-      <a href="pages/vehicles.html" class="sub-link"><i class="fa-solid fa-car-on"></i> المركبات</a>
-      <a href="pages/college.html" class="sub-link"><i class="fa-solid fa-graduation-cap"></i> كلية التدريب</a>
-      <a href="pages/exams.html" class="sub-link"><i class="fa-solid fa-file-pen"></i> الاختبارات</a>
-      <a href="pages/field-title.html" class="sub-link"><i class="fa-solid fa-id-card"></i> التوجيهات الميدانية</a>
-      <a href="pages/uniform.html" class="sub-link"><i class="fa-solid fa-shirt"></i> الزي العسكري</a>
-      <a href="pages/database.html" class="sub-link"><i class="fa-solid fa-lock"></i> قاعدة البيانات</a>
-    </div>
-  </div>
-</nav>
-
-<!-- ═══════════════ SIDEBAR ═══════════════ -->
-<div class="sidebar-overlay" id="sidebar-overlay"></div>
-<aside class="sidebar" id="sidebar" role="navigation" aria-label="القائمة الجانبية">
-  <div class="sidebar-header">
-    <div class="sidebar-logo">
-      <img src="assets/img/emblem.png" alt="شعار الأمن العام" class="sidebar-logo-img"
-           onerror="this.outerHTML='<div class=\'sidebar-logo-icon\'><i class=\'fa-solid fa-shield-halved\'></i></div>'">
-      <div style="display: flex; flex-direction: column; line-height: 1.25; text-align: right; margin-right: 8px;">
-        <span style="font-size: 13px; font-weight: 900; color: #ffffff; letter-spacing: 0.5px;">إدارة الأمن العام</span>
-        <span style="font-size: 10px; font-weight: 800; color: #c9a227; margin-top: 1px;">مدينة الـ 90</span>
-      </div>
-    </div>
-    <button class="sidebar-close" data-action="close-sidebar">✕</button>
-  </div>
-
-  <div class="sidebar-body">
-    <div class="sidebar-section-label">القائمة الرئيسية</div>
-    <a href="index.html" class="sidebar-nav-item active"><div class="sidebar-nav-icon"><i class="fa-solid fa-house"></i></div>الرئيسية</a>
-    <a href="pages/leadership.html" class="sidebar-nav-item"><div class="sidebar-nav-icon"><i class="fa-solid fa-crown"></i></div>القيادة</a>
-    <a href="pages/managers.html" class="sidebar-nav-item"><div class="sidebar-nav-icon"><i class="fa-solid fa-medal"></i></div>مدراء الأقسام</a>
-    <a href="pages/centers.html" class="sidebar-nav-item"><div class="sidebar-nav-icon"><i class="fa-solid fa-building-shield"></i></div>المراكز</a>
-    <div class="sidebar-divider"></div>
-    <div class="sidebar-section-label">المحتوى والمعرفة</div>
-    <a href="pages/guide.html" class="sidebar-nav-item"><div class="sidebar-nav-icon"><i class="fa-solid fa-book-open"></i></div>الدليل الشامل</a>
-    <a href="pages/college.html" class="sidebar-nav-item"><div class="sidebar-nav-icon"><i class="fa-solid fa-graduation-cap"></i></div>كلية التدريب</a>
-    <a href="pages/exams.html" class="sidebar-nav-item"><div class="sidebar-nav-icon"><i class="fa-solid fa-file-pen"></i></div>الاختبارات</a>
-    <a href="pages/uniform.html" class="sidebar-nav-item"><div class="sidebar-nav-icon"><i class="fa-solid fa-shirt"></i></div>الزي العسكري</a>
-    <div class="sidebar-divider"></div>
-    <div class="sidebar-section-label">الإدارة والتوثيق</div>
-    <a href="pages/inventory.html" class="sidebar-nav-item"><div class="sidebar-nav-icon"><i class="fa-solid fa-box-open"></i></div>العهدة</a>
-    <a href="pages/field-title.html" class="sidebar-nav-item"><div class="sidebar-nav-icon"><i class="fa-solid fa-id-card"></i></div>التوجيهات الميدانية</a>
-    <div class="sidebar-divider"></div>
-    <div class="sidebar-section-label">المجتمع</div>
-    <a href="pages/database.html" class="sidebar-nav-item"><div class="sidebar-nav-icon"><i class="fa-solid fa-folder-tree"></i></div>قاعدة البيانات</a>
-  </div>
-
-  <div class="sidebar-footer">
-    <div class="sidebar-status">
-      <div class="status-dot"></div>
-      <span class="sidebar-status-text">السيرفر يعمل بشكل طبيعي</span>
-    </div>
-    <div class="sidebar-footer-stats">
-      <div class="sidebar-stat"><span class="sidebar-stat-value" id="sidebar-total">127</span><span class="sidebar-stat-label">عضو</span></div>
-      <div class="sidebar-stat"><span class="sidebar-stat-value" id="sidebar-online">34</span><span class="sidebar-stat-label">متصل</span></div>
-      <div class="sidebar-stat"><span class="sidebar-stat-value" id="sidebar-centers">5</span><span class="sidebar-stat-label">مركز</span></div>
-    </div>
-  </div>
-</aside>
+<!-- ═══════════════ NAVBAR & SIDEBAR ═══════════════ -->
+<script src="assets/js/storage.js?v=1.1.31"></script>
+<script src="assets/js/data.js?v=1.1.31"></script>
+<script src="assets/js/auth.js?v=1.1.31"></script>
+<script src="assets/js/components.js?v=1.1.31"></script>
+<script>
+  document.write(Components.navbar('home'));
+  document.write(Components.sidebar('home'));
+</script>
 
 <!-- ═══════════════ PAGE CONTENT ═══════════════ -->
 <main class="page-content">
@@ -368,10 +289,7 @@
 </footer>
 
 <!-- ═══════════════ SCRIPTS ═══════════════ -->
-<script src="assets/js/storage.js?v=1.1.26"></script>
-<script src="assets/js/data.js?v=1.1.26"></script>
-<script src="assets/js/auth.js?v=1.1.26"></script>
-<script src="assets/js/app.js?v=1.1.26"></script>
+<script src="assets/js/app.js?v=1.1.31"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   // Seed data and settings first if needed

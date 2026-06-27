@@ -32,9 +32,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>قاعدة البيانات | الأمن العام</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=1.1.26">
-  <link rel="stylesheet" href="../assets/css/navbar.css?v=1.1.26">
-  <link rel="stylesheet" href="../assets/css/sidebar.css?v=1.1.26">
+  <link rel="stylesheet" href="../assets/css/main.css?v=1.1.27">
+  <link rel="stylesheet" href="../assets/css/navbar.css?v=1.1.27">
+  <link rel="stylesheet" href="../assets/css/sidebar.css?v=1.1.27">
   <link rel="stylesheet" href="../assets/css/footer.css">
   <style>
     /* ── Premium Tabs Styling ── */
@@ -747,11 +747,11 @@
 <body>
 <div id="toast-container"></div>
 
-<script src="../assets/js/storage.js?v=1.1.26"></script>
-<script src="../assets/js/data.js?v=1.1.26"></script>
-<script src="../assets/js/auth.js?v=1.1.26"></script>
-<script src="../assets/js/components.js?v=1.1.26"></script>
-<script src="../assets/js/app.js?v=1.1.26"></script>
+<script src="../assets/js/storage.js?v=1.1.30"></script>
+<script src="../assets/js/data.js?v=1.1.27"></script>
+<script src="../assets/js/auth.js?v=1.1.30"></script>
+<script src="../assets/js/components.js?v=1.1.31"></script>
+<script src="../assets/js/app.js?v=1.1.31"></script>
 
 <script>
   document.write(Components.navbar('database'));
@@ -871,7 +871,7 @@
   <!-- ── Interactive Person Info Modal ── -->
   <div class="info-modal-overlay" id="info-modal" onclick="if(event.target===this) closePersonModal()">
     <div class="info-modal">
-      <div class="info-modal-header">
+      <div class="info-modal-header" style="overflow: visible;">
         <div class="info-modal-title">
           <span id="modal-person-badge"><i class="fa-solid fa-shield-halved"></i></span>
           <div>
@@ -1014,6 +1014,13 @@
       .replace(/ى/g, 'ي');
   }
 
+  function cleanPositionValue(val) {
+    if (!val) return "";
+    const s = String(val).trim();
+    if (s.toLowerCase() === 'false' || s.toLowerCase() === 'true' || s === '—' || s === '-' || s === 'لايوجد' || s === 'لا يوجد') return "";
+    return s;
+  }
+
   function getMemberAvatarUrl(r) {
     let rawDiscord = r.discord || '';
     let discordId = '';
@@ -1113,7 +1120,8 @@
   const MAIN_TABS = [
     'جدول الامن العام - الاساسي',
     'جدول الامن العام - الادارة',
-    'جدول الامن العام - المنتدبين'
+    'جدول الامن العام - المنتدبين',
+    'جدول الامن العام - المعتمدين'
   ];
 
   // ── Promotion Requirements: أفراد الأمن العام (الأساسي + الإدارة) ──
@@ -1162,34 +1170,28 @@
   }
 
   document.addEventListener('DOMContentLoaded', async () => {
-    if (!Auth.requireDiscordAuth()) {
-      const mainContent = document.querySelector('.page-content');
-      if (mainContent) mainContent.style.display = 'none';
-      return;
-    }
-
     // Resolve role and table permissions to prevent flashing unpermitted data
-    const user = Auth.getCurrentUser();
-    if (user) {
-      const role = user.role || 'viewer';
-      const settings = Storage.get(Storage.keys.SETTINGS) || {};
-      const perms = settings.tablePermissions || {};
-      const rolePerms = perms[role] || { basic: true, approved: true, management: true };
-      
-      if (!rolePerms.basic) {
-        if (rolePerms.approved) {
-          currentTab = 'جدول الامن العام - المنتدبين';
-          document.getElementById('tab-btn-main')?.classList.remove('active');
-          document.getElementById('tab-btn-deputed')?.classList.add('active');
-        } else if (rolePerms.management) {
-          currentTab = 'جدول الامن العام - الادارة';
-          document.getElementById('tab-btn-main')?.classList.remove('active');
-          document.getElementById('tab-btn-admin')?.classList.add('active');
-        } else {
-          currentTab = 'نظام الترقيات ⭐️جديد';
-          document.getElementById('tab-btn-main')?.classList.remove('active');
-          document.getElementById('tab-btn-promo-rules')?.classList.add('active');
-        }
+    const isLoggedIn = Auth.isLoggedIn();
+    const user = isLoggedIn ? Auth.getCurrentUser() : null;
+    const role = user ? (user.role || 'viewer') : 'viewer';
+    
+    const settings = Storage.get(Storage.keys.SETTINGS) || {};
+    const perms = settings.tablePermissions || {};
+    const rolePerms = perms[role] || { basic: true, approved: true, management: true };
+    
+    if (!rolePerms.basic) {
+      if (rolePerms.approved) {
+        currentTab = 'جدول الامن العام - المنتدبين';
+        document.getElementById('tab-btn-main')?.classList.remove('active');
+        document.getElementById('tab-btn-deputed')?.classList.add('active');
+      } else if (rolePerms.management) {
+        currentTab = 'جدول الامن العام - الادارة';
+        document.getElementById('tab-btn-main')?.classList.remove('active');
+        document.getElementById('tab-btn-admin')?.classList.add('active');
+      } else {
+        currentTab = 'نظام الترقيات ⭐️جديد';
+        document.getElementById('tab-btn-main')?.classList.remove('active');
+        document.getElementById('tab-btn-promo-rules')?.classList.add('active');
       }
     }
     
@@ -1409,7 +1411,7 @@
           rank: valOf(3) || "عضو",
           joinDate: "—",
           status: "بالخدمة",
-          position: valOf(4) || "عضو المجلس",
+          position: cleanPositionValue(valOf(4)) || "عضو المجلس",
           courses: [],
           regularCourses: [],
           notes: valOf(5) || "—",
@@ -1484,7 +1486,7 @@
           rank: valOf(3) || "عضو",
           joinDate: "—",
           status: valOf(4) || "على رأس العمل",
-          position: valOf(5) || "عضو الشؤون",
+          position: cleanPositionValue(valOf(5)) || "عضو الشؤون",
           courses: [],
           regularCourses: [],
           notes: valOf(7) || "—",
@@ -1518,7 +1520,7 @@
           rank: valOf(3) || "عضو",
           joinDate: "—",
           status: valOf(4) || "على رأس العمل",
-          position: valOf(5) || "عضو التجنيد",
+          position: cleanPositionValue(valOf(5)) || "عضو التجنيد",
           courses: [],
           regularCourses: [],
           notes: valOf(6) || "—",
@@ -1551,7 +1553,7 @@
           rank: valOf(3) || "عضو",
           joinDate: "—",
           status: valOf(4) || "على رأس العمل",
-          position: valOf(5) || "عضو شؤون التدريب",
+          position: cleanPositionValue(valOf(5)) || "عضو شؤون التدريب",
           courses: [],
           regularCourses: [],
           salary: valOf(6) || "—",
@@ -1674,7 +1676,7 @@
       const code = valOf(idxCode).replace(/[\[\]]/g, '').trim();
       const rank = valOf(idxRank);
       const promoDate = valOf(idxPromo);
-      const position = valOf(30) || valOf(idxPosition);
+      const position = cleanPositionValue(idxPosition !== -1 ? valOf(idxPosition) : valOf(31));
       const notes = valOf(idxNotes);
       const badgeDegree = valOf(idxBadgeDegree);
       
@@ -2069,6 +2071,10 @@
       });
       
       await Promise.all(fetchPromises);
+
+      if (failedTabsCount === SHEET_TABS.length) {
+        throw new Error('All sheet tabs failed to load from Google Sheets.');
+      }
       
       cachedSheets = fetchedCache;
       try {
@@ -2112,14 +2118,21 @@
           App.toast('⚡ تم تحديث قاعدة البيانات بالكامل بنجاح!', 'success');
         } else if (failedTabsCount < SHEET_TABS.length) {
           App.toast('⚠️ تم تحديث قاعدة البيانات جزئياً. تم استخدام البيانات المؤقتة لبعض الأقسام.', 'warning');
-        } else {
-          // If all tabs failed, throw to show the error toast
-          throw new Error('All sheet tabs failed to load.');
         }
       }
     } catch (err) {
       console.error('Failed to fetch spreadsheet data:', err);
-      // Fallback
+      
+      // If the user is online and all tabs failed, the Google Sheet is closed/locked
+      if (navigator.onLine) {
+        console.warn('[Database] Google Sheet is inaccessible while online. Locking database.');
+        localStorage.removeItem('members_google_sheets_cache');
+        cachedSheets = {};
+        showDatabaseClosedMessage();
+        return;
+      }
+      
+      // Fallback only if offline (no network)
       if (Object.keys(cachedSheets).length === 0) {
         await loadStaticCacheFromServer();
       }
@@ -2143,6 +2156,52 @@
       }
     }
   }
+
+  function showDatabaseClosedMessage() {
+    const wrapper = document.querySelector('.page-wrapper');
+    if (wrapper) {
+      if (document.getElementById('db-closed-screen')) return;
+      
+      if (!window.originalDbContent) {
+        window.originalDbContent = wrapper.innerHTML;
+      }
+      
+      wrapper.innerHTML = `
+        <div id="db-closed-screen" style="text-align: center; padding: 80px 24px; background: rgba(30, 30, 45, 0.2); border: 1px solid rgba(231, 76, 60, 0.2); border-radius: 16px; margin: 40px auto; max-width: 600px; box-shadow: 0 12px 40px rgba(0,0,0,0.6); backdrop-filter: blur(12px); animation: fadeIn 0.5s ease;">
+          <div style="width: 80px; height: 80px; background: rgba(231, 76, 60, 0.1); border: 2px solid rgba(231, 76, 60, 0.35); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; box-shadow: 0 0 20px rgba(231, 76, 60, 0.15);">
+            <i class="fa-solid fa-lock" style="font-size: 2.2rem; color: #e74c3c;"></i>
+          </div>
+          <h2 style="color: #fff; font-weight: 900; font-size: 1.8rem; margin-bottom: 12px; font-family: 'Cairo', sans-serif;">جدول البيانات مغلق حالياً</h2>
+          <p style="color: var(--color-text-secondary); font-size: 0.95rem; line-height: 1.8; max-width: 460px; margin: 0 auto 30px; font-family: 'Cairo', sans-serif;">
+            تم إغلاق جدول البيانات الرئيسي من قبل الإدارة العامة لشؤون الأمن العام. سيتم إعادة تفعيل تصفح السجلات تلقائياً بمجرد فتح الجدول.
+          </p>
+          <button id="btn-retry-db" onclick="retryFetchSpreadsheet()" class="btn btn-gold" style="display: inline-flex; width: auto; padding: 12px 30px; font-weight: 700; border-radius: 8px; justify-content: center; align-items: center; gap: 8px; font-family: 'Cairo', sans-serif; transition: all 0.3s ease;">
+            <i class="fa-solid fa-arrows-rotate"></i> إعادة المحاولة والتحقق
+          </button>
+        </div>
+      `;
+    }
+  }
+
+  window.retryFetchSpreadsheet = function() {
+    const btn = document.getElementById('btn-retry-db');
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري التحقق من حالة الجدول...';
+    }
+    
+    // Restore original DOM content so elements exist for fetchSpreadsheetData to target
+    if (window.originalDbContent) {
+      const wrapper = document.querySelector('.page-wrapper');
+      if (wrapper) {
+        wrapper.innerHTML = window.originalDbContent;
+        window.originalDbContent = null;
+      }
+    }
+    
+    // Trigger fresh non-silent fetch
+    fetchSpreadsheetData(true, false);
+  };
 
   // Helper: extract numeric amount from a fine string
   function extractAmount(raw) {
@@ -2402,7 +2461,8 @@
     }
 
     tbody.innerHTML = list.map(r => {
-      const posHTML = `<span class="pos-badge ${r.position ? 'has-pos' : ''}">${r.position || 'عضو ميداني'}</span>`;
+      const hasPosClass = r.position && r.position !== 'لا يوجد' ? 'has-pos' : '';
+      const posHTML = `<span class="pos-badge ${hasPosClass}">${r.position || 'لا يوجد'}</span>`;
       const degreeHTML = `<span class="badge-degree ${r.badgeDegree && r.badgeDegree !== '—' && r.badgeDegree !== '-' ? 'has-degree' : ''}">${r.badgeDegree || '—'}</span>`;
       
       const renderCheck = (hasIt) => {
@@ -2424,7 +2484,7 @@
           <td onclick="_clickedTab=currentTab; showPersonModal('${r.name}')" style="font-weight: 800; color: #fff; cursor: pointer;" onmouseover="this.style.color='var(--color-gold-primary)'; this.style.textDecoration='underline';" onmouseout="this.style.color='#fff'; this.style.textDecoration='none';">${renderMemberAvatarCell(r)}</td>
           <td><span class="badge-code-left" style="position:static; margin:0; display:inline-block;">${r.badge || '—'}</span></td>
           <td style="color:var(--color-gold-primary);font-weight:700">${r.rank || '—'}</td>
-          <td><span class="pos-badge ${r.position ? 'has-pos' : ''}">${r.position || 'عضو ميداني'}</span></td>
+          <td><span class="pos-badge ${hasPosClass}">${r.position || 'لا يوجد'}</span></td>
           <td>${statusHTML}</td>
           <td>${getFormattedLastActive(r)}</td>
           <td>${degreeHTML}</td>
@@ -2462,18 +2522,37 @@
   
   function switchModalTab(tabName) {
     activeModalTab = tabName;
+    // Remove active class from all tab buttons
     document.querySelectorAll('.info-modal-tab-btn').forEach(b => b.classList.remove('active'));
+    // Remove active class from all tab content panels
     document.querySelectorAll('.info-modal-tab-content').forEach(c => c.classList.remove('active'));
     
     if (tabName === 'promo') {
-      document.getElementById('btn-tab-promo').classList.add('active');
-      document.getElementById('modal-tab-content-promo').classList.add('active');
+      const btn = document.getElementById('btn-tab-promo');
+      const content = document.getElementById('modal-tab-content-promo');
+      // Only switch if the tab is visible (not hidden)
+      if (btn && btn.style.display !== 'none') {
+        btn.classList.add('active');
+        if (content) content.classList.add('active');
+      } else {
+        // Fallback to discord tab if promo is hidden
+        document.getElementById('btn-tab-discord')?.classList.add('active');
+        document.getElementById('modal-tab-content-discord')?.classList.add('active');
+      }
     } else if (tabName === 'fines') {
-      document.getElementById('btn-tab-fines').classList.add('active');
-      document.getElementById('modal-tab-content-fines').classList.add('active');
-    } else if (tabName === 'discord') {
-      document.getElementById('btn-tab-discord').classList.add('active');
-      document.getElementById('modal-tab-content-discord').classList.add('active');
+      const btn = document.getElementById('btn-tab-fines');
+      const content = document.getElementById('modal-tab-content-fines');
+      if (btn && btn.style.display !== 'none') {
+        btn.classList.add('active');
+        if (content) content.classList.add('active');
+      } else {
+        document.getElementById('btn-tab-discord')?.classList.add('active');
+        document.getElementById('modal-tab-content-discord')?.classList.add('active');
+      }
+    } else {
+      // Discord / profile tab - always available
+      document.getElementById('btn-tab-discord')?.classList.add('active');
+      document.getElementById('modal-tab-content-discord')?.classList.add('active');
     }
   }
 
@@ -2513,11 +2592,27 @@
     const clickedStr = cleanTabStr(_clickedTab);
 
     const isMainTabClick = MAIN_TABS.map(cleanTabStr).includes(clickedStr);
-    const isFinesTable = clickedStr.includes('الغرامات') || clickedStr.includes('غرامات');
+    const isFinesTableClick = clickedStr.includes('الغرامات') || clickedStr.includes('غرامات');
+    const showFinesTab = isMainTabClick || isFinesTableClick;
 
-    document.getElementById('modal-tab-content-promo').style.display = isMainTabClick ? 'block' : 'none';
-    document.getElementById('modal-tab-content-fines').style.display = (isMainTabClick || isFinesTable) ? 'block' : 'none';
+    // Profile (Discord) tab: always visible for ALL tables
     document.getElementById('modal-tab-content-discord').style.display = 'block';
+    document.getElementById('btn-tab-discord').style.display = '';
+
+    // Promo tab: only for main security tables (الأساسي / المعتمدين / الإدارة / المنتدبين)
+    document.getElementById('modal-tab-content-promo').style.display = isMainTabClick ? 'block' : 'none';
+    document.getElementById('btn-tab-promo').style.display = isMainTabClick ? '' : 'none';
+
+    // Fines tab: only for main tables OR the fines table itself
+    document.getElementById('modal-tab-content-fines').style.display = showFinesTab ? 'block' : 'none';
+    document.getElementById('btn-tab-fines').style.display = showFinesTab ? '' : 'none';
+
+    // Profile view button: always visible
+    const profileBtn = document.getElementById('modal-view-profile-btn');
+    if (profileBtn) profileBtn.style.display = '';
+
+    // Always default to discord (profile) tab when opening
+    switchModalTab('discord');
 
     // ── Consolidate dynamic values for the default Discord tab ──
     const finesTab = cachedSheets[' جدول الغرامات 💵'] || [];
@@ -2526,29 +2621,47 @@
       (f.badge && person.badge && cleanArabicString(f.badge) === cleanArabicString(person.badge))
     );
 
-    // 3. Populate specific tab elements (promo & fines) for users navigating them directly
-    
-    // Fines Tab details
-    const unpaidFines = personFines.filter(f => f.paid === 'false' || f.paid === false || String(f.paid).toLowerCase() === 'false');
+    // Fines Tab details - show ALL violations with paid/unpaid distinction
+    // Debug: log paid field values to see what format the sheet uses
+    if (personFines.length > 0) {
+      console.log('[Fines Debug] personFines paid fields:', personFines.map(f => ({ name: f.name, paid: f.paid, paidType: typeof f.paid })));
+    }
+    // A fine is "paid" ONLY if its paid field explicitly says so
+    const isPaidValue = (val) => {
+      const s = String(val || '').trim().toLowerCase();
+      return s === 'true' || s === 'نعم' || s === 'مسدد' || s === 'تم السداد' || s === 'سدد' || s === 'paid' || s === 'yes';
+    };
+    const unpaidFines = personFines.filter(f => !isPaidValue(f.paid));
+    const paidFines = personFines.filter(f => isPaidValue(f.paid));
     let totalFineAmount = 0;
     unpaidFines.forEach(f => { totalFineAmount += extractAmount(f.fine); });
-    document.getElementById('modal-fines-count').textContent = `${unpaidFines.length} مخالفات`;
-    document.getElementById('modal-fines-total').textContent = `${formatFineAmount(totalFineAmount)} ريال`;
+    document.getElementById('modal-fines-count').textContent = `${personFines.length} مخالفة`;
+    document.getElementById('modal-fines-total').textContent = `${unpaidFines.length > 0 ? formatFineAmount(totalFineAmount) + ' ريال غير مسدد' : 'لا يوجد مستحقات'}`;
     const finesListEl = document.getElementById('modal-fines-list');
-    if (!unpaidFines.length) {
-      finesListEl.innerHTML = `<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3);font-size:0.85rem">لا توجد غرامات غير مسددة مسجلة على هذا الشخص حالياً.</div>`;
+    if (!personFines.length) {
+      finesListEl.innerHTML = `<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3);font-size:0.85rem"><i class="fa-solid fa-circle-check" style="font-size:2rem;color:rgba(46,204,113,0.4);display:block;margin-bottom:10px"></i>لا توجد مخالفات أو غرامات مسجلة على هذا الشخص.</div>`;
     } else {
-      finesListEl.innerHTML = unpaidFines.map((f, idx) => `
-        <div class="fine-card" style="border-right: 4px solid #ff4757;">
-          <span class="fine-card-badge"># ${idx + 1}</span>
-          <div class="fine-card-amount">${formatFineAmount(f.fine)} ريال</div>
+      const renderFine = (f, idx, isPaid) => `
+        <div class="fine-card" style="border-right: 4px solid ${isPaid ? '#2ecc71' : '#ff4757'}; ${isPaid ? 'opacity:0.7;' : ''}">
+          <span class="fine-card-badge" style="background:${isPaid ? 'rgba(46,204,113,0.15); color:#2ecc71;' : 'rgba(255,71,87,0.15); color:#ff4757;'}">${isPaid ? '✓ مسدد' : `# ${idx + 1} غير مسدد`}</span>
+          <div class="fine-card-amount" style="color:${isPaid ? '#2ecc71' : '#ff4757'}">${formatFineAmount(f.fine)} ريال</div>
           <div class="fine-card-grid">
-            <div><div class="fine-card-lbl">⚠️ سبب الغرامة</div><div class="fine-card-val">${f.reason}</div></div>
-            <div><div class="fine-card-lbl"><i class="fa-solid fa-scale-balanced"></i> القاضي</div><div class="fine-card-val">${f.judge}</div></div>
-            <div><div class="fine-card-lbl"><i class="fa-solid fa-landmark"></i> مصدر الحكم</div><div class="fine-card-val">${f.source}</div></div>
-            <div><div class="fine-card-lbl"><i class="fa-solid fa-calendar-days"></i> تاريخ الإصدار</div><div class="fine-card-val">${f.date || '2026/05/01'}</div></div>
+            <div><div class="fine-card-lbl">⚠️ سبب الغرامة</div><div class="fine-card-val">${f.reason || '—'}</div></div>
+            <div><div class="fine-card-lbl"><i class="fa-solid fa-scale-balanced"></i> القاضي</div><div class="fine-card-val">${f.judge || '—'}</div></div>
+            <div><div class="fine-card-lbl"><i class="fa-solid fa-landmark"></i> مصدر الحكم</div><div class="fine-card-val">${f.source || '—'}</div></div>
+            <div><div class="fine-card-lbl"><i class="fa-solid fa-calendar-days"></i> تاريخ الإصدار</div><div class="fine-card-val">${f.date || '—'}</div></div>
           </div>
-        </div>`).join('');
+        </div>`;
+      let html = '';
+      if (unpaidFines.length > 0) {
+        html += `<div style="font-size:0.78rem;font-weight:800;color:#ff4757;margin-bottom:8px;"><i class="fa-solid fa-triangle-exclamation"></i> غرامات غير مسددة (${unpaidFines.length})</div>`;
+        html += unpaidFines.map((f, i) => renderFine(f, i + 1, false)).join('');
+      }
+      if (paidFines.length > 0) {
+        html += `<div style="font-size:0.78rem;font-weight:800;color:#2ecc71;margin:${unpaidFines.length > 0 ? '16px' : '0'} 0 8px;"><i class="fa-solid fa-circle-check"></i> غرامات مسددة (${paidFines.length})</div>`;
+        html += paidFines.map((f, i) => renderFine(f, i + 1, true)).join('');
+      }
+      finesListEl.innerHTML = html;
     }
 
     // Promo tab logic

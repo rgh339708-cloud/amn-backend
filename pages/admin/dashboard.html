@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>لوحة التحكم العليا | الأمن العام</title>
   
-  <link rel="stylesheet" href="../../assets/css/main.css?v=1.1.26">
-  <link rel="stylesheet" href="../../assets/css/admin.css?v=1.1.26">
-  <script src="../../assets/js/storage.js?v=1.1.26"></script>
-  <script src="../../assets/js/data.js?v=1.1.26"></script>
-  <script src="../../assets/js/auth.js?v=1.1.26"></script>
-  <script src="../../assets/js/app.js?v=1.1.26"></script>
+  <link rel="stylesheet" href="../../assets/css/main.css?v=1.1.27">
+  <link rel="stylesheet" href="../../assets/css/admin.css?v=1.1.27">
+  <script src="../../assets/js/storage.js?v=1.1.30"></script>
+  <script src="../../assets/js/data.js?v=1.1.27"></script>
+  <script src="../../assets/js/auth.js?v=1.1.30"></script>
+  <script src="../../assets/js/app.js?v=1.1.31"></script>
   <script>
     // Synchronous route guard to prevent flashing of admin content
     if (!Auth.isLoggedIn() || !['owner', 'assistant_owner', 'academy_affairs', 'admin'].includes(Auth.getRole())) {
@@ -839,6 +839,7 @@
               <option value="academy_affairs">رئاسة تدريب الأمن العام</option>
               <option value="admin">شؤون أكاديمية التدريب</option>
               <option value="course_admin">مسؤول دورة</option>
+              <option value="college_trainee">منسوبي كلية التدريب</option>
               <option value="viewer">مشاهد</option>
             </select>
             <select class="form-select" id="filter-permissions-type" onchange="renderPermissionsTable()" style="max-width:180px; padding:8px 12px; background:#0f1530; border:1px solid rgba(255,255,255,0.08); color:#fff; border-radius:8px;">
@@ -968,12 +969,13 @@
         <div class="form-group">
           <label class="form-label" for="perm-rank-select">اختر الرتبة العسكرية لمنحها:</label>
           <select class="form-select" id="perm-rank-select" style="width:100%; padding: 12px; background: #0b1232; border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 8px;">
-            <option value="owner">المالك (owner)</option>
-            <option value="assistant_owner">قيادة الأمن العام (assistant_owner)</option>
-            <option value="academy_affairs">رئاسة تدريب الأمن العام (academy_affairs)</option>
-            <option value="admin">شؤون أكاديمية التدريب (admin)</option>
-            <option value="course_admin">مسؤول دورة (course_admin)</option>
-            <option value="viewer">مشاهد (viewer)</option>
+            <option value="owner" data-rank="المالك">المالك</option>
+            <option value="assistant_owner" data-rank="قيادة الأمن العام">قيادة الأمن العام</option>
+            <option value="academy_affairs" data-rank="رئاسة تدريب الأمن العام">رئاسة تدريب الأمن العام</option>
+            <option value="admin" data-rank="شؤون أكاديمية التدريب">شؤون أكاديمية التدريب</option>
+            <option value="course_admin" data-rank="مسؤول دورة">مسؤول دورة</option>
+            <option value="college_trainee" data-rank="منسوبي كلية التدريب">منسوبي كلية التدريب</option>
+            <option value="viewer" data-rank="مشاهد">مشاهد</option>
           </select>
           <span style="font-size: 0.72rem; color: var(--color-text-secondary); margin-top: 4px; display: block;">الرتبة العسكرية الرسمية التي تمنح الصلاحيات المقابلة لها فوراً في النظام.</span>
         </div>
@@ -995,6 +997,15 @@
 <!-- ═══════════════ SCRIPTS ═══════════════ -->
 
 <script>
+
+  // Safe avatar error handler for table rows
+  window.handleTableAvatarError = function(img) {
+    const initial = img.getAttribute('data-initial') || 'M';
+    const div = document.createElement('div');
+    div.style.cssText = 'width:32px;height:32px;border-radius:50%;background:rgba(201,162,39,0.15);display:flex;align-items:center;justify-content:center;color:#c9a227;font-size:0.95rem;font-weight:bold;';
+    div.textContent = initial;
+    img.parentNode.replaceChild(div, img);
+  };
 
   let discordUsersCache = {};
 
@@ -2020,11 +2031,82 @@
 
     const users = Storage.get('ps_users', []) || [];
     
-    // Stats calculation
+    // === إضافة الأعضاء من جداول الشيتس (الأساسي - المعتمدين - الإدارة) ===
+    let sheetsData = {};
+    try {
+      const cachedData = localStorage.getItem('members_google_sheets_cache');
+      if (cachedData) {
+        sheetsData = JSON.parse(cachedData);
+      }
+    } catch (e) {
+      console.warn('Failed to parse sheets cache:', e);
+    }
+
+    const sheetTabs = [
+      { key: 'جدول الامن العام - الاساسي', dept: 'الأساسي' },
+      { key: 'جدول الامن العام - المنتدبين', dept: 'المعتمدين' },
+      { key: 'جدول الامن العام - الادارة', dept: 'الإدارة' }
+    ];
+
+    // بناء قائمة موحدة
+    const unifiedUsers = [...users];
+    const addedIds = new Set(users.map(u => String(u.id || u.discord_id || '').trim()));
+    const addedNames = new Set(users.map(u => String(u.display_name || u.username || '').trim().toLowerCase()));
+
+    sheetTabs.forEach(({ key, dept }) => {
+      const rows = sheetsData[key] || [];
+      rows.forEach(row => {
+        if (!row || !row.name) return;
+
+        // تحقق ما إذا كان هذا الشخص موجود بالفعل
+        let discordVal = String(row.discord || '').replace(/[<@>]/g, '').trim();
+        let discordId = /^\d+$/.test(discordVal) ? discordVal : '';
+
+        const alreadyById = discordId && addedIds.has(discordId);
+        const alreadyByName = addedNames.has(String(row.name || '').trim().toLowerCase());
+
+        if (alreadyById || alreadyByName) {
+          // تحديث قسم الشخص الموجود
+          const existing = unifiedUsers.find(u =>
+            (discordId && (String(u.id || '').trim() === discordId || String(u.discord_id || '').trim() === discordId)) ||
+            String(u.display_name || u.username || '').trim().toLowerCase() === String(row.name || '').trim().toLowerCase()
+          );
+          if (existing && !existing.sheetDepts) {
+            existing.sheetDepts = dept;
+          } else if (existing && existing.sheetDepts && !existing.sheetDepts.includes(dept)) {
+            existing.sheetDepts += ' / ' + dept;
+          }
+          return;
+        }
+
+        // إضافة عضو جديد من الشيتس
+        const virtualId = discordId || `sheet_${row.name}_${Math.random().toString(36).substr(2,6)}`;
+        if (discordId) addedIds.add(discordId);
+        addedNames.add(String(row.name || '').trim().toLowerCase());
+
+        unifiedUsers.push({
+          id: virtualId,
+          display_name: row.name,
+          username: discordVal && !/^\d+$/.test(discordVal) ? discordVal : '',
+          discord_id: discordId,
+          role: 'viewer',
+          rank: row.rank || 'مشاهد',
+          status: 'active',
+          sheetDepts: dept,
+          code: row.badge || '',
+          is_manual_role: false,
+          isSheetOnly: true
+        });
+      });
+    });
+    // ================================================================
+
+    // Stats calculation (based on actual ps_users only)
     let ownersCount = 0;
     let academyCount = 0;
     let adminsCount = 0;
     let courseAdminsCount = 0;
+    let collegeTraineeCount = 0;
 
     users.forEach(u => {
       const r = u.role || 'viewer';
@@ -2032,6 +2114,7 @@
       else if (r === 'academy_affairs') academyCount++;
       else if (r === 'admin') adminsCount++;
       else if (r === 'course_admin') courseAdminsCount++;
+      else if (r === 'college_trainee') collegeTraineeCount++;
     });
 
     const elOwners = document.getElementById('perm-stat-owners');
@@ -2044,14 +2127,14 @@
     if (elAdmins) elAdmins.textContent = adminsCount;
     if (elCourseAdmins) elCourseAdmins.textContent = courseAdminsCount;
 
-    // Filter users list
-    let filtered = users.filter(u => {
+    // Filter unified users list
+    let filtered = unifiedUsers.filter(u => {
       const nameMatch = String(u.display_name || '').toLowerCase().includes(searchVal) ||
                         String(u.username || '').toLowerCase().includes(searchVal);
       const idMatch = String(u.id || '').includes(searchVal) ||
                       String(u.discord_id || '').includes(searchVal);
       
-      const matchesSearch = nameMatch || idMatch;
+      const matchesSearch = !searchVal || nameMatch || idMatch;
 
       const matchesRole = !filterRole || u.role === filterRole;
 
@@ -2063,12 +2146,14 @@
       return matchesSearch && matchesRole && matchesType;
     });
 
-    // Sort by manual first, then alphabetical
+    // Sort: manual first, then registered, then sheet-only, then alphabetical
     filtered.sort((a, b) => {
       const aManual = a.is_manual_role === 1 || a.is_manual_role === true;
       const bManual = b.is_manual_role === 1 || b.is_manual_role === true;
       if (aManual && !bManual) return -1;
       if (!aManual && bManual) return 1;
+      if (!a.isSheetOnly && b.isSheetOnly) return -1;
+      if (a.isSheetOnly && !b.isSheetOnly) return 1;
       return String(a.display_name || '').localeCompare(String(b.display_name || ''));
     });
 
@@ -2084,10 +2169,15 @@
     tableBody.innerHTML = filtered.map(u => {
       const isManual = u.is_manual_role === 1 || u.is_manual_role === true;
       
-      // Avatar render
-      const avatarHtml = u.avatar && u.avatar !== '🎮' ? 
-        `<img src="${u.avatar}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;" onerror="this.src='../../assets/images/avatar-placeholder.png'">` :
-        `<div style="width: 32px; height: 32px; border-radius: 50%; background: rgba(201,162,39,0.15); display: flex; align-items: center; justify-content: center; color: #c9a227; font-size: 0.95rem; font-weight: bold;">${(u.display_name || 'M').charAt(0).toUpperCase()}</div>`;
+      // Avatar render - fix relative paths for pages/admin/ directory depth
+      let avatarSrc = u.avatar || '';
+      if (avatarSrc && !avatarSrc.startsWith('http') && !avatarSrc.startsWith('data:') && !avatarSrc.startsWith('../../')) {
+        avatarSrc = '../../' + avatarSrc.replace(/^\/+/, '');
+      }
+      const avatarInitialChar = (u.display_name || 'M').charAt(0).toUpperCase();
+      const avatarHtml = avatarSrc && avatarSrc !== '\uD83C\uDFAE' ?
+        `<img src="${avatarSrc}" data-initial="${avatarInitialChar}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;" onerror="window.handleTableAvatarError(this)">` :
+        `<div style="width:32px;height:32px;border-radius:50%;background:rgba(201,162,39,0.15);display:flex;align-items:center;justify-content:center;color:#c9a227;font-size:0.95rem;font-weight:bold;">${avatarInitialChar}</div>`;
 
       // Role badge style
       const roleColor = Auth.getRoleColor(u.role || 'viewer');
@@ -2099,25 +2189,36 @@
       // Assignment type badge
       const typeBadge = isManual ?
         `<span style="background:rgba(201,162,39,0.12); color:#c9a227; border:1px solid rgba(201,162,39,0.25); font-size:0.75rem; padding:3px 8px; border-radius:6px; font-weight:bold; display:inline-flex; align-items:center; gap:4px;"><i class="fa-solid fa-user-gear"></i> تعيين يدوي</span>` :
-        `<span style="background:rgba(255,255,255,0.04); color:rgba(255,255,255,0.55); border:1px solid rgba(255,255,255,0.08); font-size:0.75rem; padding:3px 8px; border-radius:6px; display:inline-flex; align-items:center; gap:4px;"><i class="fa-solid fa-arrows-rotate"></i> تلقائي Sheets</span>`;
+        (u.isSheetOnly ?
+          `<span style="background:rgba(52,152,219,0.12); color:#3498db; border:1px solid rgba(52,152,219,0.25); font-size:0.75rem; padding:3px 8px; border-radius:6px; display:inline-flex; align-items:center; gap:4px;"><i class="fa-solid fa-table"></i> ${u.sheetDepts || 'Google Sheets'}</span>` :
+          `<span style="background:rgba(255,255,255,0.04); color:rgba(255,255,255,0.55); border:1px solid rgba(255,255,255,0.08); font-size:0.75rem; padding:3px 8px; border-radius:6px; display:inline-flex; align-items:center; gap:4px;"><i class="fa-solid fa-arrows-rotate"></i> تلقائي Sheets${u.sheetDepts ? ' (' + u.sheetDepts + ')' : ''}</span>`
+        );
 
       // Check if this row belongs to an owner
       const isTargetOwner = ownerIds.includes(u.id) || 
                             (u.username && ownerUsernames.includes(u.username.toLowerCase())) || 
                             u.role === 'owner';
 
-      // Buttons authorization
+      // Buttons authorization - sheet-only members get grant button only
       let actionsHtml = '';
       if (isTargetOwner) {
         actionsHtml = `<span style="font-size:0.78rem; color:var(--color-text-muted); font-style:italic;">ملاك البوابة (محمي)</span>`;
+      } else if (u.isSheetOnly) {
+        actionsHtml = `
+          <div style="display:flex; gap:8px;">
+            <button class="btn-action primary" style="font-size:0.75rem; padding:4px 10px; border-radius:6px;" onclick="grantPermissionToSheetMember('${u.display_name}', '${u.discord_id || ''}')">
+              <i class="fa-solid fa-shield-halved"></i> منح رتبة
+            </button>
+          </div>
+        `;
       } else {
         actionsHtml = `
           <div style="display:flex; gap:8px;">
-            <button class="btn-action primary" style="font-size:0.75rem; padding:4px 10px; border-radius:6px;" onclick="editUserPermission('${u.id}', '${u.username || u.display_name}', '${u.role}', '${u.rank}')">
+            <button class="btn-action primary" style="font-size:0.75rem; padding:4px 10px; border-radius:6px;" onclick="editUserPermission('${u.id}', '${(u.username || u.display_name || '').replace(/'/g, "\\'")}', '${u.role}', '${u.rank}')">
               <i class="fa-solid fa-pen-to-square"></i> تعديل
             </button>
             ${isManual ? `
-              <button class="btn-action danger" style="font-size:0.75rem; padding:4px 10px; border-radius:6px;" onclick="removeUserPermission('${u.id}', '${u.username || u.display_name}')">
+              <button class="btn-action danger" style="font-size:0.75rem; padding:4px 10px; border-radius:6px;" onclick="removeUserPermission('${u.id}', '${(u.username || u.display_name || '').replace(/'/g, "\\'")}')">
                 <i class="fa-solid fa-trash-can"></i> إزالة
               </button>
             ` : ''}
@@ -2126,17 +2227,20 @@
       }
 
       return `
-        <tr>
+        <tr${u.isSheetOnly ? ' style="opacity:0.85;"' : ''}>
           <td style="font-weight:700; color:#fff; display:flex; align-items:center; gap:10px;">
             ${avatarHtml}
-            <span>${u.display_name || u.username || 'عضو غير معروف'}</span>
+            <div>
+              <span>${u.display_name || u.username || 'عضو غير معروف'}</span>
+              ${u.code ? `<div style="font-size:0.7rem; color:var(--color-gold-primary); margin-top:2px;">${u.code}</div>` : ''}
+            </div>
           </td>
           <td style="font-family:monospace; font-size:0.8rem; color:rgba(255,255,255,0.75);">${u.username ? '@' + u.username : '—'}</td>
           <td style="font-family:monospace; font-size:0.8rem; color:rgba(255,255,255,0.6);">${u.id || u.discord_id || '—'}</td>
           <td style="font-weight:800; color:#ffd700;">${u.rank || 'مشاهد'}</td>
           <td>${roleBadge}</td>
           <td>${typeBadge}</td>
-          <td style="font-size:0.8rem; color:rgba(255,255,255,0.55);">${formatLogDate(u.updated_at || u.last_sync)}</td>
+          <td style="font-size:0.8rem; color:rgba(255,255,255,0.55);">${u.isSheetOnly ? '<span style="color:#3498db; font-size:0.75rem;"><i class="fa-solid fa-table"></i> من الجدول</span>' : formatLogDate(u.updated_at || u.last_sync)}</td>
           <td>${actionsHtml}</td>
         </tr>
       `;
@@ -2319,6 +2423,34 @@
     previewBox.style.display = 'flex';
   };
 
+  // دالة لمنح رتبة لعضو من الشيتس (لا يملك حساب ديسكورد مرتبط بعد)
+  window.grantPermissionToSheetMember = function(displayName, discordId) {
+    openGrantPermissionModal();
+
+    // Switch to manual mode
+    document.getElementById('perm-action-type').value = 'grant';
+    document.getElementById('permission-modal-title').textContent = `منح رتبة عسكرية لـ: ${displayName}`;
+    document.getElementById('btn-save-permission').textContent = 'منح الصلاحيات';
+
+    const selectModeRadios = document.querySelectorAll('input[name="account-select-mode"]');
+    selectModeRadios.forEach(r => {
+      if (r.value === 'manual') r.checked = true;
+    });
+
+    document.getElementById('account-group-dropdown').style.display = 'none';
+    document.getElementById('account-group-manual').style.display = 'flex';
+
+    // Prefill manual fields
+    if (discordId) {
+      const idField = document.getElementById('perm-manual-id');
+      if (idField) idField.value = discordId;
+    }
+    const tagField = document.getElementById('perm-manual-tag');
+    if (tagField) tagField.value = displayName;
+
+    document.getElementById('perm-user-preview-box').style.display = 'none';
+  };
+
   window.editUserPermission = function(userId, username, role, rank) {
     openGrantPermissionModal();
 
@@ -2401,7 +2533,7 @@
     const selectRank = document.getElementById('perm-rank-select');
     const selectedRankOption = selectRank.options[selectRank.selectedIndex];
     const role = selectedRankOption.value;
-    const rank = selectedRankOption.text;
+    const rank = selectedRankOption.dataset.rank || selectedRankOption.text.replace(/\s*\([^)]+\)\s*$/, '').trim();
 
     const payload = {
       operator_id: operator ? operator.id : '',
@@ -2423,12 +2555,15 @@
       body: JSON.stringify(payload)
     })
     .then(res => {
-      if (!res.ok) {
-        return res.json().then(errData => {
-          throw new Error(errData.error || 'فشل في حفظ الرتبة والصلاحيات.');
-        });
-      }
-      return res.json();
+      return res.text().then(text => {
+        let data;
+        try { data = JSON.parse(text); } catch(e) { data = null; }
+        if (!res.ok) {
+          const msg = (data && data.error) ? data.error : `فشل في حفظ الرتبة والصلاحيات. (${res.status})`;
+          throw new Error(msg);
+        }
+        return data;
+      });
     })
     .then(resData => {
       App.toast('✅ تم منح وتحديث الرتبة العسكرية بنجاح وتطبيق الصلاحيات فورياً!', 'success');
@@ -2474,12 +2609,15 @@
       body: JSON.stringify(payload)
     })
     .then(res => {
-      if (!res.ok) {
-        return res.json().then(errData => {
-          throw new Error(errData.error || 'فشل في إزالة الصلاحيات.');
-        });
-      }
-      return res.json();
+      return res.text().then(text => {
+        let data;
+        try { data = JSON.parse(text); } catch(e) { data = null; }
+        if (!res.ok) {
+          const msg = (data && data.error) ? data.error : `فشل في إزالة الصلاحيات. (${res.status})`;
+          throw new Error(msg);
+        }
+        return data;
+      });
     })
     .then(resData => {
       App.toast('✅ تم إلغاء الصلاحية العسكرية اليدوية وإرجاع الحساب للمزامنة بنجاح.', 'success');

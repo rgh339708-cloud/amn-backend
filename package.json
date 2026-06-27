@@ -4,7 +4,8 @@
   "description": "Local sync server for Security Dashboard settings",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "build-zip": "node scratch/zip_deploy.js"
   },
   "keywords": [],
   "author": "",

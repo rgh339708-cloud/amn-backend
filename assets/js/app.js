@@ -157,6 +157,28 @@ const App = (() => {
     return ROOT + 'api/settings';
   }
 
+  function getApiBase() {
+    const host = window.location.hostname;
+    const protocol = window.location.protocol;
+    
+    let backendUrl = '';
+    try {
+      const settings = Storage.get(Storage.keys.SETTINGS, {});
+      if (settings && settings.backendUrl) {
+        backendUrl = settings.backendUrl;
+      }
+    } catch (e) {}
+
+    if (backendUrl) {
+      return backendUrl;
+    }
+
+    if (host === 'localhost' || host === '127.0.0.1' || protocol === 'file:') {
+      return 'http://localhost:3000';
+    }
+    return 'https://amn-backend.onrender.com';
+  }
+
   /* ── Toast Notifications ──────────────────────────── */
 
   function toast(message, type = 'info', duration = 3500) {
@@ -2127,8 +2149,10 @@ const App = (() => {
     const isSubpage = path.includes('/pages/');
     const isCallback = path.includes('callback.html');
     const isLogin = path.includes('login.html');
+    const isDatabase = path.includes('database.html');
+    const isExams = path.includes('exams.html');
 
-    if (isSubpage && !isLogin && !isCallback) {
+    if (isSubpage && !isLogin && !isCallback && !isDatabase && !isExams) {
       let isLinked = false;
       if (typeof Auth !== 'undefined' && Auth.isLoggedIn()) {
         const user = Auth.getCurrentUser();
@@ -2634,6 +2658,7 @@ const App = (() => {
     formatDate, timeAgo, animateCounter,
     syncSettingsWithServer,
     getSettingsApiUrl,
+    getApiBase,
     checkMaintenanceStatus,
     replaceEmojisWithIcons,
     initUserBadge,

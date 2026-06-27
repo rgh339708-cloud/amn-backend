@@ -34,6 +34,7 @@ https.get(url, (res) => {
       }
     } catch (e) {
       console.error('Error parsing:', e);
+      console.log('Raw data preview (first 500 chars):', data.substring(0, 500));
     }
   });
 }).on('error', (err) => {

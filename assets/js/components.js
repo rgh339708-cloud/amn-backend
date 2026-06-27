@@ -1,6 +1,7 @@
 /**
  * components.js - Shared HTML components builder
  * Reusable navbar, sidebar, footer for all pages
+ * v1.1.30 - Full system pages independence from localStorage
  */
 
 // Dynamically inject FontAwesome CDN stylesheet
@@ -17,79 +18,113 @@
 
 const Components = (() => {
 
-  const BASE = '../';
+  const BASE = window.location.pathname.includes('/pages/') ? '../' : './';
 
+  // ─── MASTER SYSTEM PAGE DEFINITIONS ───────────────────────────────────────
+  // These are ALWAYS authoritative. Never rely on localStorage for system pages.
+  const SYSTEM_PAGES = [
+    { id: 'home',                       title: 'الرئيسية',                        emoji: '<i class="fa-solid fa-house"></i>',               allowedRoles: ['*'] },
+    { id: 'leadership',                 title: 'القيادة',                         emoji: '<i class="fa-solid fa-crown"></i>',               allowedRoles: ['*'] },
+    { id: 'managers',                   title: 'مدراء الأقسام',                   emoji: '<i class="fa-solid fa-medal"></i>',               allowedRoles: ['*'] },
+    { id: 'centers',                    title: 'المراكز',                         emoji: '<i class="fa-solid fa-building-shield"></i>',     allowedRoles: ['*'] },
+    { id: 'guide',                      title: 'الدليل الشامل',                   emoji: '<i class="fa-solid fa-book-open"></i>',           allowedRoles: ['*'] },
+    { id: 'inventory',                  title: 'العهدة',                          emoji: '<i class="fa-solid fa-box-open"></i>',            allowedRoles: ['*'] },
+    { id: 'vehicles',                   title: 'المركبات',                        emoji: '<i class="fa-solid fa-car-on"></i>',              allowedRoles: ['*'] },
+    { id: 'college',                    title: 'كلية التدريب',                    emoji: '<i class="fa-solid fa-graduation-cap"></i>',      allowedRoles: ['*'] },
+    { id: 'attendance-reports',         title: 'تقارير الحضور',                   emoji: '<i class="fa-solid fa-clipboard-user"></i>',      allowedRoles: ['owner', 'assistant_owner', 'college_trainee'] },
+    { id: 'exams',                      title: 'الاختبارات',                      emoji: '<i class="fa-solid fa-file-pen"></i>',            allowedRoles: ['*'] },
+    { id: 'field-title',                title: 'التوجيهات الميدانية',             emoji: '<i class="fa-solid fa-id-card"></i>',             allowedRoles: ['*'] },
+    { id: 'uniform',                    title: 'الزي العسكري',                    emoji: '<i class="fa-solid fa-shirt"></i>',               allowedRoles: ['*'] },
+    { id: 'apply',                      title: 'التقديم',                         emoji: '<i class="fa-solid fa-envelope-open-text"></i>',  allowedRoles: ['*'] },
+    { id: 'database',                   title: 'قاعدة البيانات',                  emoji: '<i class="fa-solid fa-database"></i>',             allowedRoles: ['*'] },
+    { id: 'wings',                      title: 'أجنحة مدينة الـ 90',             emoji: '🦅',                                              allowedRoles: ['*'] },
+    // Wings sub-pages
+    { id: 'aviation-document',          title: 'مستند الجناح الجوي',              emoji: '🚁',  parentId: 'wings', allowedRoles: ['*'] },
+    { id: 'counter-terrorism-wing',     title: 'مستند جناح مكافحة الإرهاب',      emoji: '⚔️', parentId: 'wings', allowedRoles: ['*'] },
+    { id: 'pursuit-assault-wing',       title: 'مستند جناح المداهمة والاقتحام',  emoji: '🛡️', parentId: 'wings', allowedRoles: ['*'] },
+    { id: 'shooting-skills-wing',       title: 'جناح الرماية والتدريب الميداني', emoji: '🎯', parentId: 'wings', allowedRoles: ['*'] },
+    { id: 'roads-document',             title: 'مستند جناح أمن الطرق',           emoji: '🛣️', parentId: 'wings', allowedRoles: ['*'] },
+    { id: 'traffic-document',           title: 'مستند جناح المرور',              emoji: '🚥', parentId: 'wings', allowedRoles: ['*'] },
+    { id: 'rapid-intervention-document',title: 'مستند جناح التدخل السريع',       emoji: '⚡', parentId: 'wings', allowedRoles: ['*'] },
+    { id: 'special-tasks-document',     title: 'مستند جناح المهام الخاصة',       emoji: '🔥', parentId: 'wings', allowedRoles: ['*'] },
+    { id: 'officers-document',          title: 'مستند الضباط',                   emoji: '🎖️', parentId: 'wings', allowedRoles: ['*'] },
+    { id: 'staff-document',             title: 'مستند الأفراد',                  emoji: '🎖️', parentId: 'wings', allowedRoles: ['*'] },
+    { id: 'ops-document',               title: 'مستند العمليات',                 emoji: '📞', parentId: 'wings', allowedRoles: ['*'] },
+    { id: 'regulations-document',       title: 'مستند الأنظمة واللوائح',         emoji: '📜', parentId: 'wings', allowedRoles: ['*'] },
+    { id: 'investigation-document',     title: 'مستند المباحث',                  emoji: '🕵️', parentId: 'wings', allowedRoles: ['*'] },
+    { id: 'narcotics-document',         title: 'مستند مكافحة المخدرات',          emoji: '💊', parentId: 'wings', allowedRoles: ['*'] },
+    { id: 'district-officers-document', title: 'مستند قيادة أمن الطرق',          emoji: '🛣️', parentId: 'wings', allowedRoles: ['*'] },
+    { id: 'amn90-r',                    title: 'مدينة الـ 90 العسكرية',           emoji: '🏰', parentId: 'wings', allowedRoles: ['*'] },
+  ];
+
+  const SYSTEM_IDS = new Set(SYSTEM_PAGES.map(p => p.id));
+
+  // Helper: check if a page can be accessed by current user
+  function canAccess(page) {
+    const allowed = page.allowedRoles || ['*'];
+    // Pages open to everyone (including unauthenticated visitors) show always
+    if (allowed.includes('*')) return true;
+    if (typeof Auth === 'undefined') return false;
+    if (!Auth.isLoggedIn()) return false;
+    // Owner always sees everything (unless in preview mode)
+    const user = Auth.getCurrentUser();
+    if (user && user.role === 'owner' && !Auth.getPreviewRole()) return true;
+    const role = Auth.getRole();
+    return allowed.includes(role);
+  }
+
+  // Helper: get custom pages (non-system) from localStorage
+  function getCustomPages() {
+    if (typeof Storage === 'undefined') return [];
+    const all = Storage.getCollection(Storage.keys.PAGES) || [];
+    return all.filter(p => p && p.id && !SYSTEM_IDS.has(p.id));
+  }
+
+  // Helper: build icon HTML from emoji string
+  function iconHtml(emoji) {
+    if (!emoji) return '📄';
+    if (emoji.includes('<i')) return emoji;
+    return `<span>${emoji}</span>`;
+  }
+
+  // ─── NAVBAR ───────────────────────────────────────────────────────────────
   function navbar(activePage = '') {
-    if (typeof Auth !== 'undefined' && typeof Auth.seedSystemPages === 'function') {
-      Auth.seedSystemPages();
-    }
-    let rawPages = (typeof Storage !== 'undefined') ? (Storage.getCollection(Storage.keys.PAGES) || []) : [];
-    const seenIds = new Set();
-    const pages = [];
-    
-    function normalizeArabic(str) {
-      if (!str) return '';
-      return str.trim()
-        .replace(/[أإآا]/g, 'ا')
-        .replace(/ة/g, 'ه')
-        .replace(/\s+/g, '');
-    }
+    // Pages that only appear in sidebar, not in the top sub-bar
+    const navbarExcludeIds = new Set(['wings', 'apply', 'announcements', 'promotions', 'archive', 'aviation-document', 'counter-terrorism-wing', 'pursuit-assault-wing', 'shooting-skills-wing', 'roads-document', 'traffic-document', 'rapid-intervention-document', 'special-tasks-document', 'officers-document', 'staff-document', 'ops-document', 'regulations-document', 'investigation-document', 'narcotics-document', 'district-officers-document', 'amn90-r']);
 
-    const systemPageIds = ['home', 'leadership', 'managers', 'centers', 'guide', 'inventory', 'vehicles', 'college', 'attendance-reports', 'exams', 'field-title', 'uniform', 'database'];
-    const systemNormalizedTitles = ['الرئيسية', 'القيادة', 'مدراء الأقسام', 'المراكز', 'الدليل الشامل', 'العهدة', 'المركبات', 'كلية التدريب', 'تقارير الحضور', 'الاختبارات', 'التوجيهات الميدانية', 'الزي العسكري', 'قاعدة البيانات'].map(normalizeArabic);
+    // Order for navbar
+    const navbarOrder = ['home', 'leadership', 'managers', 'guide', 'centers', 'vehicles', 'inventory', 'college', 'attendance-reports', 'exams', 'field-title', 'uniform', 'database'];
 
-    rawPages.forEach(p => {
-      if (!p || !p.id) return;
-      
-      const normTitle = normalizeArabic(p.title);
-      const isSystemId = systemPageIds.includes(p.id);
-      const isSystemTitle = systemNormalizedTitles.includes(normTitle);
-      
-      if (isSystemId) {
-        p.isSystem = true;
-      }
-      
-      if (!isSystemId && isSystemTitle) return;
-      
-      if (!seenIds.has(p.id)) {
-        seenIds.add(p.id);
-        pages.push(p);
-      }
-    });
-    
-    // Filter and build links based on checkPageAccess
-    const visiblePages = pages.filter(p => {
-      // Must be a parent page (no parentId)
-      if (p.parentId) return false;
-      // Must not be hidden
-      if (p.isHidden) return false;
-      // User must have access
-      if (typeof Auth !== 'undefined' && !Auth.checkPageAccess(p.id)) return false;
-      return true;
-    });
+    // Build links: system pages first (in order), then custom parent pages
+    const links = [];
 
-    // Sort system pages in correct order, then custom pages
-    const systemOrder = ['home', 'leadership', 'managers', 'centers', 'guide', 'inventory', 'vehicles', 'college', 'attendance-reports', 'exams', 'field-title', 'uniform', 'database'];
-    visiblePages.sort((a, b) => {
-      const idxA = systemOrder.indexOf(a.id);
-      const idxB = systemOrder.indexOf(b.id);
-      
-      if (idxA !== -1 && idxB !== -1) return idxA - idxB;
-      if (idxA !== -1) return -1;
-      if (idxB !== -1) return 1;
-      return pages.indexOf(a) - pages.indexOf(b);
-    });
+    for (const id of navbarOrder) {
+      if (navbarExcludeIds.has(id)) continue;
+      const page = SYSTEM_PAGES.find(p => p.id === id);
+      if (!page) continue;
+      if (page.isHidden) continue;
+      if (!canAccess(page)) continue;
 
-    const links = visiblePages.map(p => {
-      const isCustom = !p.isSystem;
-      const href = isCustom ? `pages/custom.html?id=${p.id}` : (p.id === 'home' ? 'index.html' : `pages/${p.id}.html`);
-      const iconHTML = p.emoji ? (p.emoji.includes('<i') ? p.emoji : `<span>${p.emoji}</span>`) : '📄';
-      return {
+      const href = id === 'home' ? 'index.html' : `pages/${id}.html`;
+      links.push({
         href,
-        label: `${iconHTML} ${p.title}`,
-        page: isCustom ? `custom_${p.id}` : p.id
-      };
-    });
+        label: `${iconHtml(page.emoji)} ${page.title}`,
+        page: id
+      });
+    }
+
+    // Append allowed custom parent pages
+    const customPages = getCustomPages();
+    for (const p of customPages) {
+      if (p.parentId) continue;
+      if (p.isHidden) continue;
+      if (!canAccess(p)) continue;
+      links.push({
+        href: `pages/custom.html?id=${p.id}`,
+        label: `${iconHtml(p.emoji)} ${p.title}`,
+        page: `custom_${p.id}`
+      });
+    }
 
     return `
     <nav class="navbar" id="navbar">
@@ -117,139 +152,110 @@ const Components = (() => {
     </nav>`;
   }
 
+  // ─── SIDEBAR ──────────────────────────────────────────────────────────────
   function sidebar(activePage = '') {
-    if (typeof Auth !== 'undefined' && typeof Auth.seedSystemPages === 'function') {
-      Auth.seedSystemPages();
-    }
-    let rawPages = (typeof Storage !== 'undefined') ? (Storage.getCollection(Storage.keys.PAGES) || []) : [];
-    const seenIds = new Set();
-    const pages = [];
-    
-    function normalizeArabic(str) {
-      if (!str) return '';
-      return str.trim()
-        .replace(/[أإآا]/g, 'ا')
-        .replace(/ة/g, 'ه')
-        .replace(/\s+/g, '');
-    }
-
-    const systemPageIds = ['home', 'leadership', 'managers', 'centers', 'guide', 'inventory', 'vehicles', 'college', 'attendance-reports', 'exams', 'field-title', 'uniform', 'database'];
-    const systemNormalizedTitles = ['الرئيسية', 'القيادة', 'مدراء الأقسام', 'المراكز', 'الدليل الشامل', 'العهدة', 'المركبات', 'كلية التدريب', 'تقارير الحضور', 'الاختبارات', 'التوجيهات الميدانية', 'الزي العسكري', 'قاعدة البيانات'].map(normalizeArabic);
-
-    rawPages.forEach(p => {
-      if (!p || !p.id) return;
-      
-      const normTitle = normalizeArabic(p.title);
-      const isSystemId = systemPageIds.includes(p.id);
-      const isSystemTitle = systemNormalizedTitles.includes(normTitle);
-      
-      if (isSystemId) {
-        p.isSystem = true;
-      }
-      
-      if (!isSystemId && isSystemTitle) return;
-      
-      if (!seenIds.has(p.id)) {
-        seenIds.add(p.id);
-        pages.push(p);
-      }
-    });
     const currentUser = (typeof Auth !== 'undefined') ? Auth.getCurrentUser() : null;
+    const customPages = getCustomPages();
 
-    // Helper to check if page is authorized
-    const isAuthorized = (pageId) => {
-      return (typeof Auth !== 'undefined') ? Auth.checkPageAccess(pageId) : true;
-    };
+    function item(page, overrideHref, overrideLabel, extra = {}) {
+      if (!canAccess(page)) return null;
+      if (page.isHidden) return null;
+      return {
+        href: overrideHref || `${BASE}pages/${page.id}.html`,
+        icon: iconHtml(page.emoji),
+        label: overrideLabel || page.title,
+        page: page.id,
+        ...extra
+      };
+    }
 
-    // Filter out unauthorized pages and hidden pages
-    const allowedPages = pages.filter(p => !p.isHidden && isAuthorized(p.id));
+    function sysPage(id) {
+      return SYSTEM_PAGES.find(p => p.id === id) || null;
+    }
 
-    // Build items array
     const items = [];
 
-    // 1. Core Section
-    const coreIds = ['home', 'leadership', 'managers', 'centers'];
-    const corePages = allowedPages.filter(p => coreIds.includes(p.id));
-    corePages.sort((a, b) => coreIds.indexOf(a.id) - coreIds.indexOf(b.id));
-    corePages.forEach(p => {
-      items.push({
-        href: `${BASE}${p.id === 'home' ? 'index.html' : 'pages/' + p.id + '.html'}`,
-        icon: p.emoji ? (p.emoji.includes('<i') ? p.emoji : `<span>${p.emoji}</span>`) : '📄',
-        label: p.title,
-        page: p.id
-      });
-    });
+    // 1. Core Section - القائمة الرئيسية
+    const coreIds = ['home', 'leadership', 'managers', 'guide', 'centers', 'vehicles', 'inventory'];
+    let hasCore = false;
+    for (const id of coreIds) {
+      const p = sysPage(id);
+      if (!p) continue;
+      const href = id === 'home' ? `${BASE}index.html` : `${BASE}pages/${id}.html`;
+      const it = item(p, href);
+      if (it) { items.push(it); hasCore = true; }
+    }
 
     // 2. Knowledge Section
-    const knowledgeIds = ['guide', 'college', 'attendance-reports', 'exams', 'uniform'];
-    const knowledgePages = allowedPages.filter(p => knowledgeIds.includes(p.id));
-    knowledgePages.sort((a, b) => knowledgeIds.indexOf(a.id) - knowledgeIds.indexOf(b.id));
-    
-    if (knowledgePages.length > 0) {
+    const knowledgeIds = ['college', 'attendance-reports', 'exams', 'field-title', 'uniform', 'database'];
+    const knowledgeItems = [];
+    for (const id of knowledgeIds) {
+      const p = sysPage(id);
+      if (!p) continue;
+      const it = item(p);
+      if (it) knowledgeItems.push(it);
+    }
+    if (knowledgeItems.length > 0) {
       items.push({ divider: true });
-      items.push({ label: 'المحتوى والمعرفة', section: true });
-      knowledgePages.forEach(p => {
-        items.push({
-          href: `${BASE}pages/${p.id}.html`,
-          icon: p.emoji ? (p.emoji.includes('<i') ? p.emoji : `<span>${p.emoji}</span>`) : '📄',
-          label: p.title,
-          page: p.id
-        });
-      });
+      items.push({ label: 'التدريب والمعرفة', section: true });
+      items.push(...knowledgeItems);
     }
 
-    // 3. Admin & Documentation Section
-    const adminDocsIds = ['inventory', 'field-title'];
-    const adminDocsPages = allowedPages.filter(p => adminDocsIds.includes(p.id));
-    adminDocsPages.sort((a, b) => adminDocsIds.indexOf(a.id) - adminDocsIds.indexOf(b.id));
-    
-    if (adminDocsPages.length > 0) {
-      items.push({ divider: true });
-      items.push({ label: 'الإدارة والتوثيق', section: true });
-      adminDocsPages.forEach(p => {
-        items.push({
-          href: `${BASE}pages/${p.id}.html`,
-          icon: p.emoji ? (p.emoji.includes('<i') ? p.emoji : `<span>${p.emoji}</span>`) : '📄',
-          label: p.title,
-          page: p.id
-        });
-      });
+    // 3. Community Section (apply only)
+    const commIds = ['apply'];
+    const commItems = [];
+    for (const id of commIds) {
+      const p = sysPage(id);
+      if (!p) continue;
+      const it = item(p);
+      if (it) commItems.push(it);
     }
-
-    // 4. Community Section
-    const commIds = ['database'];
-    const commPages = allowedPages.filter(p => commIds.includes(p.id));
-    commPages.sort((a, b) => commIds.indexOf(a.id) - commIds.indexOf(b.id));
-    
-    if (commPages.length > 0) {
+    if (commItems.length > 0) {
       items.push({ divider: true });
       items.push({ label: 'المجتمع', section: true });
-      commPages.forEach(p => {
-        items.push({
-          href: `${BASE}pages/${p.id}.html`,
-          icon: p.emoji ? (p.emoji.includes('<i') ? p.emoji : `<span>${p.emoji}</span>`) : '📄',
-          label: p.title,
-          page: p.id
-        });
-      });
+      items.push(...commItems);
     }
 
-    // 6. Custom pages (dynamic pages)
-    const customParents = allowedPages.filter(p => !p.parentId && !p.isSystem);
+    // 5. Wings Section
+    const wingsPage = sysPage('wings');
+    if (wingsPage && canAccess(wingsPage)) {
+      items.push({ divider: true });
+      items.push({ label: wingsPage.title, section: true });
+      items.push({
+        href: `${BASE}pages/wings.html`,
+        icon: iconHtml(wingsPage.emoji),
+        label: 'استعراض الأجنحة',
+        page: 'wings'
+      });
+      // Wing sub-pages
+      const wingSubs = SYSTEM_PAGES.filter(p => p.parentId === 'wings');
+      for (const sub of wingSubs) {
+        if (!canAccess(sub)) continue;
+        items.push({
+          href: `${BASE}pages/${sub.id}.html`,
+          icon: '↳',
+          label: sub.title,
+          page: sub.id,
+          isSubpage: true
+        });
+      }
+    }
+
+    // 6. Custom pages
+    const customParents = customPages.filter(p => !p.parentId && !p.isHidden && canAccess(p));
     if (customParents.length > 0) {
       items.push({ divider: true });
       items.push({ label: 'صفحات إضافية', section: true });
-      customParents.forEach(p => {
+      for (const p of customParents) {
         items.push({
           href: `${BASE}pages/custom.html?id=${p.id}`,
-          icon: p.emoji ? (p.emoji.includes('<i') ? p.emoji : `<span>${p.emoji}</span>`) : '📄',
+          icon: iconHtml(p.emoji),
           label: p.title,
           page: `custom_${p.id}`
         });
-
-        // Find child sub-pages
-        const subs = allowedPages.filter(sub => sub.parentId === p.id);
-        subs.forEach(sub => {
+        // Child sub-pages
+        const subs = customPages.filter(s => s.parentId === p.id && !s.isHidden && canAccess(s));
+        for (const sub of subs) {
           items.push({
             href: `${BASE}pages/custom.html?id=${sub.id}`,
             icon: '↳',
@@ -257,26 +263,24 @@ const Components = (() => {
             page: `custom_${sub.id}`,
             isSubpage: true
           });
-        });
-      });
+        }
+      }
     }
 
-    const itemsHTML = items.map(item => {
-      if (item.divider) return `<div class="sidebar-divider"></div>`;
-      if (item.section) return `<div class="sidebar-section-label">${item.label}</div>`;
-      
-      const subStyle = item.isSubpage ? 'style="padding-right: 32px; font-size: 0.85rem; opacity: 0.85; border-right: 1px dashed rgba(201, 162, 39, 0.2);"' : '';
-      const iconStyle = item.isSubpage ? 'style="margin-left: 6px; font-size: 0.90rem; color: var(--color-gold-primary);"' : '';
-      
+    const itemsHTML = items.map(it => {
+      if (it.divider) return `<div class="sidebar-divider"></div>`;
+      if (it.section) return `<div class="sidebar-section-label">${it.label}</div>`;
+      const subStyle = it.isSubpage ? 'style="padding-right: 32px; font-size: 0.85rem; opacity: 0.85; border-right: 1px dashed rgba(201, 162, 39, 0.2);"' : '';
+      const iconStyle = it.isSubpage ? 'style="margin-left: 6px; font-size: 0.90rem; color: var(--color-gold-primary);"' : '';
       return `
-        <a href="${item.href}" class="sidebar-nav-item${activePage === item.page ? ' active' : ''}" ${subStyle}>
-          <div class="sidebar-nav-icon" ${iconStyle}>${item.icon}</div>
-          ${item.label}
-          ${item.badge ? `<span class="sidebar-nav-badge" data-badge="${item.page}">...</span>` : ''}
+        <a href="${it.href}" class="sidebar-nav-item${activePage === it.page ? ' active' : ''}" ${subStyle}>
+          <div class="sidebar-nav-icon" ${iconStyle}>${it.icon}</div>
+          ${it.label}
+          ${it.badge ? `<span class="sidebar-nav-badge" data-badge="${it.page}">...</span>` : ''}
         </a>`;
     }).join('');
 
-    // Construct profile widget
+    // Profile widget
     let profileWidgetHTML = '';
     if (currentUser) {
       profileWidgetHTML = `
@@ -319,7 +323,7 @@ const Components = (() => {
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-header">
         <div class="sidebar-logo">
-          <img src="${BASE}assets/img/emblem.png" alt="شعار الأمن العام" class="sidebar-logo-img" onerror="this.outerHTML='<div class=\'sidebar-logo-icon emblem-mini\'><i class=\'fa-solid fa-shield-halved\'></i></div>'">
+          <img src="${BASE}assets/img/emblem.png" alt="شعار الأمن العام" class="sidebar-logo-img" onerror="this.outerHTML='<div class=\\'sidebar-logo-icon emblem-mini\\'><i class=\\'fa-solid fa-shield-halved\\'></i></div>'">
           <div style="display: flex; flex-direction: column; line-height: 1.25; text-align: right; margin-right: 8px;">
             <span style="font-size: 13px; font-weight: 900; color: #ffffff; letter-spacing: 0.5px;">إدارة الأمن العام</span>
             <span style="font-size: 10px; font-weight: 800; color: #c9a227; margin-top: 1px;">مدينة الـ 90</span>
@@ -338,15 +342,15 @@ const Components = (() => {
         </div>
         <div class="sidebar-footer-stats">
           <div class="sidebar-stat">
-            <span class="sidebar-stat-value" id="sb-total">127</span>
+            <span class="sidebar-stat-value" id="sidebar-total">127</span>
             <span class="sidebar-stat-label">عضو</span>
           </div>
           <div class="sidebar-stat">
-            <span class="sidebar-stat-value" id="sb-online">34</span>
+            <span class="sidebar-stat-value" id="sidebar-online">34</span>
             <span class="sidebar-stat-label">متصل</span>
           </div>
           <div class="sidebar-stat">
-            <span class="sidebar-stat-value" id="sb-centers">${(typeof Storage !== 'undefined') ? (Storage.getCollection(Storage.keys.CENTERS) || []).length : 1}</span>
+            <span class="sidebar-stat-value" id="sidebar-centers">${(typeof Storage !== 'undefined') ? (Storage.getCollection(Storage.keys.CENTERS) || []).length : 1}</span>
             <span class="sidebar-stat-label">مركز</span>
           </div>
         </div>
@@ -367,7 +371,7 @@ const Components = (() => {
           <div class="footer-grid">
             <div class="footer-brand">
               <div class="footer-logo">
-                <img src="${BASE}assets/img/emblem.png" alt="شعار الأمن العام" class="footer-emblem" onerror="this.outerHTML='<div class=\'footer-logo-icon emblem-mini\'><i class=\'fa-solid fa-shield-halved\'></i></div>'">
+                <img src="${BASE}assets/img/emblem.png" alt="شعار الأمن العام" class="footer-emblem" onerror="this.outerHTML='<div class=\\'footer-logo-icon emblem-mini\\'><i class=\\'fa-solid fa-shield-halved\\'></i></div>'">
                 <div style="display: flex; flex-direction: column; line-height: 1.25; text-align: right; margin-right: 8px;">
                   <span style="font-size: 13px; font-weight: 900; color: #ffffff; letter-spacing: 0.5px;">إدارة الأمن العام</span>
                   <span style="font-size: 10px; font-weight: 800; color: #c9a227; margin-top: 1px;">مدينة الـ 90</span>
@@ -442,7 +446,7 @@ ${scriptTags}
 </html>`;
   }
 
-  return { navbar, sidebar, footer, pageShell };
+  return { navbar, sidebar, footer, pageShell, SYSTEM_PAGES, SYSTEM_IDS };
 })();
 
 window.Components = Components;
@@ -451,7 +455,6 @@ window.Components = Components;
 (function() {
   function injectPreviewWidget() {
     if (typeof Auth !== 'undefined' && typeof Auth.isActualOwner === 'function' && Auth.isActualOwner()) {
-      // Inject a sticky top warning banner if preview mode is active (preview role is not 'owner')
       const currentPreview = Auth.getPreviewRole();
       if (currentPreview && currentPreview !== 'owner') {
         if (!document.getElementById('ps-preview-banner')) {
@@ -517,4 +520,3 @@ window.Components = Components;
     injectPreviewWidget();
   }
 })();
-

@@ -5,9 +5,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>كلية التدريب الأمنية | الأمن العام</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=1.1.26">
-  <link rel="stylesheet" href="../assets/css/navbar.css?v=1.1.26">
-  <link rel="stylesheet" href="../assets/css/sidebar.css?v=1.1.26">
+  <link rel="stylesheet" href="../assets/css/main.css?v=1.1.27">
+  <link rel="stylesheet" href="../assets/css/navbar.css?v=1.1.27">
+  <link rel="stylesheet" href="../assets/css/sidebar.css?v=1.1.27">
   <link rel="stylesheet" href="../assets/css/footer.css">
   <style>
     /* Premium CSS for the Course Catalog Grid */
@@ -541,14 +541,33 @@
         <div class="section-bar-badge"><i class="fa-solid fa-medal"></i></div>
         <div>
           <div class="section-bar-title">الشارات التشريفية والأوسمة</div>
-          <div class="section-bar-subtitle">الأنواط الرسمية لقطاع الأمن العام</div>
+          <div class="section-bar-subtitle">الونقات والأنواط الرسمية لقطاع الأمن العام</div>
         </div>
       </div>
-      <div class="section-bar-left-badge">قسم واحد</div>
+      <div class="section-bar-left-badge">قسمين</div>
     </div>
 
     <!-- Insignia & Medals Grid -->
     <div class="courses-grid animate-fade-up">
+
+      <!-- 1. Wings (الونقات) -->
+      <div class="course-card" onclick="window.location.href='wings.html'">
+        <div class="course-card-arrow">←</div>
+        <div class="course-card-icon-container">
+          <svg viewBox="0 0 100 100" class="course-card-emblem-img">
+            <circle cx="50" cy="50" r="42" fill="#0d1840" stroke="#c9a227" stroke-width="3"/>
+            <!-- Golden Star inside -->
+            <polygon points="50,20 58,38 78,40 63,53 67,73 50,62 33,73 37,53 22,40 42,38" fill="#c9a227" stroke="#b08b1e" stroke-width="1.5"/>
+          </svg>
+        </div>
+        <h3 class="course-card-title">الونقات</h3>
+        <h4 class="course-card-subtitle">شارات التخصص والمهارة</h4>
+        <p class="course-card-desc">تفاصيل شارات التخصص الميداني والمهارة الممنوحة لرجال الأمن العام، مثل شارة الرماية ومكافحة الإرهاب والمظليين.</p>
+        <div class="course-card-footer">
+          <span>عرض التفاصيل</span>
+          <span class="course-card-footer-icon">⭐</span>
+        </div>
+      </div>
 
       <!-- 2. Medals (الأنواط) -->
       <div class="course-card" onclick="window.location.href='uniform.html#insignias'">
@@ -576,11 +595,11 @@
 
   </div>
 
-  <script src="../assets/js/storage.js?v=1.1.26"></script>
-  <script src="../assets/js/data.js?v=1.1.26"></script>
-  <script src="../assets/js/auth.js?v=1.1.26"></script>
-  <script src="../assets/js/components.js?v=1.1.26"></script>
-  <script src="../assets/js/app.js?v=1.1.26"></script>
+  <script src="../assets/js/storage.js?v=1.1.30"></script>
+  <script src="../assets/js/data.js?v=1.1.27"></script>
+  <script src="../assets/js/auth.js?v=1.1.30"></script>
+  <script src="../assets/js/components.js?v=1.1.31"></script>
+  <script src="../assets/js/app.js?v=1.1.31"></script>
   <script>
     // Inject navbar and sidebar
     document.write(Components.navbar('college'));

@@ -86,8 +86,8 @@ const SeedData = (() => {
         settings.discordLink = 'https://discord.gg/UpAUaRcqe';
         updated = true;
       }
-      if (!settings.officialSiteLink || settings.officialSiteLink === '#' || settings.officialSiteLink.includes('publicsecurity90.gov') || settings.officialSiteLink.includes('amn-90-rm.surge.sh')) {
-        settings.officialSiteLink = 'https://amn-3-90.surge.sh/index.html';
+      if (!settings.officialSiteLink || settings.officialSiteLink === '#' || settings.officialSiteLink.includes('publicsecurity90.gov') || settings.officialSiteLink.includes('surge.sh')) {
+        settings.officialSiteLink = 'https://amn-3-90.com/index.html';
         updated = true;
       }
       if (!settings.welcomeTitle || settings.welcomeTitle === '• المنصة الرسمية - إصدار 1.0 •' || settings.welcomeTitle === 'البوابة الرسمية لأدارة الامن العام') {
@@ -875,7 +875,7 @@ const SeedData = (() => {
       serverName: 'إدارة الأمن العام - مدينة الـ90',
       serverIp: 'connect cfx.re/join/abcdef',
       discordLink: 'https://discord.gg/UpAUaRcqe',
-      officialSiteLink: 'https://amn-3-90.surge.sh/index.html',
+      officialSiteLink: 'https://amn-3-90.com/index.html',
       youtubeLink: 'https://youtube.com/@publicsecurity',
       heroTitleLine1: '',
       heroTitleLine2: 'إدارة الأمن العام',

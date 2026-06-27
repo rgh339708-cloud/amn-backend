@@ -665,6 +665,7 @@ function initializeAttendanceBooks(targetDb = db) {
     });
   });
   updateOpsExamDescription(targetDb);
+  seedExamsTableIfEmpty(targetDb);
 }
 
 function updateOpsExamDescription(targetDb = db) {
@@ -703,6 +704,62 @@ function updateOpsExamDescription(targetDb = db) {
           }
         }
       );
+    }
+  });
+}
+
+function seedExamsTableIfEmpty(targetDb = db) {
+  targetDb.get("SELECT COUNT(*) as cnt FROM exams", [], (err, row) => {
+    if (err) {
+      console.error('[DB Seed] Failed to count exams:', err.message);
+      return;
+    }
+    const count = row ? (row.cnt || 0) : 0;
+    if (count <= 1) { // If empty or only has 1 exam (the Operations exam), let's seed all 9 exams!
+      console.log(`[DB Seed] Exams table has ${count} rows. Seeding 9 default exams...`);
+      const EXAMS_FILE = path.join(PUBLIC_DIR, 'assets', 'data', 'exams.json');
+      if (fs.existsSync(EXAMS_FILE)) {
+        try {
+          const exams = JSON.parse(fs.readFileSync(EXAMS_FILE, 'utf8'));
+          exams.forEach(e => {
+            const qJson = JSON.stringify(e.questions || []);
+            const details = { ...e };
+            delete details.questions;
+            delete details.id;
+            delete details.title;
+            delete details.category;
+            delete details.questionsCountToShow;
+            delete details.passingScore;
+            delete details.isOpen;
+            const detJson = JSON.stringify(details);
+
+            targetDb.run(
+              `INSERT OR REPLACE INTO exams (id, exam_name, course_name, questions_count, passing_score, status, questions_json, details_json)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+              [
+                e.id,
+                e.title,
+                e.category,
+                e.questionsCountToShow || 0,
+                e.passingScore || 0,
+                e.isOpen ? 'open' : 'closed',
+                qJson,
+                detJson
+              ],
+              (insertErr) => {
+                if (insertErr) console.error(`[DB Seed] Failed to insert exam ${e.title}:`, insertErr.message);
+              }
+            );
+          });
+          console.log('[DB Seed] Successfully queued default exams insertion!');
+        } catch (ex) {
+          console.error('[DB Seed] Failed to parse exams.json for seeding:', ex.message);
+        }
+      } else {
+        console.warn('[DB Seed] exams.json not found at:', EXAMS_FILE);
+      }
+    } else {
+      console.log(`[DB Seed] Exams table already has ${count} exams. No seeding required.`);
     }
   });
 }

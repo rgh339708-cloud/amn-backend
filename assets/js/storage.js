@@ -419,16 +419,12 @@ const Storage = (() => {
           markKeySynced(collection);
         } else {
           console.warn(`[Storage Sync] Failed to sync ${collection} remote action ${action}`);
-          if (window.App && window.App.toast) {
-            window.App.toast('⚠️ فشل حفظ التعديلات على الخادم. تم الاحتفاظ بالتعديلات محلياً وسيتم المزامنة تلقائياً.', 'warning');
-          }
+          // Silent - no toast, retry will handle it automatically
         }
       }).catch(err => {
         activeSyncs[collection] = Math.max(0, (activeSyncs[collection] || 0) - 1);
         console.warn(`[Storage Sync] Network error syncing ${collection} to server`, err);
-        if (window.App && window.App.toast) {
-          window.App.toast('⚠️ فشل الاتصال بالخادم لمزامنة التعديلات. تم حفظها محلياً وسيتم المزامنة تلقائياً.', 'warning');
-        }
+        // Silent - no toast, retry will handle it automatically
       });
   }
 

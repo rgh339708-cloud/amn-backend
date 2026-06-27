@@ -839,8 +839,8 @@
   <script src="../assets/js/storage.js?v=1.1.26"></script>
   <script src="../assets/js/data.js?v=1.1.26"></script>
   <script src="../assets/js/auth.js?v=1.1.26"></script>
-  <script src="../assets/js/components.js?v=1.1.26"></script>
-  <script src="../assets/js/app.js?v=1.1.26"></script>
+  <script src="../assets/js/components.js?v=1.1.31"></script>
+  <script src="../assets/js/app.js?v=1.1.31"></script>
 
   <script>
     document.write(Components.navbar('exams'));
@@ -2484,7 +2484,19 @@
       const grid = document.getElementById('exams-grid');
       if (!grid) return;
 
-      const exams = Storage.getCollection(Storage.keys.EXAMS) || [];
+      let exams = Storage.getCollection(Storage.keys.EXAMS) || [];
+
+      // Filter exams based on supervisor check
+      const isLoggedIn = Auth.isLoggedIn();
+      const userRole = isLoggedIn ? Auth.getRole() : 'viewer';
+      const roleInfo = Auth.getRoleInfo(userRole);
+      const isSupervisor = roleInfo && roleInfo.level >= 3.5;
+
+      if (!isSupervisor) {
+        // Regular users/guests: Only see open exams
+        exams = exams.filter(e => e.isOpen);
+      }
+
       if (exams.length === 0) {
         grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:50px;color:var(--color-text-muted)">لا توجد اختبارات متوفرة حالياً.</div>`;
         return;
@@ -2607,6 +2619,10 @@
 
     async function submitNamePrompt() {
       const inputName = document.getElementById('examinee-name-input').value.trim();
+      const inputDiscord = document.getElementById('examinee-discord-input')?.value.trim() || '';
+      const inputRank = document.getElementById('examinee-rank-input')?.value.trim() || 'مشاهد';
+      const inputJobCode = document.getElementById('examinee-job-code-input')?.value.trim() || '';
+
       if (!inputName) {
         App.toast('تعذر جلب بيانات الاسم. يرجى مراجعة الدعم!', 'warning');
         return;
@@ -2710,7 +2726,7 @@
       const currentUser = Auth.getCurrentUser();
       const lookupUser = {
         id: currentUser ? currentUser.id : '',
-        discord: currentUser ? currentUser.discord : '',
+        discord: currentUser ? currentUser.discord : inputDiscord,
         username: activeExamineeName || (currentUser ? currentUser.username : ''),
         globalName: activeExamineeName || (currentUser ? currentUser.globalName : ''),
         name: activeExamineeName || (currentUser ? currentUser.name : '')
@@ -2719,10 +2735,10 @@
 
       const startAttemptData = {
         trainee_name: tableInfo.name || activeExamineeName || (currentUser ? currentUser.username : "عضو ميداني"),
-        rank: tableInfo.rank || (currentUser ? currentUser.rank : "مشاهد"),
-        code: currentUser ? currentUser.discord : "",
+        rank: tableInfo.rank || (currentUser ? currentUser.rank : inputRank),
+        code: currentUser ? currentUser.discord : inputDiscord,
         discord_id: currentUser ? currentUser.id : "",
-        badge_code: tableInfo.badge || "",
+        badge_code: tableInfo.badge || inputJobCode,
         course_name: examObj.category || "عام",
         exam_name: examObj.title,
         start_time: examEntryTime,
@@ -2920,9 +2936,13 @@
 
       // Resolve user table info (rank, badge) by comparing the entered name
       const currentUser = Auth.getCurrentUser();
+      const inputDiscord = document.getElementById('examinee-discord-input')?.value.trim() || '';
+      const inputRank = document.getElementById('examinee-rank-input')?.value.trim() || 'مشاهد';
+      const inputJobCode = document.getElementById('examinee-job-code-input')?.value.trim() || '';
+
       const lookupUser = {
         id: currentUser ? currentUser.id : '',
-        discord: currentUser ? currentUser.discord : '',
+        discord: currentUser ? currentUser.discord : inputDiscord,
         username: activeExamineeName || (currentUser ? currentUser.username : ''),
         globalName: activeExamineeName || (currentUser ? currentUser.globalName : ''),
         name: activeExamineeName || (currentUser ? currentUser.name : '')
@@ -2939,9 +2959,9 @@
         examId: activeExam.id,
         examTitle: activeExam.title,
         studentName: tableInfo.name || activeExamineeName || (currentUser ? currentUser.username : "عضو ميداني"),
-        studentDiscord: currentUser ? currentUser.discord : "",
-        studentRank: tableInfo.rank || (currentUser ? currentUser.rank : "مشاهد"),
-        studentBadge: tableInfo.badge || "—",
+        studentDiscord: currentUser ? currentUser.discord : inputDiscord,
+        studentRank: tableInfo.rank || (currentUser ? currentUser.rank : inputRank),
+        studentBadge: tableInfo.badge || inputJobCode || "—",
         studentTables: tableInfo.tables || [],
         score: finalScore,
         correctCount: correctCount,

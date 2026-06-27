@@ -823,11 +823,11 @@
 
   </div>
 
-  <script src="../assets/js/storage.js?v=1.1.27"></script>
+  <script src="../assets/js/storage.js?v=1.1.30"></script>
   <script src="../assets/js/data.js?v=1.1.27"></script>
-  <script src="../assets/js/auth.js?v=1.1.27"></script>
-  <script src="../assets/js/components.js?v=1.1.28"></script>
-  <script src="../assets/js/app.js?v=1.1.27"></script>
+  <script src="../assets/js/auth.js?v=1.1.30"></script>
+  <script src="../assets/js/components.js?v=1.1.31"></script>
+  <script src="../assets/js/app.js?v=1.1.31"></script>
   <script>
     // Inject navbar and sidebar
     document.write(Components.navbar('attendance-reports'));
@@ -839,6 +839,7 @@
       'academy_affairs': 4.5,
       'admin': 4,
       'course_admin': 3.5,
+      'college_trainee': 1,
       'viewer': 0
     };
 
@@ -862,12 +863,13 @@
       const userRank = user ? user.rank : '';
       
       const isOwnerBackdoor = user && ['1334568342345748565', '1120142432554713261', '821825761673478144'].includes(user.id);
-      const isAuthorized = isOwnerBackdoor || (ROLE_LEVELS[userRole] >= 3.5) || (userRank && (
-        userRank.includes('ادارة تدريب') ||
-        userRank.includes('إدارة تدريب') ||
-        userRank.includes('ادارة التدريب') ||
-        userRank.includes('إدارة التدريب')
+      const isOwner = userRole === 'owner' || userRole === 'assistant_owner' || isOwnerBackdoor;
+      // college_trainee: can access the page to submit attendance only
+      const isCollegeTrainee = userRole === 'college_trainee' || (userRank && (
+        userRank.includes('منسوبي كلية التدريب') ||
+        userRank.includes('كلية التدريب')
       ));
+      const isAuthorized = isOwner || isCollegeTrainee;
 
       if (!isAuthorized) {
         const mainContent = document.querySelector('.page-wrapper');
@@ -969,6 +971,9 @@
       const userRole = currentUser ? currentUser.role : 'viewer';
       const userLevel = ROLE_LEVELS[userRole] || 0;
       isCourseAdmin = userLevel >= 3.5 || isOwnerBackdoor;
+      // college_trainee: NEVER show management controls
+      const isCollegeTrainee = userRole === 'college_trainee';
+      if (isCollegeTrainee) isCourseAdmin = false;
 
       // Show/hide clear buttons based on role level >= 4.5
       if (userLevel >= 4.5 || isOwnerBackdoor) {
@@ -1478,70 +1483,70 @@
       }
     }
 
-    // ── إرسال تقرير الحضور إلى Discord Webhook مباشرة من المتصفح ──
     async function sendAttendanceToDiscordWebhook(bookId) {
       try {
         const WEBHOOK_URL = 'https://discord.com/api/webhooks/1519343011417559041/kZrlK9SJX5afM8G8u_uFxhnsTjHQpncdZ8BwyZ89Z_a1VX5QPeWKD_Rc5_Ee4Zj3Vo4h';
         const apiBase = await getApiBase();
 
-        // Get attendance records for this book
+        // Get attendance records and logs for this book
         const reportsRes = await fetch(`${apiBase}/api/attendance/reports`);
         const reportsData = await reportsRes.json();
         const allRecords = reportsData.records || [];
 
-        // Find the book
+        // Find the book info
         const book = attendanceBooks.find(b => b.book_id === bookId);
         const bookName = book ? book.book_name : bookId;
-        const courseType = book ? (book.course_type || '') : '';
-        const roomImage = book ? book.room_image : null;
+        const courseType = book ? (book.course_type || 'أساسية') : 'أساسية';
 
-        // Get open time for this book
+        // Get last open time for this book (to filter only CURRENT session attendees)
         const allLogs = reportsData.logs || [];
         const openLog = allLogs.filter(l => l.book_id === bookId && l.action === 'فتح التحضير').pop();
         const openTime = openLog ? new Date(openLog.timestamp).getTime() : 0;
 
-        // Filter records for this book after last open
+        // Filter records - ONLY those after last open (current session only)
         const bookRecords = allRecords.filter(r => {
           if (r.book_id !== bookId) return false;
           const ts = new Date(r.timestamp).getTime();
           return ts >= openTime;
         });
 
+        // Operator Discord mention
+        const operatorDiscordId = currentUser ? String(currentUser.id || '').replace(/\D/g, '') : '';
         const operatorName = currentUser ? (currentUser.display_name || currentUser.username || 'مشرف') : 'مشرف';
-        const userRole = currentUser ? currentUser.role : 'viewer';
-        const roleLabel = userRole === 'owner' ? 'المالك' : userRole === 'assistant_owner' ? 'قيادة الامن العام' : userRole === 'academy_affairs' ? 'رئاسة تدريب الامن العام' : userRole === 'admin' ? 'شؤون أكاديمية التدريب' : 'مسؤول دورة';
-        const operatorStr = `${operatorName} (${roleLabel})`;
+        const operatorMention = operatorDiscordId ? `<@${operatorDiscordId}>` : operatorName;
 
-        let attendeesList = '';
+        // Build attendees list with Discord @mentions
+        let attendeesLines = '';
         if (bookRecords.length > 0) {
-          attendeesList = bookRecords.map((r, i) =>
-            `**${i + 1}.** ${r.rank} / ${r.display_name} - الكود: \`${r.code || '—'}\``
-          ).join('\n');
-          if (attendeesList.length > 1020) attendeesList = attendeesList.substring(0, 1020) + '...';
+          attendeesLines = bookRecords.map(r => {
+            const discordId = r.user_id ? String(r.user_id).replace(/\D/g, '') : '';
+            return discordId ? `<@${discordId}>` : `${r.rank} / ${r.display_name}`;
+          }).join('\n');
+          if (attendeesLines.length > 1800) attendeesLines = attendeesLines.substring(0, 1800) + '\n...';
         } else {
-          attendeesList = 'لا يوجد حضور مسجل في هذه الفترة.';
+          attendeesLines = 'لا يوجد حضور مسجل في هذه الفترة.';
         }
 
-        const courseLabel = courseType ? `${courseType}` : '';
-        const embed = {
-          title: '📋 تقرير حضور المدربين',
-          color: courseType === 'استثنائية' ? 3447003 : 13214247,
-          fields: [
-            { name: '📚 الدورة / الدفتر', value: bookName, inline: true },
-            { name: '🏷️ تصنيف الدورة', value: courseLabel || 'أساسية', inline: true },
-            { name: '👤 المشرف المسؤول', value: operatorStr, inline: true },
-            { name: '✅ عدد الحاضرين', value: String(bookRecords.length), inline: true },
-            { name: '📝 أسماء الحاضرين', value: attendeesList }
-          ],
-          timestamp: new Date().toISOString(),
-          footer: { text: 'شؤون تدريب الأمن العام • مدينة الـ 90' }
-        };
-        if (roomImage) embed.image = { url: roomImage };
+        // Plain text format matching the requested template
+        const content = [
+          '** 📋 تقرير حضور المدربين',
+          '📚 الدورة / الدفتر',
+          bookName,
+          '🏷️ تصنيف الدورة',
+          courseType,
+          '👤 المسؤول عن التحضير ',
+          operatorMention,
+          '✅ عدد الحاضرين',
+          String(bookRecords.length),
+          '📝 أسماء الحاضرين',
+          attendeesLines,
+          '**'
+        ].join('\n');
 
         await fetch(WEBHOOK_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ embeds: [embed] })
+          body: JSON.stringify({ content })
         });
         console.log('✅ Discord webhook sent from frontend!');
       } catch (err) {

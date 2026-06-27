@@ -23,3 +23,9 @@ test_api.js
 test_db.js
 test_debug_api.js
 test_insert.js
+# Dynamic data files - never overwrite on deploy
+assets/data/exams.json
+assets/data/system_logs.json
+assets/data/discord_users.json
+assets/data/members_google_sheets_cache.json
+exam_archive.db

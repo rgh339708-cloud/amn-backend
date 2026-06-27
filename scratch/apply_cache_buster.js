@@ -1,64 +1,39 @@
 const fs = require('fs');
 const path = require('path');
 
-const TARGET_DIR = path.join(__dirname, '..');
-const VERSION = '1.1.26'; // New cache-buster version
+const PAGES_DIR = path.join(__dirname, '..', 'pages');
+const ROOT_DIR = path.join(__dirname, '..');
 
-// Helper to recursively find all HTML files
-function getHtmlFiles(dir, filesList = []) {
-  const files = fs.readdirSync(dir);
-  for (const file of files) {
-    const filePath = path.join(dir, file);
-    const stat = fs.statSync(filePath);
-    if (stat.isDirectory()) {
-      if (file !== 'node_modules' && file !== '.git' && file !== 'scratch') {
-        getHtmlFiles(filePath, filesList);
-      }
-    } else if (file.endsWith('.html')) {
-      filesList.push(filePath);
+// 1. Process files in pages/
+if (fs.existsSync(PAGES_DIR)) {
+  const files = fs.readdirSync(PAGES_DIR).filter(f => f.endsWith('.html'));
+  files.forEach(file => {
+    const filePath = path.join(PAGES_DIR, file);
+    let content = fs.readFileSync(filePath, 'utf8');
+    
+    // Replace components.js version
+    let updated = content.replace(/components\.js\?v=[\d\.]+/g, 'components.js?v=1.1.31');
+    updated = updated.replace(/components\.js/g, 'components.js?v=1.1.31'); // safety check for unversioned
+    updated = updated.replace(/components\.js\?v=1\.1\.31\?v=1\.1\.31/g, 'components.js?v=1.1.31'); // remove double versioning if any
+    
+    if (updated !== content) {
+      fs.writeFileSync(filePath, updated, 'utf8');
+      console.log(`✅ Bumped components.js version in pages/${file}`);
     }
-  }
-  return filesList;
+  });
 }
 
-const htmlFiles = getHtmlFiles(TARGET_DIR);
-console.log(`Found ${htmlFiles.length} HTML files to update.`);
-
-let updatedCount = 0;
-
-const jsFiles = ['storage.js', 'data.js', 'auth.js', 'components.js', 'app.js'];
-const cssFiles = ['main.css', 'hero.css', 'navbar.css', 'sidebar.css', 'admin.css'];
-
-htmlFiles.forEach(filePath => {
-  let content = fs.readFileSync(filePath, 'utf8');
-  let changed = false;
-
-  jsFiles.forEach(jsFile => {
-    // Regex matches e.g. src="path/to/auth.js" or src="path/to/auth.js?v=something"
-    // Capture the path before the file name and the quote at the end
-    const regex = new RegExp(`src="([^"]*\\b${jsFile})(?:\\?[^"]*)?"`, 'g');
-    
-    if (regex.test(content)) {
-      content = content.replace(regex, `src="$1?v=${VERSION}"`);
-      changed = true;
-    }
-  });
-
-  cssFiles.forEach(cssFile => {
-    // Regex matches e.g. href="path/to/hero.css" or href="path/to/hero.css?v=something"
-    const regex = new RegExp(`href="([^"]*\\b${cssFile})(?:\\?[^"]*)?"`, 'g');
-    
-    if (regex.test(content)) {
-      content = content.replace(regex, `href="$1?v=${VERSION}"`);
-      changed = true;
-    }
-  });
-
-  if (changed) {
-    fs.writeFileSync(filePath, content, 'utf8');
-    console.log(`Updated: ${path.relative(TARGET_DIR, filePath)}`);
-    updatedCount++;
+// 2. Process index.html in root
+const indexHtmlPath = path.join(ROOT_DIR, 'index.html');
+if (fs.existsSync(indexHtmlPath)) {
+  let content = fs.readFileSync(indexHtmlPath, 'utf8');
+  let updated = content.replace(/components\.js\?v=[\d\.]+/g, 'components.js?v=1.1.31');
+  updated = updated.replace(/components\.js/g, 'components.js?v=1.1.31');
+  updated = updated.replace(/components\.js\?v=1\.1\.31\?v=1\.1\.31/g, 'components.js?v=1.1.31');
+  if (updated !== content) {
+    fs.writeFileSync(indexHtmlPath, updated, 'utf8');
+    console.log(`✅ Bumped components.js version in root index.html`);
   }
-});
+}
 
-console.log(`Successfully updated ${updatedCount} files with cache buster ?v=${VERSION}.`);
+console.log('🎉 Cache-busting complete!');
