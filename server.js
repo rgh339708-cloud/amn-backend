@@ -833,11 +833,11 @@ async function sendRecruitmentDecisionWebhook(application, newStatus, operatorNa
     title: isApproved ? '✅ قبول نهائي | شؤون التجنيد والقبول' : '❌ اعتذار ورفض طلب | شؤون التجنيد والقبول',
     color: isApproved ? 3066993 : 15158332,
     fields: [
-      { name: '👤 اسم المتقدم', value: application.fullName || '—', inline: true },
-      { name: '🆔 معرّف الديسكورد', value: userMention, inline: true },
-      { name: '🏢 القطاع', value: application.sector || 'الأمن العام', inline: true },
-      { name: '👮 المسؤول عن القرار', value: operatorMention, inline: true },
-      { name: '📝 نتيجة القرار', value: isApproved ? 'تم القبول المبدئي في قطاع الأمن العام. يرجى التواجد في الادارة العامه ورومات التوظيف.' : 'نعتذر عن عدم قبول الطلب لهذه الدورة لعدم استيفاء الشروط أو اكتمال الشاغر.', inline: false }
+      { name: '👤 اسم المتقدم', value: `**${application.fullName || '—'}**`, inline: true },
+      { name: '🆔 معرّف الديسكورد', value: `**${userMention}**`, inline: true },
+      { name: '🏢 القطاع', value: `**${application.sector || 'الأمن العام'}**`, inline: true },
+      { name: '👮 المسؤول عن القرار', value: `**${operatorMention}**`, inline: true },
+      { name: '📝 نتيجة القرار', value: isApproved ? '**تم القبول المبدئي في قطاع الأمن العام. يرجى التواجد في الادارة العامه ورومات التوظيف.**' : '**نعتذر عن عدم قبول الطلب لهذه الدورة لعدم استيفاء الشروط أو اكتمال الشاغر.**', inline: false }
     ],
     timestamp: new Date().toISOString(),
     footer: {
@@ -846,7 +846,7 @@ async function sendRecruitmentDecisionWebhook(application, newStatus, operatorNa
   };
 
   const payload = JSON.stringify({
-    content: isApproved ? `🔔 القبول النهائي للمتقدم: ${userMention}` : `🔔 نعتذر عن قبول المتقدم: ${userMention}`,
+    content: isApproved ? `**🔔 القبول النهائي للمتقدم: ${userMention}**` : `**🔔 نعتذر عن قبول المتقدم: ${userMention}**`,
     embeds: [embed]
   });
   const webhookPath = targetWebhook.replace('https://discord.com', '');
