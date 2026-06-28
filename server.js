@@ -313,6 +313,7 @@ async function initializeMysqlSchema(pool) {
     status VARCHAR(255) DEFAULT 'closed',
     updated_by VARCHAR(255),
     room_image VARCHAR(255),
+    course_type VARCHAR(255) DEFAULT 'أساسية',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
   )`);
 
@@ -362,6 +363,9 @@ async function initializeMysqlSchema(pool) {
   } catch(e) {}
   try {
     await queryAsync(`ALTER TABLE attendance_records ADD COLUMN room_image TEXT`);
+  } catch(e) {}
+  try {
+    await queryAsync(`ALTER TABLE attendance_books ADD COLUMN course_type VARCHAR(255) DEFAULT 'أساسية'`);
   } catch(e) {}
 
   console.log('✅ MySQL Schema initialization completed.');
@@ -592,15 +596,18 @@ function initializeSqliteSchema(sqliteDb) {
     status TEXT DEFAULT 'closed',
     updated_by TEXT,
     room_image TEXT,
+    course_type TEXT DEFAULT 'أساسية',
     updated_at TEXT DEFAULT (datetime('now'))
   )`, () => {
     sqliteDb.run("ALTER TABLE attendance_books ADD COLUMN room_image TEXT", () => {
-      const sqliteWrapper = {
-        run(sql, params, cb) { sqliteDb.run(sql, params, cb); },
-        get(sql, params, cb) { sqliteDb.get(sql, params, cb); },
-        all(sql, params, cb) { sqliteDb.all(sql, params, cb); }
-      };
-      initializeAttendanceBooks(sqliteWrapper);
+      sqliteDb.run("ALTER TABLE attendance_books ADD COLUMN course_type TEXT DEFAULT 'أساسية'", () => {
+        const sqliteWrapper = {
+          run(sql, params, cb) { sqliteDb.run(sql, params, cb); },
+          get(sql, params, cb) { sqliteDb.get(sql, params, cb); },
+          all(sql, params, cb) { sqliteDb.all(sql, params, cb); }
+        };
+        initializeAttendanceBooks(sqliteWrapper);
+      });
     });
   });
 
@@ -2996,7 +3003,7 @@ const server = http.createServer((req, res) => {
     req.on('end', () => {
       try {
         const data = JSON.parse(body);
-        const { book_id, status, operator_id, room_image } = data; // status: 'open', 'closed', or 'report_sent'
+        const { book_id, status, operator_id, room_image, course_type } = data; // status: 'open', 'closed', or 'report_sent'
 
         if (!book_id || !status || !operator_id) {
           res.writeHead(400, { 'Content-Type': 'application/json' });
@@ -3071,8 +3078,8 @@ const server = http.createServer((req, res) => {
             let params = [status, operatorStr, book_id];
 
             if (status === 'open') {
-              query = `UPDATE attendance_books SET status = ?, updated_by = ?, room_image = ?, updated_at = datetime('now') WHERE book_id = ?`;
-              params = [status, operatorStr, room_image || null, book_id];
+              query = `UPDATE attendance_books SET status = ?, updated_by = ?, room_image = ?, course_type = ?, updated_at = datetime('now') WHERE book_id = ?`;
+              params = [status, operatorStr, room_image || null, bookCourseType, book_id];
             }
 
             db.run(query, params, (updateErr) => {
@@ -3107,8 +3114,7 @@ const server = http.createServer((req, res) => {
                       if (errRecs) {
                         console.error('Error fetching records for Discord report:', errRecs);
                       }
-                      const opId = (req.body && req.body.operator_id) || (user ? (user.discord || user.id) : operatorStr);
-                      sendAttendanceReportToDiscord(bookName, opId, bookRoomImage, records || [], bookCourseType);
+                      sendAttendanceReportToDiscord(bookName, operator_id, bookRoomImage, records || [], bookCourseType);
                     });
                   }
 
