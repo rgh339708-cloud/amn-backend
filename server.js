@@ -952,6 +952,15 @@ async function resolveDiscordUserId(inputStr) {
   queryName = queryName.replace(/\s*->\s*$/, '').trim();
   queryName = queryName.replace(/[-\s>]+$/, '').trim();
 
+  const cleanQuery = queryName.toLowerCase();
+  const manualMappings = {
+    'onlyryan': '1334568342345748565',
+    '3gjo': '1334568342345748565',
+    'z6tw': '1120142432554713261',
+    'ifm711': '821825761673478144'
+  };
+  if (manualMappings[cleanQuery]) return manualMappings[cleanQuery];
+
   // 1. Search in local JSON cache (discord_users.json)
   try {
     const usersPath = path.join(__dirname, 'assets', 'data', 'discord_users.json');
