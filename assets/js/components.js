@@ -31,7 +31,7 @@ const Components = (() => {
     { id: 'inventory',                  title: 'العهدة',                          emoji: '<i class="fa-solid fa-box-open"></i>',            allowedRoles: ['*'] },
     { id: 'vehicles',                   title: 'المركبات',                        emoji: '<i class="fa-solid fa-car-on"></i>',              allowedRoles: ['*'] },
     { id: 'college',                    title: 'كلية التدريب',                    emoji: '<i class="fa-solid fa-graduation-cap"></i>',      allowedRoles: ['*'] },
-    { id: 'attendance-reports',         title: 'تقارير الحضور',                   emoji: '<i class="fa-solid fa-clipboard-user"></i>',      allowedRoles: ['owner', 'assistant_owner', 'college_trainee'] },
+    { id: 'attendance-reports',         title: 'تقارير الحضور',                   emoji: '<i class="fa-solid fa-clipboard-user"></i>',      allowedRoles: ['owner', 'assistant_owner', 'academy_affairs', 'admin', 'course_admin', 'college_trainee'] },
     { id: 'exams',                      title: 'الاختبارات',                      emoji: '<i class="fa-solid fa-file-pen"></i>',            allowedRoles: ['*'] },
     { id: 'field-title',                title: 'التوجيهات الميدانية',             emoji: '<i class="fa-solid fa-id-card"></i>',             allowedRoles: ['*'] },
     { id: 'uniform',                    title: 'الزي العسكري',                    emoji: '<i class="fa-solid fa-shirt"></i>',               allowedRoles: ['*'] },
@@ -482,6 +482,7 @@ window.Components = Components;
             'assistant_owner': 'قيادة الامن العام',
             'academy_affairs': 'رئاسة تدريب الامن العام',
             'admin': 'شؤون أكاديمية التدريب',
+            'recruitment_affairs': 'شؤون التجنيد',
             'course_admin': 'مسؤول دورة',
             'viewer': 'مشاهد'
           };

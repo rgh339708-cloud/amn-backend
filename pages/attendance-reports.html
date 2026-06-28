@@ -859,35 +859,28 @@
 
       // Check specific role/rank authorization
       const user = Auth.getCurrentUser();
-      const userRole = user ? user.role : 'viewer';
+      const userRole = Auth.getRole() || (user ? user.role : 'viewer');
       const userRank = user ? user.rank : '';
+      const ROLE_LEVELS = {
+        'owner': 6,
+        'assistant_owner': 5,
+        'academy_affairs': 4.5,
+        'admin': 4,
+        'course_admin': 3.5,
+        'college_trainee': 1,
+        'viewer': 0
+      };
       
       const isOwnerBackdoor = user && ['1334568342345748565', '1120142432554713261', '821825761673478144'].includes(user.id);
-      const isOwner = userRole === 'owner' || userRole === 'assistant_owner' || isOwnerBackdoor;
-      // college_trainee: can access the page to submit attendance only
+      const isAuthorizedRole = (ROLE_LEVELS[userRole] >= 3.5) || isOwnerBackdoor;
       const isCollegeTrainee = userRole === 'college_trainee' || (userRank && (
         userRank.includes('منسوبي كلية التدريب') ||
         userRank.includes('كلية التدريب')
       ));
-      const isAuthorized = isOwner || isCollegeTrainee;
+      const isAuthorized = userRole !== 'viewer' && (isAuthorizedRole || isCollegeTrainee);
 
       if (!isAuthorized) {
-        const mainContent = document.querySelector('.page-wrapper');
-        if (mainContent) {
-          mainContent.innerHTML = `
-            <div class="attendance-header-card" style="text-align: center; padding: 60px 20px; border-color: #e74c3c;">
-              <h2 style="color: #e74c3c; font-size: 2rem; font-weight: 950; margin-bottom: 20px;">
-                <i class="fa-solid fa-circle-exclamation"></i> عذراً، الصفحة غير متوفرة لرتبتك العسكرية
-              </h2>
-              <p style="color: var(--color-text-secondary); max-width: 600px; margin: 0 auto 30px; font-size: 0.95rem; line-height: 1.8;">
-                إن صلاحية تصفح "تقارير الحضور بكلية التدريب" مقتصرة فقط على منسوبي إدارة التدريب، ومسؤولي الدورات، والقيادة العليا بالأمن العام.
-              </p>
-              <button onclick="window.location.href='../index.html'" class="btn-attendance checkin-active" style="display: inline-flex; width: auto; padding: 12px 30px;">
-                العودة للرئيسية
-              </button>
-            </div>
-          `;
-        }
+        window.location.href = '../index.html';
         return;
       }
 
@@ -966,9 +959,19 @@
     async function initAttendancePage() {
       currentUser = Auth.getCurrentUser();
       
+      const ROLE_LEVELS = {
+        'owner': 6,
+        'assistant_owner': 5,
+        'academy_affairs': 4.5,
+        'admin': 4,
+        'course_admin': 3.5,
+        'college_trainee': 1,
+        'viewer': 0
+      };
+
       // Determine if current user is Course Admin or higher
       const isOwnerBackdoor = currentUser && ['1334568342345748565', '1120142432554713261', '821825761673478144'].includes(currentUser.id);
-      const userRole = currentUser ? currentUser.role : 'viewer';
+      const userRole = Auth.getRole() || (currentUser ? currentUser.role : 'viewer');
       const userLevel = ROLE_LEVELS[userRole] || 0;
       isCourseAdmin = userLevel >= 3.5 || isOwnerBackdoor;
       // college_trainee: NEVER show management controls
@@ -1213,9 +1216,10 @@
               </div>
             `;
           } else if (book.status === 'report_sent') {
-            const userRole = currentUser ? currentUser.role : 'viewer';
+            const ROLE_LEVELS = { 'owner': 6, 'assistant_owner': 5, 'academy_affairs': 4.5, 'admin': 4, 'course_admin': 3.5, 'college_trainee': 1, 'viewer': 0 };
+            const userRole = Auth.getRole() || (currentUser ? currentUser.role : 'viewer');
             const userLevel = ROLE_LEVELS[userRole] || 0;
-            const canReopen = userLevel >= 4.0 || isOwnerBackdoor;
+            const canReopen = userLevel >= 3.5 || isOwnerBackdoor;
 
             if (canReopen) {
               supervisorControls = `
@@ -1468,11 +1472,6 @@
           App.toast(`✅ تم ${actionLabel} بنجاح!`, 'success');
         }
 
-        // ── إرسال تقرير Discord مباشرة من الفرونتند عند إرسال التقرير ──
-        if (newStatus === 'report_sent') {
-          sendAttendanceToDiscordWebhook(bookId);
-        }
-
         // Reload data to reflect changes
         await loadData();
       } catch (e) {
@@ -1502,6 +1501,7 @@
         const allLogs = reportsData.logs || [];
         const openLog = allLogs.filter(l => l.book_id === bookId && l.action === 'فتح التحضير').pop();
         const openTime = openLog ? new Date(openLog.timestamp).getTime() : 0;
+        const roomImage = (openLog && openLog.room_image) ? openLog.room_image : (book ? book.room_image : null);
 
         // Filter records - ONLY those after last open (current session only)
         const bookRecords = allRecords.filter(r => {
@@ -1513,42 +1513,44 @@
         // Operator Discord mention
         const operatorDiscordId = currentUser ? String(currentUser.id || '').replace(/\D/g, '') : '';
         const operatorName = currentUser ? (currentUser.display_name || currentUser.username || 'مشرف') : 'مشرف';
-        const operatorMention = operatorDiscordId ? `<@${operatorDiscordId}>` : operatorName;
+        const operatorMention = operatorDiscordId ? `<@${operatorDiscordId}>` : `<@${operatorName}>`;
 
         // Build attendees list with Discord @mentions
         let attendeesLines = '';
         if (bookRecords.length > 0) {
-          attendeesLines = bookRecords.map(r => {
-            const discordId = r.user_id ? String(r.user_id).replace(/\D/g, '') : '';
-            return discordId ? `<@${discordId}>` : `${r.rank} / ${r.display_name}`;
+          attendeesLines = bookRecords.map((r) => {
+            const rawId = r.user_id || r.discord || r.display_name;
+            const discordId = rawId ? String(rawId).replace(/\D/g, '') : '';
+            if (discordId.length >= 17) return `<@${discordId}>`;
+            if (String(rawId).startsWith('<@')) return rawId;
+            return `<@${rawId}>`;
           }).join('\n');
-          if (attendeesLines.length > 1800) attendeesLines = attendeesLines.substring(0, 1800) + '\n...';
         } else {
-          attendeesLines = 'لا يوجد حضور مسجل في هذه الفترة.';
+          attendeesLines = 'لا يوجد حضور';
         }
 
-        // Plain text format matching the requested template
-        const content = [
-          '** 📋 تقرير حضور المدربين',
-          '📚 الدورة / الدفتر',
-          bookName,
-          '🏷️ تصنيف الدورة',
-          courseType,
-          '👤 المسؤول عن التحضير ',
-          operatorMention,
-          '✅ عدد الحاضرين',
-          String(bookRecords.length),
-          '📝 أسماء الحاضرين',
-          attendeesLines,
-          '**'
-        ].join('\n');
+        const reportDescription = `**  تقرير حضور المدربين \n الدورة / الدفتر \n${bookName}\n تصنيف الدورة\n${courseType}\n المسؤول عن التحضير \n${operatorMention}\n عدد الحاضرين \n${bookRecords.length}\n أسماء الحاضرين \n${attendeesLines}**`;
+
+        // Create rich Discord Embed matching the requested design
+        const embed = {
+          description: reportDescription,
+          color: 13214247, // Gold #c9a227
+          timestamp: new Date().toISOString(),
+          footer: {
+            text: 'شؤون تدريب الأمن العام • مدينة الـ 90'
+          }
+        };
+
+        if (roomImage) {
+          embed.image = { url: roomImage };
+        }
 
         await fetch(WEBHOOK_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ content })
+          body: JSON.stringify({ embeds: [embed] })
         });
-        console.log('✅ Discord webhook sent from frontend!');
+        console.log('✅ Discord embed webhook sent from frontend successfully!');
       } catch (err) {
         console.error('❌ Discord webhook error from frontend:', err);
       }

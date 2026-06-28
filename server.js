@@ -806,33 +806,98 @@ function sendDiscordChannelMessage(channelId, payload, botToken) {
   });
 }
 
-function sendAttendanceReportToDiscord(bookName, operatorStr, roomImage, records) {
-  // Discord Webhook URL - direct and reliable, no bot token needed
+async function sendRecruitmentDecisionWebhook(application, newStatus, operatorName = 'شؤون التجنيد') {
+  const ACCEPT_WEBHOOK = 'https://discord.com/api/webhooks/1520733141013364847/jgF85eVWN3gIT3Vo_Ln6x5qtVguFzMcbDWZh7u80rczQSBnVNCmxXpBHkg8OiH3XHKTO';
+  const REJECT_WEBHOOK = 'https://discord.com/api/webhooks/1520734010605568090/Kqdh5ZgsH-qCMmrtXeIoaZKTmY7f79tjQ1Hs0VomyT8Ve17M4ZL5CSD0y5Ak-Un-Brtq';
+
+  const targetWebhook = newStatus === 'approved' ? ACCEPT_WEBHOOK : REJECT_WEBHOOK;
+  const isApproved = newStatus === 'approved';
+
+  // Resolve numeric Discord ID for applicant
+  const rawApplicant = application.discordId || application.userId || application.username || '';
+  const resolvedApplicantId = await resolveDiscordUserId(rawApplicant);
+  let userMention = resolvedApplicantId ? `<@${resolvedApplicantId}>` : (rawApplicant ? `<@${String(rawApplicant).replace(/^@/, '')}>` : '—');
+
+  // Resolve numeric Discord ID for operator
+  const resolvedOpId = await resolveDiscordUserId(operatorName);
+  let operatorMention = resolvedOpId ? `<@${resolvedOpId}>` : (operatorName ? `<@${String(operatorName).replace(/^@/, '')}>` : '<@شؤون التجنيد>');
+
+  const embed = {
+    title: isApproved ? '✅ قبول مبدئي | شؤون التجنيد والقبول' : '❌ اعتذار ورفض طلب | شؤون التجنيد والقبول',
+    color: isApproved ? 3066993 : 15158332,
+    fields: [
+      { name: '👤 اسم المتقدم', value: application.fullName || '—', inline: true },
+      { name: '🆔 معرّف الديسكورد', value: userMention, inline: true },
+      { name: '🏢 القطاع', value: application.sector || 'الأمن العام', inline: true },
+      { name: '👮 المسؤول عن القرار', value: operatorMention, inline: true },
+      { name: '📝 نتيجة القرار', value: isApproved ? 'تم القبول المبدئي في قطاع الأمن العام. يرجى التواجد في المقر التجنيدي ورومات المتابعة.' : 'نعتذر عن عدم قبول الطلب لهذه الدورة لعدم استيفاء الشروط أو اكتمال الشاغر.', inline: false }
+    ],
+    timestamp: new Date().toISOString(),
+    footer: {
+      text: 'شؤون التجنيد والقبول • القيادة العامة للأمن العام'
+    }
+  };
+
+  const payload = JSON.stringify({
+    content: isApproved ? `🔔 القبول المبدئي للمتقدم: ${userMention}` : `🔔 نعتذر عن قبول المتقدم: ${userMention}`,
+    embeds: [embed]
+  });
+  const webhookPath = targetWebhook.replace('https://discord.com', '');
+  const options = {
+    hostname: 'discord.com',
+    path: webhookPath,
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Content-Length': Buffer.byteLength(payload)
+    }
+  };
+
+  const req = https.request(options, (res) => {
+    let body = '';
+    res.on('data', chunk => body += chunk);
+    res.on('end', () => console.log(`[Recruitment Webhook] ${newStatus} sent. Status: ${res.statusCode}`));
+  });
+  req.on('error', err => console.error('[Recruitment Webhook Error]', err));
+  req.write(payload);
+  req.end();
+}
+
+function sendAttendanceReportToDiscord(bookName, operatorStr, roomImage, records, courseType = 'أساسية') {
   const WEBHOOK_URL = 'https://discord.com/api/webhooks/1519343011417559041/kZrlK9SJX5afM8G8u_uFxhnsTjHQpncdZ8BwyZ89Z_a1VX5QPeWKD_Rc5_Ee4Zj3Vo4h';
 
   console.log('[Discord Report] Sending report via webhook for book:', bookName);
-  console.log('[Discord Report] Records count:', records ? records.length : 0);
+
+  let cleanOp = operatorStr || '';
+  if (cleanOp) {
+    if (!cleanOp.startsWith('<@')) {
+      const opDigits = String(cleanOp).replace(/\D/g, '');
+      cleanOp = opDigits.length >= 17 ? `<@${opDigits}>` : `<@${cleanOp}>`;
+    }
+  } else {
+    cleanOp = '—';
+  }
 
   let attendeesList = '';
   if (records && records.length > 0) {
-    attendeesList = records.map((r, i) => `**${i + 1}.** ${r.rank} / ${r.display_name} - الكود: \`${r.code || '—'}\``).join('\n');
-    // Discord embed field value limit is 1024 chars
-    if (attendeesList.length > 1020) {
-      attendeesList = attendeesList.substring(0, 1020) + '...';
-    }
+    attendeesList = records.map((r) => {
+      if (r.display_name && String(r.display_name).startsWith('<@')) return r.display_name;
+      const rawId = r.user_id || r.discord || r.display_name;
+      const cleanId = String(rawId).replace(/\D/g, '');
+      if (cleanId.length >= 17) return `<@${cleanId}>`;
+      if (String(rawId).startsWith('<@')) return rawId;
+      return `<@${rawId}>`;
+    }).join('\n');
   } else {
-    attendeesList = 'لا يوجد حضور مسجل في هذه الفترة.';
+    attendeesList = 'لا يوجد حضور';
   }
 
+  const countVal = records ? records.length : 0;
+  const reportDescription = `**  تقرير حضور المدربين \n الدورة / الدفتر \n${bookName}\n تصنيف الدورة\n${courseType}\n المسؤول عن التحضير \n${cleanOp}\n عدد الحاضرين \n${countVal}\n أسماء الحاضرين \n${attendeesList}**`;
+
   const embed = {
-    title: '📋 تقرير حضور المدربين',
+    description: reportDescription,
     color: 13214247, // Gold #c9a227
-    fields: [
-      { name: '📚 الدورة / الدفتر', value: bookName, inline: true },
-      { name: '👤 المشرف المسؤول', value: operatorStr, inline: true },
-      { name: '✅ عدد الحاضرين', value: String(records ? records.length : 0), inline: true },
-      { name: '📝 أسماء الحاضرين', value: attendeesList }
-    ],
     timestamp: new Date().toISOString(),
     footer: {
       text: 'شؤون تدريب الأمن العام • مدينة الـ 90'
@@ -875,6 +940,154 @@ function sendAttendanceReportToDiscord(bookName, operatorStr, roomImage, records
 
   req.write(payload);
   req.end();
+}
+
+async function resolveDiscordUserId(inputStr) {
+  if (!inputStr) return null;
+  const digitsOnly = String(inputStr).replace(/\D/g, '');
+  if (digitsOnly.length >= 17) return digitsOnly;
+
+  const queryName = String(inputStr).replace(/^@/, '').trim();
+  try {
+    const row = await new Promise((res) => {
+      db.get(`SELECT id, discord FROM users WHERE username = ? OR display_name = ? OR discord = ? OR id = ? LIMIT 1`,
+        [queryName, queryName, queryName, queryName], (err, r) => res(r));
+    });
+    if (row) {
+      if (row.id && String(row.id).replace(/\D/g, '').length >= 17) return String(row.id).replace(/\D/g, '');
+      if (row.discord && String(row.discord).replace(/\D/g, '').length >= 17) return String(row.discord).replace(/\D/g, '');
+    }
+  } catch (e) {}
+
+  try {
+    const token = config.discordToken || 'MTUxMDE1NzU0NjUwMDAwMTg4NA.G2vHtB.jWHVzM7gd2EvV0Er8NOgIcX9neH2bhA3JiLipg';
+    const guildId = config.guildId || '1272212444936404992';
+    const searchRes = await new Promise((res) => {
+      const options = {
+        hostname: 'discord.com',
+        path: `/api/v10/guilds/${guildId}/members/search?query=${encodeURIComponent(queryName)}&limit=1`,
+        headers: { 'Authorization': `Bot ${token}` }
+      };
+      https.get(options, (r) => {
+        let body = '';
+        r.on('data', chunk => body += chunk);
+        r.on('end', () => {
+          try { res(JSON.parse(body)); } catch (e) { res(null); }
+        });
+      }).on('error', () => res(null));
+    });
+
+    if (Array.isArray(searchRes) && searchRes.length > 0 && searchRes[0].user && searchRes[0].user.id) {
+      return searchRes[0].user.id;
+    }
+  } catch (e) {}
+
+  return null;
+}
+
+function sendDiscordDM(userId, fullName, sector) {
+  return new Promise(async (resolve) => {
+    const token = config.discordToken || 'MTUxMDE1NzU0NjUwMDAwMTg4NA.G2vHtB.jWHVzM7gd2EvV0Er8NOgIcX9neH2bhA3JiLipg';
+    if (!token || !userId) {
+      console.warn('[Discord DM] Missing bot token or userId:', userId);
+      return resolve(false);
+    }
+
+    const cleanUserId = await resolveDiscordUserId(userId);
+    if (!cleanUserId) {
+      console.warn('[Discord DM] Could not resolve numeric Discord ID for:', userId);
+      return resolve(false);
+    }
+
+    const postData = JSON.stringify({ recipient_id: cleanUserId });
+    const reqOptions = {
+      hostname: 'discord.com',
+      path: '/api/v10/users/@me/channels',
+      method: 'POST',
+      headers: {
+        'Authorization': `Bot ${token}`,
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(postData)
+      }
+    };
+
+    const req = https.request(reqOptions, (res) => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => {
+        try {
+          const channel = JSON.parse(data);
+          if (!channel.id) {
+            console.warn('[Discord DM] Could not create DM channel for user:', cleanUserId, data);
+            return resolve(false);
+          }
+
+          const embed = {
+            title: '🛡️ بوابة التجنيد والقبول | الأمن العام',
+            description: 'تم إرسال طلبك بنجاح وهو الآن **بانتظار الاعتماد والمراجعة**.\n\nيرجى التواجد في التجنيد وفي الرومات المخصصة لمتابعة حالة قبولك وسير القبول الميداني.',
+            color: 13214247, // Gold #c9a227
+            fields: [
+              { name: '👤 اسم المتقدم', value: fullName || '—', inline: true },
+              { name: '🏢 القطاع / التخصص', value: sector || 'الأمن العام', inline: true },
+              { name: '⏳ حالة الطلب', value: 'تم إرسال طلبك وبانتظار الاعتماد', inline: false }
+            ],
+            timestamp: new Date().toISOString(),
+            footer: {
+              text: 'شؤون التجنيد والقبول • القيادة العامة للأمن العام'
+            }
+          };
+
+          const msgPayload = {
+            content: `تم إرسال طلبك وبانتظار الاعتماد، يرجى التواجد في التجنيد وفي الرومات المخصصة.`,
+            embeds: [embed]
+          };
+
+          const msgData = JSON.stringify(msgPayload);
+          const msgOptions = {
+            hostname: 'discord.com',
+            path: `/api/v10/channels/${channel.id}/messages`,
+            method: 'POST',
+            headers: {
+              'Authorization': `Bot ${token}`,
+              'Content-Type': 'application/json',
+              'Content-Length': Buffer.byteLength(msgData)
+            }
+          };
+
+          const msgReq = https.request(msgOptions, (msgRes) => {
+            let msgResult = '';
+            msgRes.on('data', chunk => msgResult += chunk);
+            msgRes.on('end', () => {
+              if (msgRes.statusCode === 200 || msgRes.statusCode === 201) {
+                console.log('✅ [Discord DM] Sent direct message to user:', cleanUserId);
+                resolve(true);
+              } else {
+                console.warn('❌ [Discord DM] Failed to send message to channel:', channel.id, msgResult);
+                resolve(false);
+              }
+            });
+          });
+
+          msgReq.on('error', err => {
+            console.error('[Discord DM Error] Sending message error:', err);
+            resolve(false);
+          });
+          msgReq.write(msgData);
+          msgReq.end();
+        } catch (e) {
+          console.error('[Discord DM Error] Parse error:', e);
+          resolve(false);
+        }
+      });
+    });
+
+    req.on('error', err => {
+      console.error('[Discord DM Error] Create channel error:', err);
+      resolve(false);
+    });
+    req.write(postData);
+    req.end();
+  });
 }
 
 let db;
@@ -1633,6 +1846,7 @@ function resolveRoleFromRank(rank, currentRole = 'viewer') {
   if (r.includes('قيادة الامن العام') || r.includes('assistant_owner')) return 'assistant_owner';
   if (r.includes('رئاسة تدريب الامن العام') || r.includes('academy_affairs')) return 'academy_affairs';
   if (r.includes('شؤون أكاديمية التدريب') || r.includes('admin')) return 'admin';
+  if (r.includes('شؤون التجنيد') || r.includes('recruitment_affairs')) return 'recruitment_affairs';
   if (r.includes('مسؤول دورة') || r.includes('مسؤول الدورة') || r.includes('course_admin')) return 'course_admin';
   return currentRole;
 }
@@ -2764,6 +2978,7 @@ const server = http.createServer((req, res) => {
             'assistant_owner': 5,
             'academy_affairs': 4.5,
             'admin': 4,
+            'recruitment_affairs': 3.8,
             'course_admin': 3.5,
             'viewer': 0
           };
@@ -2792,6 +3007,7 @@ const server = http.createServer((req, res) => {
             const bookName = book.book_name;
             const currentStatus = book.status || 'closed';
             const bookRoomImage = book.room_image || null;
+            const bookCourseType = course_type || book.course_type || 'أساسية';
 
             // Restrict reopening locked reports: if book status is 'report_sent', only academy_affairs or higher can reopen it
             if (status === 'open' && currentStatus === 'report_sent') {
@@ -2820,6 +3036,13 @@ const server = http.createServer((req, res) => {
                 return;
               }
 
+              // If opening a new session, clear previous attendance records for this book so count starts fresh
+              if (status === 'open') {
+                db.run('DELETE FROM attendance_records WHERE book_id = ?', [book_id], (delErr) => {
+                  if (delErr) console.error('Failed to clear previous attendance records for book:', book_id, delErr);
+                });
+              }
+
               // Log the action
               db.run(`INSERT INTO attendance_book_logs (book_id, book_name, action, operator) VALUES (?, ?, ?, ?)`,
                 [book_id, bookName, actionLabel, operatorStr],
@@ -2832,16 +3055,14 @@ const server = http.createServer((req, res) => {
                   const auditMsg = `قام "${userName}" (${userRoleLabel}) بـ ${actionLabel} لـ "${bookName}"`;
                   logSystemActivity('attendance_toggle', operatorStr, auditMsg);
 
-                  // If status is report_sent, fetch attendees and send report to Discord
+                  // If status is report_sent, fetch active attendees for current session and send report to Discord
                   if (status === 'report_sent') {
-                    db.get(`SELECT timestamp FROM attendance_book_logs WHERE book_id = ? AND action = 'فتح التحضير' ORDER BY id DESC LIMIT 1`, [book_id], (errLog, lastOpenLog) => {
-                      const openTime = lastOpenLog ? lastOpenLog.timestamp : '1970-01-01 00:00:00';
-                      db.all(`SELECT display_name, rank, code, timestamp FROM attendance_records WHERE book_id = ? AND timestamp >= ? ORDER BY timestamp ASC`, [book_id, openTime], (errRecs, records) => {
-                        if (errRecs) {
-                          console.error('Error fetching records for Discord report:', errRecs);
-                        }
-                        sendAttendanceReportToDiscord(bookName, operatorStr, bookRoomImage, records || []);
-                      });
+                    db.all(`SELECT user_id, display_name, rank, code, timestamp FROM attendance_records WHERE book_id = ? ORDER BY id ASC`, [book_id], (errRecs, records) => {
+                      if (errRecs) {
+                        console.error('Error fetching records for Discord report:', errRecs);
+                      }
+                      const opId = (req.body && req.body.operator_id) || (user ? (user.discord || user.id) : operatorStr);
+                      sendAttendanceReportToDiscord(bookName, opId, bookRoomImage, records || [], bookCourseType);
                     });
                   }
 
@@ -3363,6 +3584,48 @@ const server = http.createServer((req, res) => {
             }
           }
         );
+      } catch (e) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Invalid JSON' }));
+      }
+    });
+    return;
+  }
+
+  // POST /api/applications/notify_dm - Send Discord DM when applying
+  if (pathname === '/api/applications/notify_dm' && req.method === 'POST') {
+    let body = '';
+    req.on('data', chunk => { body += chunk; });
+    req.on('end', async () => {
+      try {
+        const data = JSON.parse(body);
+        const { discordId, fullName, sector } = data;
+        if (discordId) {
+          await sendDiscordDM(discordId, fullName, sector);
+        }
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true }));
+      } catch (e) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Invalid JSON' }));
+      }
+    });
+    return;
+  }
+
+  // POST /api/applications/decision - Send Discord webhook when application status is approved or rejected
+  if (pathname === '/api/applications/decision' && req.method === 'POST') {
+    let body = '';
+    req.on('data', chunk => { body += chunk; });
+    req.on('end', async () => {
+      try {
+        const data = JSON.parse(body);
+        const { application, newStatus, operatorName } = data;
+        if (application && newStatus) {
+          await sendRecruitmentDecisionWebhook(application, newStatus, operatorName);
+        }
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true }));
       } catch (e) {
         res.writeHead(400, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ error: 'Invalid JSON' }));

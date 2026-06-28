@@ -302,6 +302,7 @@ const App = (() => {
           { value: 'assistant_owner', label: 'قيادة الامن العام' },
           { value: 'academy_affairs', label: 'رئاسة تدريب الامن العام' },
           { value: 'admin', label: 'شؤون أكاديمية التدريب' },
+          { value: 'recruitment_affairs', label: 'شؤون التجنيد' },
           { value: 'course_admin', label: 'مسؤول دورة' },
           { value: 'viewer', label: 'مشاهد' }
         ];
@@ -464,6 +465,7 @@ const App = (() => {
                 <option value="assistant_owner" ${currentPreview === 'assistant_owner' ? 'selected' : ''} style="background: #0d122b; color: #fff;">قيادة الامن العام</option>
                 <option value="academy_affairs" ${currentPreview === 'academy_affairs' ? 'selected' : ''} style="background: #0d122b; color: #fff;">رئاسة تدريب الامن العام</option>
                 <option value="admin" ${currentPreview === 'admin' ? 'selected' : ''} style="background: #0d122b; color: #fff;">شؤون أكاديمية التدريب</option>
+                <option value="recruitment_affairs" ${currentPreview === 'recruitment_affairs' ? 'selected' : ''} style="background: #0d122b; color: #fff;">شؤون التجنيد</option>
                 <option value="course_admin" ${currentPreview === 'course_admin' ? 'selected' : ''} style="background: #0d122b; color: #fff;">مسؤول دورة</option>
                 <option value="viewer" ${currentPreview === 'viewer' ? 'selected' : ''} style="background: #0d122b; color: #fff;">مشاهد</option>
               </select>
@@ -1805,7 +1807,7 @@ const App = (() => {
   /* ── ديناميكية حقن روابط الحضور للأشخاص المصرح لهم ── */
   function injectAttendanceLinkIfNeeded() {
     const currentUser = (typeof Auth !== 'undefined') ? Auth.getCurrentUser() : null;
-    const userRole = currentUser ? currentUser.role : null;
+    const userRole = (typeof Auth !== 'undefined') ? Auth.getRole() : (currentUser ? currentUser.role : null);
     const userRank = currentUser ? currentUser.rank : null;
     const ROLE_LEVELS = {
       'owner': 6,
@@ -1813,16 +1815,20 @@ const App = (() => {
       'academy_affairs': 4.5,
       'admin': 4,
       'course_admin': 3.5,
+      'college_trainee': 1,
       'viewer': 0
     };
-    const isAuthorized = currentUser && (
+    const isAuthorized = currentUser && userRole !== 'viewer' && (
       ['1334568342345748565', '1120142432554713261', '821825761673478144'].includes(currentUser.id) ||
       (ROLE_LEVELS[userRole] >= 3.5) ||
+      userRole === 'college_trainee' ||
       (userRank && (
         userRank.includes('ادارة تدريب') ||
         userRank.includes('إدارة تدريب') ||
         userRank.includes('ادارة التدريب') ||
-        userRank.includes('إدارة التدريب')
+        userRank.includes('إدارة التدريب') ||
+        userRank.includes('منسوبي كلية التدريب') ||
+        userRank.includes('كلية التدريب')
       ))
     );
 

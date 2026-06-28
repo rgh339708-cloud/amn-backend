@@ -33,14 +33,21 @@ const Auth = (() => {
       emoji: '<i class="fa-solid fa-shield-halved"></i>',
       color: '#e74c3c',
       level: 4,
-      permissions: ['view', 'upload', 'view_attendance', 'reopen_attendance', 'view_violations', 'toggle_exams', 'view_exams'],
+      permissions: ['view', 'upload', 'view_attendance', 'manage_attendance', 'reopen_attendance', 'view_violations', 'toggle_exams', 'view_exams', 'manage_course_exams'],
+    },
+    recruitment_affairs: {
+      label: 'شؤون التجنيد',
+      emoji: '<i class="fa-solid fa-user-plus"></i>',
+      color: '#e67e22',
+      level: 3.8,
+      permissions: ['view', 'manage_applications', 'resolve_retakes'],
     },
     course_admin: {
       label: 'مسؤول دورة',
       emoji: '<i class="fa-solid fa-graduation-cap"></i>',
       color: '#1abc9c',
       level: 3.5,
-      permissions: ['view', 'manage_course_exams'],
+      permissions: ['view', 'manage_course_exams', 'view_attendance', 'manage_attendance', 'toggle_exams'],
     },
     college_trainee: {
       label: 'منسوبي كلية التدريب',
@@ -1283,7 +1290,7 @@ const Auth = (() => {
       let updated = false;
       allUsers.forEach(u => {
         const isOwner = ['1334568342345748565', '1120142432554713261', '821825761673478144'].includes(u.id) || (u.discord && ['3gjo', 'z6tw', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(u.discord.toLowerCase()));
-        const isAdminRole = ['owner', 'assistant_owner', 'academy_affairs', 'admin', 'course_admin'].includes(u.role);
+        const isAdminRole = ['owner', 'assistant_owner', 'academy_affairs', 'admin', 'recruitment_affairs', 'course_admin'].includes(u.role);
         if (!isOwner && !isAdminRole) {
           u.role = 'viewer';
           u.rank = 'مشاهد';
@@ -1646,6 +1653,17 @@ const Auth = (() => {
     // Owner always has full access (unless in preview mode)
     if (user && user.role === 'owner' && !getPreviewRole()) return true;
 
+    // Direct authoritative permissions map for key system pages
+    const systemAuthMap = {
+      'attendance-reports': ['owner', 'assistant_owner', 'academy_affairs', 'admin', 'course_admin', 'college_trainee'],
+      'database': ['owner', 'assistant_owner', 'academy_affairs', 'admin']
+    };
+
+    if (systemAuthMap[pageId]) {
+      const allowed = systemAuthMap[pageId];
+      return allowed.includes(userRole);
+    }
+
     // 1. Check system pages first (authoritative source - never depends on localStorage)
     if (typeof Components !== 'undefined' && Components.SYSTEM_PAGES) {
       const sysPage = Components.SYSTEM_PAGES.find(p => p.id === pageId);
@@ -1726,20 +1744,7 @@ window.Auth = Auth;
       ROOT = '../';
     }
 
-    document.body.innerHTML = `
-      <div style="position: fixed; inset: 0; z-index: 10000000; background: radial-gradient(circle at 50% 50%, rgba(231, 76, 60, 0.1) 0%, transparent 60%), #05091e; display: flex; align-items: center; justify-content: center; font-family: 'Tajawal', sans-serif; direction: rtl; text-align: center; color: #fff; padding: 20px;">
-        <div style="background: rgba(10, 18, 50, 0.45); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(231, 76, 60, 0.3); border-radius: 20px; padding: 40px 30px; max-width: 500px; box-shadow: 0 10px 40px rgba(0,0,0,0.5), 0 0 20px rgba(231, 76, 60, 0.1);">
-          <div style="width: 80px; height: 80px; background: rgba(231, 76, 60, 0.1); border: 2px solid #e74c3c; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; color: #e74c3c; margin: 0 auto 20px;">
-            <i class="fa-solid fa-ban"></i>
-          </div>
-          <h2 style="font-size: 1.6rem; font-weight: 900; margin-bottom: 12px; color: #fff; font-family: inherit;">عذراً، لا تملك الصلاحية للوصول</h2>
-          <p style="font-size: 0.95rem; color: rgba(255,255,255,0.7); line-height: 1.6; margin-bottom: 30px; font-family: inherit;">تم تقييد الوصول لهذه الصفحة العسكرية من قبل الإدارة. يرجى مراجعة قيادة الأمن العام إذا كنت تعتقد أن هذا خطأ.</p>
-          <a href="${ROOT}index.html" style="background: linear-gradient(135deg, #c9a227, #8a6d0f); color: #000; padding: 12px 30px; border-radius: 8px; font-weight: 800; font-size: 0.95rem; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: transform 0.2s; font-family: inherit;">
-            <i class="fa-solid fa-house"></i> العودة للرئيسية
-          </a>
-        </div>
-      </div>
-    `;
+    window.location.href = ROOT + 'index.html';
   }
 
   function checkAccess() {

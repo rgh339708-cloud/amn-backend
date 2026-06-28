@@ -838,6 +838,7 @@
               <option value="assistant_owner">قيادة الأمن العام</option>
               <option value="academy_affairs">رئاسة تدريب الأمن العام</option>
               <option value="admin">شؤون أكاديمية التدريب</option>
+              <option value="recruitment_affairs">شؤون التجنيد</option>
               <option value="course_admin">مسؤول دورة</option>
               <option value="college_trainee">منسوبي كلية التدريب</option>
               <option value="viewer">مشاهد</option>
@@ -973,6 +974,7 @@
             <option value="assistant_owner" data-rank="قيادة الأمن العام">قيادة الأمن العام</option>
             <option value="academy_affairs" data-rank="رئاسة تدريب الأمن العام">رئاسة تدريب الأمن العام</option>
             <option value="admin" data-rank="شؤون أكاديمية التدريب">شؤون أكاديمية التدريب</option>
+            <option value="recruitment_affairs" data-rank="شؤون التجنيد">شؤون التجنيد</option>
             <option value="course_admin" data-rank="مسؤول دورة">مسؤول دورة</option>
             <option value="college_trainee" data-rank="منسوبي كلية التدريب">منسوبي كلية التدريب</option>
             <option value="viewer" data-rank="مشاهد">مشاهد</option>
@@ -1116,25 +1118,40 @@
   };
 
   document.addEventListener('DOMContentLoaded', () => {
-    // 1. Secure Route - check if owner, assistant_owner, academy_affairs, or admin
-    if (!Auth.isLoggedIn() || !['owner', 'assistant_owner', 'academy_affairs', 'admin'].includes(Auth.getRole())) {
+    // 1. Secure Route - check if owner, assistant_owner, academy_affairs, admin, or recruitment_affairs
+    if (!Auth.isLoggedIn() || !['owner', 'assistant_owner', 'academy_affairs', 'admin', 'recruitment_affairs'].includes(Auth.getRole())) {
       window.location.href = 'login.html';
       return;
     }
     
     const user = Auth.getCurrentUser();
+    const userRole = Auth.getRole();
     setupUserBadge();
 
+    // If role is recruitment_affairs, restrict interface strictly to recruitment tab
+    if (userRole === 'recruitment_affairs') {
+      document.querySelectorAll('.admin-nav-item').forEach(item => {
+        if (item.dataset.tab !== 'recruitment') {
+          item.style.display = 'none';
+        }
+      });
+      const navRec = document.getElementById('nav-item-recruitment');
+      if (navRec) {
+        navRec.style.display = 'flex';
+        // Force activation
+        setTimeout(() => navRec.click(), 50);
+      }
+    }
+
     // Show logs management tab for owner, assistant_owner, and academy_affairs
-    if (user && ['owner', 'assistant_owner', 'academy_affairs'].includes(user.role)) {
+    if (user && ['owner', 'assistant_owner', 'academy_affairs'].includes(userRole)) {
       const navLogs = document.getElementById('nav-item-logs');
       if (navLogs) navLogs.style.display = 'flex';
       filterAndRenderLogs();
     }
 
-    // Show recruitment tab if owner, assistant_owner, academy_affairs, or admin
-    const userRole = user ? user.role : '';
-    const isOwnerOrAdmin = ['owner', 'assistant_owner', 'academy_affairs', 'admin'].includes(userRole);
+    // Show recruitment tab if owner, assistant_owner, academy_affairs, admin, or recruitment_affairs
+    const isOwnerOrAdmin = ['owner', 'assistant_owner', 'academy_affairs', 'admin', 'recruitment_affairs'].includes(userRole);
     if (isOwnerOrAdmin) {
       const navRec = document.getElementById('nav-item-recruitment');
       if (navRec) navRec.style.display = 'flex';
@@ -1938,17 +1955,24 @@
         : '<span class="status-badge danger"><i class="fa-solid fa-circle-xmark"></i> راسب</span>';
         
       // Action buttons
-      let actionsHtml = '—';
+      let actionsHtml = '';
       if (item.status === 'pending') {
-        actionsHtml = `
+        actionsHtml += `
           <button class="btn-action success" onclick="updateApplicationStatus('${item.id}', 'approved')" style="padding:4px 10px; font-size:0.75rem; border-radius:6px; margin-left:4px;">
             <i class="fa-solid fa-check"></i> قبول
           </button>
-          <button class="btn-action danger" onclick="updateApplicationStatus('${item.id}', 'rejected')" style="padding:4px 10px; font-size:0.75rem; border-radius:6px;">
+          <button class="btn-action danger" onclick="updateApplicationStatus('${item.id}', 'rejected')" style="padding:4px 10px; font-size:0.75rem; border-radius:6px; margin-left:4px;">
             <i class="fa-solid fa-xmark"></i> رفض
           </button>
         `;
       }
+      
+      // Allow Retake button
+      actionsHtml += `
+        <button class="btn-action primary" onclick="grantApplicationRetake('${item.fullName}', '${item.discordId}', ${item.examScore || 0})" style="padding:4px 10px; font-size:0.75rem; border-radius:6px; background:rgba(201,162,39,0.12); border-color:rgba(201,162,39,0.3); color:var(--color-gold-primary); margin-left:4px;">
+          <i class="fa-solid fa-rotate-right"></i> سماح بالإعادة
+        </button>
+      `;
       
       const formattedDate = App.formatDate ? App.formatDate(item.createdAt, 'datetime') : item.createdAt.replace('T', ' ').substring(0, 16);
       
@@ -1966,6 +1990,36 @@
     });
   }
 
+  window.grantApplicationRetake = function(candidateName, discordId, prevScore) {
+    const user = Auth.getCurrentUser();
+    const userName = user ? (user.globalName || user.username) : 'شؤون التجنيد';
+    
+    if (!confirm(`هل أنت متأكد من منح المتقدم "${candidateName}" صلاحية إعادة الاختبار؟`)) {
+      return;
+    }
+    
+    const reqData = {
+      trainee_name: candidateName,
+      rank: 'متقدم تجنيد',
+      code: discordId,
+      course_name: 'اختبار القبول والتجنيد (الأمن العام)',
+      previous_score: prevScore || 0,
+      request_time: new Date().toLocaleDateString('ar-SA') + ' ' + new Date().toLocaleTimeString('ar-SA', { hour12: false }),
+      status: 'approved',
+      approved_by: userName
+    };
+    
+    Storage.saveRetakeRequest(reqData).then(() => {
+      App.toast(`✔️ تم منح صلاحية إعادة الاختبار للمتقدم "${candidateName}" بنجاح!`, 'success');
+      if (typeof Logger !== 'undefined') {
+        Logger.log('retake_approved', `قام "${userName}" بمنح صلاحية إعادة اختبار التجنيد للمتقدم "${candidateName}" (${discordId})`);
+      }
+    }).catch(err => {
+      console.error(err);
+      App.toast('فشل إرسال تصريح إعادة الاختبار.', 'error');
+    });
+  }
+
   window.updateApplicationStatus = function(id, newStatus) {
     const user = Auth.getCurrentUser();
     const userName = user ? (user.globalName || user.username) : 'شؤون التجنيد';
@@ -1974,6 +2028,20 @@
     if (updated) {
       App.toast(`تم ${newStatus === 'approved' ? 'قبول' : 'رفض'} طلب المتقدم بنجاح.`, 'success');
       
+      // Send Discord decision webhook
+      try {
+        const apiBase = (typeof Storage !== 'undefined' && Storage.getApiBase) ? Storage.getApiBase() : '';
+        fetch(`${apiBase}/api/applications/decision`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            application: updated,
+            newStatus: newStatus,
+            operatorName: userName
+          })
+        }).catch(err => console.warn('Failed to send recruitment decision webhook:', err));
+      } catch (e) {}
+
       // Log in audit logs
       if (typeof Logger !== 'undefined') {
         Logger.log('recruitment_decision', `قام "${userName}" بـ ${newStatus === 'approved' ? 'قبول' : 'رفض'} طلب التجنيد الخاص بالمتقدم "${updated.fullName}" (${updated.discordId})`);
@@ -2496,7 +2564,8 @@
 
     const action = document.getElementById('perm-action-type').value;
     const operator = Auth.getCurrentUser();
-    const apiBase = App.getApiBase ? App.getApiBase() : window.location.origin;
+    // Always use the production backend directly
+    const apiBase = 'https://amn-backend.onrender.com';
 
     let targetId = '';
     let targetDiscord = '';
@@ -2587,7 +2656,8 @@
     }
 
     const operator = Auth.getCurrentUser();
-    const apiBase = App.getApiBase ? App.getApiBase() : window.location.origin;
+    // Always use the production backend directly
+    const apiBase = 'https://amn-backend.onrender.com';
 
     const payload = {
       operator_id: operator ? operator.id : '',

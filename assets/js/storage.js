@@ -139,6 +139,7 @@ const Storage = (() => {
     RETAKE_REQUESTS: `${PREFIX}retake_requests`,
     EXAM_VIOLATIONS: `${PREFIX}exam_violations`,
     DISCORD_LOGS:   `${PREFIX}discord_logs`,
+    QBANK_REQUESTS: `${PREFIX}qbank_requests`,
   };
 
   const lastWriteTime = {};
@@ -494,6 +495,25 @@ const Storage = (() => {
             // Avoid overwriting active session on client
             if (key === keys.CURRENT_USER) return;
             
+            // Special smart merge protection for Question Bank Requests
+            if (key === keys.QBANK_REQUESTS) {
+              const serverArr = json.collections[key];
+              const localArr = getCollection(key);
+              if (Array.isArray(serverArr) && serverArr.length > 0) {
+                const map = new Map();
+                serverArr.forEach(item => { if (item && item.id) map.set(item.id, item); });
+                localArr.forEach(item => { if (item && item.id) map.set(item.id, item); });
+                const merged = Array.from(map.values()).sort((a,b) => (b.id > a.id ? 1 : -1));
+                localStorage.setItem(key, JSON.stringify(merged));
+              } else if (!serverArr || serverArr.length === 0) {
+                if (localArr && localArr.length > 0) {
+                  // Keep local data intact if server collection is empty or uninitialized
+                  return;
+                }
+              }
+              return;
+            }
+
             // Skip overwriting if there is an active sync request in flight, if it was modified recently (8s), or if it is unsynced (dirty)
             const lastWrite = lastWriteTime[key] || 0;
             const hasActiveSync = activeSyncs[key] > 0;
@@ -548,7 +568,8 @@ const Storage = (() => {
     saveViolation,
     deleteViolation,
     loadAllFromServer,
-    startRealTimePolling
+    startRealTimePolling,
+    getApiBase
   };
 })();window.Storage = Storage;
 
