@@ -2145,10 +2145,10 @@ function syncGoogleSheetsToDb(forceId = null, loginUser = null) {
 
           const deactivatePromises = activeUsers.map(user => {
             // Protect Owner, Assistant Owner, Guest Viewers, and Manually assigned users from auto-deactivation
-            const isOwnerOrAssistant = ['1334568342345748565', '1120142432554713261', '821825761673478144'].includes(user.id) || 
-                                       (user.username && ['3gjo', 'z6tw', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(user.username.toLowerCase())) ||
-                                       (user.display_name && ['3gjo', 'z6tw', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(user.display_name.toLowerCase())) ||
-                                       user.role === 'owner' || user.role === 'assistant_owner';
+            const isOwnerOrAssistant = ['1334568342345748565', '821825761673478144'].includes(user.id) || 
+                                       (user.username && ['3gjo', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(user.username.toLowerCase())) ||
+                                       (user.display_name && ['3gjo', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(user.display_name.toLowerCase())) ||
+                                       (user.role === 'owner' || user.role === 'assistant_owner');
             const isGuest = user.role === 'viewer' && (!user.rank || user.rank === 'مشاهد' || user.rank === 'غير معروف');
             const isManual = user.is_manual_role === 1 || user.is_manual_role === true;
             if (isOwnerOrAssistant || isGuest || isManual) {
@@ -2216,8 +2216,8 @@ function syncGoogleSheetsToDb(forceId = null, loginUser = null) {
 
             const targetDbId = dbUser ? dbUser.id : forceId;
 
-            const isOwnerOrAssistant = ['1334568342345748565', '1120142432554713261', '821825761673478144'].includes(targetDbId) || 
-                                       ['1334568342345748565', '1120142432554713261', '821825761673478144'].includes(cleanForceId) || 
+            const isOwnerOrAssistant = ['1334568342345748565', '821825761673478144'].includes(targetDbId) || 
+                                       ['1334568342345748565', '821825761673478144'].includes(cleanForceId) || 
                                        (dbUser && (dbUser.role === 'owner' || dbUser.role === 'assistant_owner'));
 
             const isGuest = dbUser && dbUser.role === 'viewer' && (!dbUser.rank || dbUser.rank === 'مشاهد' || dbUser.rank === 'غير معروف');
@@ -2653,7 +2653,7 @@ async function syncAllUsersFromDiscord() {
         let finalRole = isManual ? u.role : (matchedRole || u.role || 'viewer');
         let finalRank = isManual ? u.rank : (u.rank || matchedRank || 'مشاهد');
 
-        if (['1334568342345748565', '1120142432554713261', '821825761673478144'].includes(discordId)) {
+        if (['1334568342345748565', '821825761673478144'].includes(discordId)) {
           finalRole = 'owner';
           finalRank = 'المالك';
         }
@@ -3029,7 +3029,7 @@ const server = http.createServer((req, res) => {
             'viewer': 0
           };
 
-          const isOwnerBackdoor = ['1334568342345748565', '1120142432554713261', '821825761673478144'].includes(operator_id);
+          const isOwnerBackdoor = ['1334568342345748565', '821825761673478144'].includes(operator_id);
           const userRole = user ? user.role : 'viewer';
           const userLevel = ROLE_LEVELS[userRole] || 0;
 
@@ -4778,9 +4778,9 @@ const server = http.createServer((req, res) => {
             return;
           }
 
-          const isOwner = ['1334568342345748565', '1120142432554713261', '821825761673478144'].includes(id) || 
-                          (username && ['3gjo', 'z6tw', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(username.toLowerCase())) ||
-                          (display_name && ['3gjo', 'z6tw', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(display_name.toLowerCase()));
+          const isOwner = ['1334568342345748565', '821825761673478144'].includes(id) || 
+                          (username && ['3gjo', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(username.toLowerCase())) ||
+                          (display_name && ['3gjo', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(display_name.toLowerCase()));
 
           // If user exists but status is disabled or banned, reject
           if (existingUser && (existingUser.status === 'disabled' || existingUser.status === 'banned') && !isOwner) {
@@ -4940,8 +4940,8 @@ const server = http.createServer((req, res) => {
             return;
           }
           
-          const opIds = ['1334568342345748565', '1120142432554713261', '821825761673478144'];
-          const opUsernames = ['3gjo', 'z6tw', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'];
+          const opIds = ['1334568342345748565', '821825761673478144'];
+          const opUsernames = ['3gjo', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'];
           
           const isAuthorized = opUser && (opUser.role === 'owner' || opUser.role === 'assistant_owner' || 
                               opIds.includes(operator_id) ||

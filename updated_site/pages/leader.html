@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>القيادة | الأمن العام</title>
+  <link rel="stylesheet" href="../assets/css/main.css?v=1.1.27">
+  <link rel="stylesheet" href="../assets/css/navbar.css?v=1.1.27">
+  <link rel="stylesheet" href="../assets/css/sidebar.css?v=1.1.27">
+  <link rel="stylesheet" href="../assets/css/footer.css">
+  <style>
+
+    /* ═══════════════════════════════════════════════════════
+       PAGE WRAPPER
+    ═══════════════════════════════════════════════════════ */
+    .leadership-page {
+      background: var(--color-bg-primary);
+      min-height: 100vh;
+      padding-top: 102px; /* 62px top + 40px sub-nav */
+
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       OFFICIAL DOCUMENT HEADER
+    ═══════════════════════════════════════════════════════ */
+    .official-header {
+      background: linear-gradient(180deg, #060d2e 0%, #0b1840 60%, #071230 100%);
+      border-bottom: 1px solid rgba(201,162,39,0.15);
+      padding: 40px 0 32px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Subtle shimmer lines on header */
+    .official-header::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(201,162,39,0.4) 20%,
+        var(--color-gold-primary) 50%,
+        rgba(201,162,39,0.4) 80%,
+        transparent 100%
+      );
+    }
+    .official-header::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 80% at 50% 50%, rgba(13,27,75,0.4) 0%, transparent 70%),
+        url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c9a227' fill-opacity='0.018'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      pointer-events: none;
+    }
+
+    .official-header-inner {
+      max-width: var(--content-max);
+      margin: 0 auto;
+      padding: 0 var(--space-8);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-8);
+      position: relative;
+      z-index: 2;
+    }
+
+    /* ── Entity name block (right) ── */
+    .entity-name-block {
+      text-align: right;
+      flex: 1;
+    }
+
+    .entity-name-ar {
+      font-size: 2rem;
+      font-weight: 900;
+      color: var(--color-text-primary);
+      letter-spacing: 2px;
+      line-height: 1.2;
+      text-shadow: 0 0 30px rgba(201,162,39,0.15);
+    }
+
+    .entity-name-en {
+      font-family: var(--font-display);
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--color-gold-primary);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-top: 4px;
+      opacity: 0.85;
+    }
+
+    .entity-sub-ar {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--color-text-secondary);
+      margin-top: 10px;
+      letter-spacing: 1px;
+    }
+
+    .entity-sub-en {
+      font-family: var(--font-display);
+      font-size: 0.6rem;
+      font-weight: 500;
+      color: var(--color-text-muted);
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    /* ── Official Emblem (center) ── */
+    .official-emblem {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-2);
+      flex-shrink: 0;
+    }
+
+    .emblem-img-wrap {
+      position: relative;
+      width: 110px;
+      height: 110px;
+    }
+
+    /* emblem ring glow animation */
+    @keyframes emblemGlow {
+      0%, 100% { filter: drop-shadow(0 0 8px rgba(201,162,39,0.4)); }
+      50%       { filter: drop-shadow(0 0 18px rgba(201,162,39,0.7)); }
+    }
+    .official-emblem-img {
+      width: 110px;
+      height: 110px;
+      object-fit: contain;
+      animation: emblemGlow 3s ease-in-out infinite;
+    }
+
+    /* ── Page title (left) ── */
+    .header-page-meta {
+      text-align: left;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+
+    .page-meta-label {
+      font-size: 9px;
+      font-family: var(--font-display);
+      color: var(--color-text-muted);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .page-meta-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--color-gold-light);
+      letter-spacing: 1px;
+    }
+
+    .page-meta-date {
+      font-size: 10px;
+      color: var(--color-text-muted);
+      margin-top: 6px;
+      font-family: var(--font-display);
+      letter-spacing: 0.5px;
+    }
+
+    /* ── Gold divider bar under header ── */
+    .gold-header-divider {
+      height: 1px;
+      background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(201,162,39,0.1) 10%,
+        rgba(201,162,39,0.5) 30%,
+        var(--color-gold-primary) 50%,
+        rgba(201,162,39,0.5) 70%,
+        rgba(201,162,39,0.1) 90%,
+        transparent 100%
+      );
+      margin: 0;
+    }
+    .gold-header-divider-thick {
+      height: 3px;
+      background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(201,162,39,0.3) 15%,
+        var(--color-gold-primary) 40%,
+        var(--color-gold-light) 50%,
+        var(--color-gold-primary) 60%,
+        rgba(201,162,39,0.3) 85%,
+        transparent 100%
+      );
+    }
+
+    /* ── Sub label below divider ── */
+    .chart-label-bar {
+      background: rgba(0,0,0,0.3);
+      padding: 10px var(--space-8);
+      text-align: center;
+      border-bottom: 1px solid rgba(201,162,39,0.08);
+    }
+    .chart-label-text {
+      font-size: 11px;
+      font-family: var(--font-display);
+      color: var(--color-gold-primary);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      opacity: 0.8;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       BREADCRUMB
+    ═══════════════════════════════════════════════════════ */
+    .breadcrumb-bar {
+      padding: var(--space-3) var(--space-8);
+      max-width: var(--content-max);
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      font-size: var(--font-size-xs);
+      color: var(--color-text-muted);
+    }
+    .breadcrumb-bar a:hover { color: var(--color-gold-primary); }
+    .breadcrumb-bar .sep { color: var(--color-text-muted); opacity: 0.4; }
+
+    /* ═══════════════════════════════════════════════════════
+       ORG CHART – FULL WIDTH
+    ═══════════════════════════════════════════════════════ */
+    .org-section {
+      padding: 60px var(--space-8) 70px;
+      position: relative;
+      background: linear-gradient(180deg, #071230 0%, #090a18 100%);
+      overflow-x: auto;
+    }
+
+    .org-section::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(201,162,39,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(201,162,39,0.025) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+    }
+
+    .org-tree {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      min-width: 860px;
+      max-width: 1200px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    /* ── Levels ── */
+    .org-level {
+      display: flex;
+      justify-content: center;
+      gap: 0;
+      width: 100%;
+      position: relative;
+    }
+
+    .org-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+    }
+
+    /* ─── NODE CARDS ─── */
+    .org-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 28px 32px 24px;
+      border-radius: 18px;
+      position: relative;
+      transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+      cursor: default;
+      user-select: none;
+    }
+
+    /* Top accent bar on each card */
+    .org-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 16px; right: 16px;
+      height: 3px;
+      border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    }
+
+    .org-card:hover {
+      transform: translateY(-5px);
+    }
+
+    /* Level 1 – Commander */
+    .org-card.lvl-1 {
+      background: linear-gradient(160deg, #1a2f70 0%, #0f1d4a 60%, #091535 100%);
+      border: 2px solid var(--color-gold-primary);
+      box-shadow:
+        0 0 40px rgba(201,162,39,0.2),
+        0 12px 40px rgba(0,0,0,0.6),
+        inset 0 1px 0 rgba(255,255,255,0.05);
+      padding: 34px 48px 28px;
+      min-width: 300px;
+    }
+    .org-card.lvl-1::before {
+      background: linear-gradient(90deg, var(--color-gold-dark), var(--color-gold-primary), #f0d060, var(--color-gold-primary), var(--color-gold-dark));
+      height: 4px;
+      left: 0; right: 0;
+      top: 0;
+      border-radius: 18px 18px 0 0;
+    }
+    .org-card.lvl-1:hover {
+      box-shadow:
+        0 0 60px rgba(201,162,39,0.3),
+        0 18px 50px rgba(0,0,0,0.7),
+        inset 0 1px 0 rgba(255,255,255,0.08);
+    }
+
+    /* Level 2 – Deputies */
+    .org-card.lvl-2 {
+      background: linear-gradient(160deg, #112050 0%, #0b1635 60%, #071025 100%);
+      border: 1.5px solid rgba(201,162,39,0.55);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.5), 0 0 20px rgba(201,162,39,0.08);
+      padding: 26px 36px 22px;
+      min-width: 240px;
+    }
+    .org-card.lvl-2::before {
+      background: linear-gradient(90deg, transparent, var(--color-gold-primary), transparent);
+    }
+    .org-card.lvl-2:hover {
+      border-color: rgba(201,162,39,0.85);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.6), 0 0 30px rgba(201,162,39,0.14);
+    }
+
+    /* Level 3 – Assistants */
+    .org-card.lvl-3 {
+      background: linear-gradient(160deg, #0d1840 0%, #091228 60%, #060e1e 100%);
+      border: 1.5px solid rgba(201,162,39,0.3);
+      box-shadow: 0 6px 22px rgba(0,0,0,0.4);
+      padding: 22px 28px 18px;
+      min-width: 200px;
+    }
+    .org-card.lvl-3::before {
+      background: linear-gradient(90deg, transparent, rgba(201,162,39,0.6), transparent);
+    }
+    .org-card.lvl-3:hover {
+      border-color: rgba(201,162,39,0.55);
+      box-shadow: 0 10px 32px rgba(0,0,0,0.55), 0 0 20px rgba(201,162,39,0.1);
+    }
+
+    /* ── Node icon badge ── */
+    .node-icon {
+      font-size: 2.4rem;
+      margin-bottom: 14px;
+      line-height: 1;
+      filter: drop-shadow(0 0 6px rgba(201,162,39,0.5));
+    }
+    .lvl-2 .node-icon { font-size: 2rem; margin-bottom: 12px; }
+    .lvl-3 .node-icon { font-size: 1.7rem; margin-bottom: 10px; }
+
+    /* ── Node avatar badge ── */
+    .node-avatar {
+      width: 85px;
+      height: 85px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--color-gold-primary);
+      box-shadow: 0 0 15px rgba(201,162,39,0.35);
+      margin-bottom: 12px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .org-card:hover .node-avatar {
+      transform: scale(1.06) rotate(2deg);
+      box-shadow: 0 0 25px rgba(201,162,39,0.6);
+      border-color: var(--color-gold-light);
+    }
+
+
+    /* ── Position label ── */
+    .node-position {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--color-gold-light);
+      background: rgba(201,162,39,0.12);
+      border: 1px solid rgba(201,162,39,0.25);
+      border-radius: var(--radius-full);
+      padding: 4px 14px;
+      margin-bottom: 12px;
+      display: inline-block;
+      white-space: nowrap;
+    }
+    .lvl-1 .node-position {
+      font-size: 11px;
+      letter-spacing: 2.5px;
+      background: rgba(201,162,39,0.18);
+      border-color: rgba(201,162,39,0.45);
+      color: var(--color-gold-primary);
+      padding: 5px 18px;
+    }
+
+    /* ── Name ── */
+    .node-name {
+      font-size: 1.35rem;
+      font-weight: 900;
+      color: #ffffff;
+      line-height: 1.2;
+      margin-bottom: 8px;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    }
+    .lvl-1 .node-name {
+      font-size: 1.65rem;
+      letter-spacing: 0.5px;
+    }
+    .lvl-3 .node-name {
+      font-size: 1.15rem;
+    }
+
+    /* ── ID badge ── */
+    .node-id {
+      font-family: var(--font-display);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--color-gold-dark);
+      letter-spacing: 2px;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(201,162,39,0.12);
+      border-radius: var(--radius-full);
+      padding: 2px 12px;
+    }
+    .lvl-1 .node-id {
+      color: var(--color-gold-primary);
+      font-size: 12px;
+      border-color: rgba(201,162,39,0.25);
+    }
+
+    /* ════════════════════════════════
+       CONNECTOR LINES
+    ════════════════════════════════ */
+
+    /* Vertical down from a card */
+    .v-line-down {
+      width: 3px;
+      background: linear-gradient(to bottom, var(--color-gold-primary), rgba(201,162,39,0.35));
+      box-shadow: 0 0 10px rgba(201,162,39,0.35);
+      margin: 0 auto;
+      border-radius: 2px;
+    }
+    .v-line-down.tall  { height: 50px; }
+    .v-line-down.short { height: 36px; }
+
+    /* Vertical up into a card */
+    .v-line-up {
+      width: 3px;
+      background: linear-gradient(to top, var(--color-gold-primary), rgba(201,162,39,0.35));
+      box-shadow: 0 0 8px rgba(201,162,39,0.25);
+      margin: 0 auto;
+      border-radius: 2px;
+    }
+    .v-line-up.tall  { height: 50px; }
+    .v-line-up.short { height: 36px; }
+
+    /* Horizontal bar – absolutely positioned over the level gap */
+    .h-line {
+      position: absolute;
+      height: 3px;
+      background: linear-gradient(90deg,
+        rgba(201,162,39,0.15),
+        var(--color-gold-primary) 20%,
+        var(--color-gold-primary) 80%,
+        rgba(201,162,39,0.15)
+      );
+      box-shadow: 0 0 10px rgba(201,162,39,0.3);
+      border-radius: 2px;
+      z-index: 4;
+    }
+
+    /* Wrapper for the horizontal bar + nodes below */
+    .h-row-wrap {
+      position: relative;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* The horizontal bar spans from first to last child's center */
+    /* 2 children: spans from 25%..75% */
+    .h-line.span-2 { left: calc(25% + 2px); right: calc(25% + 2px); top: 0; }
+    /* 3 children: spans from ~17%..83% */
+    .h-line.span-3 { left: calc(16.7% + 2px); right: calc(16.7% + 2px); top: 0; }
+
+    /* ═══════════════════════════════════════════════════════
+       PROFILES (التعريف بالقيادات) SECTION
+    ═══════════════════════════════════════════════════════ */
+    .profiles-section {
+      padding: 60px var(--space-8) 80px;
+      background: var(--color-bg-primary);
+      border-top: 1px solid rgba(201,162,39,0.12);
+    }
+
+    .section-hdr {
+      display: flex;
+      align-items: center;
+      gap: var(--space-5);
+      margin-bottom: 48px;
+    }
+    .section-hdr::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(to left, transparent, rgba(201,162,39,0.35));
+    }
+    .section-hdr-icon {
+      width: 46px; height: 46px;
+      background: rgba(201,162,39,0.1);
+      border: 1px solid rgba(201,162,39,0.25);
+      border-radius: var(--radius-lg);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem;
+      flex-shrink: 0;
+    }
+    .section-hdr-title {
+      font-size: 1.6rem;
+      font-weight: 900;
+      color: var(--color-text-primary);
+      white-space: nowrap;
+    }
+
+    .profiles-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+      gap: var(--space-6);
+      max-width: var(--content-max);
+      margin: 0 auto;
+    }
+
+    .profile-card {
+      background: linear-gradient(155deg, #0d1840 0%, #070f25 100%);
+      border: 1px solid rgba(201,162,39,0.18);
+      border-radius: 18px;
+      padding: var(--space-6);
+      position: relative;
+      transition: all 0.3s ease;
+      overflow: hidden;
+    }
+    .profile-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(201,162,39,0.45), transparent);
+    }
+    .profile-card:hover {
+      border-color: rgba(201,162,39,0.38);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.45), 0 0 18px rgba(201,162,39,0.07);
+      transform: translateY(-3px);
+    }
+    .profile-card.is-cmd {
+      background: linear-gradient(155deg, #152565 0%, #0f1d4a 100%);
+      border-color: rgba(201,162,39,0.4);
+      box-shadow: 0 0 25px rgba(201,162,39,0.1);
+    }
+    .profile-card.is-cmd::before {
+      background: linear-gradient(90deg, transparent, var(--color-gold-primary), transparent);
+      height: 3px;
+    }
+
+    .pc-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+      margin-bottom: var(--space-5);
+      padding-bottom: var(--space-4);
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+
+    .pc-emblem {
+      width: 58px; height: 58px;
+      border-radius: 14px;
+      background: rgba(201,162,39,0.08);
+      border: 1px solid rgba(201,162,39,0.2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.7rem;
+      flex-shrink: 0;
+    }
+    .is-cmd .pc-emblem {
+      background: rgba(201,162,39,0.14);
+      border-color: rgba(201,162,39,0.38);
+      box-shadow: 0 0 16px rgba(201,162,39,0.15);
+    }
+    .pc-emblem img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 14px;
+    }
+
+
+    .pc-id-block { flex: 1; }
+    .pc-pos-tag {
+      font-size: 9.5px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      color: var(--color-gold-primary);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+      opacity: 0.9;
+    }
+    .pc-name {
+      font-size: 1.2rem;
+      font-weight: 900;
+      color: var(--color-text-primary);
+      line-height: 1.2;
+    }
+    .pc-id {
+      font-family: var(--font-display);
+      font-size: 10px;
+      color: var(--color-gold-dark);
+      letter-spacing: 1.5px;
+      margin-top: 3px;
+      font-weight: 700;
+    }
+
+    .pc-rows { display: flex; flex-direction: column; gap: 10px; }
+
+    .pc-row {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-3);
+      font-size: 0.82rem;
+      color: var(--color-text-secondary);
+      line-height: 1.5;
+    }
+    .pc-row-icon {
+      width: 22px;
+      text-align: center;
+      flex-shrink: 0;
+      opacity: 0.65;
+      margin-top: 1px;
+    }
+
+    .rank-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(201,162,39,0.1);
+      border: 1px solid rgba(201,162,39,0.22);
+      border-radius: var(--radius-full);
+      padding: 3px 12px;
+      font-size: 11px;
+      color: var(--color-gold-light);
+      font-weight: 700;
+    }
+    .is-cmd .rank-chip {
+      background: rgba(201,162,39,0.15);
+      border-color: rgba(201,162,39,0.38);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       RESPONSIVE
+    ═══════════════════════════════════════════════════════ */
+    @media (max-width: 900px) {
+      .official-header-inner {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: var(--space-5);
+        padding: 0 var(--space-4);
+      }
+      .entity-name-block { text-align: center; }
+      .header-page-meta { align-items: center; text-align: center; }
+
+      .org-section { padding: 40px var(--space-2) 50px; }
+
+      .org-tree { min-width: 340px; }
+
+      .org-level { flex-direction: column; align-items: center; gap: 0; }
+
+      .h-line { display: none; }
+
+      .v-line-up, .v-line-down { height: 28px !important; }
+
+      .org-card { min-width: unset !important; width: 280px; }
+      .org-card.lvl-1 { padding: 24px 28px 20px; }
+
+      .profiles-grid { grid-template-columns: 1fr; }
+      .profiles-section { padding: 40px var(--space-4) 60px; }
+    }
+
+    @media (max-width: 500px) {
+      .entity-name-ar { font-size: 1.5rem; }
+      .org-card { width: 260px; }
+      .node-name { font-size: 1.1rem; }
+      .lvl-1 .node-name { font-size: 1.3rem; }
+    }
+
+  </style>
+</head>
+<body class="leadership-page">
+
+<div id="toast-container"></div>
+
+<!-- ═══════════════════════════════════════════════════════
+     OFFICIAL DOCUMENT HEADER
+═══════════════════════════════════════════════════════ -->
+<div class="official-header">
+  <div class="official-header-inner">
+
+    <!-- Entity name (Right) -->
+    <div class="entity-name-block">
+      <div class="entity-name-ar">إدارة الامن العام</div>
+      <div class="entity-name-en">Public Security Administration</div>
+      <div style="height:12px;"></div>
+      <div class="entity-sub-ar">لمدينة الـ90</div>
+      <div class="entity-sub-en">City 90</div>
+    </div>
+
+    <!-- Emblem (Center) -->
+    <div class="official-emblem">
+      <div class="emblem-img-wrap">
+        <img src="../assets/img/emblem.png" alt="شعار الأمن العام" class="official-emblem-img">
+      </div>
+    </div>
+
+    <!-- Page meta (Left) -->
+    <div class="header-page-meta">
+      <div class="page-meta-label">الوثيقة</div>
+      <div class="page-meta-title">الهيكل التنظيمي</div>
+      <div class="page-meta-label" style="margin-top:10px;">النسخة</div>
+      <div class="page-meta-title" style="font-size:0.9rem; color:var(--color-text-secondary);">2025 — معتمد</div>
+      <div class="page-meta-date" id="current-date">—</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Divider bars -->
+<div class="gold-header-divider-thick"></div>
+<div class="gold-header-divider" style="opacity:0.4; margin-top:2px;"></div>
+
+<!-- Sub label bar -->
+<div class="chart-label-bar">
+  <span class="chart-label-text">التسلسل القيادي الرسمي — Command Hierarchy</span>
+</div>
+
+<!-- Breadcrumb -->
+<div class="breadcrumb-bar" style="max-width:var(--content-max);">
+  <a href="../index.html" style="color:var(--color-text-muted);">الرئيسية</a>
+  <span class="sep">/</span>
+  <span style="color:var(--color-gold-primary);">القيادة</span>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     ORG CHART SECTION
+═══════════════════════════════════════════════════════ -->
+<div class="org-section">
+  <div class="org-tree">
+
+    <!-- ▌LEVEL 1 – COMMANDER ▐ -->
+    <div class="org-level">
+      <div class="org-col">
+        <div class="org-card lvl-1">
+          <img src="../assets/img/harbi.png" alt="عبدالعزيز الحربي" class="node-avatar">
+          <div class="node-position">قائد الأمن العام</div>
+          <div class="node-name">عبدالعزيز الحربي</div>
+          <div class="node-id">A-03</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- V-line down from Commander -->
+    <div class="v-line-down tall"></div>
+
+    <!-- H-bar connecting Deputies -->
+    <div class="h-row-wrap">
+      <div class="h-line span-2"></div>
+
+      <!-- ▌LEVEL 2 – DEPUTIES ▐ -->
+      <div class="org-level" style="padding-top:0;">
+
+        <div class="org-col">
+          <div class="v-line-up short"></div>
+          <div class="org-card lvl-2">
+            <img src="../assets/img/yazeed.jpg" alt="يزيد السلمي" class="node-avatar">
+            <div class="node-position">نائب قائد الأمن العام</div>
+            <div class="node-name">يزيد السلمي</div>
+            <div class="node-id">P-02</div>
+          </div>
+          <div class="v-line-down short"></div>
+        </div>
+
+        <div class="org-col">
+          <div class="v-line-up short"></div>
+          <div class="org-card lvl-2">
+            <img src="../assets/img/saadi.png" alt="مهند الساعدي" class="node-avatar" onerror="this.outerHTML='<div class=\'node-icon\'>⭐</div>'">
+            <div class="node-position">نائب قائد الأمن العام</div>
+            <div class="node-name">مهند الساعدي</div>
+            <div class="node-id">P-03</div>
+          </div>
+          <div class="v-line-down short"></div>
+        </div>
+
+      </div><!-- /level-2 -->
+    </div><!-- /h-row-wrap deputies -->
+
+    <!-- H-bar connecting Assistants -->
+    <div class="h-row-wrap">
+      <div class="h-line span-3"></div>
+
+      <!-- ▌LEVEL 3 – ASSISTANTS ▐ -->
+      <div class="org-level" style="padding-top:0;">
+
+        <div class="org-col">
+          <div class="v-line-up short"></div>
+          <div class="org-card lvl-3">
+            <img src="../assets/img/ibrahim.png" alt="إبراهيم بن علي" class="node-avatar">
+            <div class="node-position">مساعد قائد الأمن العام</div>
+            <div class="node-name">إبراهيم بن علي</div>
+            <div class="node-id">P-04</div>
+          </div>
+        </div>
+
+        <div class="org-col">
+          <div class="v-line-up short"></div>
+          <div class="org-card lvl-3">
+            <img src="../assets/img/saddah.png" alt="سداح بن محمد" class="node-avatar">
+            <div class="node-position">مساعد قائد الأمن العام</div>
+            <div class="node-name">سداح بن محمد</div>
+            <div class="node-id">P-05</div>
+          </div>
+        </div>
+
+        <div class="org-col">
+          <div class="v-line-up short"></div>
+          <div class="org-card lvl-3">
+            <img src="../assets/img/tamimi.png?v=1" alt="سعد التميمي" class="node-avatar" onerror="this.outerHTML='<div class=\'node-icon\'><i class=\'fa-solid fa-camera\'></i></div>'">
+            <div class="node-position">مساعد قائد الأمن العام</div>
+            <div class="node-name">سعد التميمي</div>
+            <div class="node-id">P-06</div>
+          </div>
+        </div>
+
+      </div><!-- /level-3 -->
+    </div><!-- /h-row-wrap assistants -->
+
+  </div><!-- /org-tree -->
+</div><!-- /org-section -->
+
+
+<!-- ═══════════════════════════════════════════════════════
+     PROFILES SECTION
+═══════════════════════════════════════════════════════ -->
+<div class="profiles-section">
+  <div style="max-width:var(--content-max); margin:0 auto;">
+
+    <div class="section-hdr">
+      <div class="section-hdr-icon"><i class="fa-solid fa-id-card"></i></div>
+      <h2 class="section-hdr-title">التعريف بالقيادات</h2>
+    </div>
+
+    <div class="profiles-grid">
+
+      <!-- ── القائد العام ── -->
+      <div class="profile-card is-cmd">
+        <div class="pc-header">
+          <div class="pc-emblem" style="overflow: hidden; padding: 0;">
+            <img src="../assets/img/harbi.png" alt="عبدالعزيز الحربي">
+          </div>
+
+          <div class="pc-id-block">
+            <div class="pc-pos-tag">قائد الأمن العام</div>
+            <div class="pc-name">عبدالعزيز الحربي</div>
+            <div class="pc-id">A-03</div>
+          </div>
+        </div>
+        <div class="pc-rows">
+          <div class="pc-row">
+            <span class="pc-row-icon"><i class="fa-solid fa-shield-halved"></i></span>
+            <span>القائد العام لجهاز الأمن العام والمسؤول الأول عن جميع شؤون المنظومة الأمنية</span>
+          </div>
+          <div class="pc-row">
+            <span class="pc-row-icon"><i class="fa-solid fa-medal"></i></span>
+            <span class="rank-chip"><i class="fa-solid fa-medal"></i> فريق أول ركن</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── النائب الأول ── -->
+      <div class="profile-card">
+        <div class="pc-header">
+          <div class="pc-emblem" style="overflow: hidden; padding: 0;">
+            <img src="../assets/img/yazeed.jpg" alt="يزيد السلمي">
+          </div>
+          <div class="pc-id-block">
+            <div class="pc-pos-tag">نائب قائد الأمن العام</div>
+            <div class="pc-name">يزيد السلمي</div>
+            <div class="pc-id">P-02</div>
+          </div>
+        </div>
+        <div class="pc-rows">
+          <div class="pc-row">
+            <span class="pc-row-icon">📋</span>
+            <span>مشرف عام على القطاع</span>
+          </div>
+          <div class="pc-row">
+            <span class="pc-row-icon"><i class="fa-solid fa-medal"></i></span>
+            <span class="rank-chip"><i class="fa-solid fa-medal"></i> فريق ركن</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── النائب الثاني ── -->
+      <div class="profile-card">
+        <div class="pc-header">
+          <div class="pc-emblem" style="overflow: hidden; padding: 0;">
+            <img src="../assets/img/saadi.png" alt="مهند الساعدي">
+          </div>
+          <div class="pc-id-block">
+            <div class="pc-pos-tag">نائب قائد الأمن العام</div>
+            <div class="pc-name">مهند الساعدي</div>
+            <div class="pc-id">P-03</div>
+          </div>
+        </div>
+        <div class="pc-rows">
+          <div class="pc-row">
+            <span class="pc-row-icon">📋</span>
+            <span>مشرف الإدارة العامة للشؤون العسكرية</span>
+          </div>
+          <div class="pc-row">
+            <span class="pc-row-icon"><i class="fa-solid fa-thumbtack"></i></span>
+            <span>مشرف عام على القطاع</span>
+          </div>
+          <div class="pc-row">
+            <span class="pc-row-icon"><i class="fa-solid fa-medal"></i></span>
+            <span class="rank-chip"><i class="fa-solid fa-medal"></i> فريق ركن</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── المساعد الأول ── -->
+      <div class="profile-card">
+        <div class="pc-header">
+          <div class="pc-emblem" style="overflow: hidden; padding: 0;">
+            <img src="../assets/img/ibrahim.png" alt="إبراهيم بن علي">
+          </div>
+          <div class="pc-id-block">
+            <div class="pc-pos-tag">مساعد قائد الأمن العام</div>
+            <div class="pc-name">إبراهيم بن علي</div>
+            <div class="pc-id">P-04</div>
+          </div>
+        </div>
+        <div class="pc-rows">
+          <div class="pc-row">
+            <span class="pc-row-icon">📋</span>
+            <span>مشرف الإدارة العامة لشؤون التدريب</span>
+          </div>
+          <div class="pc-row">
+            <span class="pc-row-icon"><i class="fa-solid fa-medal"></i></span>
+            <span class="rank-chip"><i class="fa-solid fa-medal"></i> لواء ركن</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── المساعد الثاني ── -->
+      <div class="profile-card">
+        <div class="pc-header">
+          <div class="pc-emblem" style="overflow: hidden; padding: 0;">
+            <img src="../assets/img/saddah.png" alt="سداح بن محمد">
+          </div>
+          <div class="pc-id-block">
+            <div class="pc-pos-tag">مساعد قائد الأمن العام</div>
+            <div class="pc-name">سداح بن محمد</div>
+            <div class="pc-id">P-05</div>
+          </div>
+        </div>
+        <div class="pc-rows">
+          <div class="pc-row">
+            <span class="pc-row-icon">📋</span>
+            <span>مشرف شؤون التجنيد</span>
+          </div>
+          <div class="pc-row">
+            <span class="pc-row-icon"><i class="fa-solid fa-medal"></i></span>
+            <span class="rank-chip"><i class="fa-solid fa-medal"></i> لواء ركن</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── المساعد الثالث ── -->
+      <div class="profile-card">
+        <div class="pc-header">
+          <div class="pc-emblem" style="overflow: hidden; padding: 0;">
+            <img src="../assets/img/tamimi.png?v=1" alt="سعد التميمي" onerror="this.outerHTML='<i class=\'fa-solid fa-camera\'></i>'">
+          </div>
+          <div class="pc-id-block">
+            <div class="pc-pos-tag">مساعد قائد الأمن العام</div>
+            <div class="pc-name">سعد التميمي</div>
+            <div class="pc-id">P-06</div>
+          </div>
+        </div>
+        <div class="pc-rows">
+          <div class="pc-row">
+            <span class="pc-row-icon">📋</span>
+            <span>مشرف الإدارة العامة للشؤون الإدارية والمالية</span>
+          </div>
+          <div class="pc-row">
+            <span class="pc-row-icon"><i class="fa-solid fa-medal"></i></span>
+            <span class="rank-chip"><i class="fa-solid fa-medal"></i> عقيد ركن</span>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /profiles-grid -->
+  </div>
+</div><!-- /profiles-section -->
+
+
+<script src="../assets/js/storage.js?v=1.1.30"></script>
+<script src="../assets/js/data.js?v=1.1.27"></script>
+<script src="../assets/js/auth.js?v=1.1.30"></script>
+<script src="../assets/js/components.js?v=1.1.31"></script>
+<script src="../assets/js/app.js?v=1.1.31"></script>
+<script>
+  document.write(Components.navbar('leadership'));
+  document.write(Components.sidebar('leadership'));
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // Inject footer
+    const footerDiv = document.createElement('div');
+    footerDiv.innerHTML = Components.footer();
+    document.body.appendChild(footerDiv.firstElementChild);
+
+    SeedData.init();
+
+    // Set current date in Arabic
+    const dateEl = document.getElementById('current-date');
+    if (dateEl) {
+      dateEl.textContent = new Date().toLocaleDateString('ar-SA', {
+        year: 'numeric', month: 'long', day: 'numeric'
+      });
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,3752 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>اختبارات الدورات | الأمن العام</title>
+
+  <link rel="stylesheet" href="../assets/css/main.css?v=1.1.26">
+  <link rel="stylesheet" href="../assets/css/navbar.css?v=1.1.26">
+  <link rel="stylesheet" href="../assets/css/sidebar.css?v=1.1.26">
+  <link rel="stylesheet" href="../assets/css/footer.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&family=Orbitron:wght@400;600;700;900&family=Tajawal:wght@300;400;500;700;900&display=swap"
+    rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Tajawal', 'Cairo', sans-serif;
+      background: var(--color-bg-primary);
+    }
+
+    .exams-page {
+      padding-top: 102px;
+      /* 62px top + 40px sub-nav */
+      min-height: 100vh;
+    }
+
+    /* Document header style */
+    .official-header {
+      background: linear-gradient(180deg, #060d2e 0%, #0b1840 60%, #071230 100%);
+      border-bottom: 1px solid rgba(201, 162, 39, 0.15);
+      padding: 40px 0 32px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .official-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent 0%, rgba(201, 162, 39, 0.4) 20%, var(--color-gold-primary) 50%, rgba(201, 162, 39, 0.4) 80%, transparent 100%);
+    }
+
+    .official-header::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 60% 80% at 50% 50%, rgba(13, 27, 75, 0.4) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .official-header-inner {
+      max-width: var(--content-max);
+      margin: 0 auto;
+      padding: 0 var(--space-8);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-8);
+      position: relative;
+      z-index: 2;
+    }
+
+    .entity-name-block {
+      text-align: right;
+      flex: 1;
+    }
+
+    .entity-name-ar {
+      font-size: 2rem;
+      font-weight: 900;
+      color: var(--color-text-primary);
+      letter-spacing: 2px;
+      line-height: 1.2;
+    }
+
+    .entity-name-en {
+      font-family: var(--font-display);
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--color-gold-primary);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-top: 4px;
+      opacity: 0.85;
+    }
+
+    .official-emblem {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-2);
+      flex-shrink: 0;
+    }
+
+    .official-emblem-img {
+      width: 100px;
+      height: 100px;
+      object-fit: contain;
+      filter: drop-shadow(0 0 10px rgba(201, 162, 39, 0.4));
+    }
+
+    .header-page-meta {
+      text-align: left;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+
+    .page-meta-label {
+      font-size: 9px;
+      font-family: var(--font-display);
+      color: var(--color-text-muted);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .page-meta-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--color-gold-light);
+      letter-spacing: 1px;
+    }
+
+    /* Grid layout */
+    .exams-grid-container {
+      max-width: var(--content-max);
+      margin: 50px auto;
+      padding: 0 var(--space-8) 60px;
+    }
+
+    .exams-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 30px;
+    }
+
+    @media (max-width: 992px) {
+      .exams-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 650px) {
+      .exams-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Exam Card Premium Styling */
+    .exam-card {
+      background: linear-gradient(145deg, #0d1840 0%, #060a22 100%);
+      border: 1px solid rgba(201, 162, 39, 0.2);
+      border-radius: 20px;
+      padding: 30px;
+      text-align: center;
+      transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .exam-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, rgba(201, 162, 39, 0.4), transparent);
+    }
+
+    .exam-card:hover {
+      border-color: rgba(201, 162, 39, 0.45);
+      transform: translateY(-5px);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), 0 0 20px rgba(201, 162, 39, 0.08);
+    }
+
+    .exam-icon-wrap {
+      width: 70px;
+      height: 70px;
+      background: rgba(201, 162, 39, 0.07);
+      border: 1px solid rgba(201, 162, 39, 0.2);
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.2rem;
+      margin: 0 auto 20px;
+      transition: transform 0.3s;
+    }
+
+    .exam-card:hover .exam-icon-wrap {
+      transform: scale(1.1);
+      background: rgba(201, 162, 39, 0.12);
+      border-color: rgba(201, 162, 39, 0.4);
+    }
+
+    .exam-category-badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      color: var(--color-gold-primary);
+      text-transform: uppercase;
+      border: 1px solid rgba(201, 162, 39, 0.25);
+      background: rgba(201, 162, 39, 0.05);
+      padding: 4px 12px;
+      border-radius: 4px;
+      margin-bottom: 12px;
+    }
+
+    .exam-card-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 10px;
+    }
+
+    .exam-card-desc {
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.5);
+      line-height: 1.6;
+      margin-bottom: 24px;
+      flex-grow: 1;
+    }
+
+    .exam-meta-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 18px;
+      margin-bottom: 24px;
+    }
+
+    .exam-meta-item {
+      text-align: center;
+    }
+
+    .exam-meta-val {
+      font-size: 1.1rem;
+      font-weight: 900;
+      color: var(--color-gold-light);
+      font-family: var(--font-display);
+    }
+
+    .exam-meta-lbl {
+      font-size: 0.68rem;
+      color: rgba(255, 255, 255, 0.35);
+      margin-top: 2px;
+    }
+
+    /* Quiz Overlay Window */
+    .quiz-overlay {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at center, #0c163b 0%, #05091e 100%);
+      z-index: 9999;
+      display: none;
+      flex-direction: column;
+      padding: 30px;
+      overflow-y: auto;
+    }
+
+    .quiz-overlay.active {
+      display: flex;
+    }
+
+    .quiz-header {
+      max-width: 800px;
+      width: 100%;
+      margin: 0 auto 30px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding-bottom: 20px;
+    }
+
+    .quiz-timer {
+      background: rgba(231, 76, 60, 0.1);
+      border: 1px solid rgba(231, 76, 60, 0.3);
+      color: #ff6b6b;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      font-size: 1.2rem;
+      padding: 6px 18px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      letter-spacing: 1px;
+    }
+
+    .quiz-card {
+      max-width: 800px;
+      width: 100%;
+      margin: 0 auto;
+      background: rgba(13, 24, 64, 0.5);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(201, 162, 39, 0.2);
+      border-radius: 24px;
+      padding: 40px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    }
+
+    .quiz-progress-bar-bg {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 3px;
+      margin-bottom: 30px;
+      overflow: hidden;
+    }
+
+    .quiz-progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--color-gold-dark), var(--color-gold-primary));
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .question-title {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 25px;
+      line-height: 1.5;
+    }
+
+    .options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 35px;
+    }
+
+    .option-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      padding: 16px 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      transition: all 0.2s;
+    }
+
+    .option-card:hover {
+      background: rgba(201, 162, 39, 0.05);
+      border-color: rgba(201, 162, 39, 0.25);
+    }
+
+    .option-card.selected {
+      background: rgba(201, 162, 39, 0.12);
+      border-color: var(--color-gold-primary);
+      box-shadow: 0 0 15px rgba(201, 162, 39, 0.1);
+    }
+
+    .option-radio {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+
+    .option-card.selected .option-radio {
+      border-color: var(--color-gold-primary);
+      background: var(--color-gold-primary);
+    }
+
+    .option-card.selected .option-radio::after {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #05091e;
+    }
+
+    .option-text {
+      font-size: 1rem;
+      color: var(--color-text-secondary);
+      font-weight: 600;
+    }
+
+    .option-card.selected .option-text {
+      color: #ffffff;
+    }
+
+    .quiz-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Result / Success / Certificate styling */
+    .result-container {
+      text-align: center;
+      padding: 20px 0;
+    }
+
+    .result-icon {
+      font-size: 5rem;
+      margin-bottom: 20px;
+      animation: bounce 1s ease infinite alternate;
+    }
+
+    @keyframes bounce {
+      from {
+        transform: translateY(0);
+      }
+
+      to {
+        transform: translateY(-10px);
+      }
+    }
+
+    /* Certified Military Certificate style */
+    .certificate-wrap {
+      background: radial-gradient(circle at center, #ffffff 0%, #f6f5f0 100%);
+      border: 15px double #c9a227;
+      border-radius: 8px;
+      padding: 40px;
+      color: #1e1e1e;
+      position: relative;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+      max-width: 780px;
+      margin: 40px auto;
+      text-align: center;
+      direction: rtl;
+    }
+
+    .cert-corner-border {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      border: 3px solid #8a6d0f;
+    }
+
+    .cert-tl {
+      top: 10px;
+      left: 10px;
+      border-right: none;
+      border-bottom: none;
+    }
+
+    .cert-tr {
+      top: 10px;
+      right: 10px;
+      border-left: none;
+      border-bottom: none;
+    }
+
+    .cert-bl {
+      bottom: 10px;
+      left: 10px;
+      border-right: none;
+      border-top: none;
+    }
+
+    .cert-br {
+      bottom: 10px;
+      right: 10px;
+      border-left: none;
+      border-top: none;
+    }
+
+    .cert-header {
+      font-family: 'Cairo', sans-serif;
+      font-weight: 900;
+      color: #8a6d0f;
+      font-size: 1.7rem;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+
+    .cert-subheader {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #555;
+      letter-spacing: 2px;
+      margin-bottom: 30px;
+    }
+
+    .cert-emblem-img {
+      width: 90px;
+      height: 90px;
+      object-fit: contain;
+      margin: 0 auto 20px;
+      display: block;
+      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
+    }
+
+    .cert-text-1 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    .cert-name-input-wrapper {
+      max-width: 320px;
+      margin: 0 auto 25px;
+      position: relative;
+    }
+
+    .cert-name-input {
+      width: 100%;
+      border: none;
+      border-bottom: 2px dashed #8a6d0f;
+      background: transparent;
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: 900;
+      color: #050a1f;
+      font-family: 'Cairo', sans-serif;
+      padding: 5px;
+    }
+
+    .cert-name-input:focus {
+      outline: none;
+      border-bottom-color: #c9a227;
+    }
+
+    .cert-text-2 {
+      font-size: 1.05rem;
+      color: #444;
+      line-height: 1.8;
+      max-width: 580px;
+      margin: 0 auto 35px;
+    }
+
+    .cert-text-2 span {
+      font-weight: 800;
+      color: #8a6d0f;
+    }
+
+    .cert-signatures {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      max-width: 580px;
+      margin: 0 auto;
+      border-top: 1px solid rgba(0, 0, 0, 0.08);
+      padding-top: 25px;
+    }
+
+    .cert-sig-item {
+      text-align: center;
+    }
+
+    .cert-sig-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #777;
+      margin-bottom: 12px;
+    }
+
+    .cert-sig-val {
+      font-family: 'Cairo', sans-serif;
+      font-weight: 800;
+      color: #1a1a1a;
+      font-size: 0.95rem;
+    }
+
+    .cert-seal {
+      width: 65px;
+      height: 65px;
+      background: rgba(201, 162, 39, 0.08);
+      border: 2px dashed #c9a227;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin: 0 auto;
+    }
+
+    /* Hide page layout elements when printing certificate */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+
+      .certificate-wrap,
+      .certificate-wrap * {
+        visibility: visible;
+      }
+
+      .certificate-wrap {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        border-width: 10px;
+        box-shadow: none;
+      }
+
+      .cert-name-input {
+        border-bottom: none !important;
+      }
+    }
+
+    /* ── Supervisor / Admin Panel Styles ── */
+    .supervisor-card {
+      background: linear-gradient(145deg, #0d1840 0%, #060a22 100%);
+      border: 1px solid rgba(201, 162, 39, 0.3);
+      border-radius: 20px;
+      padding: 24px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(201, 162, 39, 0.05);
+    }
+
+    .supervisor-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(201, 162, 39, 0.2);
+      padding-bottom: 14px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .supervisor-title {
+      font-size: 1.2rem;
+      font-weight: 900;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .supervisor-badge {
+      background: rgba(201, 162, 39, 0.12);
+      color: var(--color-gold-primary);
+      border: 1px solid rgba(201, 162, 39, 0.3);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.73rem;
+      font-weight: 800;
+    }
+
+    .super-table-wrap {
+      overflow-x: auto;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .super-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: right;
+    }
+
+    .super-table th {
+      background: rgba(255, 255, 255, 0.02);
+      color: var(--color-gold-primary);
+      padding: 12px 16px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      border-bottom: 1px solid rgba(201, 162, 39, 0.2);
+    }
+
+    .super-table td {
+      padding: 12px 16px;
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.7);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .super-table tr:hover td {
+      background: rgba(201, 162, 39, 0.03);
+      color: #fff;
+    }
+
+    .status-badge-el {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      border-radius: 30px;
+      font-size: 0.7rem;
+      font-weight: 800;
+    }
+
+    .status-badge-el.pass {
+      background: rgba(46, 204, 113, 0.12);
+      color: #2ecc71;
+      border: 1px solid rgba(46, 204, 113, 0.25);
+    }
+
+    .status-badge-el.fail {
+      background: rgba(231, 76, 60, 0.12);
+      color: #ff4757;
+      border: 1px solid rgba(231, 76, 60, 0.25);
+    }
+
+    .status-badge-el.pending {
+      background: rgba(230, 126, 34, 0.12);
+      color: #e67e22;
+      border: 1px solid rgba(230, 126, 34, 0.25);
+    }
+
+    .status-badge-el.approved {
+      background: rgba(46, 204, 113, 0.15);
+      color: #2ecc71;
+      border: 1px solid rgba(46, 204, 113, 0.3);
+    }
+
+    .status-badge-el.rejected {
+      background: rgba(231, 76, 60, 0.15);
+      color: #ff4757;
+      border: 1px solid rgba(231, 76, 60, 0.3);
+    }
+
+    .action-btn-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    .action-btn-el {
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 1px solid transparent;
+    }
+
+    .action-btn-el.approve {
+      background: rgba(46, 204, 113, 0.1);
+      color: #2ecc71;
+      border-color: rgba(46, 204, 113, 0.3);
+    }
+
+    .action-btn-el.approve:hover {
+      background: #2ecc71;
+      color: #fff;
+    }
+
+    .action-btn-el.reject {
+      background: rgba(231, 76, 60, 0.1);
+      color: #ff4757;
+      border-color: rgba(231, 76, 60, 0.3);
+    }
+
+    .action-btn-el.reject:hover {
+      background: #ff4757;
+      color: #fff;
+    }
+
+    /* ── Name Prompt Modal ── */
+    .prompt-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(4, 7, 20, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 10005;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .prompt-overlay.active {
+      display: flex;
+    }
+
+    .prompt-card {
+      background: linear-gradient(145deg, #070d24, #0b153a);
+      border: 1px solid rgba(201, 162, 39, 0.25);
+      border-radius: 18px;
+      padding: 28px;
+      max-width: 440px;
+      width: 100%;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      text-align: center;
+    }
+
+    .prompt-title {
+      font-size: 1.15rem;
+      font-weight: 900;
+      color: #fff;
+      margin-bottom: 10px;
+    }
+
+    .prompt-desc {
+      font-size: 0.82rem;
+      color: rgba(255, 255, 255, 0.5);
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    .prompt-input {
+      width: 100%;
+      padding: 12px 16px;
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      color: #fff;
+      font-size: 0.88rem;
+      font-family: inherit;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .prompt-input:focus {
+      border-color: var(--color-gold-primary);
+      outline: none;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="toast-container"></div>
+
+  <!-- Write shared components -->
+  <script src="../assets/js/storage.js?v=1.1.26"></script>
+  <script src="../assets/js/data.js?v=1.1.26"></script>
+  <script src="../assets/js/auth.js?v=1.1.26"></script>
+  <script src="../assets/js/components.js?v=1.1.31"></script>
+  <script src="../assets/js/app.js?v=1.1.31"></script>
+
+  <script>
+    document.write(Components.navbar('exams'));
+    document.write(Components.sidebar('exams'));
+  </script>
+
+  <main class="exams-page">
+    <!-- Header -->
+    <header class="official-header">
+      <div class="official-header-inner">
+        <div class="entity-name-block">
+          <div class="entity-name-ar">إدارة الأمن العام</div>
+          <div class="entity-name-en">Public Security Administration</div>
+        </div>
+
+        <div class="official-emblem">
+          <img src="../assets/img/emblem.png" alt="شعار الأمن العام" class="official-emblem-img">
+        </div>
+
+        <div class="header-page-meta">
+          <div class="page-meta-label">الإدارة العامة لشؤون تدريب الأمن العام</div>
+          <div class="page-meta-title"><i class="fa-solid fa-file-pen"></i> اختبارات الدورات</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Exams Grid -->
+    <div class="exams-grid-container">
+
+      <!-- ── Supervisor Dashboard ── -->
+      <div class="supervisor-card" id="supervisor-panel" style="display:none; margin-bottom: 40px;">
+        <div class="supervisor-header" style="border-bottom: none; margin-bottom: 10px;">
+          <h3 class="supervisor-title"><i class="fa-solid fa-graduation-cap"></i> لوحة إدارة الدورات والاختبارات</h3>
+          <div style="display: flex; gap: 12px; align-items: center;">
+            <button class="btn btn-gold btn-sm" id="btn-create-exam" onclick="openCreateExamModal()"
+              style="display: none;">➕ إنشاء اختبار جديد</button>
+            <button class="btn btn-ghost btn-sm" id="btn-clear-results" onclick="clearAllExamResults()"
+              style="border-color: rgba(231,76,60,0.3); color: #ff4757; padding: 4px 10px; display: none;">🗑️ مسح
+              السجلات</button>
+          </div>
+        </div>
+
+        <!-- Management Tabs -->
+        <div
+          style="display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px; overflow-x: auto; direction: rtl;">
+          <button class="btn btn-sm btn-gold" id="btn-tab-results" onclick="switchSuperTab('results')">📋 أرشيف
+            المختبرين</button>
+          <button class="btn btn-sm btn-ghost" id="btn-tab-retakes" onclick="switchSuperTab('retakes')"><i
+              class="fa-solid fa-arrows-rotate"></i> طلبات إعادة الاختبار</button>
+          <button class="btn btn-sm btn-ghost" id="btn-tab-exams-mgmt" onclick="switchSuperTab('exams-mgmt')"><i
+              class="fa-solid fa-gear"></i> بنك الأسئلة والاختبارات</button>
+          <button class="btn btn-sm btn-ghost" id="btn-tab-stats" onclick="switchSuperTab('stats')"><i
+              class="fa-solid fa-chart-column"></i> إحصائيات الدورات</button>
+          <button class="btn btn-sm btn-ghost" id="btn-tab-violations" onclick="switchSuperTab('violations')"><i
+              class="fa-solid fa-triangle-exclamation"></i> أرشيف المخالفات</button>
+          <button class="btn btn-sm btn-ghost" id="btn-tab-qbank-reqs" onclick="switchSuperTab('qbank-reqs')"><i
+              class="fa-solid fa-user-shield"></i> أذونات بنك الأسئلة <span id="qbank-reqs-badge" class="supervisor-badge" style="display:none; background:#e74c3c; color:#fff; margin-right:4px; font-size:0.7rem;">0</span></button>
+        </div>
+
+        <!-- Tab Content: Results Archive -->
+        <div id="tab-super-results" class="super-tab-content">
+          <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 15px; flex-wrap: wrap;">
+            <label style="color: rgba(255,255,255,0.7); font-size: 0.85rem; font-weight: 700;">فلترة حسب الدورة:</label>
+            <select id="archive-course-filter" class="form-select" onchange="renderSupervisorResults()"
+              style="background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 6px 12px; border-radius: 8px; font-size: 0.85rem; font-family: inherit;">
+              <option value="all">كل الدورات</option>
+              <!-- Generated dynamically -->
+            </select>
+            <span class="supervisor-badge" id="super-results-count" style="margin-right: auto;">0 محاولات</span>
+          </div>
+
+          <div class="super-table-wrap">
+            <table class="super-table">
+              <thead>
+                <tr>
+                  <th>اسم المختبر</th>
+                  <th>Discord ID</th>
+                  <th>الكود الميداني</th>
+                  <th>الرتبة</th>
+                  <th>الدورة / الاختبار</th>
+                  <th>المحاولة</th>
+                  <th>تاريخ الاختبار</th>
+                  <th>وقت الدخول</th>
+                  <th>وقت الانتهاء</th>
+                  <th>المدة (دقائق)</th>
+                  <th>الدرجة والنسبة</th>
+                  <th>حالة النجاح</th>
+                  <th>إجراءات مسؤول الدورة</th>
+                </tr>
+              </thead>
+              <tbody id="supervisor-tbody">
+                <!-- Dynamic rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Tab Content: Retake Requests -->
+        <div id="tab-super-retakes" class="super-tab-content" style="display: none;">
+          <div class="super-table-wrap">
+            <table class="super-table">
+              <thead>
+                <tr>
+                  <th>اسم المختبر</th>
+                  <th>الرتبة</th>
+                  <th>الدورة / الاختبار</th>
+                  <th>الدرجة السابقة</th>
+                  <th>تاريخ الطلب</th>
+                  <th>حالة الطلب</th>
+                  <th>مسؤول الدورة</th>
+                  <th>إجراءات الاعتماد</th>
+                </tr>
+              </thead>
+              <tbody id="retakes-tbody">
+                <!-- Generated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Tab Content: Exams Management -->
+        <div id="tab-super-exams-mgmt" class="super-tab-content" style="display: none;">
+          <div class="super-table-wrap">
+            <table class="super-table">
+              <thead>
+                <tr>
+                  <th>الاختبار</th>
+                  <th>المستند المرتبط</th>
+                  <th>بنك الأسئلة</th>
+                  <th>الأسئلة المعروضة</th>
+                  <th>حالة الاختبار</th>
+                  <th>تاريخ الفتح والإغلاق</th>
+                  <th>إدارة وتعديل</th>
+                </tr>
+              </thead>
+              <tbody id="exams-mgmt-tbody">
+                <!-- Generated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Tab Content: Statistics -->
+        <div id="tab-super-stats" class="super-tab-content" style="display: none;">
+          <div class="exams-grid" id="exams-stats-cards"
+            style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; display: grid; margin-top: 10px;">
+            <!-- Stats cards generated dynamically -->
+          </div>
+        </div>
+
+        <!-- Tab Content: Violations Archive -->
+        <div id="tab-super-violations" class="super-tab-content" style="display: none;">
+          <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 15px; flex-wrap: wrap;">
+            <label style="color: rgba(255,255,255,0.7); font-size: 0.85rem; font-weight: 700;">سجل محاولات الغش المرصودة:</label>
+            <div style="display: flex; align-items: center; gap: 8px; margin-right: 15px;">
+              <label style="color: rgba(255,255,255,0.7); font-size: 0.85rem; font-weight: 700;"><i class="fa-solid fa-filter"></i> فلترة حسب الدورة:</label>
+              <select id="violations-course-filter" class="form-select" onchange="renderViolationsArchive()"
+                style="background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 6px 12px; border-radius: 8px; font-size: 0.85rem; font-family: inherit;">
+                <option value="all">كل الدورات</option>
+                <!-- Generated dynamically -->
+              </select>
+            </div>
+            <span class="supervisor-badge" id="super-violations-count"
+              style="margin-right: auto; background: rgba(231,76,60,0.15); border: 1px solid rgba(231,76,60,0.3); color: #ff4757; padding: 4px 10px; border-radius: 8px; font-weight: 700; font-size: 0.85rem;">0 مخالفات</span>
+            <button class="btn btn-ghost btn-sm" id="btn-clear-violations" onclick="clearAllViolations()"
+              style="border-color: rgba(231,76,60,0.3); color: #ff4757; padding: 4px 10px; display: none;">🗑️ مسح سجل المخالفات</button>
+          </div>
+          <div class="super-table-wrap">
+            <table class="super-table">
+              <thead>
+                <tr>
+                  <th>اسم المختبر</th>
+                  <th>الدورة / الاختبار</th>
+                  <th>نوع المخالفة</th>
+                  <th>تاريخ ورصد المخالفة</th>
+                  <th>عدد المخالفات في الجلسة</th>
+                  <th>إجراءات المالك</th>
+                </tr>
+              </thead>
+              <tbody id="violations-tbody">
+                <!-- Generated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Tab Content: Question Bank Access Requests & Log -->
+        <div id="tab-super-qbank-reqs" class="super-tab-content" style="display: none;">
+          <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 15px; flex-wrap: wrap;">
+            <label style="color: rgba(255,255,255,0.7); font-size: 0.85rem; font-weight: 700;"><i class="fa-solid fa-user-lock"></i> سجل أذونات وطلبات دخول بنك الأسئلة (اعتماد رئاسة تدريب الأمن العام):</label>
+            <span class="supervisor-badge" id="super-qbank-reqs-count" style="margin-right: auto; background: rgba(201,162,39,0.15); border: 1px solid rgba(201,162,39,0.3); color: var(--color-gold-primary); padding: 4px 10px; border-radius: 8px; font-weight: 700; font-size: 0.85rem;">0 طلبات</span>
+          </div>
+          <div class="super-table-wrap">
+            <table class="super-table">
+              <thead>
+                <tr>
+                  <th>طالب الإذن (المسؤول)</th>
+                  <th>الرتبة والدور</th>
+                  <th>الاختبار المقصود</th>
+                  <th>سبب الطلب</th>
+                  <th>تاريخ الطلب</th>
+                  <th>حالة الإذن</th>
+                  <th>اعتماد / رفض رئاسة التدريب</th>
+                  <th>إجراءات الاعتماد</th>
+                </tr>
+              </thead>
+              <tbody id="qbank-reqs-tbody">
+                <!-- Generated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div
+        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+        <h2 style="font-weight: 800; color: #fff;"><i class="fa-solid fa-book-bookmark"></i> الدورات والاختبارات
+          المتوفرة</h2>
+      </div>
+
+      <div class="exams-grid" id="exams-grid">
+        <!-- Dyn list populated by JS -->
+      </div>
+    </div>
+  </main>
+
+  <!-- ── Name Prompt overlay ── -->
+  <div class="prompt-overlay" id="name-prompt-modal" onclick="if(event.target===this) closeNamePrompt()">
+    <div class="prompt-card" style="max-width: 500px; padding: 28px;">
+      <div class="prompt-title"><i class="fa-solid fa-file-pen"></i> بدء الاختبار العسكري</div>
+      <p class="prompt-desc">يرجى مراجعة بياناتك الميدانية قبل دخول الاختبار. هذه البيانات موثقة تلقائياً من نظام
+        الديسكورد:</p>
+
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:12px;">
+        <div>
+          <label
+            style="color:var(--color-text-secondary); font-size:0.8rem; font-weight:700; margin-bottom:4px; display:block;">الاسم
+            الميداني</label>
+          <input type="text" id="examinee-name-input" class="prompt-input" placeholder="جاري الجلب..." readonly
+            style="margin-bottom:0; background:rgba(0,0,0,0.3); cursor:not-allowed;">
+        </div>
+        <div>
+          <label
+            style="color:var(--color-text-secondary); font-size:0.8rem; font-weight:700; margin-bottom:4px; display:block;">حساب
+            الديسكورد</label>
+          <input type="text" id="examinee-discord-input" class="prompt-input" placeholder="جاري الجلب..." readonly
+            style="margin-bottom:0; background:rgba(0,0,0,0.3); cursor:not-allowed;">
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:20px;">
+        <div>
+          <label
+            style="color:var(--color-text-secondary); font-size:0.8rem; font-weight:700; margin-bottom:4px; display:block;">الرتبة
+            الميدانية</label>
+          <input type="text" id="examinee-rank-input" class="prompt-input" placeholder="جاري الجلب..." readonly
+            style="margin-bottom:0; background:rgba(0,0,0,0.3); cursor:not-allowed;">
+        </div>
+        <div>
+          <label
+            style="color:var(--color-text-secondary); font-size:0.8rem; font-weight:700; margin-bottom:4px; display:block;">الرمز
+            الميداني (Job Code)</label>
+          <input type="text" id="examinee-job-code-input" class="prompt-input" placeholder="غير متوفر" readonly
+            style="margin-bottom:0; background:rgba(0,0,0,0.3); cursor:not-allowed;">
+        </div>
+      </div>
+
+      <div style="display:flex; gap:12px; justify-content:center;">
+        <button class="btn btn-ghost" onclick="closeNamePrompt()">إلغاء</button>
+        <button class="btn btn-gold" onclick="submitNamePrompt()">ادخل الاختبار <i
+            class="fa-solid fa-flag-checkered"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Exam Details Edit Modal ── -->
+  <div class="prompt-overlay" id="exam-details-modal" onclick="if(event.target===this) closeExamDetailsModal()">
+    <div class="prompt-card"
+      style="max-width: 500px; text-align: right; background: linear-gradient(145deg, #070d24, #0b153a); border: 1px solid rgba(201, 162, 39, 0.25); border-radius: 18px; padding: 28px;">
+      <div class="prompt-title"
+        style="text-align: center; margin-bottom: 20px; font-size: 1.25rem; font-weight: 900; color: #fff;"><i
+          class="fa-solid fa-gear"></i> إعدادات وتعديل الدورة والاختبار</div>
+      <input type="hidden" id="edit-exam-id">
+
+      <div class="form-group" style="margin-bottom: 12px;">
+        <label class="form-label"
+          style="color:rgba(255,255,255,0.75); font-weight:800; font-size:0.8rem; display:block; margin-bottom:6px;">اسم
+          الدورة / الاختبار:</label>
+        <input type="text" id="edit-exam-title" class="prompt-input" style="text-align:right; margin-bottom:0;"
+          placeholder="مثال: دورة الأركان - اختبار التكتيك">
+      </div>
+
+      <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px; margin-bottom: 12px;">
+        <div class="form-group">
+          <label class="form-label"
+            style="color:rgba(255,255,255,0.75); font-weight:800; font-size:0.8rem; display:block; margin-bottom:6px;">القسم
+            / التصنيف:</label>
+          <input type="text" id="edit-exam-category" class="prompt-input" style="text-align:right; margin-bottom:0;"
+            placeholder="مثال: قيادة عليا">
+        </div>
+        <div class="form-group">
+          <label class="form-label"
+            style="color:rgba(255,255,255,0.75); font-weight:800; font-size:0.8rem; display:block; margin-bottom:6px;">الرمز
+            التعبيري (Emoji):</label>
+          <input type="text" id="edit-exam-emoji" class="prompt-input" style="text-align:center; margin-bottom:0;"
+            placeholder="⭐">
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+        <div class="form-group">
+          <label class="form-label"
+            style="color:rgba(255,255,255,0.75); font-weight:800; font-size:0.8rem; display:block; margin-bottom:6px;">مدة
+            الاختبار (دقائق):</label>
+          <input type="number" id="edit-exam-duration" class="prompt-input" style="text-align:center; margin-bottom:0;"
+            placeholder="15">
+        </div>
+        <div class="form-group">
+          <label class="form-label"
+            style="color:rgba(255,255,255,0.75); font-weight:800; font-size:0.8rem; display:block; margin-bottom:6px;">درجة
+            النجاح المئوية (%):</label>
+          <input type="number" id="edit-exam-passing" class="prompt-input" style="text-align:center; margin-bottom:0;"
+            placeholder="80">
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1.8fr 1.2fr; gap: 12px; margin-bottom: 12px;">
+        <div class="form-group">
+          <label class="form-label"
+            style="color:rgba(255,255,255,0.75); font-weight:800; font-size:0.8rem; display:block; margin-bottom:6px;">رابط
+            ملف مستند الدورة (مهم للقفل):</label>
+          <select id="edit-exam-docurl" class="prompt-input"
+            style="text-align:right; height:45px; background:#05091e; color:#fff; border:1px solid rgba(255,255,255,0.08); border-radius:8px; font-family:inherit; margin-bottom:0; width:100%; display:block; box-sizing:border-box;">
+            <option value="">لا يوجد مستند مرتبط</option>
+            <option value="staff-document.html">دورة الأركان (staff-document.html)</option>
+            <option value="regulations-document.html">اللائحة التنظيمية للتدريب (regulations-document.html)</option>
+            <option value="ops-document.html">دورة مركز العمليات (ops-document.html)</option>
+            <option value="traffic-document.html">دورة المرور (traffic-document.html)</option>
+            <option value="roads-document.html">قطاع أمن الطرق (roads-document.html)</option>
+            <option value="aviation-document.html">دورة الطيران الأمني (aviation-document.html)</option>
+            <option value="district-officers-document.html">دورة ضباط المناطق (district-officers-document.html)</option>
+            <option value="special-tasks-document.html">دورة المهمات والواجبات الخاصة (special-tasks-document.html)
+            </option>
+            <option value="narcotics-document.html">دورة مكافحة المخدرات (narcotics-document.html)</option>
+            <option value="officers-document.html">دورة الضباط (officers-document.html)</option>
+            <option value="investigation-document.html">دورة البحث والتحري (investigation-document.html)</option>
+            <option value="rapid-intervention-document.html">دورة التدخل السريع للضباط
+              (rapid-intervention-document.html)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label"
+            style="color:rgba(255,255,255,0.75); font-weight:800; font-size:0.8rem; display:block; margin-bottom:6px;">الأسئلة
+            المعروضة:</label>
+          <input type="number" id="edit-exam-showcount" class="prompt-input" style="text-align:center; margin-bottom:0;"
+            placeholder="عرض الكل">
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 20px;">
+        <label class="form-label"
+          style="color:rgba(255,255,255,0.75); font-weight:800; font-size:0.8rem; display:block; margin-bottom:6px;">وصف
+          الدورة والاختبار:</label>
+        <textarea id="edit-exam-desc" class="prompt-input"
+          style="text-align:right; height:60px; padding:10px; margin-bottom:0;"
+          placeholder="اكتب نبذة عن الاختبار..."></textarea>
+      </div>
+
+      <div style="display:flex; gap:12px; justify-content:center;">
+        <button class="btn btn-ghost" onclick="closeExamDetailsModal()">إلغاء</button>
+        <button class="btn btn-gold" onclick="saveExamDetails()">حفظ البيانات 💾</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Question Bank Management Modal ── -->
+  <div class="prompt-overlay" id="question-bank-modal" onclick="if(event.target===this) closeQuestionBankModal()">
+    <div class="prompt-card"
+      style="max-width: 650px; text-align: right; background: linear-gradient(145deg, #070d24, #0b153a); border: 1px solid rgba(201, 162, 39, 0.25); border-radius: 18px; padding: 28px; display:flex; flex-direction:column; max-height:85vh;">
+      <div class="prompt-title"
+        style="text-align: center; margin-bottom: 10px; font-size: 1.25rem; font-weight: 900; color: #fff;"
+        id="qbank-title">إدارة بنك الأسئلة</div>
+      <input type="hidden" id="qbank-exam-id">
+      <input type="hidden" id="qbank-edit-index" value="-1">
+
+      <!-- List of questions inside bank -->
+      <div
+        style="flex-grow:1; overflow-y:auto; margin-bottom:20px; padding:10px; background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.05); border-radius:12px; min-height: 150px;"
+        id="qbank-list-container">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- Form to add new question -->
+      <div style="border-top:1px solid rgba(255,255,255,0.1); padding-top:15px;" id="qbank-add-section">
+        <h4 style="color:var(--color-gold-primary); font-weight:800; margin-bottom:10px; font-size:0.92rem;"
+          id="qbank-form-title">➕ إضافة سؤال جديد لبنك الأسئلة:</h4>
+        <div class="form-group" style="margin-bottom:10px;">
+          <input type="text" id="new-q-text" class="prompt-input" style="text-align:right; margin-bottom:0;"
+            placeholder="اكتب نص السؤال هنا...">
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+          <input type="text" id="new-q-opt0" class="prompt-input" style="text-align:right; margin-bottom:0;"
+            placeholder="الخيار الأول">
+          <input type="text" id="new-q-opt1" class="prompt-input" style="text-align:right; margin-bottom:0;"
+            placeholder="الخيار الثاني">
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+          <input type="text" id="new-q-opt2" class="prompt-input" style="text-align:right; margin-bottom:0;"
+            placeholder="الخيار الثالث">
+          <input type="text" id="new-q-opt3" class="prompt-input" style="text-align:right; margin-bottom:0;"
+            placeholder="الخيار الرابع">
+        </div>
+        <div style="display:flex; gap:12px; align-items:center; margin-bottom:15px; flex-wrap:wrap;">
+          <label style="color:#fff; font-size:0.8rem; font-weight:700; white-space:nowrap;">رقم الخيار الصحيح:</label>
+          <select id="new-q-correct" class="prompt-input"
+            style="text-align:right; font-family:inherit; margin-bottom:0; height:38px; width:150px; background:#05091e; color:#fff; border:1px solid rgba(255,255,255,0.08); border-radius:8px; display:inline-block; padding: 0 8px;">
+            <option value="0">الخيار الأول</option>
+            <option value="1">الخيار الثاني</option>
+            <option value="2">الخيار الثالث</option>
+            <option value="3">الخيار الرابع</option>
+          </select>
+          <button class="btn btn-gold btn-sm" id="qbank-save-btn" onclick="addQuestionToBank()"
+            style="margin-right:auto; height:38px; padding:0 20px;">حفظ السؤال في البنك 💾</button>
+          <button class="btn btn-ghost btn-sm" id="qbank-cancel-btn" onclick="cancelEditQuestion()"
+            style="display:none; height:38px; padding:0 15px; margin-right:10px; border-color:rgba(255,255,255,0.15);">إلغاء
+            ✕</button>
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:center; border-top:1px solid rgba(255,255,255,0.05); padding-top:15px;">
+        <button class="btn btn-ghost" onclick="closeQuestionBankModal()">إغلاق النافذة</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Review Answers Modal ── -->
+  <div class="prompt-overlay" id="review-answers-modal" onclick="if(event.target===this) closeReviewAnswersModal()">
+    <div class="prompt-card"
+      style="max-width: 650px; text-align: right; background: linear-gradient(145deg, #070d24, #0b153a); border: 1px solid rgba(201, 162, 39, 0.25); border-radius: 18px; padding: 28px; display:flex; flex-direction:column; max-height:85vh;">
+      <div class="prompt-title"
+        style="text-align: center; margin-bottom: 5px; font-size: 1.25rem; font-weight: 900; color: #fff;"
+        id="review-title">مراجعة إجابات المختبر</div>
+      <div style="text-align: center; font-size: 0.85rem; color: var(--color-gold-primary); margin-bottom: 15px;"
+        id="review-subtitle"></div>
+
+      <div
+        style="flex-grow:1; overflow-y:auto; margin-bottom:20px; padding:10px; background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.05); border-radius:12px;"
+        id="review-questions-container">
+        <!-- Generated dynamically -->
+      </div>
+
+      <div style="display:flex; justify-content:center; border-top:1px solid rgba(255,255,255,0.05); padding-top:15px;">
+        <button class="btn btn-ghost" onclick="closeReviewAnswersModal()">إغلاق النافذة</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Question Bank Access Request Modal ── -->
+  <div class="prompt-overlay" id="qbank-request-modal" onclick="if(event.target===this) closeQBankRequestModal()">
+    <div class="prompt-card" style="max-width: 520px; text-align: right; background: linear-gradient(145deg, #070d24, #0b153a); border: 1px solid rgba(201, 162, 39, 0.25); border-radius: 18px; padding: 28px;">
+      <div class="prompt-title" style="text-align: center; margin-bottom: 10px; font-size: 1.25rem; font-weight: 900; color: #fff;">
+        <i class="fa-solid fa-user-lock"></i> طلب إذن دخول وتعديل بنك الأسئلة
+      </div>
+      <p style="color: rgba(255,255,255,0.65); font-size: 0.85rem; line-height: 1.6; text-align: center; margin-bottom: 20px;">
+        وفقاً لتعليمات الخصوصية والضبط الإداري، لا يمكن دخول أو تعديل بنك الأسئلة إلا بعد الحصول على إذن رسمي مسبق وموثق من <strong style="color:var(--color-gold-primary);">رئاسة تدريب الأمن العام</strong>.
+      </p>
+      <input type="hidden" id="req-qbank-exam-id">
+      <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 14px; margin-bottom: 16px;">
+        <div style="font-size: 0.82rem; color: rgba(255,255,255,0.5); margin-bottom: 4px;">الاختبار المستهدف:</div>
+        <div style="font-weight: 800; color: #fff; font-size: 1rem;" id="req-qbank-exam-title">—</div>
+      </div>
+      <div id="qbank-request-form-body">
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label class="form-label" style="color:rgba(255,255,255,0.8); font-weight:800; font-size:0.82rem; display:block; margin-bottom:6px;">سبب وتبرير دخول وتعديل بنك الأسئلة:</label>
+          <textarea id="req-qbank-reason" class="prompt-input" style="text-align:right; height:80px; padding:10px; margin-bottom:0;" placeholder="اكتب السبب بالتفصيل (مثل: إضافة أسئلة الدورة الجديدة، تعديل بعض الأخطاء المطبعية...)"></textarea>
+        </div>
+        <div style="display:flex; gap:12px; justify-content:center;">
+          <button class="btn btn-ghost" onclick="closeQBankRequestModal()">إلغاء</button>
+          <button class="btn btn-gold" onclick="submitQBankAccessRequest()"><i class="fa-solid fa-paper-plane"></i> إرسال الطلب لرئاسة التدريب</button>
+        </div>
+      </div>
+      <div id="qbank-request-status-body" style="display:none; text-align:center; padding: 10px 0;">
+        <div id="req-status-icon" style="font-size: 2.5rem; margin-bottom: 10px;">⏳</div>
+        <div id="req-status-title" style="font-weight: 800; color: #fff; font-size: 1.1rem; margin-bottom: 8px;">جاري معالجة الطلب</div>
+        <p id="req-status-desc" style="color: rgba(255,255,255,0.6); font-size: 0.85rem; line-height: 1.5; margin-bottom: 20px;">طلبك حالياً قيد المراجعة والاعتماد من قبل رئاسة تدريب الأمن العام.</p>
+        <button class="btn btn-ghost" onclick="closeQBankRequestModal()">إغلاق النافذة</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ QUIZ OVERLAY ═══════════════ -->
+  <div class="quiz-overlay" id="quiz-overlay">
+    <div class="quiz-header">
+      <div>
+        <h2 style="font-weight:900; color:#fff" id="quiz-exam-title">اختبار بروتوكول الاعتقال</h2>
+        <p style="color:var(--color-text-muted); font-size:0.8rem; margin-top:2px;" id="quiz-exam-cat">إجراءات ميدانية
+        </p>
+      </div>
+
+      <div class="quiz-timer">
+        <span>⏱️</span>
+        <span id="quiz-timer-text">15:00</span>
+      </div>
+    </div>
+
+    <div class="quiz-card" id="quiz-card">
+      <!-- Active Quiz Questions screen -->
+      <div id="quiz-play-screen">
+        <div class="quiz-progress-bar-bg">
+          <div class="quiz-progress-bar-fill" id="quiz-progress-fill"></div>
+        </div>
+
+        <div class="question-title" id="quiz-question-title">ما هي أول خطوة يجب اتخاذها قبل تنفيذ أي عملية اعتقال؟</div>
+
+        <div class="options-list" id="quiz-options-list">
+          <!-- Render options dyn -->
+        </div>
+
+        <div class="quiz-footer">
+          <span style="color:var(--color-text-muted); font-size:0.85rem;" id="quiz-counter">سؤال 1 من 5</span>
+          <div style="display:flex; gap:12px;">
+            <button class="btn btn-ghost" id="quiz-btn-prev">السؤال السابق</button>
+            <button class="btn btn-gold" id="quiz-btn-next">السؤال التالي</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results / Failure / Success Screen -->
+      <div id="quiz-result-screen" style="display:none">
+        <!-- Generated dyn -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let activeExam = null;
+    let currentQIdx = 0;
+    let userAnswers = []; // holds indices of selected choices
+    let timerInterval = null;
+    let timeLeft = 0; // seconds
+
+    let activeExamineeName = null;
+    let activeExamIdToPrompt = null;
+    let examEntryTime = null;
+    let activeAttemptDbId = null;
+    let activeTab = 'results';
+
+    async function init() {
+      SeedData.init();
+
+      // Initial sync with server
+      try {
+        await App.syncSettingsWithServer();
+        if (typeof Storage !== 'undefined' && Storage.loadAllFromServer) {
+          await Storage.loadAllFromServer();
+        }
+      } catch (e) {
+        console.warn('[Sync] Initial settings/database sync failed:', e);
+      }
+
+      // Periodic sync every 3 seconds for supervisor data if active
+      setInterval(() => {
+        const panel = document.getElementById('supervisor-panel');
+        if (panel && panel.style.display !== 'none') {
+          // Always update the QBank requests notification badge in real-time
+          try {
+            const qreqs = Storage.getCollection(Storage.keys.QBANK_REQUESTS) || [];
+            const pendingQreqs = qreqs.filter(r => r.status === 'pending').length;
+            const badgeEl = document.getElementById('qbank-reqs-badge');
+            if (badgeEl) {
+              if (pendingQreqs > 0) {
+                badgeEl.textContent = pendingQreqs;
+                badgeEl.style.display = 'inline-block';
+              } else {
+                badgeEl.style.display = 'none';
+              }
+            }
+          } catch (e) {
+            console.warn('Failed to update QBank requests badge count:', e);
+          }
+
+          if (activeTab === 'results') {
+            renderSupervisorResults();
+          } else if (activeTab === 'retakes') {
+            renderRetakeRequests();
+          } else if (activeTab === 'violations') {
+            renderViolationsArchive();
+          } else if (activeTab === 'qbank-reqs') {
+            renderQBankRequests();
+          }
+        }
+      }, 3000);
+
+      // Periodic sync every 5 seconds
+      setInterval(() => {
+        App.syncSettingsWithServer()
+          .then(() => {
+            renderExamsMgmtTable();
+            renderExamsList();
+          })
+          .catch(() => { });
+      }, 5000);
+
+      // Global Discord Auth Gate for all subpages
+      checkAuthGate();
+
+      // Check maintenance mode immediately
+      checkMaintenanceSync();
+
+      // Check if current document is locked due to active exam
+      checkActiveExamDocumentLock();
+
+      // Listen to storage changes for exams and settings to sync in real-time across tabs
+      window.addEventListener('storage', (e) => {
+        if (e.key === 'ps_exams') {
+          checkActiveExamDocumentLock();
+          // Also refresh exam UI for all tabs
+          renderExamsMgmtTable();
+          renderExamsList();
+        }
+        // When settings (including openExams) change, update local state immediately
+        if (e.key === 'ps_settings') {
+          try {
+            const newSettings = JSON.parse(e.newValue || '{}');
+            if (newSettings.openExams) {
+              // Update exams collection based on server openExams flag
+              const exams = Storage.getCollection(Storage.keys.EXAMS) || [];
+              let updated = false;
+              exams.forEach(ex => {
+                const serverState = newSettings.openExams[ex.id];
+                if (serverState !== undefined && ex.isOpen !== serverState) {
+                  ex.isOpen = serverState;
+                  updated = true;
+                }
+              });
+              if (updated) {
+                Storage.set(Storage.keys.EXAMS, exams);
+                renderExamsMgmtTable();
+                renderExamsList();
+              }
+            }
+          } catch (err) {
+            console.warn('Failed to parse ps_settings storage event', err);
+          }
+        }
+      });
+    }
+
+    // Holds shuffles for the active quiz
+    let activeQuizQuestions = [];
+
+    // Anti-cheat state variables
+    let isExamActive = false;
+    let violationsCount = 0;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (!Auth.requireDiscordAuth()) {
+        const mainContent = document.querySelector('.exams-page');
+        if (mainContent) mainContent.style.display = 'none';
+        return;
+      }
+
+      try {
+        await init();
+      } catch (err) {
+        console.error('[DOMContentLoaded] Failed during init():', err);
+      }
+
+      try {
+        // Clean up mock results from storage if they exist
+        let results = Storage.getCollection(Storage.keys.EXAM_RESULTS) || [];
+        const hadMock = results.some(r => r && (r.id === 'res_1' || r.id === 'res_2' || r.id === 'res_3'));
+        if (hadMock) {
+          results = results.filter(r => r && r.id !== 'res_1' && r.id !== 'res_2' && r.id !== 'res_3');
+          Storage.set(Storage.keys.EXAM_RESULTS, results);
+        }
+      } catch (err) {
+        console.error('[DOMContentLoaded] Failed cleaning mock results:', err);
+      }
+
+      try {
+        renderExamsList();
+      } catch (err) {
+        console.error('[DOMContentLoaded] Failed rendering exams list:', err);
+      }
+
+      try {
+        renderSupervisorPanel();
+      } catch (err) {
+        console.error('[DOMContentLoaded] Failed rendering supervisor panel:', err);
+      }
+
+      try {
+        restoreExamProgress();
+      } catch (err) {
+        console.error('[DOMContentLoaded] Failed restoring exam progress:', err);
+      }
+
+      // Wire quiz screen buttons
+      document.getElementById('quiz-btn-prev').addEventListener('click', prevQuestion);
+      document.getElementById('quiz-btn-next').addEventListener('click', nextQuestion);
+
+      // Anti-cheat Event Listeners
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden && isExamActive) {
+          recordViolation('تغيير التبويب أو تصغير المتصفح (Tab Switch / Minimized)');
+        }
+      });
+
+      window.addEventListener('blur', () => {
+        if (isExamActive) {
+          recordViolation('خروج المؤشر عن صفحة الاختبار أو فتح نافذة أخرى (Window Focus Lost)');
+        }
+      });
+
+      window.addEventListener('keydown', (e) => {
+        if (isExamActive) {
+          if (e.key === 'Meta' || e.metaKey) {
+            recordViolation('الضغط على مفتاح Windows (Meta Key)');
+          }
+        }
+      });
+
+      window.addEventListener('beforeunload', (e) => {
+        if (isExamActive) {
+          e.preventDefault();
+          e.returnValue = 'هل أنت متأكد من رغبتك في الخروج؟ سيتم اعتبار محاولتك منسحبة!';
+          return e.returnValue;
+        }
+      });
+
+      window.addEventListener('popstate', (e) => {
+        if (isExamActive) {
+          history.pushState(null, null, window.location.href);
+          recordViolation('محاولة استخدام زر الرجوع للخلف بالمتصفح (Back Navigation Attempt)');
+          alert('ممنوع الرجوع للخلف أثناء تقديم الاختبار! تم تسجيل مخالفة.');
+        }
+      });
+
+
+
+      window.addEventListener('error', function (event) {
+        if (isExamActive && activeExam) {
+          const errorData = {
+            trainee_name: activeExamineeName || '—',
+            exam_name: activeExam.title || '—',
+            error_message: event.message,
+            stack_trace: event.error ? event.error.stack : ''
+          };
+          fetch('/api/exam_errors', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(errorData)
+          }).catch(err => console.warn('Failed to send error to log:', err));
+        }
+      });
+
+      // Storage sync listener for real-time monitoring by supervisors
+      window.addEventListener('storage', (e) => {
+        if (e.key === Storage.keys.EXAM_VIOLATIONS) {
+          if (activeTab === 'violations') {
+            renderViolationsArchive();
+          }
+        }
+        if (e.key === Storage.keys.EXAM_RESULTS) {
+          if (activeTab === 'results') {
+            renderSupervisorResults();
+          }
+        }
+      });
+    });
+
+    // Helper to shuffle array
+    function shuffleArray(array) {
+      let currentIndex = array.length, randomIndex;
+      while (currentIndex !== 0) {
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex--;
+        [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+      }
+      return array;
+    }
+
+    /* ── Supervisor / Admin Tabs ── */
+    function switchSuperTab(tabId) {
+      activeTab = tabId;
+
+      // Toggle active classes on tab buttons
+      document.querySelectorAll('.supervisor-card .btn-sm').forEach(btn => {
+        if (btn.id === `btn-tab-${tabId}`) {
+          btn.classList.remove('btn-ghost');
+          btn.classList.add('btn-gold');
+        } else if (btn.id.startsWith('btn-tab-')) {
+          btn.classList.remove('btn-gold');
+          btn.classList.add('btn-ghost');
+        }
+      });
+
+      // Toggle content displays
+      document.querySelectorAll('.super-tab-content').forEach(content => {
+        content.style.display = 'none';
+      });
+
+      if (tabId === 'results') {
+        document.getElementById('tab-super-results').style.display = 'block';
+        renderSupervisorResults();
+      } else if (tabId === 'retakes') {
+        document.getElementById('tab-super-retakes').style.display = 'block';
+        renderRetakeRequests();
+      } else if (tabId === 'exams-mgmt') {
+        document.getElementById('tab-super-exams-mgmt').style.display = 'block';
+        renderExamsMgmtTable();
+      } else if (tabId === 'stats') {
+        document.getElementById('tab-super-stats').style.display = 'block';
+        renderStatsTab();
+      } else if (tabId === 'violations') {
+        document.getElementById('tab-super-violations').style.display = 'block';
+        renderViolationsArchive();
+      } else if (tabId === 'qbank-reqs') {
+        document.getElementById('tab-super-qbank-reqs').style.display = 'block';
+        renderQBankRequests();
+      }
+    }
+
+    function renderSupervisorPanel() {
+      const panel = document.getElementById('supervisor-panel');
+      const userRole = Auth.getRole();
+      const roleInfo = Auth.getRoleInfo(userRole);
+      const isSuper = Auth.isLoggedIn() && roleInfo && roleInfo.level >= 3.5;
+
+      console.log('[renderSupervisorPanel] isLoggedIn:', Auth.isLoggedIn(), 'userRole:', userRole, 'roleInfo:', roleInfo, 'isSuper:', isSuper);
+
+      if (!isSuper) {
+        panel.style.display = 'none';
+        return;
+      }
+
+      panel.style.display = 'block';
+
+      const isAuthorizedToCreate = roleInfo && roleInfo.level >= 4.0;
+      const createBtn = document.getElementById('btn-create-exam');
+      if (createBtn) createBtn.style.display = isAuthorizedToCreate ? 'inline-block' : 'none';
+      const clearBtn = document.getElementById('btn-clear-results');
+      if (clearBtn) clearBtn.style.display = (roleInfo && roleInfo.level >= 3.5) ? 'inline-block' : 'none';
+
+      // Populate course filter dropdowns
+      const filterDropdown = document.getElementById('archive-course-filter');
+      const exams = Storage.getCollection(Storage.keys.EXAMS) || [];
+      if (filterDropdown) {
+        const selectedVal = filterDropdown.value || 'all';
+        filterDropdown.innerHTML = '<option value="all">كل الدورات</option>' +
+          exams.map(e => `<option value="${e.id}">${e.title}</option>`).join('');
+        filterDropdown.value = selectedVal;
+      }
+
+      const vFilterDropdown = document.getElementById('violations-course-filter');
+      if (vFilterDropdown) {
+        const vSelectedVal = vFilterDropdown.value || 'all';
+        vFilterDropdown.innerHTML = '<option value="all">كل الدورات</option>' +
+          exams.map(e => `<option value="${e.id}">${e.title}</option>`).join('');
+        vFilterDropdown.value = vSelectedVal;
+      }
+
+      // Render the active tab content
+      switchSuperTab(activeTab);
+    }
+
+    function renderSupervisorResults() {
+      const tbody = document.getElementById('supervisor-tbody');
+      const filterVal = document.getElementById('archive-course-filter').value || 'all';
+      const userRole = Auth.getRole();
+      const roleInfo = Auth.getRoleInfo(userRole);
+
+      Storage.fetchExamArchive()
+        .then(exams => {
+          let results = exams.map(dbRow => {
+            const examObj = Storage.getCollection(Storage.keys.EXAMS).find(e => e.title === dbRow.exam_name);
+            const passingScore = examObj ? examObj.passingScore : 50;
+            return {
+              id: dbRow.id,
+              studentName: dbRow.trainee_name,
+              studentRank: dbRow.rank,
+              studentBadge: dbRow.badge_code || dbRow.code,
+              discordId: dbRow.discord_id || '—',
+              attemptCount: dbRow.attempt_count || 1,
+              duration: dbRow.duration !== undefined ? dbRow.duration : 0,
+              examTitle: dbRow.exam_name || dbRow.course_name,
+              date: dbRow.created_at ? dbRow.created_at.split(' ')[0].replace(/-/g, '/') : '—',
+              entryTime: dbRow.start_time,
+              endTime: dbRow.end_time,
+              score: dbRow.score,
+              passed: dbRow.score >= passingScore,
+              status: dbRow.status,
+              passingScore: passingScore,
+              studentTables: dbRow.studentTables || []
+            };
+          });
+
+          if (filterVal !== 'all') {
+            results = results.filter(r => {
+              const examObj = Storage.getCollection(Storage.keys.EXAMS).find(e => e.title === r.examTitle || e.id === filterVal);
+              return examObj && (examObj.id === filterVal || examObj.title === r.examTitle);
+            });
+          }
+
+          document.getElementById('super-results-count').textContent = `${results.length} محاولات`;
+
+          if (results.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="13" style="text-align:center;padding:30px;color:rgba(255,255,255,0.3)">لا توجد محاولات اختبار مسجلة لهذه الدورة</td></tr>`;
+            return;
+          }
+
+          tbody.innerHTML = results.map(r => {
+            const passBadge = r.passed
+              ? `<span class="status-badge-el pass"><i class="fa-solid fa-circle-check" style="color: #2ecc71;"></i> ناجح</span>`
+              : `<span class="status-badge-el fail"><i class="fa-solid fa-circle-exclamation" style="color: #e74c3c;"></i> راسب</span>`;
+
+            let statusBadge = '';
+            if (r.status === 'approved') {
+              statusBadge = `<span class="status-badge-el pass">✓ معتمد</span>`;
+            } else if (r.status === 'rejected') {
+              statusBadge = `<span class="status-badge-el fail">✕ مرفوض</span>`;
+            } else if (r.status === 'started') {
+              statusBadge = `<span class="status-badge-el pending">✏️ يختبر الآن</span>`;
+            } else if (r.status === 'exited') {
+              statusBadge = `<span class="status-badge-el fail"><i class="fa-solid fa-door-open"></i> انسحاب</span>`;
+            } else {
+              statusBadge = `<span class="status-badge-el pending">⏳ معلق</span>`;
+            }
+
+            const canDeleteResults = roleInfo && roleInfo.level >= 3.5;
+            const deleteBtn = canDeleteResults ? `<button class="action-btn-el reject" style="background:rgba(231, 76, 60, 0.1); border-color:rgba(231, 76, 60, 0.25);" onclick="deleteExamResult('${r.id}')">🗑️ حذف</button>` : '';
+
+            let approveBtn = '';
+            if (r.status === 'pending' && r.passed) {
+              approveBtn = `<button class="action-btn-el approve" onclick="setExamStatus('${r.id}', 'approved')">✔️ اعتماد النتيجة</button>`;
+            }
+
+            const reviewBtn = `<button class="action-btn-el approve" style="background:rgba(201,162,39,0.08); border-color:rgba(201,162,39,0.3); color:var(--color-gold-primary);" onclick="openReviewAnswersModal('${r.id}')"><i class="fa-solid fa-eye"></i> مراجعة</button>`;
+
+            const examObj = Storage.getCollection(Storage.keys.EXAMS).find(e => e.title === r.examTitle);
+            const totalQs = examObj && examObj.questions ? examObj.questions.length : 15;
+            const correctVal = Math.round((r.score / 100) * totalQs);
+            const passingVal = Math.round((r.passingScore / 100) * totalQs);
+
+            let tablesList = r.studentTables;
+            if (!tablesList || tablesList.length === 0) {
+              const solved = Auth.resolveUserTableInfo({
+                discord: r.studentBadge,
+                username: r.studentName,
+                globalName: r.studentName,
+                name: r.studentName
+              }) || {};
+              tablesList = solved.tables || [];
+            }
+
+            const tablesBadge = tablesList.length > 0
+              ? tablesList.map(t => `<span class="supervisor-badge" style="display:inline-block; font-size:0.68rem; padding: 2px 6px; background:rgba(201,162,39,0.12); border:1px solid rgba(201,162,39,0.35); color:var(--color-gold-primary); border-radius:4px; font-weight:700;">${t}</span>`).join('')
+              : '<span style="font-size:0.68rem; opacity:0.35;">غير مسجل</span>';
+
+            return `
+            <tr>
+              <td style="font-weight:700; color:#fff">
+                <div>${r.studentName}</div>
+                <div style="display:flex; flex-wrap:wrap; gap:4px; margin-top:4px;">${tablesBadge}</div>
+              </td>
+              <td style="font-family:monospace; font-size:0.8rem; opacity:0.85;">${r.discordId}</td>
+              <td style="font-family:monospace; opacity:0.8;">${r.studentBadge || '—'}</td>
+              <td><span style="color:var(--color-gold-light); font-weight:800;">${r.studentRank || '—'}</span></td>
+              <td style="font-weight:600;">${r.examTitle}</td>
+              <td style="font-family:monospace; font-weight:700; text-align:center; color:var(--color-gold-primary);">${r.attemptCount}</td>
+              <td style="font-size:0.8rem; opacity:0.8;">${r.date || '—'}</td>
+              <td style="font-family:monospace; font-size:0.8rem; color:#2ecc71;">${r.entryTime || '—'}</td>
+              <td style="font-family:monospace; font-size:0.8rem; color:#e74c3c;">${r.endTime || '—'}</td>
+              <td style="font-family:monospace; font-size:0.8rem; text-align:center; color:#3498db;">${r.duration} د</td>
+              <td style="font-family:monospace; font-weight:800; color:var(--color-gold-primary)">${correctVal} / ${totalQs} (${r.score}%) <span style="font-size:0.75rem; color:rgba(255,255,255,0.4)">(${passingVal} / ${totalQs})</span></td>
+              <td>${passBadge} ${statusBadge}</td>
+              <td>
+                <div class="action-btn-group">
+                  ${approveBtn}
+                  ${reviewBtn}
+                  ${deleteBtn}
+                </div>
+              </td>
+            </tr>
+          `;
+          }).join('');
+        })
+        .catch(err => console.error('Error fetching exam archive:', err));
+    }
+
+    function deleteExamResult(id) {
+      const userRole = Auth.getRole();
+      const roleInfo = Auth.getRoleInfo(userRole);
+      if (!roleInfo || roleInfo.level < 3.5) {
+        App.toast('عذراً، غير مصرح لك بحذف النتائج!', 'error');
+        return;
+      }
+      if (confirm('هل أنت متأكد من حذف هذه المحاولة بشكل نهائي؟')) {
+        Storage.deleteExamAttempt(id)
+          .then(res => {
+            App.toast('🗑️ تم حذف محاولة الاختبار بنجاح.', 'success');
+            renderSupervisorResults();
+          })
+          .catch(err => {
+            console.error(err);
+            App.toast('✕ فشل الحذف من قاعدة البيانات', 'error');
+          });
+      }
+    }
+
+    function clearAllExamResults() {
+      const userRole = Auth.getRole();
+      const roleInfo = Auth.getRoleInfo(userRole);
+      if (!roleInfo || roleInfo.level < 3.5) {
+        App.toast('عذراً، غير مصرح لك بمسح السجلات!', 'error');
+        return;
+      }
+      if (confirm('هل أنت متأكد من رغبتك في مسح سجل اختبارات العساكر بالكامل؟ لا يمكن التراجع عن هذا الإجراء.')) {
+        Storage.deleteExamAttempt('all')
+          .then(res => {
+            App.toast('🗑️ تم مسح سجل الاختبارات بالكامل.', 'success');
+            renderSupervisorResults();
+          })
+          .catch(err => {
+            console.error(err);
+            App.toast('✕ فشل مسح قاعدة البيانات', 'error');
+          });
+      }
+    }
+
+    window.setExamStatus = function (resultId, status) {
+      const role = Auth.getRole();
+      const roleInfo = Auth.getRoleInfo(role);
+      if (!roleInfo || roleInfo.level < 3.5) {
+        App.toast('عذراً، لا تملك الصلاحية الكافية للقيام بهذا الإجراء!', 'error');
+        return;
+      }
+
+      const currentUser = Auth.getCurrentUser();
+      const adminName = currentUser ? currentUser.username : 'مسؤول الدورة';
+
+      Storage.saveExamAttempt({ id: resultId, status: status, examiner: adminName })
+        .then(res => {
+          App.toast(`✓ تم اعتماد النتيجة بنجاح للشهادة العسكرية!`, 'success');
+          renderSupervisorResults();
+        })
+        .catch(err => {
+          console.error(err);
+          App.toast('✕ فشل تحديث الحالة في قاعدة البيانات', 'error');
+        });
+    }
+
+    function submitRetakeRequestForUser(examId, studentName, studentDiscord, studentRank, previousScore) {
+      Storage.fetchRetakeRequests()
+        .then(requests => {
+          const hasPending = requests.some(r => r.exam_id === examId && r.trainee_name.toLowerCase() === studentName.toLowerCase() && r.status === 'pending');
+          if (hasPending) {
+            App.toast('⚠️ يوجد طلب إعادة معلق بالفعل لهذا الاختبار تحت هذا الاسم الميداني!', 'warning');
+            return;
+          }
+
+          const exam = Storage.findById(Storage.keys.EXAMS, examId);
+          const examTitle = exam ? exam.title : 'اختبار عسكري';
+
+          const requestData = {
+            exam_id: examId,
+            course_name: examTitle,
+            trainee_name: studentName,
+            code: studentDiscord || '',
+            rank: studentRank || 'مشاهد',
+            previous_score: previousScore,
+            request_time: new Date().toLocaleDateString('ar-SA') + ' ' + new Date().toLocaleTimeString('ar-SA', { hour12: false }),
+            status: 'pending',
+            reason: 'إعادة الاختبار لتحسين الدرجة الميدانية'
+          };
+
+          Storage.saveRetakeRequest(requestData)
+            .then(res => {
+              App.toast('✓ تم تقديم طلب إعادة الاختبار لمسؤول الدورة بنجاح.', 'success');
+              renderRetakeRequests();
+            })
+            .catch(err => {
+              console.error(err);
+              App.toast('✕ فشل تقديم الطلب للخادم', 'error');
+            });
+        });
+    }
+
+    window.openReviewAnswersModal = function (resultId) {
+      const results = Storage.getCollection(Storage.keys.EXAM_RESULTS) || [];
+      const r = results.find(item => item.id === resultId);
+      if (!r) return;
+
+      document.getElementById('review-title').textContent = `مراجعة إجابات المختبر - ${r.studentName}`;
+      document.getElementById('review-subtitle').textContent = `الاختبار: ${r.examTitle} | الدرجة: ${r.score}% (درجة النجاح: ${r.passingScore}%)`;
+
+      const container = document.getElementById('review-questions-container');
+
+      if (!r.questions || r.questions.length === 0) {
+        container.innerHTML = `<div style="text-align:center; padding:20px; color:rgba(255,255,255,0.4);">عذراً، تفاصيل الإجابات غير متوفرة لهذه المحاولة القديمة.</div>`;
+      } else {
+        container.innerHTML = r.questions.map((q, qIdx) => {
+          const userAnswerIdx = r.userAnswers ? r.userAnswers[qIdx] : null;
+          const isCorrect = userAnswerIdx === q.correct;
+
+          const optionsHtml = q.options.map((opt, optIdx) => {
+            let style = 'background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06);';
+            let labelBadge = '';
+
+            if (optIdx === q.correct) {
+              style = 'background: rgba(46, 204, 113, 0.12); border: 1px solid #2ecc71; color: #2ecc71; font-weight: bold;';
+              labelBadge = ' (الإجابة الصحيحة)';
+            } else if (optIdx === userAnswerIdx && !isCorrect) {
+              style = 'background: rgba(231, 76, 60, 0.12); border: 1px solid #ff4757; color: #ff4757; font-weight: bold;';
+              labelBadge = ' (إجابة المختبر الخاطئة)';
+            }
+
+            return `
+            <div style="padding: 10px 14px; margin-top: 6px; border-radius: 8px; font-size: 0.82rem; ${style}">
+              ${optIdx + 1}. ${opt}${labelBadge}
+            </div>
+          `;
+          }).join('');
+
+          return `
+          <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 14px; margin-bottom: 12px;">
+            <div style="font-weight: 700; color: #fff; font-size: 0.88rem; margin-bottom: 8px;">
+              س ${qIdx + 1}: ${q.q} 
+              ${isCorrect ? '<span style="color:#2ecc71; margin-right:8px;">✔️ إجابة صحيحة</span>' : '<span style="color:#ff4757; margin-right:8px;">❌ إجابة خاطئة</span>'}
+            </div>
+            ${optionsHtml}
+          </div>
+        `;
+        }).join('');
+      }
+
+      document.getElementById('review-answers-modal').classList.add('active');
+    }
+
+    window.closeReviewAnswersModal = function () {
+      document.getElementById('review-answers-modal').classList.remove('active');
+    }
+
+    function renderRetakeRequests() {
+      const tbody = document.getElementById('retakes-tbody');
+      if (!tbody) return;
+
+      Storage.fetchRetakeRequests()
+        .then(requests => {
+          if (requests.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:30px;color:rgba(255,255,255,0.3)">لا توجد طلبات إعادة اختبار مسجلة</td></tr>`;
+            return;
+          }
+
+          tbody.innerHTML = requests.map(r => {
+            let statusBadge = '';
+            let actionBtns = '';
+
+            if (r.status === 'pending') {
+              statusBadge = `<span class="status-badge-el pending">⏳ معلق</span>`;
+              actionBtns = `
+              <div class="action-btn-group">
+                <button class="action-btn-el approve" onclick="approveRetakeRequest('${r.id}')">✔️ موافقة</button>
+                <button class="action-btn-el reject" onclick="rejectRetakeRequest('${r.id}')">❌ رفض</button>
+              </div>
+            `;
+            } else if (r.status === 'approved') {
+              statusBadge = `<span class="status-badge-el pass"><i class="fa-solid fa-circle-check" style="color: #2ecc71;"></i> تمت الموافقة</span>`;
+              actionBtns = `<span style="font-size:0.75rem; color:rgba(255,255,255,0.35);">مكتمل</span>`;
+            } else if (r.status === 'rejected') {
+              statusBadge = `<span class="status-badge-el fail"><i class="fa-solid fa-circle-exclamation" style="color: #e74c3c;"></i> تم الرفض</span>`;
+              actionBtns = `<span style="font-size:0.75rem; color:rgba(255,255,255,0.35);">مكتمل</span>`;
+            }
+
+            return `
+            <tr>
+              <td style="font-weight:700; color:#fff">${r.trainee_name}</td>
+              <td><span style="color:var(--color-gold-light); font-weight:800;">${r.rank || '—'}</span></td>
+              <td style="font-weight:600;">${r.course_name}</td>
+              <td style="font-family:monospace; font-weight:800; color:#ff4757;">${r.previous_score}%</td>
+              <td style="font-size:0.8rem; opacity:0.8;">${r.request_time || '—'}</td>
+              <td>${statusBadge}</td>
+              <td style="font-weight:700; color:var(--color-gold-primary);">${r.approved_by || '—'}</td>
+              <td>${actionBtns}</td>
+            </tr>
+          `;
+          }).join('');
+        })
+        .catch(err => console.error(err));
+    }
+
+    window.approveRetakeRequest = function (requestId) {
+      const currentUser = Auth.getCurrentUser();
+      const adminName = currentUser ? currentUser.username : 'مسؤول الدورة';
+
+      Storage.updateRetakeStatus(requestId, 'approved', adminName)
+        .then(res => {
+          App.toast('✅ تم قبول طلب الإعادة وفتح محاولة جديدة للمختبر بنجاح!', 'success');
+          renderRetakeRequests();
+          renderSupervisorResults();
+        })
+        .catch(err => {
+          console.error(err);
+          App.toast('✕ فشل الموافقة على الطلب', 'error');
+        });
+    }
+
+    window.rejectRetakeRequest = function (requestId) {
+      const currentUser = Auth.getCurrentUser();
+      const adminName = currentUser ? currentUser.username : 'مسؤول الدورة';
+
+      Storage.updateRetakeStatus(requestId, 'rejected', adminName)
+        .then(res => {
+          App.toast('<i class="fa-solid fa-circle-exclamation" style="color: #e74c3c;"></i> تم رفض طلب إعادة الاختبار.', 'warning');
+          renderRetakeRequests();
+        })
+        .catch(err => {
+          console.error(err);
+          App.toast('✕ فشل رفض الطلب', 'error');
+        });
+    }
+
+    /* ── Tab 2: Exams & Question Banks Management ── */
+    function renderExamsMgmtTable() {
+      const tbody = document.getElementById('exams-mgmt-tbody');
+      const exams = Storage.getCollection(Storage.keys.EXAMS) || [];
+
+      if (exams.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:30px;color:rgba(255,255,255,0.3)">لا توجد اختبارات مسجلة بعد</td></tr>`;
+        return;
+      }
+
+      const role = Auth.getRole();
+      const roleInfo = Auth.getRoleInfo(role);
+      const canManageExams = Auth.isLoggedIn() && roleInfo && (roleInfo.permissions.includes('*') || roleInfo.permissions.includes('manage_course_exams') || roleInfo.permissions.includes('toggle_exams'));
+      const canDeleteExams = Auth.isLoggedIn() && roleInfo && (roleInfo.level >= 4.5);
+
+      tbody.innerHTML = exams.map(e => {
+        const statusText = e.isOpen ? '<i class="fa-solid fa-circle-check" style="color: #2ecc71;"></i> مفتوح' : '<i class="fa-solid fa-circle-exclamation" style="color: #e74c3c;"></i> مغلق';
+        const statusBtn = e.isOpen
+          ? `<button class="action-btn-el reject" onclick="toggleExamOpenState('${e.id}', false)">إغلاق الاختبار <i class="fa-solid fa-lock"></i></button>`
+          : `<button class="action-btn-el approve" onclick="toggleExamOpenState('${e.id}', true)">فتح الاختبار 🔓</button>`;
+
+        const showCountText = e.questionsCountToShow ? `${e.questionsCountToShow} من أصل ${e.questions ? e.questions.length : 0}` : 'عرض الكل';
+
+        const datesText = (e.isOpen && e.openedAt)
+          ? `<span style="font-size:0.75rem; color:#2ecc71;">تم الفتح: ${e.openedAt}</span>`
+          : (e.closedAt ? `<span style="font-size:0.75rem; color:#ff4757;">أغلق في: ${e.closedAt}</span>` : '<span style="color:rgba(255,255,255,0.25);">—</span>');
+
+        const editBtns = canManageExams ? `
+        <button class="action-btn-el approve" style="background:rgba(201,162,39,0.08); border-color:rgba(201,162,39,0.3); color:var(--color-gold-primary);" onclick="checkAndOpenQuestionBank('${e.id}')"><i class="fa-solid fa-file-pen"></i> بنك الأسئلة</button>
+        <button class="action-btn-el approve" style="background:rgba(255,255,255,0.05); border-color:rgba(255,255,255,0.1); color:#fff;" onclick="openEditExamModal('${e.id}')"><i class="fa-solid fa-gear"></i> الإعدادات</button>
+      ` : '';
+
+        const deleteBtn = canDeleteExams ? `
+        <button class="action-btn-el reject" style="background:rgba(231,76,60,0.1); border-color:rgba(231,76,60,0.25);" onclick="deleteExam('${e.id}')">🗑️ حذف</button>
+      ` : '';
+
+        return `
+        <tr>
+          <td style="font-weight:700; color:#fff">${e.emoji || '<i class="fa-solid fa-file-pen"></i>'} ${e.title}</td>
+          <td style="font-family:monospace; font-size:0.82rem; opacity:0.8;">${e.documentUrl || 'غير مرتبط'}</td>
+          <td style="font-family:monospace; font-weight:800; color:var(--color-gold-primary);">${e.questions ? e.questions.length : 0} سؤال</td>
+          <td style="font-weight:700;">${showCountText}</td>
+          <td style="font-weight:800;">${statusText}</td>
+          <td>${datesText}</td>
+          <td>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              ${canManageExams ? statusBtn : ''}
+              ${editBtns}
+              ${deleteBtn}
+            </div>
+          </td>
+        </tr>
+      `;
+      }).join('');
+    }
+
+    async function toggleExamOpenState(examId, openIt) {
+      const role = Auth.getRole();
+      if (!['owner', 'assistant_owner', 'admin', 'course_admin'].includes(role)) {
+        App.toast('عذراً، لا تملك صلاحية فتح أو إغلاق الاختبارات!', 'error');
+        return;
+      }
+
+      const exams = Storage.getCollection(Storage.keys.EXAMS) || [];
+      const idx = exams.findIndex(e => e.id === examId);
+      if (idx === -1) return;
+
+      const targetExam = exams[idx];
+
+      if (openIt) {
+        // 1. Prevent opening more than one exam for the same course/document URL at the same time
+        const duplicateOpen = exams.find(e => e.isOpen === true && e.documentUrl === targetExam.documentUrl && e.id !== examId);
+        if (duplicateOpen) {
+          App.toast(`⚠️ لا يمكن فتح أكثر من اختبار لـ (${targetExam.documentUrl}) في الوقت نفسه! الاختبار الحالي المفتوح: ${duplicateOpen.title}`, 'error');
+          return;
+        }
+
+        targetExam.isOpen = true;
+        targetExam.openedAt = new Date().toLocaleString('ar-SA', { hour12: false });
+        targetExam.closedAt = '';
+
+        App.toast(`<i class="fa-solid fa-circle-check" style="color: #2ecc71;"></i> تم فتح الاختبار وتأمين وإغلاق مستند الدورة (${targetExam.documentUrl}) تلقائياً!`, 'success');
+        const currentUser = Auth.getCurrentUser();
+        const adminName = currentUser ? currentUser.username : 'مسؤول الدورة';
+        if (typeof Logger !== 'undefined') {
+          Logger.log('exam_open', `قام مسؤول الدورة "${adminName}" بفتح اختبار "${targetExam.title}" وتأمين المستند التابع له (${targetExam.documentUrl})`);
+        }
+      } else {
+        targetExam.isOpen = false;
+        targetExam.closedAt = new Date().toLocaleString('ar-SA', { hour12: false });
+
+        App.toast('<i class="fa-solid fa-circle-exclamation" style="color: #e74c3c;"></i> تم إغلاق الاختبار وإعادة تنشيط مستند الدورة للعمل بشكل طبيعي.', 'warning');
+        const currentUser = Auth.getCurrentUser();
+        const adminName = currentUser ? currentUser.username : 'مسؤول الدورة';
+        if (typeof Logger !== 'undefined') {
+          Logger.log('exam_close', `قام مسؤول الدورة "${adminName}" بإغلاق اختبار "${targetExam.title}" وإعادة فتح المستند التابع له (${targetExam.documentUrl})`);
+        }
+      }
+
+      Storage.set(Storage.keys.EXAMS, exams);
+      // Trigger a storage event for other tabs (fallback)    
+      localStorage.setItem('ps_exams_sync', Date.now().toString());
+
+      // Save open state to settings so it synchronizes globally via settings.json
+      const S = Storage.get(Storage.keys.SETTINGS, {});
+      if (!S.openExams) S.openExams = {};
+      S.openExams[examId] = openIt;
+      Storage.set(Storage.keys.SETTINGS, S);
+
+      fetch(App.getSettingsApiUrl(), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(S)
+      }).catch(err => console.warn('Failed to sync settings with server:', err));
+
+      renderExamsMgmtTable();
+      renderExamsList();
+    }
+
+    function deleteExam(examId) {
+      const role = Auth.getRole();
+      const roleInfo = Auth.getRoleInfo(role);
+      if (!roleInfo || roleInfo.level < 4.5) {
+        App.toast('عذراً، غير مصرح لك بحذف الاختبارات!', 'error');
+        return;
+      }
+      if (confirm('هل أنت متأكد من رغبتك في حذف هذا الاختبار نهائياً مع كامل بنك الأسئلة الخاص به؟')) {
+        const exams = Storage.getCollection(Storage.keys.EXAMS) || [];
+        const matched = exams.find(e => e.id === examId);
+        Storage.deleteFromCollection(Storage.keys.EXAMS, examId);
+
+        if (typeof Logger !== 'undefined' && matched) {
+          Logger.log('exam_verify', `قام بحذف اختبار "${matched.title}" بالكامل من النظام`);
+        }
+
+        App.toast('🗑️ تم حذف الاختبار بنجاح.', 'success');
+        renderExamsMgmtTable();
+        renderExamsList();
+      }
+    }
+
+    /* ── Tab 3: Statistics ── */
+    function renderStatsTab() {
+      const container = document.getElementById('exams-stats-cards');
+      const exams = Storage.getCollection(Storage.keys.EXAMS) || [];
+      const results = Storage.getCollection(Storage.keys.EXAM_RESULTS) || [];
+
+      if (exams.length === 0) {
+        container.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:50px;color:rgba(255,255,255,0.3)">لا توجد اختبارات مسجلة لإظهار الإحصائيات</div>`;
+        return;
+      }
+
+      container.innerHTML = exams.map(e => {
+        // Calculate real-time stats
+        const examResults = results.filter(r => r.examId === e.id);
+        const totalTakers = examResults.length;
+        const passedCount = examResults.filter(r => r.passed).length;
+        const failedCount = totalTakers - passedCount;
+        const rate = totalTakers > 0 ? Math.round((passedCount / totalTakers) * 100) : 0;
+
+        return `
+        <div class="exam-card" style="padding: 24px; min-height: auto; cursor: default; transform: none; box-shadow: none;">
+          <div>
+            <div style="font-size: 1.8rem; margin-bottom: 10px;">${e.emoji || '<i class="fa-solid fa-chart-column"></i>'}</div>
+            <h4 style="color:#fff; font-weight:800; font-size:1.1rem; margin-bottom:12px; text-align:right;">${e.title}</h4>
+            
+            <div style="display:flex; flex-direction:column; gap:8px; border-top:1px solid rgba(255,255,255,0.06); padding-top:12px;">
+              <div style="display:flex; justify-content:space-between; font-size:0.82rem; color:rgba(255,255,255,0.65);">
+                <span>إجمالي المختبرين:</span>
+                <strong style="color:#fff;">${totalTakers} عسكري</strong>
+              </div>
+              <div style="display:flex; justify-content:space-between; font-size:0.82rem; color:rgba(255,255,255,0.65);">
+                <span>الناجحين:</span>
+                <strong style="color:#2ecc71;">${passedCount} عسكري</strong>
+              </div>
+              <div style="display:flex; justify-content:space-between; font-size:0.82rem; color:rgba(255,255,255,0.65);">
+                <span>الراسبين:</span>
+                <strong style="color:#ff4757;">${failedCount} عسكري</strong>
+              </div>
+              <div style="display:flex; justify-content:space-between; font-size:0.82rem; color:rgba(255,255,255,0.65);">
+                <span>نسبة النجاح العامة:</span>
+                <strong style="color:var(--color-gold-primary);">${rate}%</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      }).join('');
+    }
+
+    /* ── Modal: Exam Details ── */
+    function openCreateExamModal() {
+      const role = Auth.getRole();
+      const roleInfo = Auth.getRoleInfo(role);
+      if (!roleInfo || roleInfo.level < 4.0) {
+        App.toast('عذراً، غير مصرح لك بإنشاء الاختبارات جديدة!', 'error');
+        return;
+      }
+      document.getElementById('edit-exam-id').value = '';
+      document.getElementById('edit-exam-title').value = '';
+      document.getElementById('edit-exam-category').value = 'دورة تدريبية';
+      document.getElementById('edit-exam-emoji').value = '<i class="fa-solid fa-file-pen"></i>';
+      document.getElementById('edit-exam-duration').value = '15';
+      document.getElementById('edit-exam-passing').value = '80';
+      document.getElementById('edit-exam-docurl').value = '';
+      document.getElementById('edit-exam-showcount').value = '';
+      document.getElementById('edit-exam-desc').value = '';
+
+      document.getElementById('exam-details-modal').classList.add('active');
+    }
+
+    function openEditExamModal(examId) {
+      const role = Auth.getRole();
+      const roleInfo = Auth.getRoleInfo(role);
+      const canManageExams = Auth.isLoggedIn() && roleInfo && (roleInfo.permissions.includes('*') || roleInfo.permissions.includes('manage_course_exams'));
+      if (!canManageExams) {
+        App.toast('عذراً، غير مصرح لك بتعديل الاختبارات!', 'error');
+        return;
+      }
+      const exam = Storage.findById(Storage.keys.EXAMS, examId);
+      if (!exam) return;
+
+      document.getElementById('edit-exam-id').value = exam.id;
+      document.getElementById('edit-exam-title').value = exam.title;
+      document.getElementById('edit-exam-category').value = exam.category || 'عام';
+      document.getElementById('edit-exam-emoji').value = exam.emoji || '<i class="fa-solid fa-file-pen"></i>';
+      document.getElementById('edit-exam-duration').value = exam.duration;
+      document.getElementById('edit-exam-passing').value = exam.passingScore;
+      document.getElementById('edit-exam-docurl').value = exam.documentUrl || '';
+      document.getElementById('edit-exam-showcount').value = exam.questionsCountToShow || '';
+      document.getElementById('edit-exam-desc').value = exam.description || '';
+
+      document.getElementById('exam-details-modal').classList.add('active');
+    }
+
+    function closeExamDetailsModal() {
+      document.getElementById('exam-details-modal').classList.remove('active');
+    }
+
+    function saveExamDetails() {
+      const role = Auth.getRole();
+      const roleInfo = Auth.getRoleInfo(role);
+      const canManageExams = Auth.isLoggedIn() && roleInfo && (roleInfo.permissions.includes('*') || roleInfo.permissions.includes('manage_course_exams'));
+      if (!canManageExams) {
+        App.toast('عذراً، غير مصرح لك بحفظ الاختبارات!', 'error');
+        return;
+      }
+      const id = document.getElementById('edit-exam-id').value;
+      const title = document.getElementById('edit-exam-title').value.trim();
+      const category = document.getElementById('edit-exam-category').value.trim();
+      const emoji = document.getElementById('edit-exam-emoji').value.trim();
+      const duration = parseInt(document.getElementById('edit-exam-duration').value) || 15;
+      const passing = parseInt(document.getElementById('edit-exam-passing').value) || 80;
+      const docurl = document.getElementById('edit-exam-docurl').value || '';
+      const showcount = document.getElementById('edit-exam-showcount').value ? parseInt(document.getElementById('edit-exam-showcount').value) : null;
+      const desc = document.getElementById('edit-exam-desc').value.trim();
+
+      if (!id && roleInfo.level < 4.0) {
+        App.toast('عذراً، غير مصرح لك بإنشاء اختبارات جديدة!', 'error');
+        return;
+      }
+
+      if (!title) {
+        App.toast('يرجى كتابة عنوان الاختبار!', 'warning');
+        return;
+      }
+
+      if (!docurl) {
+        App.toast('⚠️ يجب اختيار الدورة/المستند المقصود بها هذا الاختبار!', 'warning');
+        return;
+      }
+
+      const exams = Storage.getCollection(Storage.keys.EXAMS) || [];
+
+      if (id) {
+        // Edit mode
+        const idx = exams.findIndex(e => e.id === id);
+        if (idx !== -1) {
+          exams[idx] = {
+            ...exams[idx],
+            title: title,
+            category: category,
+            emoji: emoji,
+            duration: duration,
+            passingScore: passing,
+            documentUrl: docurl,
+            questionsCountToShow: showcount,
+            description: desc,
+            updatedAt: new Date().toISOString()
+          };
+          App.toast('✓ تم تحديث إعدادات الاختبار بنجاح.', 'success');
+        }
+      } else {
+        // Create mode
+        const newExam = {
+          id: 'exam_' + Date.now(),
+          title: title,
+          category: category,
+          emoji: emoji,
+          duration: duration,
+          passingScore: passing,
+          documentUrl: docurl,
+          questionsCountToShow: showcount,
+          description: desc,
+          isOpen: false,
+          openedAt: '',
+          closedAt: '',
+          questions: [],
+          attempts: 0,
+          passRate: 0,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+        exams.push(newExam);
+        App.toast('<i class="fa-solid fa-champagne-glasses"></i> تم إنشاء الاختبار الجديد بنجاح! يرجى إضافة الأسئلة الآن.', 'success');
+      }
+
+      Storage.set(Storage.keys.EXAMS, exams);
+      closeExamDetailsModal();
+      renderExamsMgmtTable();
+      renderExamsList();
+    }
+
+    /* ── Question Bank Permission & Request Management System ── */
+    window.checkAndOpenQuestionBank = function(examId) {
+      const role = Auth.getRole();
+      const roleInfo = Auth.getRoleInfo(role);
+      if (!Auth.isLoggedIn() || !roleInfo) {
+        App.toast('يرجى تسجيل الدخول أولاً!', 'warning');
+        return;
+      }
+
+      // Check if user is high authority (academy_affairs, assistant_owner, owner -> level >= 4.5)
+      // They have automatic direct access without external approval.
+      if (roleInfo.level >= 4.5) {
+        openQuestionBankModal(examId);
+        return;
+      }
+
+      // Roles with level 3.5 (course_admin) or 4.0 (admin) require an approved request from academy_affairs
+      const currentUser = Auth.getCurrentUser();
+      const userId = currentUser ? currentUser.id : '';
+      const username = currentUser ? (currentUser.username || currentUser.globalName || '') : '';
+      const requests = Storage.getCollection(Storage.keys.QBANK_REQUESTS) || [];
+
+      // Find active approved request for this user and this exam (match by ID or Username)
+      const approvedReq = requests.find(r => 
+        ((userId && r.requester_id === userId) || (username && r.requester_username === username)) && 
+        r.exam_id === examId && 
+        r.status === 'approved'
+      );
+
+      if (approvedReq) {
+        // Access granted!
+        openQuestionBankModal(examId);
+      } else {
+        // Check if there's an existing request that is pending or rejected
+        const existingReq = requests.find(r => 
+          ((userId && r.requester_id === userId) || (username && r.requester_username === username)) && 
+          r.exam_id === examId
+        );
+        openQBankRequestModal(examId, existingReq);
+      }
+    };
+
+    window.openQBankRequestModal = function(examId, existingReq) {
+      const exam = Storage.findById(Storage.keys.EXAMS, examId);
+      if (!exam) return;
+
+      document.getElementById('req-qbank-exam-id').value = examId;
+      document.getElementById('req-qbank-exam-title').textContent = exam.title;
+
+      const formBody = document.getElementById('qbank-request-form-body');
+      const statusBody = document.getElementById('qbank-request-status-body');
+
+      if (existingReq && existingReq.status === 'pending') {
+        formBody.style.display = 'none';
+        statusBody.style.display = 'block';
+        document.getElementById('req-status-icon').innerHTML = '⏳';
+        document.getElementById('req-status-title').textContent = 'طلبك قيد المراجعة والاعتماد';
+        document.getElementById('req-status-desc').innerHTML = `تم إرسال طلبك بتاريخ (${existingReq.request_time}). وهو حالياً بانتظار موافقة <strong style="color:var(--color-gold-primary);">رئاسة تدريب الأمن العام</strong>.`;
+      } else if (existingReq && existingReq.status === 'rejected') {
+        formBody.style.display = 'block';
+        statusBody.style.display = 'none';
+        document.getElementById('req-qbank-reason').value = existingReq.request_reason || '';
+        App.toast('⚠️ تم رفض طلبك السابق من قبل رئاسة التدريب. يمكنك التقديم بطلب جديد مع توضيح تبرير أعمق.', 'warning');
+      } else if (existingReq && existingReq.status === 'revoked') {
+        formBody.style.display = 'block';
+        statusBody.style.display = 'none';
+        document.getElementById('req-qbank-reason').value = '';
+        App.toast('⚠️ تم إلغاء إذنك السابق من قبل رئاسة التدريب. يمكنك تقديم طلب إذن جديد.', 'warning');
+      } else {
+        formBody.style.display = 'block';
+        statusBody.style.display = 'none';
+        document.getElementById('req-qbank-reason').value = '';
+      }
+
+      document.getElementById('qbank-request-modal').classList.add('active');
+    };
+
+    window.closeQBankRequestModal = function() {
+      document.getElementById('qbank-request-modal').classList.remove('active');
+    };
+
+    window.submitQBankAccessRequest = function() {
+      const examId = document.getElementById('req-qbank-exam-id').value;
+      const reason = document.getElementById('req-qbank-reason').value.trim();
+      const exam = Storage.findById(Storage.keys.EXAMS, examId);
+
+      if (!reason) {
+        App.toast('يرجى التكرم بكتابة تبرير وسبب طلب دخول بنك الأسئلة!', 'warning');
+        return;
+      }
+
+      const currentUser = Auth.getCurrentUser();
+      const role = Auth.getRole();
+      const roleInfo = Auth.getRoleInfo(role);
+
+      const requestObj = {
+        id: 'qreq_' + Date.now(),
+        exam_id: examId,
+        exam_title: exam ? exam.title : 'اختبار عسكري',
+        requester_id: currentUser ? currentUser.id : '',
+        requester_username: currentUser ? (currentUser.username || currentUser.globalName || 'عضو') : 'مسؤول',
+        requester_name: currentUser ? (currentUser.displayName || currentUser.name || currentUser.username) : 'مسؤول الدورة',
+        requester_role: roleInfo ? roleInfo.label : 'مسؤول دورة',
+        requester_rank: currentUser ? (currentUser.rank || roleInfo.label) : 'مسؤول دورة',
+        request_reason: reason,
+        request_time: new Date().toLocaleDateString('ar-SA') + ' ' + new Date().toLocaleTimeString('ar-SA', { hour12: false }),
+        status: 'pending',
+        reviewed_by: '',
+        review_time: '',
+        review_note: ''
+      };
+
+      // Remove previous pending/rejected requests for this user and exam if any
+      let requests = Storage.getCollection(Storage.keys.QBANK_REQUESTS) || [];
+      requests = requests.filter(r => !((r.requester_username === requestObj.requester_username || (r.requester_id && r.requester_id === requestObj.requester_id)) && r.exam_id === examId));
+      requests.unshift(requestObj);
+      Storage.set(Storage.keys.QBANK_REQUESTS, requests);
+      try { localStorage.setItem('ps_qbank_requests_sync', Date.now().toString()); } catch(e){}
+
+      if (typeof Logger !== 'undefined') {
+        Logger.log('qbank_request', `قام المسؤول "${requestObj.requester_name}" بتقديم طلب إذن دخول بنك الأسئلة لاختبار "${requestObj.exam_title}"`);
+      }
+
+      App.toast('✔️ تم إرسال طلب الإذن لرئاسة تدريب الأمن العام بنجاح!', 'success');
+      closeQBankRequestModal();
+      renderQBankRequests();
+    };
+
+    window.renderQBankRequests = function() {
+      const tbody = document.getElementById('qbank-reqs-tbody');
+      const countEl = document.getElementById('super-qbank-reqs-count');
+      const badgeEl = document.getElementById('qbank-reqs-badge');
+      if (!tbody) return;
+
+      const requests = Storage.getCollection(Storage.keys.QBANK_REQUESTS) || [];
+      const userRole = Auth.getRole();
+      const roleInfo = Auth.getRoleInfo(userRole);
+      const isHighAuthority = roleInfo && roleInfo.level >= 4.5; // academy_affairs, assistant_owner, owner
+
+      const pendingCount = requests.filter(r => r.status === 'pending').length;
+      if (countEl) countEl.textContent = `${requests.length} طلبات (${pendingCount} معلقة)`;
+      if (badgeEl) {
+        if (pendingCount > 0) {
+          badgeEl.textContent = pendingCount;
+          badgeEl.style.display = 'inline-block';
+        } else {
+          badgeEl.style.display = 'none';
+        }
+      }
+
+      if (requests.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:30px;color:rgba(255,255,255,0.3)">لا توجد طلبات إذن بنك أسئلة مسجلة في الأرشيف</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = requests.map(r => {
+        let statusBadge = '';
+        let actionBtns = '';
+
+        if (r.status === 'pending') {
+          statusBadge = `<span class="status-badge-el pending">⏳ قيد المراجعة</span>`;
+          if (isHighAuthority) {
+            actionBtns = `
+              <div class="action-btn-group">
+                <button class="action-btn-el approve" onclick="approveQBankRequest('${r.id}')">✔️ قبول الإذن</button>
+                <button class="action-btn-el reject" onclick="rejectQBankRequest('${r.id}')">❌ رفض</button>
+              </div>
+            `;
+          } else {
+            actionBtns = `<span style="font-size:0.75rem; color:rgba(255,255,255,0.35);">بانتظار رئاسة التدريب</span>`;
+          }
+        } else if (r.status === 'approved') {
+          statusBadge = `<span class="status-badge-el pass"><i class="fa-solid fa-circle-check" style="color: #2ecc71;"></i> إذن مقبول ومفعل</span>`;
+          if (isHighAuthority) {
+            actionBtns = `<button class="action-btn-el reject" style="padding:4px 8px; font-size:0.75rem;" onclick="revokeQBankRequest('${r.id}')">🚫 إلغاء الإذن</button>`;
+          } else {
+            actionBtns = `<span style="font-size:0.75rem; color:#2ecc71;">مصرّح بالدخول</span>`;
+          }
+        } else if (r.status === 'rejected') {
+          statusBadge = `<span class="status-badge-el fail"><i class="fa-solid fa-circle-exclamation" style="color: #e74c3c;"></i> تم الرفض</span>`;
+          actionBtns = `<span style="font-size:0.75rem; color:rgba(255,255,255,0.35);">مرفوض</span>`;
+        } else if (r.status === 'revoked') {
+          statusBadge = `<span class="status-badge-el fail" style="background:rgba(230,126,34,0.15); border-color:rgba(230,126,34,0.3); color:#e67e22;">🚫 تم سحب الإذن</span>`;
+          actionBtns = `<span style="font-size:0.75rem; color:rgba(255,255,255,0.35);">ملغى</span>`;
+        }
+
+        return `
+          <tr>
+            <td style="font-weight:700; color:#fff">${r.requester_name} <span style="font-size:0.75rem; opacity:0.6; display:block;">(@${r.requester_username})</span></td>
+            <td><span style="color:var(--color-gold-light); font-weight:800;">${r.requester_rank || '—'}</span></td>
+            <td style="font-weight:600;">${r.exam_title}</td>
+            <td style="font-size:0.82rem; max-width:200px; line-height:1.4; color:rgba(255,255,255,0.8);">${r.request_reason}</td>
+            <td style="font-size:0.8rem; opacity:0.8;">${r.request_time || '—'}</td>
+            <td>${statusBadge}</td>
+            <td style="font-weight:700; color:var(--color-gold-primary); font-size:0.82rem;">${r.reviewed_by ? r.reviewed_by + '<span style="display:block; font-size:0.7rem; opacity:0.6;">' + r.review_time + '</span>' : '—'}</td>
+            <td>${actionBtns}</td>
+          </tr>
+        `;
+      }).join('');
+    };
+
+    window.approveQBankRequest = function(reqId) {
+      const userRole = Auth.getRole();
+      const roleInfo = Auth.getRoleInfo(userRole);
+      if (!roleInfo || roleInfo.level < 4.5) {
+        App.toast('عذراً، الموافقة مقتصرة فقط على رئاسة تدريب الأمن العام والقيادة العليا!', 'error');
+        return;
+      }
+      const currentUser = Auth.getCurrentUser();
+      const adminName = currentUser ? (currentUser.displayName || currentUser.username) : 'رئاسة تدريب الأمن العام';
+
+      let requests = Storage.getCollection(Storage.keys.QBANK_REQUESTS) || [];
+      const idx = requests.findIndex(r => r.id === reqId);
+      if (idx !== -1) {
+        requests[idx].status = 'approved';
+        requests[idx].reviewed_by = adminName + ' (رئاسة التدريب)';
+        requests[idx].review_time = new Date().toLocaleDateString('ar-SA') + ' ' + new Date().toLocaleTimeString('ar-SA', { hour12: false });
+        Storage.set(Storage.keys.QBANK_REQUESTS, requests);
+        try { localStorage.setItem('ps_qbank_requests_sync', Date.now().toString()); } catch(e){}
+
+        if (typeof Logger !== 'undefined') {
+          Logger.log('qbank_approve', `قامت رئاسة التدريب بموافقة وإعطاء إذن بنك الأسئلة للمسؤول "${requests[idx].requester_name}" لاختبار "${requests[idx].exam_title}"`);
+        }
+
+        App.toast('✅ تم اعتماد وإعطاء إذن بنك الأسئلة للمسؤول بنجاح!', 'success');
+        renderQBankRequests();
+      }
+    };
+
+    window.rejectQBankRequest = function(reqId) {
+      const userRole = Auth.getRole();
+      const roleInfo = Auth.getRoleInfo(userRole);
+      if (!roleInfo || roleInfo.level < 4.5) {
+        App.toast('عذراً، الرفض مقتصر فقط على رئاسة تدريب الأمن العام والقيادة العليا!', 'error');
+        return;
+      }
+      const currentUser = Auth.getCurrentUser();
+      const adminName = currentUser ? (currentUser.displayName || currentUser.username) : 'رئاسة تدريب الأمن العام';
+
+      let requests = Storage.getCollection(Storage.keys.QBANK_REQUESTS) || [];
+      const idx = requests.findIndex(r => r.id === reqId);
+      if (idx !== -1) {
+        requests[idx].status = 'rejected';
+        requests[idx].reviewed_by = adminName + ' (رئاسة التدريب)';
+        requests[idx].review_time = new Date().toLocaleDateString('ar-SA') + ' ' + new Date().toLocaleTimeString('ar-SA', { hour12: false });
+        Storage.set(Storage.keys.QBANK_REQUESTS, requests);
+        try { localStorage.setItem('ps_qbank_requests_sync', Date.now().toString()); } catch(e){}
+
+        if (typeof Logger !== 'undefined') {
+          Logger.log('qbank_reject', `قامت رئاسة التدريب برفض طلب إذن بنك الأسئلة المقدم من "${requests[idx].requester_name}"`);
+        }
+
+        App.toast('❌ تم رفض طلب إذن بنك الأسئلة وتوثيقه بالباكلوج.', 'warning');
+        renderQBankRequests();
+      }
+    };
+
+    window.revokeQBankRequest = function(reqId) {
+      const userRole = Auth.getRole();
+      const roleInfo = Auth.getRoleInfo(userRole);
+      if (!roleInfo || roleInfo.level < 4.5) {
+        App.toast('عذراً، إلغاء الإذن مقتصر فقط على رئاسة تدريب الأمن العام والقيادة العليا!', 'error');
+        return;
+      }
+      if (!confirm('هل أنت متأكد من سحب وإلغاء إذن الوصول لبنك الأسئلة من هذا المسؤول؟')) return;
+
+      const currentUser = Auth.getCurrentUser();
+      const adminName = currentUser ? (currentUser.displayName || currentUser.username) : 'رئاسة تدريب الأمن العام';
+
+      let requests = Storage.getCollection(Storage.keys.QBANK_REQUESTS) || [];
+      const idx = requests.findIndex(r => r.id === reqId);
+      if (idx !== -1) {
+        requests[idx].status = 'revoked';
+        requests[idx].reviewed_by = adminName + ' (رئاسة التدريب)';
+        requests[idx].review_time = new Date().toLocaleDateString('ar-SA') + ' ' + new Date().toLocaleTimeString('ar-SA', { hour12: false });
+        Storage.set(Storage.keys.QBANK_REQUESTS, requests);
+        try { localStorage.setItem('ps_qbank_requests_sync', Date.now().toString()); } catch(e){}
+
+        App.toast('🚫 تم إلغاء وسحب إذن بنك الأسئلة.', 'warning');
+        renderQBankRequests();
+      }
+    };
+
+    window.hasActiveQBankPermission = function(examId) {
+      const role = Auth.getRole();
+      const roleInfo = Auth.getRoleInfo(role);
+      if (!Auth.isLoggedIn() || !roleInfo) return false;
+      if (roleInfo.level >= 4.5) return true; // High authority (academy_affairs, owner, etc.)
+
+      const currentUser = Auth.getCurrentUser();
+      const username = currentUser ? currentUser.username : '';
+      const userId = currentUser ? currentUser.id : '';
+      const requests = Storage.getCollection(Storage.keys.QBANK_REQUESTS) || [];
+      return !!requests.find(r => (r.requester_username === username || (r.requester_id && r.requester_id === userId)) && r.exam_id === examId && r.status === 'approved');
+    };
+
+    /* ── Modal: Question Bank ── */
+    function openQuestionBankModal(examId) {
+      const role = Auth.getRole();
+      const roleInfo = Auth.getRoleInfo(role);
+      const canManageExams = Auth.isLoggedIn() && roleInfo && (roleInfo.permissions.includes('*') || roleInfo.permissions.includes('manage_course_exams'));
+      if (!canManageExams || !hasActiveQBankPermission(examId)) {
+        App.toast('عذراً، تحتاج موافقة وإذن رسمي من رئاسة تدريب الأمن العام لتعديل ودخول بنك الأسئلة!', 'error');
+        return;
+      }
+      const exam = Storage.findById(Storage.keys.EXAMS, examId);
+      if (!exam) return;
+
+      document.getElementById('qbank-exam-id').value = examId;
+      document.getElementById('qbank-title').textContent = `إدارة بنك الأسئلة - ${exam.title}`;
+
+      // Clear add fields & edit index
+      document.getElementById('qbank-edit-index').value = '-1';
+      document.getElementById('qbank-form-title').textContent = '➕ إضافة سؤال جديد لبنك الأسئلة:';
+      document.getElementById('qbank-save-btn').textContent = 'حفظ السؤال في البنك 💾';
+      document.getElementById('qbank-cancel-btn').style.display = 'none';
+
+      document.getElementById('new-q-text').value = '';
+      document.getElementById('new-q-opt0').value = '';
+      document.getElementById('new-q-opt1').value = '';
+      document.getElementById('new-q-opt2').value = '';
+      document.getElementById('new-q-opt3').value = '';
+      document.getElementById('new-q-correct').value = '0';
+
+      renderQuestionBankList();
+      document.getElementById('question-bank-modal').classList.add('active');
+    }
+
+    function closeQuestionBankModal() {
+      document.getElementById('question-bank-modal').classList.remove('active');
+    }
+
+    function renderQuestionBankList() {
+      const examId = document.getElementById('qbank-exam-id').value;
+      const exam = Storage.findById(Storage.keys.EXAMS, examId);
+      const container = document.getElementById('qbank-list-container');
+
+      if (!exam || !exam.questions || exam.questions.length === 0) {
+        container.innerHTML = `<div style="text-align:center; padding:30px; color:rgba(255,255,255,0.3); font-size:0.85rem;">بنك الأسئلة فارغ حالياً. أضف أسئلة بالأسفل!</div>`;
+        return;
+      }
+
+      const role = Auth.getRole();
+      const roleInfo = Auth.getRoleInfo(role);
+      const canDelete = roleInfo && roleInfo.level >= 3.5;
+
+      container.innerHTML = exam.questions.map((q, idx) => {
+        const deleteBtn = canDelete ? `<button onclick="deleteQuestionFromBank(${idx})" style="position:absolute; top:12px; left:12px; background:none; border:none; color:#ff4757; font-size:0.75rem; font-weight:700; cursor:pointer;">🗑️ حذف</button>` : '';
+        return `
+        <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:8px; padding:12px; margin-bottom:10px; position:relative;">
+          <button onclick="editQuestionInBank(${idx})" style="position:absolute; top:12px; left:60px; background:none; border:none; color:#c9a227; font-size:0.75rem; font-weight:700; cursor:pointer;"><i class="fa-solid fa-file-pen"></i> تعديل</button>
+          ${deleteBtn}
+          <div style="font-weight:700; color:#fff; margin-bottom:8px; font-size:0.88rem; max-width:80%;">س ${idx + 1}: ${q.q}</div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; font-size:0.78rem;">
+            <div style="color:${q.correct === 0 ? '#2ecc71; font-weight:800;' : 'rgba(255,255,255,0.6)'}">1. ${q.options[0]}</div>
+            <div style="color:${q.correct === 1 ? '#2ecc71; font-weight:800;' : 'rgba(255,255,255,0.6)'}">2. ${q.options[1]}</div>
+            <div style="color:${q.correct === 2 ? '#2ecc71; font-weight:800;' : 'rgba(255,255,255,0.6)'}">3. ${q.options[2]}</div>
+            <div style="color:${q.correct === 3 ? '#2ecc71; font-weight:800;' : 'rgba(255,255,255,0.6)'}">4. ${q.options[3]}</div>
+          </div>
+        </div>
+      `;
+      }).join('');
+    }
+
+    function editQuestionInBank(questionIndex) {
+      const role = Auth.getRole();
+      const roleInfo = Auth.getRoleInfo(role);
+      const canManageExams = Auth.isLoggedIn() && roleInfo && (roleInfo.permissions.includes('*') || roleInfo.permissions.includes('manage_course_exams'));
+      if (!canManageExams) {
+        App.toast('عذراً، غير مصرح لك بتعديل الأسئلة!', 'error');
+        return;
+      }
+      const examId = document.getElementById('qbank-exam-id').value;
+      const exam = Storage.findById(Storage.keys.EXAMS, examId);
+      if (!exam || !exam.questions || !exam.questions[questionIndex]) return;
+
+      const q = exam.questions[questionIndex];
+
+      document.getElementById('qbank-edit-index').value = questionIndex;
+      document.getElementById('qbank-form-title').textContent = `<i class="fa-solid fa-file-pen"></i> تعديل السؤال الحالي (رقم ${questionIndex + 1}):`;
+
+      document.getElementById('new-q-text').value = q.q;
+      document.getElementById('new-q-opt0').value = q.options[0];
+      document.getElementById('new-q-opt1').value = q.options[1];
+      document.getElementById('new-q-opt2').value = q.options[2];
+      document.getElementById('new-q-opt3').value = q.options[3];
+      document.getElementById('new-q-correct').value = q.correct;
+
+      document.getElementById('qbank-save-btn').textContent = 'تحديث السؤال 💾';
+      document.getElementById('qbank-cancel-btn').style.display = 'inline-block';
+
+      // Smooth scroll to the form section
+      document.getElementById('qbank-add-section').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function cancelEditQuestion() {
+      document.getElementById('qbank-edit-index').value = '-1';
+      document.getElementById('qbank-form-title').textContent = '➕ إضافة سؤال جديد لبنك الأسئلة:';
+
+      document.getElementById('new-q-text').value = '';
+      document.getElementById('new-q-opt0').value = '';
+      document.getElementById('new-q-opt1').value = '';
+      document.getElementById('new-q-opt2').value = '';
+      document.getElementById('new-q-opt3').value = '';
+      document.getElementById('new-q-correct').value = '0';
+
+      document.getElementById('qbank-save-btn').textContent = 'حفظ السؤال في البنك 💾';
+      document.getElementById('qbank-cancel-btn').style.display = 'none';
+    }
+
+    function addQuestionToBank() {
+      const examId = document.getElementById('qbank-exam-id').value;
+      const role = Auth.getRole();
+      const roleInfo = Auth.getRoleInfo(role);
+      const canManageExams = Auth.isLoggedIn() && roleInfo && (roleInfo.permissions.includes('*') || roleInfo.permissions.includes('manage_course_exams'));
+      if (!canManageExams || !hasActiveQBankPermission(examId)) {
+        App.toast('عذراً، غير مصرح لك بالتعديل على بنك الأسئلة إلا بموافقة رئاسة تدريب الأمن العام!', 'error');
+        return;
+      }
+      const editIndex = parseInt(document.getElementById('qbank-edit-index').value);
+
+      const text = document.getElementById('new-q-text').value.trim();
+      const opt0 = document.getElementById('new-q-opt0').value.trim();
+      const opt1 = document.getElementById('new-q-opt1').value.trim();
+      const opt2 = document.getElementById('new-q-opt2').value.trim();
+      const opt3 = document.getElementById('new-q-opt3').value.trim();
+      const correct = parseInt(document.getElementById('new-q-correct').value);
+
+      if (!text || !opt0 || !opt1 || !opt2 || !opt3) {
+        App.toast('يرجى ملء نص السؤال وجميع الخيارات الأربعة!', 'warning');
+        return;
+      }
+
+      const exams = Storage.getCollection(Storage.keys.EXAMS) || [];
+      const idx = exams.findIndex(e => e.id === examId);
+      if (idx === -1) return;
+
+      const newQuestion = {
+        q: text,
+        options: [opt0, opt1, opt2, opt3],
+        correct: correct
+      };
+
+      if (editIndex !== -1) {
+        // Edit mode
+        if (exams[idx].questions && exams[idx].questions[editIndex]) {
+          exams[idx].questions[editIndex] = newQuestion;
+          App.toast('✓ تم تحديث السؤال بنجاح.', 'success');
+        }
+      } else {
+        // Add mode
+        if (!exams[idx].questions) exams[idx].questions = [];
+        exams[idx].questions.push(newQuestion);
+        App.toast('✓ تم إضافة السؤال لبنك الأسئلة بنجاح.', 'success');
+      }
+
+      Storage.set(Storage.keys.EXAMS, exams);
+      cancelEditQuestion();
+
+      renderQuestionBankList();
+      renderExamsMgmtTable();
+      renderExamsList();
+    }
+
+    function deleteQuestionFromBank(questionIndex) {
+      const examId = document.getElementById('qbank-exam-id').value;
+      const role = Auth.getRole();
+      const roleInfo = Auth.getRoleInfo(role);
+      if (!roleInfo || roleInfo.level < 3.5 || !hasActiveQBankPermission(examId)) {
+        App.toast('عذراً، غير مصرح لك بحذف الأسئلة إلا بموافقة رئاسة تدريب الأمن العام!', 'error');
+        return;
+      }
+      if (confirm('هل أنت متأكد من حذف هذا السؤال من البنك؟')) {
+        const exams = Storage.getCollection(Storage.keys.EXAMS) || [];
+        const idx = exams.findIndex(e => e.id === examId);
+        if (idx !== -1 && exams[idx].questions) {
+          exams[idx].questions.splice(questionIndex, 1);
+          Storage.set(Storage.keys.EXAMS, exams);
+          App.toast('🗑️ تم حذف السؤال بنجاح.', 'success');
+          renderQuestionBankList();
+          renderExamsMgmtTable();
+          renderExamsList();
+        }
+      }
+    }
+
+    function renderExamsList() {
+      const grid = document.getElementById('exams-grid');
+      if (!grid) return;
+
+      let exams = Storage.getCollection(Storage.keys.EXAMS) || [];
+
+      // Filter exams based on supervisor check
+      const isLoggedIn = Auth.isLoggedIn();
+      const userRole = isLoggedIn ? Auth.getRole() : 'viewer';
+      const roleInfo = Auth.getRoleInfo(userRole);
+      const isSupervisor = roleInfo && roleInfo.level >= 3.5;
+
+      if (!isSupervisor) {
+        // Regular users/guests: Only see open exams
+        exams = exams.filter(e => e.isOpen);
+      }
+
+      if (exams.length === 0) {
+        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:50px;color:var(--color-text-muted)">لا توجد اختبارات متوفرة حالياً.</div>`;
+        return;
+      }
+
+      grid.innerHTML = exams.map(e => {
+        const statusText = e.isOpen ? 'مفتوح للتقديم' : 'مغلق حالياً';
+        const statusDot = e.isOpen ? '<span style="color:#2ecc71; margin-right:6px;"><i class="fa-solid fa-circle-check" style="color: #2ecc71;"></i></span>' : '<span style="color:#e74c3c; margin-right:6px;"><i class="fa-solid fa-circle-exclamation" style="color: #e74c3c;"></i></span>';
+        const totalQs = e.questionsCountToShow ? parseInt(e.questionsCountToShow) : (e.questions ? e.questions.length : 0);
+        const passingCount = Math.round((e.passingScore / 100) * totalQs);
+
+        return `
+        <article class="exam-card">
+          <div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+              <span class="exam-category-badge">${e.category || 'عام'}</span>
+              <span style="font-size:0.75rem; font-weight:800; display:inline-flex; align-items:center;">
+                ${statusDot} ${statusText}
+              </span>
+            </div>
+            <div class="exam-icon-wrap">${e.emoji || '<i class="fa-solid fa-file-pen"></i>'}</div>
+            <h3 class="exam-card-title">${e.title}</h3>
+            <p class="exam-card-desc">${e.description || ''}</p>
+          </div>
+          
+          <div>
+            <div class="exam-meta-row">
+              <div class="exam-meta-item">
+                <div class="exam-meta-val">${totalQs}</div>
+                <div class="exam-meta-lbl">عدد الأسئلة</div>
+              </div>
+              <div class="exam-meta-item">
+                <div class="exam-meta-val">${e.duration}</div>
+                <div class="exam-meta-lbl">دقيقة</div>
+              </div>
+              <div class="exam-meta-item">
+                <div class="exam-meta-val">${passingCount} من ${totalQs}</div>
+                <div class="exam-meta-lbl">للنجاح</div>
+              </div>
+            </div>
+            
+            <button class="btn btn-gold" style="width:100%;justify-content:center" onclick="startExam('${e.id}')">✏️ ابدأ الاختبار</button>
+          </div>
+        </article>
+      `;
+      }).join('');
+    }
+
+    /* ── Quiz Launch & Single Attempt Enforcement ── */
+    async function startExam(id) {
+      const exam = Storage.findById(Storage.keys.EXAMS, id);
+      if (!exam) return;
+
+      // 1. Enforce closed check
+      if (!exam.isOpen) {
+        App.toast('✕ عذراً، هذا الاختبار مغلق حالياً ولا يمكن التقديم فيه.', 'error');
+        return;
+      }
+
+      // 2. Pre-check single attempt rules by Discord ID
+      const results = Storage.getCollection(Storage.keys.EXAM_RESULTS) || [];
+      const currentUser = Auth.getCurrentUser();
+      let existing = results.find(r => r.examId === id && currentUser && r.studentDiscord === currentUser.discord);
+
+      if (!existing) {
+        try {
+          const dbAttempts = await Storage.fetchExamArchive();
+          const found = dbAttempts.find(a =>
+            a.exam_name === exam.title &&
+            currentUser &&
+            (a.code === currentUser.discord || a.trainee_name === (currentUser.name || currentUser.username)) &&
+            a.status !== 'started'
+          );
+          if (found) {
+            existing = {
+              studentName: found.trainee_name,
+              studentDiscord: found.code,
+              studentRank: found.rank,
+              score: found.score
+            };
+          }
+        } catch (err) {
+          console.warn('Failed to fetch exam archive for check:', err);
+        }
+      }
+
+      if (existing) {
+        const confirmRetake = confirm(`لقد قمت بإجراء هذا الاختبار مسبقاً وحصلت على درجة ${existing.score}%. هل ترغب في تقديم طلب إعادة اختبار لمسؤول الدورة؟`);
+        if (confirmRetake) {
+          submitRetakeRequestForUser(id, existing.studentName, existing.studentDiscord, existing.studentRank, existing.score);
+        }
+        return;
+      }
+
+      activeExamIdToPrompt = id;
+
+      // Resolve candidate name automatically from Discord/Database
+      let prefilledName = '';
+      if (currentUser) {
+        const tableInfo = Auth.resolveUserTableInfo(currentUser) || {};
+        prefilledName = tableInfo.name || currentUser.globalName || currentUser.username || '';
+
+        const discordInp = document.getElementById('examinee-discord-input');
+        const rankInp = document.getElementById('examinee-rank-input');
+        const jobInp = document.getElementById('examinee-job-code-input');
+
+        if (discordInp) discordInp.value = currentUser.discord || '';
+        if (rankInp) rankInp.value = tableInfo.rank || currentUser.rank || 'عضو';
+        if (jobInp) jobInp.value = tableInfo.badge || '';
+      }
+
+      document.getElementById('examinee-name-input').value = prefilledName;
+      document.getElementById('name-prompt-modal').classList.add('active');
+    }
+
+    function closeNamePrompt() {
+      document.getElementById('name-prompt-modal').classList.remove('active');
+      activeExamIdToPrompt = null;
+    }
+
+    async function submitNamePrompt() {
+      const inputName = document.getElementById('examinee-name-input').value.trim();
+      const inputDiscord = document.getElementById('examinee-discord-input')?.value.trim() || '';
+      const inputRank = document.getElementById('examinee-rank-input')?.value.trim() || 'مشاهد';
+      const inputJobCode = document.getElementById('examinee-job-code-input')?.value.trim() || '';
+
+      if (!inputName) {
+        App.toast('تعذر جلب بيانات الاسم. يرجى مراجعة الدعم!', 'warning');
+        return;
+      }
+
+      // 3. Enforce single attempt check by entered name
+      const results = Storage.getCollection(Storage.keys.EXAM_RESULTS) || [];
+      const examObj = Storage.findById(Storage.keys.EXAMS, activeExamIdToPrompt);
+      if (!examObj) return;
+
+      // Check concurrent device login
+      try {
+        const dbAttempts = await Storage.fetchExamArchive();
+        const currentUser = Auth.getCurrentUser();
+        const lookupUser = {
+          id: currentUser ? currentUser.id : '',
+          discord: currentUser ? currentUser.discord : '',
+          username: inputName || (currentUser ? currentUser.username : ''),
+          globalName: inputName || (currentUser ? currentUser.globalName : ''),
+          name: inputName || (currentUser ? currentUser.name : '')
+        };
+        const tableInfo = Auth.resolveUserTableInfo(lookupUser) || {};
+        const activeLocalAttempt = localStorage.getItem(`active_attempt_${examObj.id}`);
+
+        const activeServerAttempt = dbAttempts.find(a =>
+          a.exam_name === examObj.title &&
+          a.status === 'started' &&
+          ((currentUser && (a.discord_id === currentUser.id || a.code === currentUser.discord)) || a.trainee_name.toLowerCase() === inputName.toLowerCase())
+        );
+
+        if (activeServerAttempt) {
+          if (!activeLocalAttempt || activeLocalAttempt !== String(activeServerAttempt.id)) {
+            const dbViolationData = {
+              trainee_name: tableInfo.name || inputName || (currentUser ? currentUser.username : "عضو ميداني"),
+              rank: tableInfo.rank || (currentUser ? currentUser.rank : "مشاهد"),
+              code: currentUser ? currentUser.discord : "",
+              course_name: examObj.title,
+              violation_type: 'محاولة تسجيل دخول متعدد لنفس الاختبار (Concurrent Device Login)',
+              violation_time: new Date().toLocaleTimeString('ar-SA', { hour12: false }),
+              details: `محاولة دخول متعدد للاختبار من جهاز آخر أو تبويب آخر بينما المحاولة نشطة (ID: ${activeServerAttempt.id})`,
+              exam_id: examObj.id
+            };
+            Storage.saveViolation(dbViolationData).catch(e => console.error(e));
+            App.toast('✕ خطأ: هذا الاختبار مفتوح بالفعل من جهاز/متصفح آخر!', 'error');
+            alert('عذراً، لا يمكنك فتح الاختبار من أكثر من جهاز أو تبويب في نفس الوقت!');
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('Failed to verify concurrent login check:', err);
+      }
+
+      let existing = results.find(r => r.examId === activeExamIdToPrompt && r.studentName.toLowerCase() === inputName.toLowerCase());
+
+      if (!existing) {
+        try {
+          const dbAttempts = await Storage.fetchExamArchive();
+          const found = dbAttempts.find(a =>
+            a.exam_name === examObj.title &&
+            a.trainee_name.toLowerCase() === inputName.toLowerCase() &&
+            a.status !== 'started'
+          );
+          if (found) {
+            existing = {
+              studentName: found.trainee_name,
+              studentDiscord: found.code,
+              studentRank: found.rank,
+              score: found.score
+            };
+          }
+        } catch (err) {
+          console.warn('Failed to fetch exam archive for check:', err);
+        }
+      }
+
+      if (existing) {
+        const confirmRetake = confirm(`هذا الاسم الميداني قام بتقديم هذا الاختبار مسبقاً وحصل على درجة ${existing.score}%. هل ترغب في تقديم طلب إعادة اختبار لمسؤول الدورة؟`);
+        if (confirmRetake) {
+          submitRetakeRequestForUser(activeExamIdToPrompt, existing.studentName, existing.studentDiscord, existing.studentRank, existing.score);
+          closeNamePrompt();
+        }
+        return;
+      }
+
+      activeExamineeName = inputName;
+
+      // Save id BEFORE closeNamePrompt() which nulls activeExamIdToPrompt
+      const examIdToLaunch = activeExamIdToPrompt;
+      closeNamePrompt();
+
+      const examTitle = examObj.title;
+
+      if (typeof Logger !== 'undefined') {
+        Logger.log('exam_open', `بدأ اختبار "${examTitle}" بالاسم الميداني: "${activeExamineeName}"`);
+      }
+
+      // Record entry time
+      examEntryTime = new Date().toLocaleTimeString('en-US', { hour12: false });
+
+      // Create attempt in SQLite database immediately (Real-Time)
+      const currentUser = Auth.getCurrentUser();
+      const lookupUser = {
+        id: currentUser ? currentUser.id : '',
+        discord: currentUser ? currentUser.discord : inputDiscord,
+        username: activeExamineeName || (currentUser ? currentUser.username : ''),
+        globalName: activeExamineeName || (currentUser ? currentUser.globalName : ''),
+        name: activeExamineeName || (currentUser ? currentUser.name : '')
+      };
+      const tableInfo = Auth.resolveUserTableInfo(lookupUser) || {};
+
+      const startAttemptData = {
+        trainee_name: tableInfo.name || activeExamineeName || (currentUser ? currentUser.username : "عضو ميداني"),
+        rank: tableInfo.rank || (currentUser ? currentUser.rank : inputRank),
+        code: currentUser ? currentUser.discord : inputDiscord,
+        discord_id: currentUser ? currentUser.id : "",
+        badge_code: tableInfo.badge || inputJobCode,
+        course_name: examObj.category || "عام",
+        exam_name: examObj.title,
+        start_time: examEntryTime,
+        status: 'started',
+        pass_status: '—',
+        score: 0,
+        duration: 0
+      };
+
+      activeAttemptDbId = null;
+
+      // Launch actual quiz overlay immediately for instant premium response
+      launchQuiz(examIdToLaunch);
+
+      // Register attempt in the database in the background asynchronously
+      Storage.saveExamAttempt(startAttemptData)
+        .then(res => {
+          if (res && res.success && res.id) {
+            activeAttemptDbId = res.id;
+            console.log('Exam attempt registered in SQLite with ID:', activeAttemptDbId);
+            localStorage.setItem('active_attempt_' + examIdToLaunch, res.id);
+          }
+        })
+        .catch(err => {
+          console.warn('Failed to save exam start attempt to server:', err);
+        });
+    }
+
+    function launchQuiz(id) {
+      activeExam = Storage.findById(Storage.keys.EXAMS, id);
+      if (!activeExam || !activeExam.questions || activeExam.questions.length === 0) {
+        App.toast('عذراً، هذا الاختبار لا يحتوي على أسئلة بعد!', 'warning');
+        return;
+      }
+
+      history.pushState(null, null, window.location.href);
+
+      // Initialize anti-cheat states
+      isExamActive = true;
+      violationsCount = 0;
+
+      /* ── RANDOMIZATION ENGINE (بنك الأسئلة العشوائي) ── */
+      // 1. Draw a random subset of questions based on questionsCountToShow
+      let questionsPool = [...activeExam.questions];
+      let numToShow = activeExam.questionsCountToShow ? parseInt(activeExam.questionsCountToShow) : questionsPool.length;
+      numToShow = Math.min(numToShow, questionsPool.length);
+
+      // Draw randomly
+      let selectedQuestions = shuffleArray(questionsPool).slice(0, numToShow);
+
+      // 2. Shuffle choices randomly for each question while maintaining correct index mapping
+      activeQuizQuestions = selectedQuestions.map(origQ => {
+        const correctOptionText = origQ.options[origQ.correct];
+        let optionsShuffled = shuffleArray([...origQ.options]);
+        let correctNewIndex = optionsShuffled.indexOf(correctOptionText);
+        return {
+          q: origQ.q,
+          options: optionsShuffled,
+          correct: correctNewIndex
+        };
+      });
+
+      currentQIdx = 0;
+      userAnswers = new Array(activeQuizQuestions.length).fill(null);
+      timeLeft = activeExam.duration * 60;
+
+      // Set overlay texts
+      document.getElementById('quiz-exam-title').textContent = activeExam.title;
+      document.getElementById('quiz-exam-cat').textContent = activeExam.category;
+
+      // Toggle screens
+      document.getElementById('quiz-play-screen').style.display = 'block';
+      document.getElementById('quiz-result-screen').style.display = 'none';
+
+      // Open Overlay
+      document.getElementById('quiz-overlay').classList.add('active');
+      document.body.style.overflow = 'hidden';
+
+      // Render first question
+      renderActiveQuestion();
+
+      // Start timer
+      startTimer();
+    }
+
+    function renderActiveQuestion() {
+      const q = activeQuizQuestions[currentQIdx];
+      document.getElementById('quiz-question-title').textContent = q.q;
+
+      // Set progress bar
+      const progressPercent = ((currentQIdx) / activeQuizQuestions.length) * 100;
+      document.getElementById('quiz-progress-fill').style.width = `${progressPercent}%`;
+
+      // Set counter text
+      document.getElementById('quiz-counter').textContent = `السؤال ${currentQIdx + 1} من ${activeQuizQuestions.length}`;
+
+      // Render option cards
+      const optionsList = document.getElementById('quiz-options-list');
+      optionsList.innerHTML = q.options.map((opt, idx) => `
+      <div class="option-card${userAnswers[currentQIdx] === idx ? ' selected' : ''}" onclick="selectOption(${idx})">
+        <div class="option-radio"></div>
+        <div class="option-text">${opt}</div>
+      </div>
+    `).join('');
+
+      // Setup footer buttons
+      const prevBtn = document.getElementById('quiz-btn-prev');
+      const nextBtn = document.getElementById('quiz-btn-next');
+
+      prevBtn.style.display = currentQIdx === 0 ? 'none' : 'block';
+
+      if (currentQIdx === activeQuizQuestions.length - 1) {
+        nextBtn.innerHTML = 'إنهاء الاختبار <i class="fa-solid fa-flag-checkered"></i>';
+        nextBtn.classList.remove('btn-gold');
+        nextBtn.classList.add('btn-danger');
+      } else {
+        nextBtn.innerHTML = 'السؤال التالي <i class="fa-solid fa-arrow-left"></i>';
+        nextBtn.classList.remove('btn-danger');
+        nextBtn.classList.add('btn-gold');
+      }
+    }
+
+    function selectOption(idx) {
+      userAnswers[currentQIdx] = idx;
+      const cards = document.querySelectorAll('.option-card');
+      cards.forEach((card, cardIdx) => {
+        if (cardIdx === idx) {
+          card.classList.add('selected');
+        } else {
+          card.classList.remove('selected');
+        }
+      });
+      saveExamProgress();
+    }
+
+    function prevQuestion() {
+      if (currentQIdx > 0) {
+        currentQIdx--;
+        renderActiveQuestion();
+      }
+    }
+
+    function nextQuestion() {
+      if (userAnswers[currentQIdx] === null) {
+        App.toast('يرجى اختيار أحد الإجابات للمتابعة!', 'warning');
+        return;
+      }
+
+      if (currentQIdx < activeQuizQuestions.length - 1) {
+        currentQIdx++;
+        renderActiveQuestion();
+      } else {
+        submitQuiz();
+      }
+    }
+
+    function startTimer() {
+      clearInterval(timerInterval);
+
+      function updateTimerText() {
+        const mins = Math.floor(timeLeft / 60);
+        const secs = timeLeft % 60;
+        document.getElementById('quiz-timer-text').textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          App.toast('انتهى وقت الاختبار المحدد! جاري التصحيح تلقائياً...', 'warning');
+          submitQuiz();
+        } else {
+          saveExamProgress();
+        }
+
+        timeLeft--;
+      }
+
+      updateTimerText();
+      timerInterval = setInterval(updateTimerText, 1000);
+    }
+
+    function submitQuiz() {
+      clearInterval(timerInterval);
+      isExamActive = false; // Turn off cheat detection
+      clearExamProgress();
+
+      // Correcting quiz answers
+      let correctCount = 0;
+      activeQuizQuestions.forEach((q, idx) => {
+        if (userAnswers[idx] === q.correct) {
+          correctCount++;
+        }
+      });
+
+      const finalScore = Math.round((correctCount / activeQuizQuestions.length) * 100);
+      const passed = finalScore >= activeExam.passingScore;
+
+      // Resolve user table info (rank, badge) by comparing the entered name
+      const currentUser = Auth.getCurrentUser();
+      const inputDiscord = document.getElementById('examinee-discord-input')?.value.trim() || '';
+      const inputRank = document.getElementById('examinee-rank-input')?.value.trim() || 'مشاهد';
+      const inputJobCode = document.getElementById('examinee-job-code-input')?.value.trim() || '';
+
+      const lookupUser = {
+        id: currentUser ? currentUser.id : '',
+        discord: currentUser ? currentUser.discord : inputDiscord,
+        username: activeExamineeName || (currentUser ? currentUser.username : ''),
+        globalName: activeExamineeName || (currentUser ? currentUser.globalName : ''),
+        name: activeExamineeName || (currentUser ? currentUser.name : '')
+      };
+      const tableInfo = Auth.resolveUserTableInfo(lookupUser) || {};
+
+      const endTime = new Date().toLocaleTimeString('en-US', { hour12: false });
+      const durationMinutes = Math.max(1, Math.round((activeExam.duration * 60 - timeLeft) / 60));
+
+      // Save attempt inside Storage.keys.EXAM_RESULTS
+      const resultId = activeAttemptDbId || ('res_' + Date.now());
+      const resultItem = {
+        id: resultId,
+        examId: activeExam.id,
+        examTitle: activeExam.title,
+        studentName: tableInfo.name || activeExamineeName || (currentUser ? currentUser.username : "عضو ميداني"),
+        studentDiscord: currentUser ? currentUser.discord : inputDiscord,
+        studentRank: tableInfo.rank || (currentUser ? currentUser.rank : inputRank),
+        studentBadge: tableInfo.badge || inputJobCode || "—",
+        studentTables: tableInfo.tables || [],
+        score: finalScore,
+        correctCount: correctCount,
+        totalQuestionsCount: activeQuizQuestions.length,
+        passingScore: activeExam.passingScore,
+        passed: passed,
+        status: 'pending',
+        questions: activeQuizQuestions,
+        userAnswers: userAnswers,
+        date: new Date().toISOString().split('T')[0].replace(/-/g, '/'),
+        entryTime: examEntryTime,
+        endTime: endTime
+      };
+
+      Storage.addToCollection(Storage.keys.EXAM_RESULTS, resultItem);
+
+      if (typeof Logger !== 'undefined') {
+        Logger.log('exam_close', `أنهى اختبار "${activeExam.title}" (الدرجة: ${correctCount} من ${activeQuizQuestions.length} (${finalScore}%), النتيجة: ${passed ? 'نجاح' : 'رسوب'})`);
+      }
+
+      // Update attempt in SQLite database immediately (Real-Time Completion)
+      if (activeAttemptDbId) {
+        localStorage.removeItem('active_attempt_' + activeExam.id);
+        const endAttemptData = {
+          id: activeAttemptDbId,
+          status: 'pending',
+          score: finalScore,
+          end_time: endTime,
+          pass_status: passed ? 'نجاح' : 'رسوب',
+          duration: durationMinutes
+        };
+        Storage.saveExamAttempt(endAttemptData)
+          .then(res => {
+            console.log('Exam attempt completed and updated in SQLite:', res);
+            renderSupervisorResults();
+          })
+          .catch(err => console.warn('Failed to update completed attempt in SQLite:', err));
+      }
+
+      // Refresh panels
+      renderSupervisorPanel();
+
+      // Write statistics update
+      const exams = Storage.getCollection(Storage.keys.EXAMS);
+      const idx = exams.findIndex(e => e.id === activeExam.id);
+      if (idx !== -1) {
+        exams[idx].attempts = (exams[idx].attempts || 0) + 1;
+        const currentRate = exams[idx].passRate || 0;
+        const countAttempts = exams[idx].attempts;
+        exams[idx].passRate = Math.round(((currentRate * (countAttempts - 1)) + (passed ? 100 : 0)) / countAttempts);
+        Storage.set(Storage.keys.EXAMS, exams);
+        renderExamsList();
+      }
+
+      // Hide playing layout
+      document.getElementById('quiz-play-screen').style.display = 'none';
+
+      // Show waiting screen (result pending approval)
+      const waitScreen = document.getElementById('quiz-result-screen');
+      waitScreen.style.display = 'block';
+      waitScreen.innerHTML = `
+        <div class="result-container" style="padding:40px 20px; text-align:center;">
+            <div class="result-icon" style="font-size:3rem;">⏳</div>
+            <h2 style="color:var(--color-gold-primary); font-size:1.8rem; font-weight:900; margin-bottom:10px;">
+                نتيجة الاختبار في انتظار اعتماد المسؤول
+            </h2>
+            <p style="color:rgba(255,255,255,0.7); max-width:550px; margin:0 auto 30px; line-height:1.7;">
+                تم إرسال إجاباتك للمراجعة. سيتحقق المسؤول من النتائج وسيُرسل لك إشعارًا عندما تُعتمد النتيجة.
+            </p>
+            <button class="btn btn-gold" onclick="closeQuizOverlay()" style="margin: 20px auto 0; justify-content: center;">إغلاق النافذة</button>
+        </div>
+    `;
+      // Log pending submission for admin visibility
+      if (typeof Logger !== 'undefined') {
+        Logger.log('exam_submitted_pending', `تم إرسال اختبار "${activeExam.title}" للانتظار (ID: ${activeExam.id})`);
+      }
+    }
+
+    function closeQuizOverlay() {
+      clearExamProgress();
+      if (activeAttemptDbId && isExamActive && activeExam) {
+        const endTime = new Date().toLocaleTimeString('en-US', { hour12: false });
+        const durationMinutes = Math.max(1, Math.round((activeExam.duration * 60 - timeLeft) / 60));
+
+        const exitAttemptData = {
+          id: activeAttemptDbId,
+          status: 'exited',
+          end_time: endTime,
+          pass_status: 'انسحاب',
+          duration: durationMinutes
+        };
+        Storage.saveExamAttempt(exitAttemptData)
+          .then(res => {
+            console.log('Exam exit recorded in SQLite:', res);
+            renderSupervisorResults();
+          })
+          .catch(err => console.warn('Failed to save exit attempt in SQLite:', err));
+      }
+
+      isExamActive = false; // Turn off cheat detection
+      document.getElementById('quiz-overlay').classList.remove('active');
+      document.body.style.overflow = '';
+
+      if (activeExam && userAnswers.some(ans => ans !== null)) {
+        if (typeof Logger !== 'undefined') {
+          Logger.log('exam_close', `خرج من اختبار "${activeExam.title}" قبل إكماله (الاسم الميداني: "${activeExamineeName}")`);
+        }
+      }
+
+      activeExam = null;
+    }
+
+    // Progress resilience functions
+    function saveExamProgress() {
+      if (!isExamActive || !activeExam) return;
+      const state = {
+        examId: activeExam.id,
+        examTitle: activeExam.title,
+        examCategory: activeExam.category,
+        examPassingScore: activeExam.passingScore,
+        examDuration: activeExam.duration,
+        examineeName: activeExamineeName,
+        attemptDbId: activeAttemptDbId,
+        entryTime: examEntryTime,
+        questions: activeQuizQuestions,
+        answers: userAnswers,
+        expirationTime: Date.now() + timeLeft * 1000
+      };
+      localStorage.setItem('ps_active_exam_state', JSON.stringify(state));
+    }
+
+    function clearExamProgress() {
+      localStorage.removeItem('ps_active_exam_state');
+      if (activeExam) {
+        localStorage.removeItem('active_attempt_' + activeExam.id);
+      }
+    }
+
+    function restoreExamProgress() {
+      const rawState = localStorage.getItem('ps_active_exam_state');
+      if (!rawState) return;
+
+      try {
+        const state = JSON.parse(rawState);
+        const remaining = Math.round((state.expirationTime - Date.now()) / 1000);
+
+        activeExam = Storage.findById(Storage.keys.EXAMS, state.examId);
+        if (!activeExam) {
+          // Fallback: Reconstruct activeExam from saved state if it is not loaded/found in database
+          activeExam = {
+            id: state.examId,
+            title: state.examTitle || 'الاختبار المستمر',
+            category: state.examCategory || 'عام',
+            passingScore: state.examPassingScore || 50,
+            duration: state.examDuration || 15,
+            questions: state.questions || []
+          };
+        }
+
+        activeExamineeName = state.examineeName;
+        activeAttemptDbId = state.attemptDbId;
+        examEntryTime = state.entryTime;
+        activeQuizQuestions = state.questions;
+        userAnswers = state.answers;
+
+        if (remaining <= 0) {
+          timeLeft = 0;
+          isExamActive = false;
+          App.toast('انتهت صلاحية وقت الاختبار أثناء الانقطاع. جاري إرسال الإجابات...', 'warning');
+          submitQuiz();
+          clearExamProgress();
+        } else {
+          timeLeft = remaining;
+          isExamActive = true;
+          violationsCount = 0;
+
+          // Open overlay
+          document.getElementById('quiz-exam-title').textContent = activeExam.title;
+          document.getElementById('quiz-exam-cat').textContent = activeExam.category;
+          document.getElementById('quiz-play-screen').style.display = 'block';
+          document.getElementById('quiz-result-screen').style.display = 'none';
+          document.getElementById('quiz-overlay').classList.add('active');
+          document.body.style.overflow = 'hidden';
+
+          // Find last active question
+          const firstNullIdx = userAnswers.findIndex(ans => ans === null);
+          currentQIdx = firstNullIdx !== -1 ? firstNullIdx : activeQuizQuestions.length - 1;
+
+          renderActiveQuestion();
+          startTimer();
+          App.toast('⚡ تم استعادة جلسة الاختبار السابقة بنجاح. يمكنك إكمال الإجابة!', 'success');
+        }
+      } catch (err) {
+        console.error('Failed to restore exam progress:', err);
+        clearExamProgress();
+      }
+    }
+
+    // Anti-cheat helper functions
+    function recordViolation(type) {
+      if (!isExamActive || !activeExam) return;
+
+      violationsCount++;
+      playBeep();
+
+      const currentUser = Auth.getCurrentUser();
+      const lookupUser = {
+        id: currentUser ? currentUser.id : '',
+        discord: currentUser ? currentUser.discord : '',
+        username: activeExamineeName || (currentUser ? currentUser.username : ''),
+        globalName: activeExamineeName || (currentUser ? currentUser.globalName : ''),
+        name: activeExamineeName || (currentUser ? currentUser.name : '')
+      };
+      const tableInfo = Auth.resolveUserTableInfo(lookupUser) || {};
+
+      const violationItem = {
+        id: 'viol_' + Date.now(),
+        examId: activeExam.id,
+        examTitle: activeExam.title,
+        studentName: tableInfo.name || activeExamineeName || (currentUser ? currentUser.username : "عضو ميداني"),
+        studentDiscord: currentUser ? currentUser.discord : "",
+        studentRank: tableInfo.rank || (currentUser ? currentUser.rank : "مشاهد"),
+        studentTables: tableInfo.tables || [],
+        type: type,
+        timestamp: new Date().toLocaleString('ar-SA', { hour12: false }),
+        count: violationsCount
+      };
+
+      const violations = Storage.getCollection(Storage.keys.EXAM_VIOLATIONS) || [];
+      violations.unshift(violationItem);
+      Storage.set(Storage.keys.EXAM_VIOLATIONS, violations);
+
+      App.toast(`<i class="fa-solid fa-triangle-exclamation"></i> تحذير أمني: تم رصد محاولة خروج/تغيير نافذة (${type})! المخالفة رقم ${violationsCount}`, 'error');
+
+      const dbViolationData = {
+        trainee_name: tableInfo.name || activeExamineeName || (currentUser ? currentUser.username : "عضو ميداني"),
+        rank: tableInfo.rank || (currentUser ? currentUser.rank : "مشاهد"),
+        code: currentUser ? currentUser.discord : "",
+        course_name: activeExam.title, // Name of the exam being taken
+        violation_type: type,
+        violation_time: new Date().toLocaleTimeString('ar-SA', { hour12: false }),
+        details: `مخالفة رقم ${violationsCount} أثناء اختبار "${activeExam.title}"`,
+        exam_id: activeExam.id
+      };
+
+      Storage.saveViolation(dbViolationData)
+        .then(res => {
+          console.log('Violation saved to SQLite:', res);
+          if (activeTab === 'violations') {
+            renderViolationsArchive();
+          }
+        })
+        .catch(err => console.warn('Failed to save violation to SQLite:', err));
+
+      if (typeof Logger !== 'undefined') {
+        Logger.log('exam_close', `<i class="fa-solid fa-triangle-exclamation"></i> مخالفة غش مرصودة للمختبر "${violationItem.studentName}" في اختبار "${activeExam.title}": تغيير النافذة أو التركيز (${type}) - إجمالي مخالفات الجلسة: ${violationsCount}`);
+      }
+    }
+
+    function playBeep() {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (AudioCtx) {
+          const ctx = new AudioCtx();
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(800, ctx.currentTime);
+          gain.gain.setValueAtTime(0.5, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.5);
+        }
+      } catch (e) {
+        console.warn('AudioContext beep failed:', e);
+      }
+    }
+
+    function renderViolationsArchive() {
+      const tbody = document.getElementById('violations-tbody');
+      if (!tbody) return;
+
+      Storage.fetchViolations()
+        .then(violations => {
+          const filterDropdown = document.getElementById('violations-course-filter');
+          const filterVal = filterDropdown ? filterDropdown.value : 'all';
+          const exams = Storage.getCollection(Storage.keys.EXAMS) || [];
+          const selectedExam = exams.find(e => e.id === filterVal);
+
+          let filteredViolations = violations;
+          if (filterVal !== 'all') {
+            filteredViolations = violations.filter(v => {
+              if (v.examId && v.examId === filterVal) return true;
+              if (v.exam_id && v.exam_id === filterVal) return true;
+              if (selectedExam && (v.course_name === selectedExam.title || (v.details && v.details.includes(selectedExam.title)))) return true;
+              return false;
+            });
+          }
+
+          const countSpan = document.getElementById('super-violations-count');
+          if (countSpan) countSpan.textContent = `${filteredViolations.length} مخالفات`;
+
+          const userRole = Auth.getRole();
+          const roleInfo = Auth.getRoleInfo(userRole);
+          const isAuthorizedToClear = roleInfo && roleInfo.level >= 4.5;
+          const clearBtn = document.getElementById('btn-clear-violations');
+          if (clearBtn) clearBtn.style.display = isAuthorizedToClear ? 'inline-block' : 'none';
+
+          if (filteredViolations.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:30px;color:rgba(255,255,255,0.3)">لا توجد مخالفات مسجلة لهذه الدورة</td></tr>`;
+            return;
+          }
+
+          tbody.innerHTML = filteredViolations.map(v => {
+            const deleteBtn = isAuthorizedToClear ? `<button class="action-btn-el reject" style="background:rgba(231, 76, 60, 0.1); border-color:rgba(231, 76, 60, 0.25);" onclick="deleteViolation('${v.id}')">🗑️ حذف</button>` : '';
+
+            let tablesList = [];
+            const solved = Auth.resolveUserTableInfo({
+              discord: v.code,
+              username: v.trainee_name,
+              globalName: v.trainee_name,
+              name: v.trainee_name
+            }) || {};
+            tablesList = solved.tables || [];
+
+            const tablesBadge = tablesList.length > 0
+              ? tablesList.map(t => `<span class="supervisor-badge" style="display:inline-block; font-size:0.68rem; padding: 2px 6px; background:rgba(201,162,39,0.12); border:1px solid rgba(201,162,39,0.35); color:var(--color-gold-primary); border-radius:4px; font-weight:700;">${t}</span>`).join('')
+              : '<span style="font-size:0.68rem; opacity:0.35;">غير مسجل</span>';
+
+            const countVal = v.details && v.details.includes('مخالفة رقم') ? v.details.split('مخالفة رقم')[1].trim().split(' ')[0] : '1';
+            const timestampText = v.created_at ? v.created_at.split(' ')[0].replace(/-/g, '/') + ' ' + v.violation_time : v.violation_time;
+
+            return `
+            <tr>
+              <td style="font-weight:700; color:#fff">
+                <div>${v.trainee_name}</div>
+                <div style="display:flex; flex-wrap:wrap; gap:4px; margin-top:4px;">${tablesBadge}</div>
+              </td>
+              <td style="font-weight:600;">${v.course_name}</td>
+              <td style="color:#ff4757; font-weight:700;">${v.violation_type}</td>
+              <td style="font-family:monospace; font-size:0.8rem; color:rgba(255,255,255,0.85);">${timestampText}</td>
+              <td style="font-family:monospace; font-weight:800; text-align:center; color:#ff4757;">${countVal}</td>
+              <td>${deleteBtn}</td>
+            </tr>
+          `;
+          }).join('');
+        })
+        .catch(err => console.error(err));
+    }
+
+    window.deleteViolation = function (id) {
+      const userRole = Auth.getRole();
+      const roleInfo = Auth.getRoleInfo(userRole);
+      if (!roleInfo || roleInfo.level < 4.5) {
+        App.toast('عذراً، غير مصرح لك بحذف المخالفات!', 'error');
+        return;
+      }
+      if (confirm('هل أنت متأكد من حذف هذه المخالفة من الأرشيف؟')) {
+        Storage.deleteViolation(id)
+          .then(res => {
+            App.toast('🗑️ تم حذف المخالفة بنجاح.', 'success');
+            renderViolationsArchive();
+          })
+          .catch(err => {
+            console.error(err);
+            App.toast('✕ فشل الحذف من قاعدة البيانات', 'error');
+          });
+      }
+    }
+
+    window.clearAllViolations = function () {
+      const userRole = Auth.getRole();
+      const roleInfo = Auth.getRoleInfo(userRole);
+      if (!roleInfo || roleInfo.level < 4.5) {
+        App.toast('عذراً، غير مصرح لك بمسح سجل المخالفات بالكامل!', 'error');
+        return;
+      }
+      if (confirm('هل أنت متأكد من رغبتك في مسح سجل المخالفات بالكامل؟')) {
+        Storage.deleteViolation('all')
+          .then(res => {
+            App.toast('🗑️ تم مسح سجل المخالفات بنجاح.', 'success');
+            renderViolationsArchive();
+          })
+          .catch(err => {
+            console.error(err);
+            App.toast('✕ فشل مسح قاعدة البيانات', 'error');
+          });
+      }
+    }
+  </script>
+</body>
+
+</html>

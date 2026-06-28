@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مستند دورة المهمات والواجبات الخاصة | الأمن العام</title>
+  <link rel="stylesheet" href="../assets/css/main.css?v=1.1.26">
+  <link rel="stylesheet" href="../assets/css/navbar.css?v=1.1.26">
+  <link rel="stylesheet" href="../assets/css/sidebar.css?v=1.1.26">
+  <link rel="stylesheet" href="../assets/css/footer.css">
+  <style>
+    /* Custom Premium Styles for Special Tasks Document Page */
+    .doc-container {
+      max-width: 960px;
+      margin: 140px auto 100px;
+      padding: 0 var(--space-4);
+    }
+
+    /* Document Body */
+    .doc-content {
+      background: linear-gradient(155deg, rgba(13, 24, 64, 0.25) 0%, rgba(7, 15, 37, 0.35) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      border-radius: 24px;
+      padding: var(--space-8);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Back Button Banner */
+    .back-banner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--space-8);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding-bottom: var(--space-5);
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: 10px 20px;
+      background: rgba(251, 197, 49, 0.1);
+      border: 1px solid rgba(251, 197, 49, 0.3);
+      border-radius: 12px;
+      color: var(--color-gold-light);
+      font-weight: 800;
+      font-size: var(--font-size-sm);
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .back-btn:hover {
+      background: var(--color-gold-primary);
+      color: #000;
+      border-color: var(--color-gold-primary);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px var(--color-gold-glow);
+    }
+
+    /* Main Title & Subtitle */
+    .doc-main-title {
+      font-size: 1.95rem;
+      font-weight: 900;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+
+    .doc-meta-info {
+      display: flex;
+      gap: var(--space-6);
+      flex-wrap: wrap;
+      margin-bottom: var(--space-8);
+    }
+
+    .doc-meta-item {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 10px 18px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--color-text-muted);
+    }
+
+    .doc-meta-item strong {
+      color: #fff;
+      margin-right: 4px;
+    }
+
+    /* Sections */
+    .doc-section {
+      scroll-margin-top: 100px;
+      margin-bottom: var(--space-8);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      padding-bottom: var(--space-6);
+    }
+
+    .doc-section:last-child {
+      border: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .section-title {
+      font-size: 1.35rem;
+      font-weight: 850;
+      color: var(--color-gold-primary);
+      margin-bottom: var(--space-4);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-body {
+      font-size: 0.88rem;
+      color: var(--color-text-secondary);
+      line-height: 1.8;
+      text-align: justify;
+    }
+
+    .styled-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: var(--space-4);
+    }
+
+    .styled-list li {
+      position: relative;
+      padding-right: var(--space-6);
+      font-size: 0.86rem;
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+    }
+
+    .styled-list li::before {
+      content: '⚡';
+      position: absolute;
+      right: 0;
+      color: var(--color-gold-primary);
+      font-size: 0.95rem;
+    }
+
+    /* Callout & Examples */
+    .callout-box {
+      background: rgba(201, 162, 39, 0.03);
+      border-right: 4px solid var(--color-gold-primary);
+      border-radius: 12px;
+      padding: var(--space-5);
+      margin: var(--space-5) 0;
+    }
+
+    .callout-box-title {
+      font-weight: 800;
+      font-size: 0.88rem;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+
+    .callout-box-desc {
+      font-size: 0.82rem;
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+    }
+
+    /* Grid for Lists */
+    .doc-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-4);
+      margin-top: var(--space-4);
+    }
+
+    /* Code Card list */
+    .code-card {
+      background: rgba(255, 255, 255, 0.015);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      border-radius: 12px;
+      padding: var(--space-4);
+      transition: all 0.25s ease;
+    }
+
+    .code-card:hover {
+      background: rgba(201, 162, 39, 0.03);
+      border-color: rgba(201, 162, 39, 0.25);
+    }
+
+    .code-card-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      background: rgba(201, 162, 39, 0.1);
+      border: 1px solid rgba(201, 162, 39, 0.25);
+      color: var(--color-gold-light);
+      border-radius: 8px;
+      font-size: 0.76rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .code-card-desc {
+      font-size: 0.78rem;
+      color: var(--color-text-secondary);
+      line-height: 1.5;
+    }
+
+    /* Prohibitions list */
+    .prohibitions-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-4);
+      margin-top: var(--space-4);
+    }
+
+    .prohibition-item {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-3);
+      font-size: 0.82rem;
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+      background: rgba(192, 57, 43, 0.02);
+      padding: var(--space-4);
+      border-radius: 12px;
+      border: 1px solid rgba(192, 57, 43, 0.08);
+    }
+
+    .prohibition-item span:first-child {
+      color: var(--color-red-alert);
+      font-weight: 900;
+      font-size: 1.1rem;
+      line-height: 1;
+    }
+
+    /* Alert Banner */
+    .alert-banner {
+      background: rgba(192, 57, 43, 0.04);
+      border-right: 4px solid var(--color-red-alert);
+      border-radius: 12px;
+      padding: var(--space-5);
+      margin-bottom: var(--space-6);
+    }
+
+    .alert-banner-title {
+      font-weight: 800;
+      font-size: 0.88rem;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+
+    .alert-banner-desc {
+      font-size: 0.82rem;
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 900px) {
+      .prohibitions-list, .doc-grid-2 {
+        grid-template-columns: 1fr;
+      }
+      .doc-content {
+        padding: var(--space-5);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="toast-container"></div>
+
+  <div class="doc-container">
+
+    <!-- Main Content -->
+    <div class="doc-content animate-fade-up delay-1">
+
+      <!-- Back Banner -->
+      <div class="back-banner">
+        <div class="navbar-logo" style="margin: 0;">
+          <img src="../assets/img/special_tasks.png" alt="شعار المهمات والواجبات" class="nav-logo-img" style="width: 46px; height: 46px; object-fit: contain;">
+          <div style="display: flex; flex-direction: column; line-height: 1.25; text-align: right; margin-right: 8px;">
+            <span style="font-size: 13px; font-weight: 900; color: #ffffff;">إدارة الأمن العام</span>
+            <span style="font-size: 10px; font-weight: 800; color: #c9a227;">شعبة المهمات والواجبات الخاصة</span>
+          </div>
+        </div>
+        <button class="back-btn" onclick="window.location.href='college.html'">➡️ رجوع إلى كلية التدريب</button>
+      </div>
+
+      <!-- Main Title -->
+      <h1 class="doc-main-title">دورة المهمات والواجبات الخاصة</h1>
+      
+      <!-- Meta Information Banner -->
+      <div class="doc-meta-info">
+        <div class="doc-meta-item">مدير الدورة: <strong>العقيد ركن / منصور عاتي</strong></div>
+        <div class="doc-meta-item">نائب المدير: <strong>الرائد / ماجد محمد</strong></div>
+        <div class="doc-meta-item">الموعد الأسبوعي: <strong>الأربعاء 9:00 م</strong></div>
+      </div>
+
+      <!-- Alert callout from board -->
+      <div class="callout-box" style="background: rgba(201, 162, 39, 0.05); margin-bottom: 40px;">
+        <div class="callout-box-title"><i class="fa-solid fa-bullhorn"></i> تنويه من مجلس التدريب</div>
+        <div class="callout-box-desc">الدورات الاستثنائية يُعلن عنها من قبل رئاسة مجلس التدريب بشكل مستقل وحسب جدول الاحتياج الميداني.</div>
+      </div>
+
+      <!-- 1. Definition -->
+      <div class="doc-section" id="sec-definition">
+        <h2 class="section-title"><i class="fa-solid fa-shield-halved"></i> تعريف قطاع المهمات والواجبات الخاصة</h2>
+        <div class="section-body">
+          شعبة المهمات والواجبات الخاصة هي قطاع نخبة عسكري مختص وحصري بمباشرة والتعامل مع <strong>البلاغات الجنائية الطارئة فقط</strong>. ويُعتبر هذا القطاع أحد الفروع الأساسية المنبثقة من فرقة التدخل السريع الخاصة بالأمن العام لفرض السيطرة المطلقة وحسم المواقف الأمنية المعقدة.
+        </div>
+      </div>
+
+      <!-- 2. Rules and Regulations -->
+      <div class="doc-section" id="sec-rules">
+        <h2 class="section-title"><i class="fa-solid fa-scroll"></i> قوانين وتعليمات قطاع المهمات والواجبات</h2>
+        <div class="section-body">
+          <ol class="styled-list">
+            <li><strong>الاختصاص الجنائي:</strong> يسمح لوحدات المهمات والواجبات بمباشرة البلاغات والحالات الجنائية فقط.</li>
+            <li><strong>حظر البلاغات المرورية:</strong> يُمنع منعاً باتاً مباشرة أو التدخل في أي بلاغات مرورية بسيطة.</li>
+            <li><strong>شرط التفعيل الميداني:</strong> لا يسمح بخروج وتفعيل وحدات المهمات والواجبات الخاصة إلا في حال وجود <strong>10 أفراد (دون احتساب العمليات والنائب)</strong> في وحدات لوس سانتوس للأمن العام.</li>
+            <li><strong>الحد الأقصى للوحدات الميدانية:</strong> يُسمح بالخروج كـ وحدة مهمات وواجبات خاصة بعدد <strong>3 وحدات كحد أقصى</strong> في الميدان (ويستثنى من هذا الشرط قيادة الأمن العام العليا).</li>
+            <li><strong>بروتوكول استخدام السلاح الثقيل:</strong> يسمح لوحدات المهمات والواجبات الخاصة باستخدام السلاح الثقيل (<strong>الشوزن العسكري</strong>) في جميع الحالات الجنائية، <strong>باستثناء المواطن الأعزل</strong> الذي لا يحمل سلاحاً.</li>
+            <li><strong>حظر التظليل:</strong> لا يسمح بتظليل زجاج مركبات المهمات والواجبات الخاصة بتاتاً.</li>
+            <li><strong>مساندة قطاع المجاهدين:</strong> يُسمح التوجه فوراً لدعم المجاهدين في مناطقهم عند طلبهم الرسمي للمساندة عبر الموجه اللاسلكية.</li>
+            <li><strong>الهيبة والمظهر الرسمي:</strong> يجب على أفراد القطاع تمثيل الشعبة بشكل متميز ومهيب بالتحدث مع المواطنين بصورة واقعية ورسمية، ويُحظر تماماً المزاح والضحك المفرط منعاً لتقليل هيبة القطاع.</li>
+            <li><strong>الالتزام بالزي الرسمي:</strong> الالتزام التام بالزي العسكري المعتمد والموحد لقطاع المهمات والواجبات الخاصة، ويُحظر إجراء أي تعديلات تجميلية عليه.</li>
+            <li><strong>حظر الدوريات السرية:</strong> يُمنع منعاً باتاً على وحدات المهمات والواجبات الخاصة المباشرة أو الخروج بدورية سرية في الميدان.</li>
+            <li><strong>شرط تواجد القيادات:</strong> يُمنع خروج الوحدات في حال عدم تواجد ضباط ميدانيين أو عدم اكتمال ضباط المناطق.</li>
+            <li><strong>الحد الأقصى للتسجيل الميداني:</strong> أقصى عدد لوحدات المهمات والواجبات الخاصة هو 3 وحدات فقط؛ ففي حال تواجد (مهام 1، برق 1، شهاب 1) يُمنع خروج أي وحدة رابعة. وفي حال تواجد (مهام 1، مهام 2، برق 1) يُمنع خروج (شهاب 1) لتجنب التكدس.</li>
+            <li><strong>حظر الخروج العشوائي للأفراد:</strong> يُمنع منعاً باتاً وبشكل نهائي خروج أي فرد (مهام) قبل اكتمال تواجد ضباط المناطق المعتمدين جغرافياً حسب كلاً ومنطقته دون أي اجتهاد أو تبرير.</li>
+            <li><strong>ضوابط خروج رتبة برق:</strong> يُمنع خروج أي ضابط (برق) في حال عدم اكتمال تواجد ثلاثة ضباط على الأقل بالميدان (مثال: ضباط تسعين 1، حزم 1، وتسعين 2)، ويُعد أي خروج بخلاف ذلك مخالفة صريحة للتعليمات.</li>
+            <li><strong>حظر العمليات المشتركة:</strong> يُمنع منعاً باتاً وبشكل نهائي تنفيذ أي مداهمة أو مشاركة ميدانية مشتركة خارج نطاق البروتوكول تحت أي ظرف كان.</li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- 3. Field Call-signs -->
+      <div class="doc-section" id="sec-callsigns">
+        <h2 class="section-title">🏷️ المسميات والنداءات الميدانية المعتمدة للقطاع</h2>
+        <div class="section-body">
+          <p class="text-secondary mb-3">تُقسم المسميات والنداءات اللاسلكية في شعبة المهمات والواجبات الخاصة حسب الرتب والمسؤوليات كالتالي:</p>
+          
+          <div class="doc-grid-2">
+            <div class="code-card">
+              <span class="code-card-badge" style="background: rgba(231, 76, 60, 0.15); border-color: rgba(231, 76, 60, 0.3); color: #e74c3c;"><i class="fa-solid fa-crown"></i> القيادة وإدارة الدورة</span>
+              <div style="font-weight: 800; color: #fff; font-size: 0.95rem; margin-bottom: 6px;">شـهـاب 1 ، شـهـاب 2</div>
+              <div class="code-card-desc">نداءات مخصصة ومحددة حصرياً لـ (مدير الدورة ونائب مدير الدورة) فقط.</div>
+            </div>
+
+            <div class="code-card">
+              <span class="code-card-badge" style="background: rgba(201, 162, 39, 0.1); border-color: rgba(201, 162, 39, 0.25); color: var(--color-gold-light);"><i class="fa-solid fa-medal"></i> الضباط بالميدان</span>
+              <div style="font-weight: 800; color: #fff; font-size: 0.95rem; margin-bottom: 6px;">بــرق 1 ، بــرق 2 ، بــرق 3</div>
+              <div class="code-card-desc">نداءات مخصصة للضباط المنتسبين للقطاع من رتبة <strong>ملازم</strong> وحتى رتبة <strong>عميد ركن</strong>.</div>
+            </div>
+
+            <div class="code-card" style="grid-column: span 2;">
+              <span class="code-card-badge"><i class="fa-solid fa-users"></i> الأفراد والصف ضباط</span>
+              <div style="font-weight: 800; color: #fff; font-size: 0.95rem; margin-bottom: 6px;">مـهـام 1 ، مـهـام 2 ، مـهـام 3</div>
+              <div class="code-card-desc">نداءات مخصصة للأفراد والصف ضباط الحاصلين على الدورة من رتبة <strong>رقيب</strong> وحتى رتبة <strong>رئيس رقباء</strong>.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Dispatch Priority -->
+      <div class="doc-section" id="sec-priority">
+        <h2 class="section-title"><i class="fa-solid fa-triangle-exclamation"></i> أولوية الاستجابة والتوجه للبلاغات</h2>
+        <div class="section-body">
+          <p class="text-secondary mb-3">تلتزم وحدات المهمات والواجبات الخاصة بترتيب الاستجابة الميدانية للبلاغات وفق سلم الأولويات الإلزامي التالي:</p>
+          
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; text-align: center;">
+            <div style="background: rgba(192, 57, 43, 0.15); border: 1px solid rgba(192, 57, 43, 0.3); padding: 15px; border-radius: 12px;">
+              <div style="font-size: 1.2rem; margin-bottom: 4px;"><i class="fa-solid fa-triangle-exclamation"></i></div>
+              <div style="font-weight: 850; font-size: 0.8rem; color: #fff;">1. الاستنفار الأمني</div>
+            </div>
+            <div style="background: rgba(230, 126, 34, 0.15); border: 1px solid rgba(230, 126, 34, 0.3); padding: 15px; border-radius: 12px;">
+              <div style="font-size: 1.2rem; margin-bottom: 4px;"><i class="fa-solid fa-burst"></i></div>
+              <div style="font-weight: 850; font-size: 0.8rem; color: #fff;">2. إطلاق النار</div>
+            </div>
+            <div style="background: rgba(241, 196, 15, 0.15); border: 1px solid rgba(241, 196, 15, 0.3); padding: 15px; border-radius: 12px;">
+              <div style="font-size: 1.2rem; margin-bottom: 4px;"><i class="fa-solid fa-wallet"></i></div>
+              <div style="font-weight: 850; font-size: 0.8rem; color: #fff;">3. السرقات والسطو</div>
+            </div>
+            <div style="background: rgba(52, 152, 219, 0.15); border: 1px solid rgba(52, 152, 219, 0.3); padding: 15px; border-radius: 12px;">
+              <div style="font-size: 1.2rem; margin-bottom: 4px;"><i class="fa-solid fa-bullhorn"></i></div>
+              <div style="font-weight: 850; font-size: 0.8rem; color: #fff;">4. نداء الاستغاثة</div>
+            </div>
+          </div>
+
+          <div class="alert-banner" style="background: rgba(192, 57, 43, 0.05);">
+            <div class="alert-banner-title" style="color: var(--color-red-alert);">⚠️ ضوابط مغادرة مواقع البلاغات:</div>
+            <div class="alert-banner-desc">
+              - يُمنع منعاً باتاً مغادرة نداء الاستغاثة الميداني حتى يتم إزالته رسمياً وتأمين الموقع بالكامل ليصبح آمناً.
+              <br>- يُمنع مغادرة منطقة الاستنفار الأمني حتى يتم إنهاء الحالة وتأمين الموقع وتأمينه بشكل كامل.
+            </div>
+          </div>
+
+          <div class="callout-box" style="background: rgba(201, 162, 39, 0.02); margin-bottom: 0;">
+            <div class="callout-box-title" style="color: var(--color-gold-light);"><i class="fa-solid fa-lightbulb"></i> التخطيط التكتيكي وحماية الأرواح</div>
+            <div class="callout-box-desc">
+              يجب على القائد الميداني التخطيط بالشكل الصحيح والحرص التام على حماية حياة المدنيين والرهائن كونك أحد أفرع فرق التدخل السريع. ويجب تنبيه كافة الوحدات للتعليمات الهامة بالابتعاد عن موقع المفاوض وأخذ سواتر حماية كاملة (كفر) خلف المركبات العسكرية.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Negotiation Protocols -->
+      <div class="doc-section" id="sec-negotiation">
+        <h2 class="section-title"><i class="fa-solid fa-comments"></i> بروتوكول وإجراءات التفاوض الميداني</h2>
+        <div class="section-body">
+          <p class="text-secondary mb-3">عند حدوث حالات السطو والرهائن، يلتزم المفاوض العسكري لقطاع المهمات بالخطوات الترتيبية التالية للتفاوض:</p>
+          
+          <ol class="styled-list" style="margin-bottom: 24px;">
+            <li><strong>التعريف عن النفس بصفة رسمية:</strong>
+              <br><em style="color: #fff; font-size: 0.82rem; background: rgba(0,0,0,0.2); padding: 4px 10px; border-radius: 6px; display: inline-block; margin-top: 4px;">مثال: "معاك العقيد ركن منصور عاتي صاحب الكود العسكري P-033 ممثل شرطة لوس سانتوس"</em>
+            </li>
+            <li><strong>تحذير متفاوض الطرف الآخر (المجرمين):</strong> تنبيههم فوراً بأنه في حال خالف أي من شروط الاتفاق، أو الاستهانة بقوة الأمن، أو طلب أكثر من طلبين، أو تقديم مطالب تعجيزية، فسيتم إلغاء التفاوض وإسقاطهم فوراً بالمداهمة.</li>
+            <li><strong>التساؤل عن سبب ارتكاب الجريمة:</strong> فهم دوافع الجناة لتسهيل مسار التفاوض وتأمين سلامة الرهائن.</li>
+            <li><strong>بدء التفاوض على المسروقات:</strong> تحديد حجم ومسار المسروقات المسموح بها لتأمين الأرواح.</li>
+            <li><strong>التحقق من جاهزية القوات الميدانية:</strong> بعد الاتفاق النهائي مع الخاطفين، يجب التأكد التام من استعداد وجاهزية العساكر للمطلب المعتمد (مثل الهروب الآمن للمجرمين، أو المداهمة التكتيكية، إلخ).</li>
+          </ol>
+
+          <div class="alert-banner" style="background: rgba(201, 162, 39, 0.03); border-right-color: var(--color-gold-primary);">
+            <div class="alert-banner-title" style="color: var(--color-gold-light);"><i class="fa-solid fa-scale-balanced"></i> أولوية التفاوض في السروقات والرهائن:</div>
+            <div class="alert-banner-desc">أولوية استلام التفاوض في السرقات تكون لـ <strong>أعلى رتبة مستلمة من قطاع المهمات والواجبات الخاصة</strong> متواجدة بالموقع. وفي حال تواجد رتبة أعلى منك تابعة للأمن العام، يجب الاستئان بالطلب منه أولاً، وفي حال موافقته يتم استلام ملف التفاوض رسمياً.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. Important Notes -->
+      <div class="doc-section" id="sec-notes">
+        <h2 class="section-title">⚠️ تنويهات وإرشادات هامة لمسرح الجريمة</h2>
+        <div class="section-body">
+          <ul class="styled-list">
+            <li><strong>تقدير الأرواح:</strong> يجب تقدير وحماية حياة الطرفين (المدنيين والرهائن) أثناء عمليات السطو والسرقة كأولوية قصوى.</li>
+            <li><strong>أخذ السواتر (الكفر):</strong> يجب على كافة الوحدات الميدانية اتخاذ الحيطة والحذر الشديد في منطقة الجريمة والالتزام بالاحتماء خلف المركبات الأمنية أو المباني المحيطة.</li>
+            <li><strong>مركبة الهروب:</strong> يُمنع منعاً باتاً إلحاق أي ضرر مادي بمركبة المجرمين المتفق عليها في موقع الجريمة.</li>
+            <li><strong>توحيد المفاوض:</strong> يُمنع منعاً باتاً وجود أكثر من مفاوض واحد لرجال الأمن في الموقع لعدم تشتيت الاتفاق.</li>
+            <li><strong>مفاوض الطرف الآخر:</strong> يُسمح بخروج مفاوض واحد فقط من جانب المجرمين للتحدث، ويُشترط أن لا يحمل أي سلاح ظاهر أو مخفي.</li>
+            <li><strong>عدد الوحدات بالموقع:</strong> يجب على القائد الميداني التأكد التام من أن أعداد الوحدات المتواجدة بمحيط الجريمة لا تتجاوز العدد الأقصى المسموح به في دستور ولوائح قوانين الإجرام.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 7. Fixed Locations -->
+      <div class="doc-section" id="sec-locations" style="border: none; padding-bottom: 0; margin-bottom: 0;">
+        <h2 class="section-title"><i class="fa-solid fa-location-dot"></i> المواقع والنقاط الثابتة للقطاع</h2>
+        <div class="section-body">
+          <div class="doc-grid-2">
+            <div>
+              <h4 style="color: var(--color-gold-primary); font-weight: 850; font-size: 0.95rem; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 6px;"><i class="fa-solid fa-city"></i> المواقع الثابتة في لوس سانتوس:</h4>
+              <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.82rem; line-height: 2; color: var(--color-text-secondary);">
+                <li><i class="fa-solid fa-caret-left"></i> حديقة الـ90 المعتمدة</li>
+                <li><i class="fa-solid fa-caret-left"></i> المراكز التجارية المزدحمة (البقالات)</li>
+                <li><i class="fa-solid fa-caret-left"></i> كراج لوس 1 ، كراج لوس 2</li>
+                <li><i class="fa-solid fa-caret-left"></i> ساحة حجز وتأمين المركبات</li>
+                <li><i class="fa-solid fa-caret-left"></i> كراج ومواقف الشاحنات</li>
+                <li><i class="fa-solid fa-caret-left"></i> مصانع العمل والإنتاج الميداني</li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 style="color: var(--color-gold-primary); font-weight: 850; font-size: 0.95rem; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 6px;"><i class="fa-solid fa-mountain"></i> المواقع الثابتة في ساندي وبليتو (عند دعم المجاهدين):</h4>
+              <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.82rem; line-height: 2; color: var(--color-text-secondary);">
+                <li><i class="fa-solid fa-caret-left"></i> كراج قطاع ساندي شورز</li>
+                <li><i class="fa-solid fa-caret-left"></i> كراج قطاع بليتو باي</li>
+                <li><i class="fa-solid fa-caret-left"></i> مصانع العمل والإنتاج بالقطاعين</li>
+                <li><i class="fa-solid fa-caret-left"></i> حجز وتأمين المركبات في ساندي</li>
+                <li><i class="fa-solid fa-caret-left"></i> حجز وتأمين المركبات في بليتو</li>
+                <li><i class="fa-solid fa-caret-left"></i> المراكز التجارية والبقالات المزدحمة بالقرى</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="../assets/js/storage.js?v=1.1.30"></script>
+  <script src="../assets/js/data.js?v=1.1.26"></script>
+  <script src="../assets/js/auth.js?v=1.1.30"></script>
+  <script src="../assets/js/components.js?v=1.1.31"></script>
+  <script src="../assets/js/app.js?v=1.1.31"></script>
+  <script>
+    // Inject navbar and sidebar
+    document.write(Components.navbar('college'));
+    document.write(Components.sidebar('college'));
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Inject Footer
+      const body = document.body;
+      const footerDiv = document.createElement('div');
+      footerDiv.innerHTML = Components.footer();
+      body.appendChild(footerDiv.firstElementChild);
+    });
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مستند شرح دورة الأركان | الأمن العام</title>
+  <link rel="stylesheet" href="../assets/css/main.css?v=1.1.26">
+  <link rel="stylesheet" href="../assets/css/navbar.css?v=1.1.26">
+  <link rel="stylesheet" href="../assets/css/sidebar.css?v=1.1.26">
+  <link rel="stylesheet" href="../assets/css/footer.css">
+  <style>
+    /* Custom Premium Styles for Staff Document Page */
+    .doc-container {
+      max-width: 960px;
+      margin: 140px auto 100px;
+      padding: 0 var(--space-4);
+    }
+
+    /* Document Body */
+    .doc-content {
+      background: linear-gradient(155deg, rgba(13, 24, 64, 0.25) 0%, rgba(7, 15, 37, 0.35) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      border-radius: 24px;
+      padding: var(--space-8);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Back Button Banner */
+    .back-banner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--space-8);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding-bottom: var(--space-5);
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: 10px 20px;
+      background: rgba(251, 197, 49, 0.1);
+      border: 1px solid rgba(251, 197, 49, 0.3);
+      border-radius: 12px;
+      color: var(--color-gold-light);
+      font-weight: 800;
+      font-size: var(--font-size-sm);
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .back-btn:hover {
+      background: var(--color-gold-primary);
+      color: #000;
+      border-color: var(--color-gold-primary);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px var(--color-gold-glow);
+    }
+
+    /* Main Title & Subtitle */
+    .doc-main-title {
+      font-size: 1.95rem;
+      font-weight: 900;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+
+    .doc-meta-info {
+      display: flex;
+      gap: var(--space-6);
+      flex-wrap: wrap;
+      margin-bottom: var(--space-8);
+    }
+
+    .doc-meta-item {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 10px 18px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--color-text-muted);
+    }
+
+    .doc-meta-item strong {
+      color: #fff;
+      margin-right: 4px;
+    }
+
+    /* Sections */
+    .doc-section {
+      scroll-margin-top: 100px;
+      margin-bottom: var(--space-8);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      padding-bottom: var(--space-6);
+    }
+
+    .doc-section:last-child {
+      border: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .section-title {
+      font-size: 1.35rem;
+      font-weight: 850;
+      color: var(--color-gold-primary);
+      margin-bottom: var(--space-4);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-body {
+      font-size: 0.88rem;
+      color: var(--color-text-secondary);
+      line-height: 1.8;
+      text-align: justify;
+    }
+
+    .styled-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: var(--space-4);
+    }
+
+    .styled-list li {
+      position: relative;
+      padding-right: var(--space-6);
+      font-size: 0.86rem;
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+    }
+
+    .styled-list li::before {
+      content: '⚡';
+      position: absolute;
+      right: 0;
+      color: var(--color-gold-primary);
+      font-size: 0.95rem;
+    }
+
+    /* Callout & Examples */
+    .callout-box {
+      background: rgba(201, 162, 39, 0.03);
+      border-right: 4px solid var(--color-gold-primary);
+      border-radius: 12px;
+      padding: var(--space-5);
+      margin: var(--space-5) 0;
+    }
+
+    .callout-box-title {
+      font-weight: 800;
+      font-size: 0.88rem;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+
+    .callout-box-desc {
+      font-size: 0.82rem;
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+    }
+
+    /* Grid for Lists */
+    .doc-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-4);
+      margin-top: var(--space-4);
+    }
+
+    /* Code Card list */
+    .code-card {
+      background: rgba(255, 255, 255, 0.015);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      border-radius: 12px;
+      padding: var(--space-4);
+      transition: all 0.25s ease;
+    }
+
+    .code-card:hover {
+      background: rgba(201, 162, 39, 0.03);
+      border-color: rgba(201, 162, 39, 0.25);
+    }
+
+    .code-card-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      background: rgba(201, 162, 39, 0.1);
+      border: 1px solid rgba(201, 162, 39, 0.25);
+      color: var(--color-gold-light);
+      border-radius: 8px;
+      font-size: 0.76rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .code-card-desc {
+      font-size: 0.78rem;
+      color: var(--color-text-secondary);
+      line-height: 1.5;
+    }
+
+    /* Prohibitions list */
+    .prohibitions-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-4);
+      margin-top: var(--space-4);
+    }
+
+    .prohibition-item {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-3);
+      font-size: 0.82rem;
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+      background: rgba(192, 57, 43, 0.02);
+      padding: var(--space-4);
+      border-radius: 12px;
+      border: 1px solid rgba(192, 57, 43, 0.08);
+    }
+
+    .prohibition-item span:first-child {
+      color: var(--color-red-alert);
+      font-weight: 900;
+      font-size: 1.1rem;
+      line-height: 1;
+    }
+
+    /* Alert Banner */
+    .alert-banner {
+      background: rgba(192, 57, 43, 0.04);
+      border-right: 4px solid var(--color-red-alert);
+      border-radius: 12px;
+      padding: var(--space-5);
+      margin-bottom: var(--space-6);
+    }
+
+    .alert-banner-title {
+      font-weight: 800;
+      font-size: 0.88rem;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+
+    .alert-banner-desc {
+      font-size: 0.82rem;
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 900px) {
+      .prohibitions-list, .doc-grid-2 {
+        grid-template-columns: 1fr;
+      }
+      .doc-content {
+        padding: var(--space-5);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="toast-container"></div>
+
+  <div class="doc-container">
+
+    <!-- Main Content -->
+    <div class="doc-content animate-fade-up delay-1">
+
+      <!-- Back Banner -->
+      <div class="back-banner">
+        <div class="navbar-logo" style="margin: 0;">
+          <svg viewBox="0 0 100 100" class="nav-logo-img" style="width: 46px; height: 46px;">
+            <circle cx="50" cy="50" r="42" fill="#0d1840" stroke="#c9a227" stroke-width="3"/>
+            <path d="M50,25 L65,40 L35,40 Z" fill="#c9a227"/>
+            <rect x="42" y="40" width="16" height="30" fill="#c9a227" rx="3"/>
+          </svg>
+          <div style="display: flex; flex-direction: column; line-height: 1.25; text-align: right; margin-right: 8px;">
+            <span style="font-size: 13px; font-weight: 900; color: #ffffff;">إدارة الأمن العام</span>
+            <span style="font-size: 10px; font-weight: 800; color: #c9a227;">دورة الأركان القيادية</span>
+          </div>
+        </div>
+        <button class="back-btn" onclick="window.location.href='college.html'">➡️ رجوع إلى كلية التدريب</button>
+      </div>
+
+      <!-- Main Title -->
+      <h1 class="doc-main-title">شرح دورة الأركان العسكرية</h1>
+      
+      <!-- Meta Information Banner -->
+      <div class="doc-meta-info">
+        <div class="doc-meta-item">الجهة المنظمة: <strong>إدارة الشرطة بمدينة الـ 90</strong></div>
+        <div class="doc-meta-item">الفئة المستهدفة: <strong>كبار الضباط والقادة (رائد وأعلى)</strong></div>
+        <div class="doc-meta-item">حالة الخدمة: <strong>مفعلة</strong></div>
+      </div>
+
+      <!-- Alert callout from board -->
+      <div class="callout-box" style="background: rgba(201, 162, 39, 0.05); margin-bottom: 40px;">
+        <div class="callout-box-title"><i class="fa-solid fa-bullhorn"></i> تنويه هام من رئاسة التدريب</div>
+        <div class="callout-box-desc">تعتبر دورة الأركان من أهم الدورات الاستراتيجية لتأهيل وإعداد القيادات العليا لإدارة الأزمات والقطاعات الميدانية باحترافية عالية.</div>
+      </div>
+
+      <!-- 1. What is the Course? -->
+      <div class="doc-section" id="sec-whatis">
+        <h2 class="section-title"><i class="fa-solid fa-medal"></i> 1. ما هي دورة الأركان؟</h2>
+        <div class="section-body">
+          <p><strong>التعريف:</strong> هي واحدة من أهم الدورات العسكرية التخصصية التي تُعنى بإعداد وتأهيل كبار الضباط لتولي المناصب القيادية العليا والإدارية الحساسة داخل مديرية الأمن العام. تتميز الدورة بمحتوى أكاديمي وعسكري متطور يهدف إلى صقل وتطوير المهارات التكتيكية، الاستراتيجية، والإدارية لدى القادة.</p>
+          
+          <h3 style="font-weight: 800; color: #fff; font-size: 0.95rem; margin-top: 16px; margin-bottom: 8px;"><i class="fa-solid fa-crosshairs"></i> الأهداف الرئيسية للدورة:</h3>
+          <ul class="styled-list">
+            <li>تحسين وتطوير قدرات التخطيط العملياتي المشترك والتنظيم الإداري.</li>
+            <li>تعزيز المهارات القيادية المتقدمة وإدارة الأزمات والوقائع الطارئة بالميدان.</li>
+            <li>رفع كفاءة الضباط في تحليل البيانات والمعلومات الأمنية واتخاذ القرارات السليمة تحت الضغط.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 2. Importance of the course -->
+      <div class="doc-section" id="sec-importance">
+        <h2 class="section-title">✨ 2. أهمية دورة الأركان</h2>
+        <div class="section-body">
+          <p>تكمن أهمية هذه الدورة القيادية في تحقيق مجموعة من المرتكزات الأساسية للعمل الشرطي والقيادي:</p>
+          <ul class="styled-list">
+            <li><strong>تحقيق الكفاءة العالية:</strong> تجهيز وإعداد الضباط للتعامل بمهنية مع المهام الأمنية المعقدة والمسؤوليات الميدانية الكبيرة.</li>
+            <li><strong>تطوير الشخصية القيادية:</strong> مساعدة الضابط في بناء شخصية قيادية قوية ومؤثرة قادرة على التوجيه وصنع القرار المناسب.</li>
+            <li><strong>زيادة الفعالية التنظيمية:</strong> تعزيز وتطوير قدرة الضابط على تنسيق وتوجيه العمل الجماعي والفرق الميدانية في مختلف القطاعات.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 3. Components of the course -->
+      <div class="doc-section" id="sec-components">
+        <h2 class="section-title"><i class="fa-solid fa-gear"></i> 3. مكونات دورة الأركان</h2>
+        <div class="section-body">
+          <p class="text-secondary mb-3">تنقسم الدورة التدريبية إلى مكونات أكاديمية نظرية وعملية تطبيقية متكاملة:</p>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-5); margin-top: 16px;">
+            <div>
+              <h3 style="font-weight: 900; color: var(--color-gold-primary); font-size: 1.05rem; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-book-bookmark"></i> أ. المكونات النظرية:</h3>
+              <ul class="styled-list" style="gap: 8px;">
+                <li><strong>التخطيط الاستراتيجي:</strong> صياغة وتطوير الخطط الأمنية طويلة وقصيرة المدى للقطاعات.</li>
+                <li><strong>إدارة الأزمات:</strong> استراتيجيات ومبادئ التعامل الفوري مع المواقف الأمنية الطارئة.</li>
+                <li><strong>تحليل المخاطر:</strong> تقييم التهديدات الميدانية المباشرة واتخاذ الإجراءات الوقائية.</li>
+                <li><strong>التحليل والتقييم الإداري:</strong> آليات ومنهجيات متابعة وتقييم أداء الضباط والأفراد ميدانياً.</li>
+              </ul>
+            </div>
+            
+            <div>
+              <h3 style="font-weight: 900; color: var(--color-gold-primary); font-size: 1.05rem; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-wrench"></i> ب. المكونات العملية والتطبيقية:</h3>
+              <ul class="styled-list" style="gap: 8px;">
+                <li><strong>تطبيقات محاكاة تكتيكية:</strong> محاكاة مواقف ووقائع قيادية حقيقية بالميدان لحل المشكلات الحرجة.</li>
+                <li><strong>التدريبات والورش الجماعية:</strong> العمل التعاوني بين القادة لحل التحديات التنظيمية والإدارية المعقدة.</li>
+                <li><strong>الأنشطة والزيارات الميدانية:</strong> جولات تفقدية ومتابعة عملية لتطبيق النظريات العسكرية في الميدان.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Acquired Skills -->
+      <div class="doc-section" id="sec-skills">
+        <h2 class="section-title"><i class="fa-solid fa-chart-column"></i> 4. المهارات المكتسبة من الدورة</h2>
+        <div class="section-body">
+          <p class="text-secondary mb-3">يكتسب الضابط بعد اجتياز هذه الدورة حزمة من المهارات التنافسية المتقدمة:</p>
+          
+          <div class="doc-grid-2">
+            <div class="code-card">
+              <span class="code-card-badge">مهارات قيادية</span>
+              <div class="code-card-desc">القدرة على بناء فرق عمل أمنية متكاملة، فعّالة، وتوجيهها وتحفيزها لتحقيق أهداف القطاع.</div>
+            </div>
+            <div class="code-card">
+              <span class="code-card-badge">التفكير التحليلي</span>
+              <div class="code-card-desc">فهم وتحليل البيانات والمؤشرات الأمنية وحل المشكلات الميدانية بطرق مبتكرة وسريعة.</div>
+            </div>
+            <div class="code-card" style="grid-column: span 2;">
+              <span class="code-card-badge">التواصل الفعّال</span>
+              <div class="code-card-desc">بناء قنوات اتصال واضحة وإيجابية مع فرق العمل الميدانية والقيادة العليا والجهات ذات العلاقة.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Course Phases -->
+      <div class="doc-section" id="sec-phases">
+        <h2 class="section-title"><i class="fa-solid fa-arrows-rotate"></i> 5. مراحل وخطوات دورة الأركان</h2>
+        <div class="section-body">
+          <p class="text-secondary mb-3">تتدرج الدورة عبر ثلاث مراحل تأهيلية متسلسلة لضمان الإعداد الكامل للضابط:</p>
+          
+          <div style="display: flex; flex-direction: column; gap: 16px;">
+            <div class="callout-box" style="margin: 0; background: rgba(255,255,255,0.015);">
+              <div class="callout-box-title" style="color: var(--color-gold-light);">المرحلة الأولى: مرحلة التأسيس</div>
+              <div class="callout-box-desc">التعرف الشامل على الأدوار القيادية والمسؤوليات الإدارية، وفهم النظريات والمبادئ الأساسية للتخطيط الأمني والتنظيم.</div>
+            </div>
+            <div class="callout-box" style="margin: 0; background: rgba(52, 152, 219, 0.02); border-right-color: #3498db;">
+              <div class="callout-box-title" style="color: #3498db;">المرحلة الثانية: التدريب العملي والتطبيق</div>
+              <div class="callout-box-desc">تطبيق المهارات القيادية والتكتيكية المكتسبة على سيناريوهات ومواقف محاكاة واقعية، واستخدام أدوات التقييم والتحليل لاتخاذ القرارات الأمنية الحيوية.</div>
+            </div>
+            <div class="callout-box" style="margin: 0; background: rgba(46, 204, 113, 0.02); border-right-color: #2ecc71;">
+              <div class="callout-box-title" style="color: #2ecc71;">المرحلة الثالثة: التقييم والمخرجات النهائية</div>
+              <div class="callout-box-desc">تقييم شامل لأداء الضابط القيادي خلال الدورة، مراجعة الأخطاء الميدانية والإدارية وتحديد مواطن القوة ونقاط التحسين والتطوير المستقبلي.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6 & 7 & 8. Target, Application & Outcomes -->
+      <div class="doc-section" id="sec-outcomes" style="border: none; padding-bottom: 0; margin-bottom: 0;">
+        <h2 class="section-title">🚀 6. المخرجات والتطبيقات العملية للدورة</h2>
+        <div class="section-body">
+          
+          <div class="alert-banner" style="background: rgba(201, 162, 39, 0.03); border-right-color: var(--color-gold-primary); margin-bottom: 24px;">
+            <div class="alert-banner-title" style="color: var(--color-gold-light);"><i class="fa-solid fa-crosshairs"></i> الفئة المستهدفة للالتحاق بالدورة:</div>
+            <div class="alert-banner-desc">تستهدف الدورة بشكل حصري <strong>كبار الضباط والقادة الميدانيين (برتبة رائد فما فوق)</strong> المؤهلين لقيادة القطاعات الأمنية المختلفة وإدارة شؤون الأركان.</div>
+          </div>
+
+          <h3 style="font-weight: 800; color: #fff; font-size: 0.95rem; margin-bottom: 8px;"><i class="fa-solid fa-wrench"></i> تطبيقات عملية بعد اجتياز الدورة:</h3>
+          <ul class="styled-list" style="margin-bottom: 24px;">
+            <li>تصميم وإعداد الخطط الأمنية والاستراتيجية الشاملة للقطاعات والمناطق.</li>
+            <li>الاستجابة الفورية لمواجهة الأزمات وإدارة المداهمات والتخطيط الميداني التكتيكي السريع والصحيح.</li>
+          </ul>
+
+          <h3 style="font-weight: 800; color: #fff; font-size: 0.95rem; margin-bottom: 8px;"><i class="fa-solid fa-trophy"></i> المخرجات النهائية والجاهزية:</h3>
+          <ul class="styled-list">
+            <li>القدرة الكاملة على قيادة وتسيير دفعة العمل بالقطاعات الأمنية وتحقيق الأهداف المحددة من القيادة العليا.</li>
+            <li>التميز والاحترافية في صياغة استراتيجيات التخطيط والتنفيذ الميداني.</li>
+            <li>تعزيز الثقة ورباطة الجأش في مواجهة وحل المشكلات الميدانية المعقدة والحالات المستعصية.</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="../assets/js/storage.js?v=1.1.30"></script>
+  <script src="../assets/js/data.js?v=1.1.26"></script>
+  <script src="../assets/js/auth.js?v=1.1.30"></script>
+  <script src="../assets/js/components.js?v=1.1.31"></script>
+  <script src="../assets/js/app.js?v=1.1.31"></script>
+  <script>
+    // Inject navbar and sidebar
+    document.write(Components.navbar('college'));
+    document.write(Components.sidebar('college'));
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Inject Footer
+      const body = document.body;
+      const footerDiv = document.createElement('div');
+      footerDiv.innerHTML = Components.footer();
+      body.appendChild(footerDiv.firstElementChild);
+    });
+  </script>
+</body>
+
+</html>

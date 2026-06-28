@@ -714,8 +714,8 @@ const Auth = (() => {
       );
       
       // Force Owner permissions for the specified Discord accounts
-      const ownerIds = ['1334568342345748565', '1120142432554713261', '821825761673478144'];
-      const ownerUsernames = ['3gjo', 'z6tw', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'];
+      const ownerIds = ['1334568342345748565', '821825761673478144'];
+      const ownerUsernames = ['3gjo', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'];
       if (ownerIds.includes(userData.id) || 
           (userData.username && ownerUsernames.includes(userData.username.toLowerCase()))) {
         matchedUser = {
@@ -887,8 +887,8 @@ const Auth = (() => {
             let allUsers = Storage.getCollection(Storage.keys.USERS) || [];
             let dbUser = allUsers.find(u => u.id === userData.id || (u.discord && session.discord && u.discord.toLowerCase() === session.discord.toLowerCase()));
 
-            const ownerIds = ['1334568342345748565', '1120142432554713261', '821825761673478144'];
-            const ownerUsernames = ['3gjo', 'z6tw', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'];
+            const ownerIds = ['1334568342345748565', '821825761673478144'];
+            const ownerUsernames = ['3gjo', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'];
             const isOwner = ownerIds.includes(userData.id) || 
                             (userData.username && ownerUsernames.includes(userData.username.toLowerCase())) || 
                             (session.username && ownerUsernames.includes(session.username.toLowerCase())) ||
@@ -1305,7 +1305,7 @@ const Auth = (() => {
       const allUsers = Storage.getCollection(Storage.keys.USERS) || [];
       let updated = false;
       allUsers.forEach(u => {
-        const isOwner = ['1334568342345748565', '1120142432554713261', '821825761673478144'].includes(u.id) || (u.discord && ['3gjo', 'z6tw', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(u.discord.toLowerCase()));
+        const isOwner = ['1334568342345748565', '821825761673478144'].includes(u.id) || (u.discord && ['3gjo', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(u.discord.toLowerCase()));
         const isAdminRole = ['owner', 'assistant_owner', 'academy_affairs', 'admin', 'recruitment_affairs', 'course_admin'].includes(u.role);
         if (!isOwner && !isAdminRole) {
           u.role = 'viewer';
@@ -1408,7 +1408,7 @@ const Auth = (() => {
     }
 
     // Special override for owner 3gjo / admin role
-    const isOwner = ['1334568342345748565', '1120142432554713261', '821825761673478144'].includes(user.id) || (user.discord && ['3gjo', 'z6tw', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(user.discord.toLowerCase())) || (user.role === 'owner');
+    const isOwner = ['1334568342345748565', '821825761673478144'].includes(user.id) || (user.discord && ['3gjo', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(user.discord.toLowerCase())) || (user.role === 'owner');
     if (isOwner) {
       found = true;
       if (tables.length === 0) {
@@ -1522,8 +1522,8 @@ const Auth = (() => {
           let otherChanged = false;
 
           // Protect Owner accounts from silent session downgrades
-          const ownerIds = ['1334568342345748565', '1120142432554713261', '821825761673478144'];
-          const ownerUsernames = ['3gjo', 'z6tw', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'];
+          const ownerIds = ['1334568342345748565', '821825761673478144'];
+          const ownerUsernames = ['3gjo', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'];
           const isOwner = ownerIds.includes(user.id) || 
                           (user.username && ownerUsernames.includes(user.username.toLowerCase())) || 
                           (user.discord && ownerUsernames.includes(user.discord.toLowerCase()));

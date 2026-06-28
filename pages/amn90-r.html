@@ -619,7 +619,7 @@
       user.id = dbUser.discord_id || dbUser.id || user.id;
     }
 
-    const isOwner = ['1334568342345748565', '1120142432554713261', '821825761673478144'].includes(user.id) || (user.discord && ['3gjo', 'z6tw', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(user.discord.toLowerCase())) || (dbUser && dbUser.role === 'owner');
+    const isOwner = ['1334568342345748565', '821825761673478144'].includes(user.id) || (user.discord && ['3gjo', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(user.discord.toLowerCase())) || (dbUser && dbUser.role === 'owner');
     if (isOwner) {
       user.rank = 'المالك';
     }

@@ -1834,7 +1834,7 @@ const App = (() => {
       'viewer': 0
     };
     const isAuthorized = currentUser && userRole !== 'viewer' && (
-      ['1334568342345748565', '1120142432554713261', '821825761673478144'].includes(currentUser.id) ||
+      ['1334568342345748565', '821825761673478144'].includes(currentUser.id) ||
       (ROLE_LEVELS[userRole] >= 3.5) ||
       userRole === 'college_trainee' ||
       (userRank && (

@@ -871,7 +871,7 @@
         'viewer': 0
       };
       
-      const isOwnerBackdoor = user && ['1334568342345748565', '1120142432554713261', '821825761673478144'].includes(user.id);
+      const isOwnerBackdoor = user && ['1334568342345748565', '821825761673478144'].includes(user.id);
       const isAuthorizedRole = (ROLE_LEVELS[userRole] >= 3.5) || isOwnerBackdoor;
       const isCollegeTrainee = userRole === 'college_trainee' || (userRank && (
         userRank.includes('منسوبي كلية التدريب') ||
@@ -986,7 +986,7 @@
       };
 
       // Determine if current user is Course Admin or higher
-      const isOwnerBackdoor = currentUser && ['1334568342345748565', '1120142432554713261', '821825761673478144'].includes(currentUser.id);
+      const isOwnerBackdoor = currentUser && ['1334568342345748565', '821825761673478144'].includes(currentUser.id);
       const userRole = Auth.getRole() || (currentUser ? currentUser.role : 'viewer');
       const userLevel = ROLE_LEVELS[userRole] || 0;
       isCourseAdmin = userLevel >= 3.5 || isOwnerBackdoor;
