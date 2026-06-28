@@ -896,6 +896,8 @@
               class="fa-solid fa-chart-column"></i> إحصائيات الدورات</button>
           <button class="btn btn-sm btn-ghost" id="btn-tab-violations" onclick="switchSuperTab('violations')"><i
               class="fa-solid fa-triangle-exclamation"></i> أرشيف المخالفات</button>
+          <button class="btn btn-sm btn-ghost" id="btn-tab-qbank-reqs" onclick="switchSuperTab('qbank-reqs')"><i
+              class="fa-solid fa-user-shield"></i> أذونات بنك الأسئلة <span id="qbank-reqs-badge" class="supervisor-badge" style="display:none; background:#e74c3c; color:#fff; margin-right:4px; font-size:0.7rem;">0</span></button>
         </div>
 
         <!-- Tab Content: Results Archive -->
@@ -992,14 +994,19 @@
         <!-- Tab Content: Violations Archive -->
         <div id="tab-super-violations" class="super-tab-content" style="display: none;">
           <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 15px; flex-wrap: wrap;">
-            <label style="color: rgba(255,255,255,0.7); font-size: 0.85rem; font-weight: 700;">سجل محاولات الغش
-              المرصودة:</label>
+            <label style="color: rgba(255,255,255,0.7); font-size: 0.85rem; font-weight: 700;">سجل محاولات الغش المرصودة:</label>
+            <div style="display: flex; align-items: center; gap: 8px; margin-right: 15px;">
+              <label style="color: rgba(255,255,255,0.7); font-size: 0.85rem; font-weight: 700;"><i class="fa-solid fa-filter"></i> فلترة حسب الدورة:</label>
+              <select id="violations-course-filter" class="form-select" onchange="renderViolationsArchive()"
+                style="background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 6px 12px; border-radius: 8px; font-size: 0.85rem; font-family: inherit;">
+                <option value="all">كل الدورات</option>
+                <!-- Generated dynamically -->
+              </select>
+            </div>
             <span class="supervisor-badge" id="super-violations-count"
-              style="margin-right: auto; background: rgba(231,76,60,0.15); border: 1px solid rgba(231,76,60,0.3); color: #ff4757; padding: 4px 10px; border-radius: 8px; font-weight: 700; font-size: 0.85rem;">0
-              مخالفات</span>
+              style="margin-right: auto; background: rgba(231,76,60,0.15); border: 1px solid rgba(231,76,60,0.3); color: #ff4757; padding: 4px 10px; border-radius: 8px; font-weight: 700; font-size: 0.85rem;">0 مخالفات</span>
             <button class="btn btn-ghost btn-sm" id="btn-clear-violations" onclick="clearAllViolations()"
-              style="border-color: rgba(231,76,60,0.3); color: #ff4757; padding: 4px 10px; display: none;">🗑️ مسح سجل
-              المخالفات</button>
+              style="border-color: rgba(231,76,60,0.3); color: #ff4757; padding: 4px 10px; display: none;">🗑️ مسح سجل المخالفات</button>
           </div>
           <div class="super-table-wrap">
             <table class="super-table">
@@ -1014,6 +1021,33 @@
                 </tr>
               </thead>
               <tbody id="violations-tbody">
+                <!-- Generated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Tab Content: Question Bank Access Requests & Log -->
+        <div id="tab-super-qbank-reqs" class="super-tab-content" style="display: none;">
+          <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 15px; flex-wrap: wrap;">
+            <label style="color: rgba(255,255,255,0.7); font-size: 0.85rem; font-weight: 700;"><i class="fa-solid fa-user-lock"></i> سجل أذونات وطلبات دخول بنك الأسئلة (اعتماد رئاسة تدريب الأمن العام):</label>
+            <span class="supervisor-badge" id="super-qbank-reqs-count" style="margin-right: auto; background: rgba(201,162,39,0.15); border: 1px solid rgba(201,162,39,0.3); color: var(--color-gold-primary); padding: 4px 10px; border-radius: 8px; font-weight: 700; font-size: 0.85rem;">0 طلبات</span>
+          </div>
+          <div class="super-table-wrap">
+            <table class="super-table">
+              <thead>
+                <tr>
+                  <th>طالب الإذن (المسؤول)</th>
+                  <th>الرتبة والدور</th>
+                  <th>الاختبار المقصود</th>
+                  <th>سبب الطلب</th>
+                  <th>تاريخ الطلب</th>
+                  <th>حالة الإذن</th>
+                  <th>اعتماد / رفض رئاسة التدريب</th>
+                  <th>إجراءات الاعتماد</th>
+                </tr>
+              </thead>
+              <tbody id="qbank-reqs-tbody">
                 <!-- Generated dynamically -->
               </tbody>
             </table>
@@ -1264,6 +1298,39 @@
     </div>
   </div>
 
+  <!-- ── Question Bank Access Request Modal ── -->
+  <div class="prompt-overlay" id="qbank-request-modal" onclick="if(event.target===this) closeQBankRequestModal()">
+    <div class="prompt-card" style="max-width: 520px; text-align: right; background: linear-gradient(145deg, #070d24, #0b153a); border: 1px solid rgba(201, 162, 39, 0.25); border-radius: 18px; padding: 28px;">
+      <div class="prompt-title" style="text-align: center; margin-bottom: 10px; font-size: 1.25rem; font-weight: 900; color: #fff;">
+        <i class="fa-solid fa-user-lock"></i> طلب إذن دخول وتعديل بنك الأسئلة
+      </div>
+      <p style="color: rgba(255,255,255,0.65); font-size: 0.85rem; line-height: 1.6; text-align: center; margin-bottom: 20px;">
+        وفقاً لتعليمات الخصوصية والضبط الإداري، لا يمكن دخول أو تعديل بنك الأسئلة إلا بعد الحصول على إذن رسمي مسبق وموثق من <strong style="color:var(--color-gold-primary);">رئاسة تدريب الأمن العام</strong>.
+      </p>
+      <input type="hidden" id="req-qbank-exam-id">
+      <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 14px; margin-bottom: 16px;">
+        <div style="font-size: 0.82rem; color: rgba(255,255,255,0.5); margin-bottom: 4px;">الاختبار المستهدف:</div>
+        <div style="font-weight: 800; color: #fff; font-size: 1rem;" id="req-qbank-exam-title">—</div>
+      </div>
+      <div id="qbank-request-form-body">
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label class="form-label" style="color:rgba(255,255,255,0.8); font-weight:800; font-size:0.82rem; display:block; margin-bottom:6px;">سبب وتبرير دخول وتعديل بنك الأسئلة:</label>
+          <textarea id="req-qbank-reason" class="prompt-input" style="text-align:right; height:80px; padding:10px; margin-bottom:0;" placeholder="اكتب السبب بالتفصيل (مثل: إضافة أسئلة الدورة الجديدة، تعديل بعض الأخطاء المطبعية...)"></textarea>
+        </div>
+        <div style="display:flex; gap:12px; justify-content:center;">
+          <button class="btn btn-ghost" onclick="closeQBankRequestModal()">إلغاء</button>
+          <button class="btn btn-gold" onclick="submitQBankAccessRequest()"><i class="fa-solid fa-paper-plane"></i> إرسال الطلب لرئاسة التدريب</button>
+        </div>
+      </div>
+      <div id="qbank-request-status-body" style="display:none; text-align:center; padding: 10px 0;">
+        <div id="req-status-icon" style="font-size: 2.5rem; margin-bottom: 10px;">⏳</div>
+        <div id="req-status-title" style="font-weight: 800; color: #fff; font-size: 1.1rem; margin-bottom: 8px;">جاري معالجة الطلب</div>
+        <p id="req-status-desc" style="color: rgba(255,255,255,0.6); font-size: 0.85rem; line-height: 1.5; margin-bottom: 20px;">طلبك حالياً قيد المراجعة والاعتماد من قبل رئاسة تدريب الأمن العام.</p>
+        <button class="btn btn-ghost" onclick="closeQBankRequestModal()">إغلاق النافذة</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ═══════════════ QUIZ OVERLAY ═══════════════ -->
   <div class="quiz-overlay" id="quiz-overlay">
     <div class="quiz-header">
@@ -1338,12 +1405,31 @@
       setInterval(() => {
         const panel = document.getElementById('supervisor-panel');
         if (panel && panel.style.display !== 'none') {
+          // Always update the QBank requests notification badge in real-time
+          try {
+            const qreqs = Storage.getCollection(Storage.keys.QBANK_REQUESTS) || [];
+            const pendingQreqs = qreqs.filter(r => r.status === 'pending').length;
+            const badgeEl = document.getElementById('qbank-reqs-badge');
+            if (badgeEl) {
+              if (pendingQreqs > 0) {
+                badgeEl.textContent = pendingQreqs;
+                badgeEl.style.display = 'inline-block';
+              } else {
+                badgeEl.style.display = 'none';
+              }
+            }
+          } catch (e) {
+            console.warn('Failed to update QBank requests badge count:', e);
+          }
+
           if (activeTab === 'results') {
             renderSupervisorResults();
           } else if (activeTab === 'retakes') {
             renderRetakeRequests();
           } else if (activeTab === 'violations') {
             renderViolationsArchive();
+          } else if (activeTab === 'qbank-reqs') {
+            renderQBankRequests();
           }
         }
       }, 3000);
@@ -1573,6 +1659,9 @@
       } else if (tabId === 'violations') {
         document.getElementById('tab-super-violations').style.display = 'block';
         renderViolationsArchive();
+      } else if (tabId === 'qbank-reqs') {
+        document.getElementById('tab-super-qbank-reqs').style.display = 'block';
+        renderQBankRequests();
       }
     }
 
@@ -1597,15 +1686,23 @@
       const clearBtn = document.getElementById('btn-clear-results');
       if (clearBtn) clearBtn.style.display = (roleInfo && roleInfo.level >= 3.5) ? 'inline-block' : 'none';
 
-      // Populate course filter dropdown
+      // Populate course filter dropdowns
       const filterDropdown = document.getElementById('archive-course-filter');
       const exams = Storage.getCollection(Storage.keys.EXAMS) || [];
-      const selectedVal = filterDropdown.value || 'all';
+      if (filterDropdown) {
+        const selectedVal = filterDropdown.value || 'all';
+        filterDropdown.innerHTML = '<option value="all">كل الدورات</option>' +
+          exams.map(e => `<option value="${e.id}">${e.title}</option>`).join('');
+        filterDropdown.value = selectedVal;
+      }
 
-      filterDropdown.innerHTML = '<option value="all">كل الدورات</option>' +
-        exams.map(e => `<option value="${e.id}">${e.title}</option>`).join('');
-
-      filterDropdown.value = selectedVal;
+      const vFilterDropdown = document.getElementById('violations-course-filter');
+      if (vFilterDropdown) {
+        const vSelectedVal = vFilterDropdown.value || 'all';
+        vFilterDropdown.innerHTML = '<option value="all">كل الدورات</option>' +
+          exams.map(e => `<option value="${e.id}">${e.title}</option>`).join('');
+        vFilterDropdown.value = vSelectedVal;
+      }
 
       // Render the active tab content
       switchSuperTab(activeTab);
@@ -1979,7 +2076,7 @@
 
       const role = Auth.getRole();
       const roleInfo = Auth.getRoleInfo(role);
-      const canManageExams = Auth.isLoggedIn() && roleInfo && (roleInfo.permissions.includes('*') || roleInfo.permissions.includes('manage_course_exams'));
+      const canManageExams = Auth.isLoggedIn() && roleInfo && (roleInfo.permissions.includes('*') || roleInfo.permissions.includes('manage_course_exams') || roleInfo.permissions.includes('toggle_exams'));
       const canDeleteExams = Auth.isLoggedIn() && roleInfo && (roleInfo.level >= 4.5);
 
       tbody.innerHTML = exams.map(e => {
@@ -1995,7 +2092,7 @@
           : (e.closedAt ? `<span style="font-size:0.75rem; color:#ff4757;">أغلق في: ${e.closedAt}</span>` : '<span style="color:rgba(255,255,255,0.25);">—</span>');
 
         const editBtns = canManageExams ? `
-        <button class="action-btn-el approve" style="background:rgba(201,162,39,0.08); border-color:rgba(201,162,39,0.3); color:var(--color-gold-primary);" onclick="openQuestionBankModal('${e.id}')"><i class="fa-solid fa-file-pen"></i> بنك الأسئلة</button>
+        <button class="action-btn-el approve" style="background:rgba(201,162,39,0.08); border-color:rgba(201,162,39,0.3); color:var(--color-gold-primary);" onclick="checkAndOpenQuestionBank('${e.id}')"><i class="fa-solid fa-file-pen"></i> بنك الأسئلة</button>
         <button class="action-btn-el approve" style="background:rgba(255,255,255,0.05); border-color:rgba(255,255,255,0.1); color:#fff;" onclick="openEditExamModal('${e.id}')"><i class="fa-solid fa-gear"></i> الإعدادات</button>
       ` : '';
 
@@ -2290,13 +2387,309 @@
       renderExamsList();
     }
 
+    /* ── Question Bank Permission & Request Management System ── */
+    window.checkAndOpenQuestionBank = function(examId) {
+      const role = Auth.getRole();
+      const roleInfo = Auth.getRoleInfo(role);
+      if (!Auth.isLoggedIn() || !roleInfo) {
+        App.toast('يرجى تسجيل الدخول أولاً!', 'warning');
+        return;
+      }
+
+      // Check if user is high authority (academy_affairs, assistant_owner, owner -> level >= 4.5)
+      // They have automatic direct access without external approval.
+      if (roleInfo.level >= 4.5) {
+        openQuestionBankModal(examId);
+        return;
+      }
+
+      // Roles with level 3.5 (course_admin) or 4.0 (admin) require an approved request from academy_affairs
+      const currentUser = Auth.getCurrentUser();
+      const userId = currentUser ? currentUser.id : '';
+      const username = currentUser ? (currentUser.username || currentUser.globalName || '') : '';
+      const requests = Storage.getCollection(Storage.keys.QBANK_REQUESTS) || [];
+
+      // Find active approved request for this user and this exam (match by ID or Username)
+      const approvedReq = requests.find(r => 
+        ((userId && r.requester_id === userId) || (username && r.requester_username === username)) && 
+        r.exam_id === examId && 
+        r.status === 'approved'
+      );
+
+      if (approvedReq) {
+        // Access granted!
+        openQuestionBankModal(examId);
+      } else {
+        // Check if there's an existing request that is pending or rejected
+        const existingReq = requests.find(r => 
+          ((userId && r.requester_id === userId) || (username && r.requester_username === username)) && 
+          r.exam_id === examId
+        );
+        openQBankRequestModal(examId, existingReq);
+      }
+    };
+
+    window.openQBankRequestModal = function(examId, existingReq) {
+      const exam = Storage.findById(Storage.keys.EXAMS, examId);
+      if (!exam) return;
+
+      document.getElementById('req-qbank-exam-id').value = examId;
+      document.getElementById('req-qbank-exam-title').textContent = exam.title;
+
+      const formBody = document.getElementById('qbank-request-form-body');
+      const statusBody = document.getElementById('qbank-request-status-body');
+
+      if (existingReq && existingReq.status === 'pending') {
+        formBody.style.display = 'none';
+        statusBody.style.display = 'block';
+        document.getElementById('req-status-icon').innerHTML = '⏳';
+        document.getElementById('req-status-title').textContent = 'طلبك قيد المراجعة والاعتماد';
+        document.getElementById('req-status-desc').innerHTML = `تم إرسال طلبك بتاريخ (${existingReq.request_time}). وهو حالياً بانتظار موافقة <strong style="color:var(--color-gold-primary);">رئاسة تدريب الأمن العام</strong>.`;
+      } else if (existingReq && existingReq.status === 'rejected') {
+        formBody.style.display = 'block';
+        statusBody.style.display = 'none';
+        document.getElementById('req-qbank-reason').value = existingReq.request_reason || '';
+        App.toast('⚠️ تم رفض طلبك السابق من قبل رئاسة التدريب. يمكنك التقديم بطلب جديد مع توضيح تبرير أعمق.', 'warning');
+      } else if (existingReq && existingReq.status === 'revoked') {
+        formBody.style.display = 'block';
+        statusBody.style.display = 'none';
+        document.getElementById('req-qbank-reason').value = '';
+        App.toast('⚠️ تم إلغاء إذنك السابق من قبل رئاسة التدريب. يمكنك تقديم طلب إذن جديد.', 'warning');
+      } else {
+        formBody.style.display = 'block';
+        statusBody.style.display = 'none';
+        document.getElementById('req-qbank-reason').value = '';
+      }
+
+      document.getElementById('qbank-request-modal').classList.add('active');
+    };
+
+    window.closeQBankRequestModal = function() {
+      document.getElementById('qbank-request-modal').classList.remove('active');
+    };
+
+    window.submitQBankAccessRequest = function() {
+      const examId = document.getElementById('req-qbank-exam-id').value;
+      const reason = document.getElementById('req-qbank-reason').value.trim();
+      const exam = Storage.findById(Storage.keys.EXAMS, examId);
+
+      if (!reason) {
+        App.toast('يرجى التكرم بكتابة تبرير وسبب طلب دخول بنك الأسئلة!', 'warning');
+        return;
+      }
+
+      const currentUser = Auth.getCurrentUser();
+      const role = Auth.getRole();
+      const roleInfo = Auth.getRoleInfo(role);
+
+      const requestObj = {
+        id: 'qreq_' + Date.now(),
+        exam_id: examId,
+        exam_title: exam ? exam.title : 'اختبار عسكري',
+        requester_id: currentUser ? currentUser.id : '',
+        requester_username: currentUser ? (currentUser.username || currentUser.globalName || 'عضو') : 'مسؤول',
+        requester_name: currentUser ? (currentUser.displayName || currentUser.name || currentUser.username) : 'مسؤول الدورة',
+        requester_role: roleInfo ? roleInfo.label : 'مسؤول دورة',
+        requester_rank: currentUser ? (currentUser.rank || roleInfo.label) : 'مسؤول دورة',
+        request_reason: reason,
+        request_time: new Date().toLocaleDateString('ar-SA') + ' ' + new Date().toLocaleTimeString('ar-SA', { hour12: false }),
+        status: 'pending',
+        reviewed_by: '',
+        review_time: '',
+        review_note: ''
+      };
+
+      // Remove previous pending/rejected requests for this user and exam if any
+      let requests = Storage.getCollection(Storage.keys.QBANK_REQUESTS) || [];
+      requests = requests.filter(r => !((r.requester_username === requestObj.requester_username || (r.requester_id && r.requester_id === requestObj.requester_id)) && r.exam_id === examId));
+      requests.unshift(requestObj);
+      Storage.set(Storage.keys.QBANK_REQUESTS, requests);
+      try { localStorage.setItem('ps_qbank_requests_sync', Date.now().toString()); } catch(e){}
+
+      if (typeof Logger !== 'undefined') {
+        Logger.log('qbank_request', `قام المسؤول "${requestObj.requester_name}" بتقديم طلب إذن دخول بنك الأسئلة لاختبار "${requestObj.exam_title}"`);
+      }
+
+      App.toast('✔️ تم إرسال طلب الإذن لرئاسة تدريب الأمن العام بنجاح!', 'success');
+      closeQBankRequestModal();
+      renderQBankRequests();
+    };
+
+    window.renderQBankRequests = function() {
+      const tbody = document.getElementById('qbank-reqs-tbody');
+      const countEl = document.getElementById('super-qbank-reqs-count');
+      const badgeEl = document.getElementById('qbank-reqs-badge');
+      if (!tbody) return;
+
+      const requests = Storage.getCollection(Storage.keys.QBANK_REQUESTS) || [];
+      const userRole = Auth.getRole();
+      const roleInfo = Auth.getRoleInfo(userRole);
+      const isHighAuthority = roleInfo && roleInfo.level >= 4.5; // academy_affairs, assistant_owner, owner
+
+      const pendingCount = requests.filter(r => r.status === 'pending').length;
+      if (countEl) countEl.textContent = `${requests.length} طلبات (${pendingCount} معلقة)`;
+      if (badgeEl) {
+        if (pendingCount > 0) {
+          badgeEl.textContent = pendingCount;
+          badgeEl.style.display = 'inline-block';
+        } else {
+          badgeEl.style.display = 'none';
+        }
+      }
+
+      if (requests.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:30px;color:rgba(255,255,255,0.3)">لا توجد طلبات إذن بنك أسئلة مسجلة في الأرشيف</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = requests.map(r => {
+        let statusBadge = '';
+        let actionBtns = '';
+
+        if (r.status === 'pending') {
+          statusBadge = `<span class="status-badge-el pending">⏳ قيد المراجعة</span>`;
+          if (isHighAuthority) {
+            actionBtns = `
+              <div class="action-btn-group">
+                <button class="action-btn-el approve" onclick="approveQBankRequest('${r.id}')">✔️ قبول الإذن</button>
+                <button class="action-btn-el reject" onclick="rejectQBankRequest('${r.id}')">❌ رفض</button>
+              </div>
+            `;
+          } else {
+            actionBtns = `<span style="font-size:0.75rem; color:rgba(255,255,255,0.35);">بانتظار رئاسة التدريب</span>`;
+          }
+        } else if (r.status === 'approved') {
+          statusBadge = `<span class="status-badge-el pass"><i class="fa-solid fa-circle-check" style="color: #2ecc71;"></i> إذن مقبول ومفعل</span>`;
+          if (isHighAuthority) {
+            actionBtns = `<button class="action-btn-el reject" style="padding:4px 8px; font-size:0.75rem;" onclick="revokeQBankRequest('${r.id}')">🚫 إلغاء الإذن</button>`;
+          } else {
+            actionBtns = `<span style="font-size:0.75rem; color:#2ecc71;">مصرّح بالدخول</span>`;
+          }
+        } else if (r.status === 'rejected') {
+          statusBadge = `<span class="status-badge-el fail"><i class="fa-solid fa-circle-exclamation" style="color: #e74c3c;"></i> تم الرفض</span>`;
+          actionBtns = `<span style="font-size:0.75rem; color:rgba(255,255,255,0.35);">مرفوض</span>`;
+        } else if (r.status === 'revoked') {
+          statusBadge = `<span class="status-badge-el fail" style="background:rgba(230,126,34,0.15); border-color:rgba(230,126,34,0.3); color:#e67e22;">🚫 تم سحب الإذن</span>`;
+          actionBtns = `<span style="font-size:0.75rem; color:rgba(255,255,255,0.35);">ملغى</span>`;
+        }
+
+        return `
+          <tr>
+            <td style="font-weight:700; color:#fff">${r.requester_name} <span style="font-size:0.75rem; opacity:0.6; display:block;">(@${r.requester_username})</span></td>
+            <td><span style="color:var(--color-gold-light); font-weight:800;">${r.requester_rank || '—'}</span></td>
+            <td style="font-weight:600;">${r.exam_title}</td>
+            <td style="font-size:0.82rem; max-width:200px; line-height:1.4; color:rgba(255,255,255,0.8);">${r.request_reason}</td>
+            <td style="font-size:0.8rem; opacity:0.8;">${r.request_time || '—'}</td>
+            <td>${statusBadge}</td>
+            <td style="font-weight:700; color:var(--color-gold-primary); font-size:0.82rem;">${r.reviewed_by ? r.reviewed_by + '<span style="display:block; font-size:0.7rem; opacity:0.6;">' + r.review_time + '</span>' : '—'}</td>
+            <td>${actionBtns}</td>
+          </tr>
+        `;
+      }).join('');
+    };
+
+    window.approveQBankRequest = function(reqId) {
+      const userRole = Auth.getRole();
+      const roleInfo = Auth.getRoleInfo(userRole);
+      if (!roleInfo || roleInfo.level < 4.5) {
+        App.toast('عذراً، الموافقة مقتصرة فقط على رئاسة تدريب الأمن العام والقيادة العليا!', 'error');
+        return;
+      }
+      const currentUser = Auth.getCurrentUser();
+      const adminName = currentUser ? (currentUser.displayName || currentUser.username) : 'رئاسة تدريب الأمن العام';
+
+      let requests = Storage.getCollection(Storage.keys.QBANK_REQUESTS) || [];
+      const idx = requests.findIndex(r => r.id === reqId);
+      if (idx !== -1) {
+        requests[idx].status = 'approved';
+        requests[idx].reviewed_by = adminName + ' (رئاسة التدريب)';
+        requests[idx].review_time = new Date().toLocaleDateString('ar-SA') + ' ' + new Date().toLocaleTimeString('ar-SA', { hour12: false });
+        Storage.set(Storage.keys.QBANK_REQUESTS, requests);
+        try { localStorage.setItem('ps_qbank_requests_sync', Date.now().toString()); } catch(e){}
+
+        if (typeof Logger !== 'undefined') {
+          Logger.log('qbank_approve', `قامت رئاسة التدريب بموافقة وإعطاء إذن بنك الأسئلة للمسؤول "${requests[idx].requester_name}" لاختبار "${requests[idx].exam_title}"`);
+        }
+
+        App.toast('✅ تم اعتماد وإعطاء إذن بنك الأسئلة للمسؤول بنجاح!', 'success');
+        renderQBankRequests();
+      }
+    };
+
+    window.rejectQBankRequest = function(reqId) {
+      const userRole = Auth.getRole();
+      const roleInfo = Auth.getRoleInfo(userRole);
+      if (!roleInfo || roleInfo.level < 4.5) {
+        App.toast('عذراً، الرفض مقتصر فقط على رئاسة تدريب الأمن العام والقيادة العليا!', 'error');
+        return;
+      }
+      const currentUser = Auth.getCurrentUser();
+      const adminName = currentUser ? (currentUser.displayName || currentUser.username) : 'رئاسة تدريب الأمن العام';
+
+      let requests = Storage.getCollection(Storage.keys.QBANK_REQUESTS) || [];
+      const idx = requests.findIndex(r => r.id === reqId);
+      if (idx !== -1) {
+        requests[idx].status = 'rejected';
+        requests[idx].reviewed_by = adminName + ' (رئاسة التدريب)';
+        requests[idx].review_time = new Date().toLocaleDateString('ar-SA') + ' ' + new Date().toLocaleTimeString('ar-SA', { hour12: false });
+        Storage.set(Storage.keys.QBANK_REQUESTS, requests);
+        try { localStorage.setItem('ps_qbank_requests_sync', Date.now().toString()); } catch(e){}
+
+        if (typeof Logger !== 'undefined') {
+          Logger.log('qbank_reject', `قامت رئاسة التدريب برفض طلب إذن بنك الأسئلة المقدم من "${requests[idx].requester_name}"`);
+        }
+
+        App.toast('❌ تم رفض طلب إذن بنك الأسئلة وتوثيقه بالباكلوج.', 'warning');
+        renderQBankRequests();
+      }
+    };
+
+    window.revokeQBankRequest = function(reqId) {
+      const userRole = Auth.getRole();
+      const roleInfo = Auth.getRoleInfo(userRole);
+      if (!roleInfo || roleInfo.level < 4.5) {
+        App.toast('عذراً، إلغاء الإذن مقتصر فقط على رئاسة تدريب الأمن العام والقيادة العليا!', 'error');
+        return;
+      }
+      if (!confirm('هل أنت متأكد من سحب وإلغاء إذن الوصول لبنك الأسئلة من هذا المسؤول؟')) return;
+
+      const currentUser = Auth.getCurrentUser();
+      const adminName = currentUser ? (currentUser.displayName || currentUser.username) : 'رئاسة تدريب الأمن العام';
+
+      let requests = Storage.getCollection(Storage.keys.QBANK_REQUESTS) || [];
+      const idx = requests.findIndex(r => r.id === reqId);
+      if (idx !== -1) {
+        requests[idx].status = 'revoked';
+        requests[idx].reviewed_by = adminName + ' (رئاسة التدريب)';
+        requests[idx].review_time = new Date().toLocaleDateString('ar-SA') + ' ' + new Date().toLocaleTimeString('ar-SA', { hour12: false });
+        Storage.set(Storage.keys.QBANK_REQUESTS, requests);
+        try { localStorage.setItem('ps_qbank_requests_sync', Date.now().toString()); } catch(e){}
+
+        App.toast('🚫 تم إلغاء وسحب إذن بنك الأسئلة.', 'warning');
+        renderQBankRequests();
+      }
+    };
+
+    window.hasActiveQBankPermission = function(examId) {
+      const role = Auth.getRole();
+      const roleInfo = Auth.getRoleInfo(role);
+      if (!Auth.isLoggedIn() || !roleInfo) return false;
+      if (roleInfo.level >= 4.5) return true; // High authority (academy_affairs, owner, etc.)
+
+      const currentUser = Auth.getCurrentUser();
+      const username = currentUser ? currentUser.username : '';
+      const userId = currentUser ? currentUser.id : '';
+      const requests = Storage.getCollection(Storage.keys.QBANK_REQUESTS) || [];
+      return !!requests.find(r => (r.requester_username === username || (r.requester_id && r.requester_id === userId)) && r.exam_id === examId && r.status === 'approved');
+    };
+
     /* ── Modal: Question Bank ── */
     function openQuestionBankModal(examId) {
       const role = Auth.getRole();
       const roleInfo = Auth.getRoleInfo(role);
       const canManageExams = Auth.isLoggedIn() && roleInfo && (roleInfo.permissions.includes('*') || roleInfo.permissions.includes('manage_course_exams'));
-      if (!canManageExams) {
-        App.toast('عذراً، غير مصرح لك بإدارة الأسئلة!', 'error');
+      if (!canManageExams || !hasActiveQBankPermission(examId)) {
+        App.toast('عذراً، تحتاج موافقة وإذن رسمي من رئاسة تدريب الأمن العام لتعديل ودخول بنك الأسئلة!', 'error');
         return;
       }
       const exam = Storage.findById(Storage.keys.EXAMS, examId);
@@ -2405,14 +2798,14 @@
     }
 
     function addQuestionToBank() {
+      const examId = document.getElementById('qbank-exam-id').value;
       const role = Auth.getRole();
       const roleInfo = Auth.getRoleInfo(role);
       const canManageExams = Auth.isLoggedIn() && roleInfo && (roleInfo.permissions.includes('*') || roleInfo.permissions.includes('manage_course_exams'));
-      if (!canManageExams) {
-        App.toast('عذراً، غير مصرح لك بحفظ الأسئلة!', 'error');
+      if (!canManageExams || !hasActiveQBankPermission(examId)) {
+        App.toast('عذراً، غير مصرح لك بالتعديل على بنك الأسئلة إلا بموافقة رئاسة تدريب الأمن العام!', 'error');
         return;
       }
-      const examId = document.getElementById('qbank-exam-id').value;
       const editIndex = parseInt(document.getElementById('qbank-edit-index').value);
 
       const text = document.getElementById('new-q-text').value.trim();
@@ -2459,13 +2852,13 @@
     }
 
     function deleteQuestionFromBank(questionIndex) {
+      const examId = document.getElementById('qbank-exam-id').value;
       const role = Auth.getRole();
       const roleInfo = Auth.getRoleInfo(role);
-      if (!roleInfo || roleInfo.level < 3.5) {
-        App.toast('عذراً، غير مصرح لك بحذف الأسئلة!', 'error');
+      if (!roleInfo || roleInfo.level < 3.5 || !hasActiveQBankPermission(examId)) {
+        App.toast('عذراً، غير مصرح لك بحذف الأسئلة إلا بموافقة رئاسة تدريب الأمن العام!', 'error');
         return;
       }
-      const examId = document.getElementById('qbank-exam-id').value;
       if (confirm('هل أنت متأكد من حذف هذا السؤال من البنك؟')) {
         const exams = Storage.getCollection(Storage.keys.EXAMS) || [];
         const idx = exams.findIndex(e => e.id === examId);
@@ -3248,8 +3641,23 @@
 
       Storage.fetchViolations()
         .then(violations => {
+          const filterDropdown = document.getElementById('violations-course-filter');
+          const filterVal = filterDropdown ? filterDropdown.value : 'all';
+          const exams = Storage.getCollection(Storage.keys.EXAMS) || [];
+          const selectedExam = exams.find(e => e.id === filterVal);
+
+          let filteredViolations = violations;
+          if (filterVal !== 'all') {
+            filteredViolations = violations.filter(v => {
+              if (v.examId && v.examId === filterVal) return true;
+              if (v.exam_id && v.exam_id === filterVal) return true;
+              if (selectedExam && (v.course_name === selectedExam.title || (v.details && v.details.includes(selectedExam.title)))) return true;
+              return false;
+            });
+          }
+
           const countSpan = document.getElementById('super-violations-count');
-          if (countSpan) countSpan.textContent = `${violations.length} مخالفات`;
+          if (countSpan) countSpan.textContent = `${filteredViolations.length} مخالفات`;
 
           const userRole = Auth.getRole();
           const roleInfo = Auth.getRoleInfo(userRole);
@@ -3257,12 +3665,12 @@
           const clearBtn = document.getElementById('btn-clear-violations');
           if (clearBtn) clearBtn.style.display = isAuthorizedToClear ? 'inline-block' : 'none';
 
-          if (violations.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:30px;color:rgba(255,255,255,0.3)">لا توجد مخالفات مسجلة</td></tr>`;
+          if (filteredViolations.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:30px;color:rgba(255,255,255,0.3)">لا توجد مخالفات مسجلة لهذه الدورة</td></tr>`;
             return;
           }
 
-          tbody.innerHTML = violations.map(v => {
+          tbody.innerHTML = filteredViolations.map(v => {
             const deleteBtn = isAuthorizedToClear ? `<button class="action-btn-el reject" style="background:rgba(231, 76, 60, 0.1); border-color:rgba(231, 76, 60, 0.25);" onclick="deleteViolation('${v.id}')">🗑️ حذف</button>` : '';
 
             let tablesList = [];

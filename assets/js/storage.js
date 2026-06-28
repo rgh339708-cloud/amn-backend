@@ -518,8 +518,8 @@ const Storage = (() => {
               const localArr = getCollection(key);
               if (Array.isArray(serverArr) && serverArr.length > 0) {
                 const map = new Map();
-                serverArr.forEach(item => { if (item && item.id) map.set(item.id, item); });
                 localArr.forEach(item => { if (item && item.id) map.set(item.id, item); });
+                serverArr.forEach(item => { if (item && item.id) map.set(item.id, item); });
                 const merged = Array.from(map.values()).sort((a,b) => (b.id > a.id ? 1 : -1));
                 localStorage.setItem(key, JSON.stringify(merged));
               } else if (!serverArr || serverArr.length === 0) {
