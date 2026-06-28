@@ -269,14 +269,31 @@ const Storage = (() => {
     return getCollection(key).length;
   }
 
+  let detectedBackendUrl = sessionStorage.getItem('detected_backend_url');
+
   function getApiBase() {
+    const host = window.location.hostname;
+    if (host === 'localhost' || host === '127.0.0.1') return 'http://localhost:3000';
+    if (detectedBackendUrl) return detectedBackendUrl;
+    
     try {
       const settings = JSON.parse(localStorage.getItem('ps_settings') || '{}');
       if (settings && settings.backendUrl) return settings.backendUrl;
     } catch (e) {}
-    const host = window.location.hostname;
-    if (host === 'localhost' || host === '127.0.0.1') return 'http://localhost:3000';
     return 'https://amn-backend.onrender.com';
+  }
+
+  // Auto-detect if Node is running on current server (Hostinger)
+  if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    fetch(`${window.location.origin}/api/healthz`)
+      .then(r => r.json())
+      .then(data => {
+        if (data && data.status === 'ok') {
+          sessionStorage.setItem('detected_backend_url', window.location.origin);
+          detectedBackendUrl = window.location.origin;
+        }
+      })
+      .catch(() => {});
   }
 
   function saveExamAttempt(data) {

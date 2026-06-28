@@ -453,9 +453,12 @@ const Auth = (() => {
     return badges;
   }
 
+  let detectedBackendUrl = sessionStorage.getItem('detected_backend_url');
+
   function getApiBase() {
     const host = window.location.hostname;
     if (host === 'localhost' || host === '127.0.0.1') return 'http://localhost:3000';
+    if (detectedBackendUrl) return detectedBackendUrl;
     
     let backendUrl = '';
     try {
@@ -467,6 +470,19 @@ const Auth = (() => {
       backendUrl = 'https://amn-backend.onrender.com';
     }
     return backendUrl;
+  }
+
+  // Auto-detect if Node is running on current server (Hostinger)
+  if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    fetch(`${window.location.origin}/api/healthz`)
+      .then(r => r.json())
+      .then(data => {
+        if (data && data.status === 'ok') {
+          sessionStorage.setItem('detected_backend_url', window.location.origin);
+          detectedBackendUrl = window.location.origin;
+        }
+      })
+      .catch(() => {});
   }
 
   async function resolveApiBase() {

@@ -888,10 +888,26 @@
       initAttendancePage();
     });
 
+    let detectedBackendUrl = sessionStorage.getItem('detected_backend_url');
+
+    // Auto-detect if Node is running on current server (Hostinger)
+    if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+      fetch(`${window.location.origin}/api/healthz`)
+        .then(r => r.json())
+        .then(data => {
+          if (data && data.status === 'ok') {
+            sessionStorage.setItem('detected_backend_url', window.location.origin);
+            detectedBackendUrl = window.location.origin;
+          }
+        })
+        .catch(() => {});
+    }
+
     // API helper — always reads fresh settings.json to get the current tunnel URL
     async function getApiBase() {
       const host = window.location.hostname;
       if (host === 'localhost' || host === '127.0.0.1') return 'http://localhost:3000';
+      if (detectedBackendUrl) return detectedBackendUrl;
 
       let apiBase = '';
       // Always fetch fresh settings.json first (cloudflare tunnel URL changes on restart)
