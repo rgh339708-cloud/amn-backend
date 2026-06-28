@@ -947,7 +947,37 @@ async function resolveDiscordUserId(inputStr) {
   const digitsOnly = String(inputStr).replace(/\D/g, '');
   if (digitsOnly.length >= 17) return digitsOnly;
 
-  const queryName = String(inputStr).replace(/^@/, '').trim();
+  // Clean the username/input string from trailing decoration like " ->" or spaces/dashes
+  let queryName = String(inputStr).replace(/^@/, '').trim();
+  queryName = queryName.replace(/\s*->\s*$/, '').trim();
+  queryName = queryName.replace(/[-\s>]+$/, '').trim();
+
+  // 1. Search in local JSON cache (discord_users.json)
+  try {
+    const usersPath = path.join(__dirname, 'assets', 'data', 'discord_users.json');
+    if (fs.existsSync(usersPath)) {
+      const usersData = JSON.parse(fs.readFileSync(usersPath, 'utf8'));
+      for (const uid in usersData) {
+        const u = usersData[uid];
+        if (u.username && u.username.toLowerCase() === queryName.toLowerCase()) {
+          return u.id;
+        }
+      }
+      for (const uid in usersData) {
+        const u = usersData[uid];
+        if (
+          (u.globalName && u.globalName.toLowerCase() === queryName.toLowerCase()) ||
+          (u.globalName && u.globalName.toLowerCase().includes(queryName.toLowerCase()))
+        ) {
+          return u.id;
+        }
+      }
+    }
+  } catch (e) {
+    console.error('Error searching discord_users.json:', e);
+  }
+
+  // 2. Search in Database
   try {
     const row = await new Promise((res) => {
       db.get(`SELECT id, discord FROM users WHERE username = ? OR display_name = ? OR discord = ? OR id = ? LIMIT 1`,
@@ -959,6 +989,7 @@ async function resolveDiscordUserId(inputStr) {
     }
   } catch (e) {}
 
+  // 3. Search via Discord Guild Search API
   try {
     const token = config.discordToken || 'MTUxMDE1NzU0NjUwMDAwMTg4NA.G2vHtB.jWHVzM7gd2EvV0Er8NOgIcX9neH2bhA3JiLipg';
     const guildId = config.guildId || '1272212444936404992';
