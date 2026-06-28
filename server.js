@@ -2062,7 +2062,10 @@ function syncGoogleSheetsToDb(forceId = null, loginUser = null) {
             }
 
             if (!dbUser) {
-              const finalRole = resolveRoleFromRank(m.rank, 'viewer');
+              let finalRole = resolveRoleFromRank(m.rank, 'viewer');
+              if (discordId === '750581378168389632' && finalRole === 'owner') {
+                finalRole = 'viewer';
+              }
               db.run(`INSERT INTO users (id, discord_id, username, display_name, avatar, banner, role, rank, department, code, status) 
                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active')`,
                 [targetDbId, discordId, m.nickname, m.nickname, avatarUrl, bannerUrl, finalRole, m.rank || 'مشاهد', dept, m.code],
@@ -2078,7 +2081,10 @@ function syncGoogleSheetsToDb(forceId = null, loginUser = null) {
               );
             } else {
               const isManual = dbUser.is_manual_role === 1 || dbUser.is_manual_role === true;
-              const finalRole = isManual ? dbUser.role : resolveRoleFromRank(m.rank, dbUser.role);
+              let finalRole = isManual ? dbUser.role : resolveRoleFromRank(m.rank, dbUser.role);
+              if ((targetDbId === '750581378168389632' || discordId === '750581378168389632') && finalRole === 'owner') {
+                finalRole = 'viewer';
+              }
               const finalRank = isManual ? dbUser.rank : (m.rank || 'مشاهد');
               const isRoleDiff = dbUser.role !== finalRole;
               const isRankDiff = dbUser.rank !== finalRank;
@@ -4810,6 +4816,11 @@ const server = http.createServer((req, res) => {
             finalRole = 'owner';
             finalRank = 'المالك';
             finalStatus = 'active';
+          }
+
+          // Safety override for Mohammad Alnahdi (ii7zn)
+          if ((id === '750581378168389632' || discord_id === '750581378168389632') && finalRole === 'owner') {
+            finalRole = 'viewer';
           }
 
           db.run(`INSERT OR REPLACE INTO users (id, discord_id, username, display_name, avatar, banner, avatar_url, banner_url, last_sync, role, rank, department, code, status, updated_at)

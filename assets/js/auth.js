@@ -1588,7 +1588,7 @@ const Auth = (() => {
       { id: 'field-title', title: 'التوجيهات الميدانية', emoji: '<i class="fa-solid fa-id-card"></i>', isSystem: true, allowedRoles: ['*'] },
       { id: 'uniform', title: 'الزي العسكري', emoji: '<i class="fa-solid fa-shirt"></i>', isSystem: true, allowedRoles: ['*'] },
       { id: 'apply', title: 'التقديم', emoji: '<i class="fa-solid fa-envelope-open-text"></i>', isSystem: true, allowedRoles: ['*'] },
-      { id: 'database', title: 'قاعدة البيانات', emoji: '<i class="fa-solid fa-lock"></i>', isSystem: true, allowedRoles: ['owner', 'assistant_owner', 'academy_affairs', 'admin'] },
+      { id: 'database', title: 'قاعدة البيانات', emoji: '<i class="fa-solid fa-lock"></i>', isSystem: true, allowedRoles: ['*'] },
       { id: 'wings', title: 'أجنحة مدينة الـ 90', emoji: '🦅', isSystem: true, allowedRoles: ['*'] },
       { id: 'aviation-document', title: 'مستند الجناح الجوي', emoji: '🚁', isSystem: true, parentId: 'wings', allowedRoles: ['*'] },
       { id: 'counter-terrorism-wing', title: 'مستند جناح مكافحة الإرهاب', emoji: '⚔️', isSystem: true, parentId: 'wings', allowedRoles: ['*'] },
@@ -1672,11 +1672,12 @@ const Auth = (() => {
     // Direct authoritative permissions map for key system pages
     const systemAuthMap = {
       'attendance-reports': ['owner', 'assistant_owner', 'academy_affairs', 'admin', 'course_admin', 'college_trainee'],
-      'database': ['owner', 'assistant_owner', 'academy_affairs', 'admin']
+      'database': ['*']
     };
 
     if (systemAuthMap[pageId]) {
       const allowed = systemAuthMap[pageId];
+      if (allowed.includes('*')) return true;
       return allowed.includes(userRole);
     }
 
