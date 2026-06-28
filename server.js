@@ -836,8 +836,8 @@ async function sendRecruitmentDecisionWebhook(application, newStatus, operatorNa
       { name: '👤 اسم المتقدم', value: `**${application.fullName || '—'}**`, inline: true },
       { name: '🆔 معرّف الديسكورد', value: `**${userMention}**`, inline: true },
       { name: '🏢 القطاع', value: `**${application.sector || 'الأمن العام'}**`, inline: true },
-      { name: '👮 المسؤول عن القرار', value: `**${operatorMention}**`, inline: true },
-      { name: '📝 نتيجة القرار', value: isApproved ? '**تم القبول المبدئي في قطاع الأمن العام. يرجى التواجد في الادارة العامه ورومات التوظيف.**' : '**نعتذر عن عدم قبول الطلب لهذه الدورة لعدم استيفاء الشروط أو اكتمال الشاغر.**', inline: false }
+      { name: '👮 المسؤول عن الاجراء', value: `**${operatorMention}**`, inline: true },
+      { name: '📝 نتيجة الاجراء', value: isApproved ? '**تم القبول المبدئي في قطاع الأمن العام. يرجى التواجد في الادارة العامه ورومات التوظيف.**' : '**نعتذر عن عدم قبول الطلب لهذه الدورة لعدم استيفاء الشروط أو اكتمال الشاغر.**', inline: false }
     ],
     timestamp: new Date().toISOString(),
     footer: {

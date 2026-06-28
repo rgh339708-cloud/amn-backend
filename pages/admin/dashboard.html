@@ -2037,7 +2037,7 @@
           body: JSON.stringify({
             application: updated,
             newStatus: newStatus,
-            operatorName: userName
+            operatorName: user ? (user.discord || user.id || user.username) : 'شؤون التجنيد'
           })
         }).catch(err => console.warn('Failed to send recruitment decision webhook:', err));
       } catch (e) {}
