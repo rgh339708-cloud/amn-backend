@@ -1249,6 +1249,12 @@
       stunGunItem.img = "../assets/img/stun_gun.png";
       needsSave = true;
     }
+    // Migrate: Ensure Pistol (id "04") has the correct image path
+    const pistolItem = CUSTODY_ITEMS.find(item => item.id === "04");
+    if (pistolItem && (!pistolItem.img || !pistolItem.img.includes("pistol.png"))) {
+      pistolItem.img = "../assets/img/pistol.png";
+      needsSave = true;
+    }
     if (needsSave) {
       Storage.set('ps_custody_items', CUSTODY_ITEMS);
     }
