@@ -1237,6 +1237,18 @@
       flareItem.img = "../assets/img/flare.png";
       needsSave = true;
     }
+    // Migrate: Ensure Nightstick (id "02") has the correct image path
+    const nightstickItem = CUSTODY_ITEMS.find(item => item.id === "02");
+    if (nightstickItem && (!nightstickItem.img || !nightstickItem.img.includes("nightstick.png"))) {
+      nightstickItem.img = "../assets/img/nightstick.png";
+      needsSave = true;
+    }
+    // Migrate: Ensure Stun Gun (id "03") has the correct image path
+    const stunGunItem = CUSTODY_ITEMS.find(item => item.id === "03");
+    if (stunGunItem && (!stunGunItem.img || !stunGunItem.img.includes("stun_gun.png"))) {
+      stunGunItem.img = "../assets/img/stun_gun.png";
+      needsSave = true;
+    }
     if (needsSave) {
       Storage.set('ps_custody_items', CUSTODY_ITEMS);
     }
