@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>دليل الأنواط العسكرية | الأمن العام</title>
+  <link rel="stylesheet" href="../assets/css/main.css?v=1.1.33">
+  <link rel="stylesheet" href="../assets/css/navbar.css?v=1.1.33">
+  <link rel="stylesheet" href="../assets/css/sidebar.css?v=1.1.33">
+  <link rel="stylesheet" href="../assets/css/footer.css">
+  <style>
+    /* Premium CSS for the Medals Grid */
+    
+    .college-header-card {
+      background: linear-gradient(135deg, rgba(26, 47, 112, 0.25) 0%, rgba(9, 21, 53, 0.4) 100%);
+      border: 1px solid rgba(201, 162, 39, 0.25);
+      border-radius: 24px;
+      padding: var(--space-8);
+      margin-bottom: var(--space-8);
+      box-shadow: 
+        0 15px 35px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(12px);
+      text-align: right;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .college-header-card::before {
+      content: '';
+      position: absolute;
+      top: 0; right: 0; left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--color-gold-primary), transparent);
+    }
+
+    .college-header-title {
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+
+    .college-header-desc {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
+      line-height: 1.8;
+      max-width: 800px;
+    }
+
+    /* Condition Box styling */
+    .condition-box {
+      background: linear-gradient(135deg, rgba(201, 162, 39, 0.08) 0%, rgba(201, 162, 39, 0.03) 100%);
+      border: 1px dashed rgba(201, 162, 39, 0.35);
+      border-radius: 18px;
+      padding: 20px;
+      margin-bottom: var(--space-6);
+      text-align: right;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+
+    .condition-title {
+      font-size: 1.1rem;
+      font-weight: 850;
+      color: var(--color-gold-light);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .condition-list {
+      margin: 0;
+      padding-right: 20px;
+      color: var(--color-text-secondary);
+      font-size: 0.85rem;
+      line-height: 1.8;
+    }
+
+    .condition-list li {
+      margin-bottom: 6px;
+    }
+
+    /* Section Divider Bar */
+    .section-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--space-6);
+      padding: 16px 24px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.02) 0%, rgba(255, 255, 255, 0.01) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 18px;
+      position: relative;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .section-bar-right {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+
+    .section-bar-badge {
+      width: 40px;
+      height: 40px;
+      background: rgba(201, 162, 39, 0.1);
+      border: 1px solid rgba(201, 162, 39, 0.25);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+
+    .section-bar-title {
+      font-size: 1.35rem;
+      font-weight: 850;
+      color: #fff;
+    }
+
+    .section-bar-subtitle {
+      font-size: 11px;
+      color: var(--color-text-muted);
+      margin-top: 2px;
+      font-weight: 700;
+    }
+
+    .section-bar-left-badge {
+      background: rgba(52, 152, 219, 0.1);
+      border: 1px solid rgba(52, 152, 219, 0.25);
+      color: #3498db;
+      padding: 6px 16px;
+      border-radius: 10px;
+      font-size: var(--font-size-xs);
+      font-weight: 800;
+    }
+
+    /* Medals Grid */
+    .courses-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: var(--space-6);
+      margin-bottom: 80px;
+    }
+
+    /* Premium Medal Card */
+    .course-card {
+      background: linear-gradient(155deg, rgba(13, 24, 64, 0.35) 0%, rgba(6, 13, 33, 0.45) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      padding: var(--space-6);
+      position: relative;
+      transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+      backdrop-filter: blur(8px);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      cursor: pointer;
+    }
+
+    .course-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(201, 162, 39, 0.35);
+      box-shadow: 
+        0 15px 30px rgba(0, 0, 0, 0.5),
+        0 0 20px rgba(201, 162, 39, 0.05);
+    }
+
+    .course-card-arrow {
+      position: absolute;
+      top: var(--space-5);
+      left: var(--space-5);
+      color: rgba(255, 255, 255, 0.2);
+      font-size: 1.05rem;
+      transition: all 0.3s ease;
+    }
+
+    .course-card:hover .course-card-arrow {
+      color: var(--color-gold-primary);
+      transform: translateX(-3px);
+    }
+
+    .course-card-icon-container {
+      width: 100%;
+      height: 110px;
+      margin-bottom: var(--space-4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .course-card-emblem-img {
+      max-width: 100%;
+      max-height: 100px;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 10px rgba(0,0,0,0.4));
+    }
+
+    .course-card-title {
+      font-size: 1.25rem;
+      font-weight: 900;
+      color: #fff;
+      margin-bottom: 6px;
+      text-align: right;
+    }
+
+    .course-card-subtitle {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: var(--color-gold-light);
+      margin-bottom: var(--space-4);
+      text-align: right;
+      opacity: 0.95;
+    }
+
+    .course-card-desc {
+      font-size: 0.82rem;
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+      margin-bottom: var(--space-5);
+      text-align: right;
+      flex-grow: 1;
+    }
+
+    .course-card-footer {
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: var(--space-4);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--color-text-muted);
+      font-size: 0.78rem;
+      font-weight: 800;
+      justify-content: flex-end;
+    }
+
+    .course-card-footer-icon {
+      font-size: 0.95rem;
+      opacity: 0.7;
+    }
+
+    /* Page wrapper and general layout */
+    .leadership-header-section {
+      padding: 60px 0 40px;
+      position: relative;
+      background: var(--color-bg-primary);
+    }
+    
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      margin-bottom: 16px;
+      color: var(--color-text-muted);
+    }
+    .breadcrumb a {
+      color: var(--color-text-muted);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover {
+      color: var(--color-gold-primary);
+    }
+
+    @media (max-width: 768px) {
+      .courses-grid {
+        grid-template-columns: 1fr;
+      }
+      .college-header-card {
+        padding: var(--space-5);
+      }
+      .section-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-3);
+      }
+      .section-bar-left-badge {
+        align-self: flex-end;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="toast-container"></div>
+
+  <!-- Header Section -->
+  <div class="leadership-header-section">
+    <div class="container">
+      <div class="breadcrumb">
+        <a href="../index.html">الرئيسية</a>
+        <span class="breadcrumb-separator">/</span>
+        <a href="amn7.html">كلية التدريب الأمنية</a>
+        <span class="breadcrumb-separator">/</span>
+        <span style="color:var(--color-gold-primary)">الأوسمة والأنواط العسكرية</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="container page-wrapper">
+
+    <!-- Top Banner Card -->
+    <div class="college-header-card animate-fade-up">
+      <h2 class="college-header-title">دليل الأنواط والأوسمة العسكرية</h2>
+      <p class="college-header-desc">
+        دليل الأنواط العسكرية الممنوحة لمنسوبي الأمن العام تقديراً لتواجدهم الميداني وإتمامهم للمهام الموكلة لهم.
+      </p>
+    </div>
+
+    <!-- Submission Conditions Box -->
+    <div class="condition-box animate-fade-up">
+      <div class="condition-title">
+        <i class="fa-solid fa-circle-info"></i> شروط الاستحقاق والتقديم العام:
+      </div>
+      <ul class="condition-list">
+        <li>يؤخذ بعين الاعتبار بأن يستحقها من يكمل شروط التواجد الأسبوعي.</li>
+        <li>يرفق مع طلب الاستحقاق عدد <strong>5 تقارير عمليات</strong>.</li>
+        <li>يجب ألا يكون قد مضى على تلك التقارير أكثر من <strong>30 يوماً</strong> منذ إعلان فتح طلب الاستحقاق.</li>
+        <li>الأنواط متاحة لرتبة <strong>جندي أول فما فوق</strong>.</li>
+      </ul>
+    </div>
+
+    <!-- Section Bar for Medals -->
+    <div class="section-bar animate-fade-up">
+      <div class="section-bar-right">
+        <div class="section-bar-badge"><i class="fa-solid fa-medal"></i></div>
+        <div>
+          <div class="section-bar-title">الأوسمة والأنواط المعتمدة</div>
+          <div class="section-bar-subtitle">الأنواط الرسمية المعلقة لرجال الأمن العام</div>
+        </div>
+      </div>
+      <div class="section-bar-left-badge" style="background: rgba(201, 162, 39, 0.1); border-color: rgba(201, 162, 39, 0.25); color: var(--color-gold-primary);">مفعلة</div>
+    </div>
+
+    <!-- Medals Grid -->
+    <div class="courses-grid animate-fade-up">
+
+      <!-- 1. Presence Medal (نوط التواجد) -->
+      <div class="course-card" onclick="showMedalNotification('نوط التواجد')">
+        <div class="course-card-arrow">←</div>
+        <div class="course-card-icon-container">
+          <img src="../assets/img/medal_presence.png" alt="نوط التواجد" class="course-card-emblem-img">
+        </div>
+        <h3 class="course-card-title">نوط ( التواجد )</h3>
+        <h4 class="course-card-subtitle">الانضباط والتواجد الميداني</h4>
+        <p class="course-card-desc">يُمنح للعسكريين الذين لديهم تواجد مستمر وفاعل في الميدان وإنهاء عدد الساعات المطلوبة لرتبتهم.</p>
+        <div class="course-card-footer">
+          <span>جندي أول فما فوق</span>
+          <span class="course-card-footer-icon">⭐</span>
+        </div>
+      </div>
+
+      <!-- 2. Task Completion Medal (نوط إكمال المهام) -->
+      <div class="course-card" onclick="showMedalNotification('نوط إكمال المهام')">
+        <div class="course-card-arrow">←</div>
+        <div class="course-card-icon-container">
+          <!-- We can use the same ribbon base with a slight gold filter/design or layout -->
+          <img src="../assets/img/medal_presence.png" alt="نوط إكمال المهام" class="course-card-emblem-img" style="filter: drop-shadow(0 4px 10px rgba(0,0,0,0.4)) hue-rotate(45deg);">
+        </div>
+        <h3 class="course-card-title">نوط ( اكمال المهام )</h3>
+        <h4 class="course-card-subtitle">إتمام التكليفات والمهام الرسمية</h4>
+        <p class="course-card-desc">يُمنح هذا النوط للعسكريين الذين يكملون المهام الموكلة لهم على أكمل وجه من قبل معالي مدير الأمن العام.</p>
+        <div class="course-card-footer">
+          <span>جندي أول فما فوق</span>
+          <span class="course-card-footer-icon"><i class="fa-solid fa-circle-check"></i></span>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script src="../assets/js/storage.js?v=1.1.33"></script>
+  <script src="../assets/js/data.js?v=1.1.33"></script>
+  <script src="../assets/js/auth.js?v=1.1.33"></script>
+  <script src="../assets/js/components.js?v=1.1.33"></script>
+  <script src="../assets/js/app.js?v=1.1.33"></script>
+  <script>
+    // Inject navbar and sidebar
+    document.write(Components.navbar('amn7'));
+    document.write(Components.sidebar('amn7'));
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Inject Footer
+      const body = document.body;
+      const footerDiv = document.createElement('div');
+      footerDiv.innerHTML = Components.footer();
+      body.appendChild(footerDiv.firstElementChild);
+    });
+
+    function showMedalNotification(medalName) {
+      if (window.App && App.toast) {
+        App.toast(`ℹ️ طلبات التقديم لـ (${medalName}) ستُفتح قريباً!`, 'info');
+      } else {
+        alert(`طلبات التقديم لـ (${medalName}) ستُفتح قريباً!`);
+      }
+    }
+  </script>
+</body>
+
+</html>

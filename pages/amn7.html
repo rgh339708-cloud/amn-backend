@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>كلية التدريب الأمنية | الأمن العام</title>
+  <link rel="stylesheet" href="../assets/css/main.css?v=1.1.32">
+  <link rel="stylesheet" href="../assets/css/navbar.css?v=1.1.32">
+  <link rel="stylesheet" href="../assets/css/sidebar.css?v=1.1.32">
+  <link rel="stylesheet" href="../assets/css/footer.css">
+  <style>
+    /* Premium CSS for the Course Catalog Grid */
+    
+    .college-header-card {
+      background: linear-gradient(135deg, rgba(26, 47, 112, 0.25) 0%, rgba(9, 21, 53, 0.4) 100%);
+      border: 1px solid rgba(201, 162, 39, 0.25);
+      border-radius: 24px;
+      padding: var(--space-8);
+      margin-bottom: var(--space-8);
+      box-shadow: 
+        0 15px 35px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(12px);
+      text-align: right;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .college-header-card::before {
+      content: '';
+      position: absolute;
+      top: 0; right: 0; left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--color-gold-primary), transparent);
+    }
+
+    .college-header-title {
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+
+    .college-header-desc {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
+      line-height: 1.8;
+      max-width: 800px;
+    }
+
+    /* Section Divider Bar */
+    .section-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--space-6);
+      padding: 16px 24px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.02) 0%, rgba(255, 255, 255, 0.01) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 18px;
+      position: relative;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .section-bar-right {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+
+    .section-bar-badge {
+      width: 40px;
+      height: 40px;
+      background: rgba(201, 162, 39, 0.1);
+      border: 1px solid rgba(201, 162, 39, 0.25);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+
+    .section-bar-title {
+      font-size: 1.35rem;
+      font-weight: 850;
+      color: #fff;
+    }
+
+    .section-bar-subtitle {
+      font-size: 11px;
+      color: var(--color-text-muted);
+      margin-top: 2px;
+      font-weight: 700;
+    }
+
+    .section-bar-left-badge {
+      background: rgba(52, 152, 219, 0.1);
+      border: 1px solid rgba(52, 152, 219, 0.25);
+      color: #3498db;
+      padding: 6px 16px;
+      border-radius: 10px;
+      font-size: var(--font-size-xs);
+      font-weight: 800;
+    }
+
+    /* Courses Grid */
+    .courses-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: var(--space-6);
+      margin-bottom: 80px;
+    }
+
+    /* Premium Course Card */
+    .course-card {
+      background: linear-gradient(155deg, rgba(13, 24, 64, 0.35) 0%, rgba(6, 13, 33, 0.45) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      padding: var(--space-6);
+      position: relative;
+      transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+      backdrop-filter: blur(8px);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      cursor: pointer;
+    }
+
+    .course-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(201, 162, 39, 0.35);
+      box-shadow: 
+        0 15px 30px rgba(0, 0, 0, 0.5),
+        0 0 20px rgba(201, 162, 39, 0.05);
+    }
+
+    .course-card-arrow {
+      position: absolute;
+      top: var(--space-5);
+      left: var(--space-5);
+      color: rgba(255, 255, 255, 0.2);
+      font-size: 1.05rem;
+      transition: all 0.3s ease;
+    }
+
+    .course-card:hover .course-card-arrow {
+      color: var(--color-gold-primary);
+      transform: translateX(-3px);
+    }
+
+    .course-card-icon-container {
+      width: 58px;
+      height: 58px;
+      margin-bottom: var(--space-4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      align-self: flex-start;
+    }
+
+    /* Align right in RTL */
+    [dir="rtl"] .course-card-icon-container {
+      align-self: flex-start;
+    }
+
+    .course-card-emblem-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .course-card-title {
+      font-size: 1.25rem;
+      font-weight: 900;
+      color: #fff;
+      margin-bottom: 6px;
+      text-align: right;
+    }
+
+    .course-card-subtitle {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: var(--color-gold-light);
+      margin-bottom: var(--space-4);
+      text-align: right;
+      opacity: 0.95;
+    }
+
+    .course-card-desc {
+      font-size: 0.82rem;
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+      margin-bottom: var(--space-5);
+      text-align: right;
+      flex-grow: 1;
+    }
+
+    .course-card-footer {
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: var(--space-4);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--color-text-muted);
+      font-size: 0.78rem;
+      font-weight: 800;
+      justify-content: flex-end;
+    }
+
+    .course-card-footer-icon {
+      font-size: 0.95rem;
+      opacity: 0.7;
+    }
+
+    /* Page wrapper and general layout */
+    .leadership-header-section {
+      padding: 60px 0 40px;
+      position: relative;
+      background: var(--color-bg-primary);
+    }
+    
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      margin-bottom: 16px;
+      color: var(--color-text-muted);
+    }
+    .breadcrumb a {
+      color: var(--color-text-muted);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover {
+      color: var(--color-gold-primary);
+    }
+
+    @media (max-width: 768px) {
+      .courses-grid {
+        grid-template-columns: 1fr;
+      }
+      .college-header-card {
+        padding: var(--space-5);
+      }
+      .section-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-3);
+      }
+      .section-bar-left-badge {
+        align-self: flex-end;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="toast-container"></div>
+
+  <!-- Header Section -->
+  <div class="leadership-header-section">
+    <div class="container">
+      <div class="breadcrumb">
+        <a href="../index.html">الرئيسية</a>
+        <span class="breadcrumb-separator">/</span>
+        <span style="color:var(--color-gold-primary)">كلية التدريب الأمنية</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="container page-wrapper">
+
+    <!-- Top Banner Card (Matching image top title block) -->
+    <div class="college-header-card animate-fade-up">
+      <h2 class="college-header-title">الإدارة العامة لشؤون التدريب</h2>
+      <p class="college-header-desc">
+        النظام الأساسي والقوانين المنظمة لكلية التدريب — الأهداف، الصلاحيات، وإجراءات التحاق المتدربين.
+      </p>
+    </div>
+
+    <!-- Section Bar for Regulations -->
+    <div class="section-bar animate-fade-up">
+      <div class="section-bar-right">
+        <div class="section-bar-badge">📋</div>
+        <div>
+          <div class="section-bar-title">اللائحة التنظيمية لشؤون التدريب</div>
+          <div class="section-bar-subtitle">النظام الأساسي والقوانين المنظمة للبرامج والأحكام العسكرية</div>
+        </div>
+      </div>
+      <div class="section-bar-left-badge" style="background: rgba(201, 162, 39, 0.1); border-color: rgba(201, 162, 39, 0.25); color: var(--color-gold-primary);">معتمدة</div>
+    </div>
+
+    <!-- Regulations Grid (1 card pointing to document) -->
+    <div class="courses-grid animate-fade-up" style="grid-template-columns: 1fr; margin-bottom: var(--space-8);">
+      <div class="course-card" onclick="window.location.href='mstnd12.html'" style="flex-direction: row; align-items: center; gap: var(--space-6); min-height: 120px; padding: var(--space-5) var(--space-6);">
+        <div class="course-card-arrow" style="top: 50%; transform: translateY(-50%); left: var(--space-5);">←</div>
+        <div class="course-card-icon-container" style="margin-bottom: 0; width: 52px; height: 52px; flex-shrink: 0;">
+          <svg viewBox="0 0 100 100" class="course-card-emblem-img">
+            <circle cx="50" cy="50" r="42" fill="#0d1840" stroke="#c9a227" stroke-width="3"/>
+            <path d="M30,35 H70 V40 H30 Z M30,48 H70 V53 H30 Z M30,60 H55 V65 H30 Z" fill="#c9a227"/>
+            <rect x="60" y="58" width="10" height="10" fill="#3498db" rx="2"/>
+          </svg>
+        </div>
+        <div style="flex-grow: 1;">
+          <h3 class="course-card-title" style="margin-bottom: 4px; font-size: 1.25rem;">اللائحة التنظيمية لـ الإدارة العامة لشؤون التدريب</h3>
+          <h4 class="course-card-subtitle" style="margin-bottom: 6px;">القواعد العامة، أوقات الدورات، الأحكام العامة والجزاءات العسكرية</h4>
+          <p class="course-card-desc" style="margin-bottom: 0; font-size: 0.82rem;">اضغط للدخول والاطلاع على اللائحة التنظيمية الرسمية للإدارة العامة لشؤون التدريب، الشروط والأحكام، أوقات وجداول الدورات، ولائحة الأحكام والمخالفات العسكرية.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section Bar (Matching image "دورات الأفراد" header) -->
+    <div class="section-bar animate-fade-up">
+      <div class="section-bar-right">
+        <div class="section-bar-badge"><i class="fa-solid fa-users"></i></div>
+        <div>
+          <div class="section-bar-title">دورات الأفراد</div>
+          <div class="section-bar-subtitle">برامج تدريبية لرتب الجنود ووكلاء الرقباء</div>
+        </div>
+      </div>
+      <div class="section-bar-left-badge">8 أقسام</div>
+    </div>
+
+    <!-- Courses Grid (7 cards as shown in image) -->
+    <div class="courses-grid animate-fade-up">
+
+      <!-- 1. Operations Course -->
+      <div class="course-card" onclick="window.location.href='mstnd11.html'">
+        <div class="course-card-arrow">←</div>
+        <div class="course-card-icon-container">
+          <img src="../assets/img/emblem.png" alt="شعار" class="course-card-emblem-img">
+        </div>
+        <h3 class="course-card-title">دورة مركز العمليات الميدانية</h3>
+        <h4 class="course-card-subtitle">تأهيل ضباط مراكز العمليات</h4>
+        <p class="course-card-desc">تدريب على إدارة العمليات الميدانية، التواصل عبر الراديو، والتنسيق بين الوحدات.</p>
+        <div class="course-card-footer">
+          <span>جندي</span>
+          <span class="course-card-footer-icon"><i class="fa-solid fa-users"></i></span>
+        </div>
+      </div>
+
+      <!-- 2. Traffic Course -->
+      <div class="course-card" onclick="window.location.href='mstnd6.html'">
+        <div class="course-card-arrow">←</div>
+        <div class="course-card-icon-container">
+          <img src="../assets/img/traffic.png" alt="شعار المرور" class="course-card-emblem-img">
+        </div>
+        <h3 class="course-card-title">دورة المرور</h3>
+        <h4 class="course-card-subtitle">إدارة وضبط الحركة المرورية</h4>
+        <p class="course-card-desc">تدريب على قوانين المرور، نقاط التفتيش، وكتابة المخالفات.</p>
+        <div class="course-card-footer">
+          <span>جندي أول / عريف</span>
+          <span class="course-card-footer-icon"><i class="fa-solid fa-users"></i></span>
+        </div>
+      </div>
+
+      <!-- 3. Road Security -->
+      <div class="course-card" onclick="window.location.href='mstnd5.html'">
+        <div class="course-card-arrow">←</div>
+        <div class="course-card-icon-container">
+          <img src="../assets/img/roads.png" alt="شعار أمن الطرق" class="course-card-emblem-img">
+        </div>
+        <h3 class="course-card-title">قطاع أمن الطرق</h3>
+        <h4 class="course-card-subtitle">حماية الطرق السريعة</h4>
+        <p class="course-card-desc">دوريات الطرق، حالات الطوارئ السريعة، والاستجابة للحوادث.</p>
+        <div class="course-card-footer">
+          <span>عريف</span>
+          <span class="course-card-footer-icon"><i class="fa-solid fa-users"></i></span>
+        </div>
+      </div>
+
+      <!-- 4. Aviation Course -->
+      <div class="course-card" onclick="window.location.href='mstnd1.html'">
+        <div class="course-card-arrow">←</div>
+        <div class="course-card-icon-container">
+          <img src="../assets/img/aviation.png" alt="شعار طيران الأمن" class="course-card-emblem-img">
+        </div>
+        <h3 class="course-card-title">دورة الطيران الأمني</h3>
+        <h4 class="course-card-subtitle">الجناح الجوي</h4>
+        <p class="course-card-desc">تدريب على عمليات الطيران الأمني، المراقبة الجوية، ودعم العمليات البرية.</p>
+        <div class="course-card-footer">
+          <span>وكيل رقيب</span>
+          <span class="course-card-footer-icon"><i class="fa-solid fa-users"></i></span>
+        </div>
+      </div>
+
+      <!-- 5. District Officers -->
+      <div class="course-card" onclick="window.location.href='district-mstnd9.html'">
+        <div class="course-card-arrow">←</div>
+        <div class="course-card-icon-container">
+          <!-- Premium District Officers SVG -->
+          <svg viewBox="0 0 100 100" class="course-card-emblem-img">
+            <defs>
+              <linearGradient id="grad-radar" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#1abc9c"/>
+                <stop offset="100%" stop-color="#16a085"/>
+              </linearGradient>
+            </defs>
+            <circle cx="50" cy="50" r="42" fill="#0d1840" stroke="url(#grad-radar)" stroke-width="3"/>
+            <circle cx="50" cy="50" r="30" fill="none" stroke="rgba(26, 188, 156, 0.4)" stroke-width="1.5" stroke-dasharray="3,3"/>
+            <circle cx="50" cy="50" r="18" fill="none" stroke="rgba(26, 188, 156, 0.6)" stroke-width="1.5"/>
+            <line x1="50" y1="15" x2="50" y2="85" stroke="rgba(26, 188, 156, 0.5)" stroke-width="1.5"/>
+            <line x1="15" y1="50" x2="85" y2="50" stroke="rgba(26, 188, 156, 0.5)" stroke-width="1.5"/>
+            <path d="M50,28 C42,28 36,34 36,42 C36,52 50,68 50,68 C50,68 64,52 64,42 C64,34 58,28 50,28 Z" fill="#f1c40f" stroke="#d35400" stroke-width="1.5"/>
+            <circle cx="50" cy="42" r="5" fill="#0d1840"/>
+          </svg>
+        </div>
+        <h3 class="course-card-title">دورة ضباط المناطق</h3>
+        <h4 class="course-card-subtitle">قيادة الميدان</h4>
+        <p class="course-card-desc">تأهيل ضباط لقيادة الأقسام الميدانية، إدارة الموارد، وكتابة التقارير.</p>
+        <div class="course-card-footer">
+          <span>وكيل رقيب</span>
+          <span class="course-card-footer-icon"><i class="fa-solid fa-users"></i></span>
+        </div>
+      </div>
+
+      <!-- 6. Special Tasks -->
+      <div class="course-card" onclick="window.location.href='mstnd8.html'">
+        <div class="course-card-arrow">←</div>
+        <div class="course-card-icon-container">
+          <img src="../assets/img/special_tasks.png" alt="شعار المهمات والواجبات" class="course-card-emblem-img">
+        </div>
+        <h3 class="course-card-title">دورة المهمات والواجبات الخاصة</h3>
+        <h4 class="course-card-subtitle">القوات الخاصة</h4>
+        <p class="course-card-desc">تدريب على المهمات السرية، التدخل السريع، والعمليات الحساسة.</p>
+        <div class="course-card-footer">
+          <span>رقيب</span>
+          <span class="course-card-footer-icon"><i class="fa-solid fa-users"></i></span>
+        </div>
+      </div>
+
+      <!-- 7. Narcotics Course -->
+      <div class="course-card" onclick="window.location.href='mstnd14.html'">
+        <div class="course-card-arrow">←</div>
+        <div class="course-card-icon-container">
+          <img src="../assets/img/narcotics.png" alt="شعار مكافحة المخدرات" class="course-card-emblem-img">
+        </div>
+        <h3 class="course-card-title">دورة مكافحة المخدرات</h3>
+        <h4 class="course-card-subtitle">مكافحة المخدرات والسموم</h4>
+        <p class="course-card-desc">التعمق في البحث والتحري والتعامل مع البلاغات السرية وتتبع شبكات الترويج للمخدرات في المدينة.</p>
+        <div class="course-card-footer">
+          <span>رقيب أول</span>
+          <span class="course-card-footer-icon"><i class="fa-solid fa-users"></i></span>
+        </div>
+      </div>
+
+      <!-- 8. Thunderbolt Course -->
+      <div class="course-card" onclick="window.location.href='mstnd15.html'">
+        <div class="course-card-arrow">←</div>
+        <div class="course-card-icon-container">
+          <img src="../assets/img/wing_thunderbolt.png" alt="شعار دورة الصاعقة والمظليين" class="course-card-emblem-img">
+        </div>
+        <h3 class="course-card-title">دورة الصاعقة ووحدات المظليين</h3>
+        <h4 class="course-card-subtitle">المهام الخاصة والقتال المتقدم</h4>
+        <p class="course-card-desc">تأهيل المقاتل جسدياً وذهنياً للقتال الحر، السباحة القتالية، الصعود الجبلي، والهبوط المظلي.</p>
+        <div class="course-card-footer">
+          <span>رئيس رقباء</span>
+          <span class="course-card-footer-icon">⚡</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Section Bar for Officers Courses -->
+    <div class="section-bar animate-fade-up" style="margin-top: 40px;">
+      <div class="section-bar-right">
+        <div class="section-bar-badge"><i class="fa-solid fa-medal"></i></div>
+        <div>
+          <div class="section-bar-title">دورات الضباط</div>
+          <div class="section-bar-subtitle">برامج تدريبية لتأهيل وتطوير رتب الضباط</div>
+        </div>
+      </div>
+      <div class="section-bar-left-badge">4 أقسام</div>
+    </div>
+
+    <!-- Courses Grid (4 cards for Officers) -->
+    <div class="courses-grid animate-fade-up">
+
+      <!-- 1. Staff Course -->
+      <div class="course-card" onclick="window.location.href='mstnd10.html'">
+        <div class="course-card-arrow">←</div>
+        <div class="course-card-icon-container">
+          <img src="../assets/img/emblem.png" alt="شعار" class="course-card-emblem-img">
+        </div>
+        <h3 class="course-card-title">دورة الأركان</h3>
+        <h4 class="course-card-subtitle">القيادة العليا والتخطيط الاستراتيجي</h4>
+        <p class="course-card-desc">تأهيل كبار الضباط على التخطيط العملياتي المشترك وإدارة الأزمات الأمنية الاستراتيجية.</p>
+        <div class="course-card-footer">
+          <span>رائد وأعلى</span>
+          <span class="course-card-footer-icon"><i class="fa-solid fa-medal"></i></span>
+        </div>
+      </div>
+
+      <!-- 2. Officers Course -->
+      <div class="course-card" onclick="window.location.href='mstnd9.html'">
+        <div class="course-card-arrow">←</div>
+        <div class="course-card-icon-container">
+          <img src="../assets/img/officers.png" alt="شعار دورة الضباط" class="course-card-emblem-img">
+        </div>
+        <h3 class="course-card-title">دورة الضباط</h3>
+        <h4 class="course-card-subtitle">القيادة والتحكم</h4>
+        <p class="course-card-desc">تأهيل وتدريب الضباط حديثي التخرج على مهارات القيادة الميدانية وإدارة الأفراد والفرق.</p>
+        <div class="course-card-footer">
+          <span>رئيس رقباء وأعلى</span>
+          <span class="course-card-footer-icon"><i class="fa-solid fa-users"></i></span>
+        </div>
+      </div>
+
+      <!-- 3. Search and Investigation Course -->
+      <div class="course-card" onclick="window.location.href='mstnd13.html'">
+        <div class="course-card-arrow">←</div>
+        <div class="course-card-icon-container">
+          <img src="../assets/img/investigation.png" alt="شعار دورة البحث والتحري" class="course-card-emblem-img">
+        </div>
+        <h3 class="course-card-title">دورة البحث والتحري</h3>
+        <h4 class="course-card-subtitle">جناح التحقيقات الجنائية</h4>
+        <p class="course-card-desc">تدريب متقدم للضباط على جمع الأدلة الجنائية، إدارة مسارح الجريمة، والتحقيقات الجنائية الخاصة.</p>
+        <div class="course-card-footer">
+          <span>رائد وأعلى</span>
+          <span class="course-card-footer-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
+        </div>
+      </div>
+
+      <!-- 4. Rapid Intervention Course -->
+      <div class="course-card" onclick="window.location.href='mstnd7.html'">
+        <div class="course-card-arrow">←</div>
+        <div class="course-card-icon-container">
+          <img src="../assets/img/special_tasks.png" alt="شعار المهمات والواجبات" class="course-card-emblem-img">
+        </div>
+        <h3 class="course-card-title">دورة التدخل السريع للضباط</h3>
+        <h4 class="course-card-subtitle">قيادة قوة التدخل السريع</h4>
+        <p class="course-card-desc">تأهيل القيادات التكتيكية الميدانية في قوات التدخل السريع على سرعة المناورة وإدارة المداهمات الأمنية.</p>
+        <div class="course-card-footer">
+          <span>ملازم وأعلى</span>
+          <span class="course-card-footer-icon">⚡</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Section Bar for Insignia and Medals -->
+    <div class="section-bar animate-fade-up" style="margin-top: 40px;">
+      <div class="section-bar-right">
+        <div class="section-bar-badge"><i class="fa-solid fa-medal"></i></div>
+        <div>
+          <div class="section-bar-title">الشارات التشريفية والأوسمة</div>
+          <div class="section-bar-subtitle">الونقات والأنواط الرسمية لقطاع الأمن العام</div>
+        </div>
+      </div>
+      <div class="section-bar-left-badge">قسمين</div>
+    </div>
+
+    <!-- Insignia & Medals Grid -->
+    <div class="courses-grid animate-fade-up">
+
+      <!-- 1. Wings (الونقات) -->
+      <div class="course-card" onclick="window.location.href='amn14.html'">
+        <div class="course-card-arrow">←</div>
+        <div class="course-card-icon-container">
+          <svg viewBox="0 0 100 100" class="course-card-emblem-img">
+            <circle cx="50" cy="50" r="42" fill="#0d1840" stroke="#c9a227" stroke-width="3"/>
+            <!-- Golden Star inside -->
+            <polygon points="50,20 58,38 78,40 63,53 67,73 50,62 33,73 37,53 22,40 42,38" fill="#c9a227" stroke="#b08b1e" stroke-width="1.5"/>
+          </svg>
+        </div>
+        <h3 class="course-card-title">الونقات</h3>
+        <h4 class="course-card-subtitle">شارات التخصص والمهارة</h4>
+        <p class="course-card-desc">تفاصيل شارات التخصص الميداني والمهارة الممنوحة لرجال الأمن العام، مثل شارة الرماية ومكافحة الإرهاب والمظليين.</p>
+        <div class="course-card-footer">
+          <span>عرض التفاصيل</span>
+          <span class="course-card-footer-icon">⭐</span>
+        </div>
+      </div>
+
+      <!-- 2. Medals (الأنواط) -->
+      <div class="course-card" onclick="window.location.href='amn17.html'">
+        <div class="course-card-arrow">←</div>
+        <div class="course-card-icon-container">
+          <svg viewBox="0 0 100 100" class="course-card-emblem-img">
+            <circle cx="50" cy="50" r="42" fill="#0d1840" stroke="#c9a227" stroke-width="3"/>
+            <!-- Medal Ribbon inside -->
+            <rect x="38" y="24" width="24" height="24" fill="#3498db" rx="2" stroke="#2980b9" stroke-width="1.5"/>
+            <rect x="46" y="24" width="8" height="24" fill="#e74c3c"/>
+            <circle cx="50" cy="58" r="16" fill="#f1c40f" stroke="#d35400" stroke-width="2"/>
+            <polygon points="50,49 53,55 59,56 55,60 56,66 50,63 44,66 45,60 41,56 47,55" fill="#d35400"/>
+          </svg>
+        </div>
+        <h3 class="course-card-title">الأنواط</h3>
+        <h4 class="course-card-subtitle">الأوسمة والأنواط الميدانية</h4>
+        <p class="course-card-desc">الأوسمة والأنواط التشريفية التي تُمنح لرجال الأمن العام كتقدير لشجاعتهم وإخلاصهم في تقديم الخدمات الاستثنائية.</p>
+        <div class="course-card-footer">
+          <span>عرض التفاصيل</span>
+          <span class="course-card-footer-icon"><i class="fa-solid fa-medal"></i></span>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script src="../assets/js/storage.js?v=1.1.32"></script>
+  <script src="../assets/js/data.js?v=1.1.32"></script>
+  <script src="../assets/js/auth.js?v=1.1.32"></script>
+  <script src="../assets/js/components.js?v=1.1.32"></script>
+  <script src="../assets/js/app.js?v=1.1.32"></script>
+  <script>
+    // Inject navbar and sidebar
+    document.write(Components.navbar('amn7'));
+    document.write(Components.sidebar('amn7'));
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Inject Footer
+      const body = document.body;
+      const footerDiv = document.createElement('div');
+      footerDiv.innerHTML = Components.footer();
+      body.appendChild(footerDiv.firstElementChild);
+    });
+
+  </script>
+</body>
+
+</html>

@@ -24,37 +24,39 @@ const Components = (() => {
   // These are ALWAYS authoritative. Never rely on localStorage for system pages.
   const SYSTEM_PAGES = [
     { id: 'home',                       title: 'الرئيسية',                        emoji: '<i class="fa-solid fa-house"></i>',               allowedRoles: ['*'] },
-    { id: 'leadership',                 title: 'القيادة',                         emoji: '<i class="fa-solid fa-crown"></i>',               allowedRoles: ['*'] },
-    { id: 'managers',                   title: 'مدراء الأقسام',                   emoji: '<i class="fa-solid fa-medal"></i>',               allowedRoles: ['*'] },
-    { id: 'centers',                    title: 'المراكز',                         emoji: '<i class="fa-solid fa-building-shield"></i>',     allowedRoles: ['*'] },
-    { id: 'guide',                      title: 'الدليل الشامل',                   emoji: '<i class="fa-solid fa-book-open"></i>',           allowedRoles: ['*'] },
-    { id: 'inventory',                  title: 'العهدة',                          emoji: '<i class="fa-solid fa-box-open"></i>',            allowedRoles: ['*'] },
-    { id: 'vehicles',                   title: 'المركبات',                        emoji: '<i class="fa-solid fa-car-on"></i>',              allowedRoles: ['*'] },
-    { id: 'college',                    title: 'كلية التدريب',                    emoji: '<i class="fa-solid fa-graduation-cap"></i>',      allowedRoles: ['*'] },
-    { id: 'attendance-reports',         title: 'تقارير الحضور',                   emoji: '<i class="fa-solid fa-clipboard-user"></i>',      allowedRoles: ['owner', 'assistant_owner', 'academy_affairs', 'admin', 'course_admin', 'college_trainee'] },
-    { id: 'exams',                      title: 'الاختبارات',                      emoji: '<i class="fa-solid fa-file-pen"></i>',            allowedRoles: ['*'] },
-    { id: 'field-title',                title: 'التوجيهات الميدانية',             emoji: '<i class="fa-solid fa-id-card"></i>',             allowedRoles: ['*'] },
-    { id: 'uniform',                    title: 'الزي العسكري',                    emoji: '<i class="fa-solid fa-shirt"></i>',               allowedRoles: ['*'] },
-    { id: 'apply',                      title: 'التقديم',                         emoji: '<i class="fa-solid fa-envelope-open-text"></i>',  allowedRoles: ['*'] },
-    { id: 'database',                   title: 'قاعدة البيانات',                  emoji: '<i class="fa-solid fa-database"></i>',             allowedRoles: ['*'] },
-    { id: 'wings',                      title: 'أجنحة مدينة الـ 90',             emoji: '🦅',                                              allowedRoles: ['*'] },
+    { id: 'amn1',                       title: 'القيادة',                         emoji: '<i class="fa-solid fa-crown"></i>',               allowedRoles: ['*'] },
+    { id: 'amn2',                       title: 'مدراء الأقسام',                   emoji: '<i class="fa-solid fa-medal"></i>',               allowedRoles: ['*'] },
+    { id: 'amn3',                       title: 'المراكز',                         emoji: '<i class="fa-solid fa-building-shield"></i>',     allowedRoles: ['*'] },
+    { id: 'amn4',                       title: 'الدليل الشامل',                   emoji: '<i class="fa-solid fa-book-open"></i>',           allowedRoles: ['*'] },
+    { id: 'amn5',                       title: 'العهدة',                          emoji: '<i class="fa-solid fa-box-open"></i>',            allowedRoles: ['*'] },
+    { id: 'amn6',                       title: 'المركبات',                        emoji: '<i class="fa-solid fa-car-on"></i>',              allowedRoles: ['*'] },
+    { id: 'amn7',                       title: 'كلية التدريب',                    emoji: '<i class="fa-solid fa-graduation-cap"></i>',      allowedRoles: ['*'] },
+    { id: 'amn8',                       title: 'تقارير الحضور',                   emoji: '<i class="fa-solid fa-clipboard-user"></i>',      allowedRoles: ['owner', 'assistant_owner', 'academy_affairs', 'admin', 'course_admin', 'college_trainee'] },
+    { id: 'amn9',                       title: 'الاختبارات',                      emoji: '<i class="fa-solid fa-file-pen"></i>',            allowedRoles: ['*'] },
+    { id: 'amn10',                      title: 'التوجيهات الميدانية',             emoji: '<i class="fa-solid fa-id-card"></i>',             allowedRoles: ['*'] },
+    { id: 'amn11',                      title: 'الزي العسكري',                    emoji: '<i class="fa-solid fa-shirt"></i>',               allowedRoles: ['*'] },
+    { id: 'amn12',                      title: 'التقديم',                         emoji: '<i class="fa-solid fa-envelope-open-text"></i>',  allowedRoles: ['*'] },
+    { id: 'amn13',                      title: 'قاعدة البيانات',                  emoji: '<i class="fa-solid fa-database"></i>',             allowedRoles: ['*'] },
+    { id: 'amn14',                      title: 'أجنحة مدينة الـ 90',             emoji: '🦅',                                              allowedRoles: ['*'] },
     // Wings sub-pages
-    { id: 'aviation-document',          title: 'مستند الجناح الجوي',              emoji: '🚁',  parentId: 'wings', allowedRoles: ['*'] },
-    { id: 'counter-terrorism-wing',     title: 'مستند جناح مكافحة الإرهاب',      emoji: '⚔️', parentId: 'wings', allowedRoles: ['*'] },
-    { id: 'pursuit-assault-wing',       title: 'مستند جناح المداهمة والاقتحام',  emoji: '🛡️', parentId: 'wings', allowedRoles: ['*'] },
-    { id: 'shooting-skills-wing',       title: 'جناح الرماية والتدريب الميداني', emoji: '🎯', parentId: 'wings', allowedRoles: ['*'] },
-    { id: 'roads-document',             title: 'مستند جناح أمن الطرق',           emoji: '🛣️', parentId: 'wings', allowedRoles: ['*'] },
-    { id: 'traffic-document',           title: 'مستند جناح المرور',              emoji: '🚥', parentId: 'wings', allowedRoles: ['*'] },
-    { id: 'rapid-intervention-document',title: 'مستند جناح التدخل السريع',       emoji: '⚡', parentId: 'wings', allowedRoles: ['*'] },
-    { id: 'special-tasks-document',     title: 'مستند جناح المهام الخاصة',       emoji: '🔥', parentId: 'wings', allowedRoles: ['*'] },
-    { id: 'officers-document',          title: 'مستند الضباط',                   emoji: '🎖️', parentId: 'wings', allowedRoles: ['*'] },
-    { id: 'staff-document',             title: 'مستند الأفراد',                  emoji: '🎖️', parentId: 'wings', allowedRoles: ['*'] },
-    { id: 'ops-document',               title: 'مستند العمليات',                 emoji: '📞', parentId: 'wings', allowedRoles: ['*'] },
-    { id: 'regulations-document',       title: 'مستند الأنظمة واللوائح',         emoji: '📜', parentId: 'wings', allowedRoles: ['*'] },
-    { id: 'investigation-document',     title: 'مستند المباحث',                  emoji: '🕵️', parentId: 'wings', allowedRoles: ['*'] },
-    { id: 'narcotics-document',         title: 'مستند مكافحة المخدرات',          emoji: '💊', parentId: 'wings', allowedRoles: ['*'] },
-    { id: 'district-officers-document', title: 'مستند قيادة أمن الطرق',          emoji: '🛣️', parentId: 'wings', allowedRoles: ['*'] },
-    { id: 'amn90-r',                    title: 'مدينة الـ 90 العسكرية',           emoji: '🏰', parentId: 'wings', allowedRoles: ['*'] },
+    { id: 'mstnd1',                     title: 'مستند الجناح الجوي',              emoji: '🚁',  parentId: 'amn14', allowedRoles: ['*'] },
+    { id: 'mstnd2',                     title: 'مستند جناح مكافحة الإرهاب',      emoji: '⚔️', parentId: 'amn14', allowedRoles: ['*'] },
+    { id: 'mstnd3',                     title: 'مستند جناح المداهمة والاقتحام',  emoji: '🛡️', parentId: 'amn14', allowedRoles: ['*'] },
+    { id: 'mstnd4',                     title: 'جناح الرماية والتدريب الميداني', emoji: '🎯', parentId: 'amn14', allowedRoles: ['*'] },
+    { id: 'mstnd5',                     title: 'مستند جناح أمن الطرق',           emoji: '🛣️', parentId: 'amn14', allowedRoles: ['*'] },
+    { id: 'mstnd6',                     title: 'مستند جناح المرور',              emoji: '🚥', parentId: 'amn14', allowedRoles: ['*'] },
+    { id: 'mstnd7',                     title: 'مستند جناح التدخل السريع',       emoji: '⚡', parentId: 'amn14', allowedRoles: ['*'] },
+    { id: 'mstnd8',                     title: 'مستند جناح المهام الخاصة',       emoji: '🔥', parentId: 'amn14', allowedRoles: ['*'] },
+    { id: 'mstnd9',                     title: 'مستند الضباط',                   emoji: '🎖️', parentId: 'amn14', allowedRoles: ['*'] },
+    { id: 'mstnd10',                    title: 'مستند الأفراد',                  emoji: '🎖️', parentId: 'amn14', allowedRoles: ['*'] },
+    { id: 'mstnd11',                    title: 'مستند العمليات',                 emoji: '📞', parentId: 'amn14', allowedRoles: ['*'] },
+    { id: 'mstnd12',                    title: 'مستند الأنظمة واللوائح',         emoji: '📜', parentId: 'amn14', allowedRoles: ['*'] },
+    { id: 'mstnd13',                    title: 'مستند المباحث',                  emoji: '🕵️', parentId: 'amn14', allowedRoles: ['*'] },
+    { id: 'mstnd14',                    title: 'مستند مكافحة المخدرات',          emoji: '💊', parentId: 'amn14', allowedRoles: ['*'] },
+    { id: 'mstnd15',                    title: 'مستند الصاعقة والمظليين',        emoji: '⚡', parentId: 'amn14', allowedRoles: ['*'] },
+    { id: 'mstnd16',                    title: 'مستند قيادة أمن الطرق',          emoji: '🛣️', parentId: 'amn14', allowedRoles: ['*'] },
+    { id: 'amn15',                      title: 'مدينة الـ 90 العسكرية',           emoji: '🏰', parentId: 'amn14', allowedRoles: ['*'] },
+    { id: 'amn17',                      title: 'الأوسمة والأنواط العسكرية',        emoji: '<i class="fa-solid fa-medal"></i>', parentId: 'amn7', allowedRoles: ['*'] },
   ];
 
   const SYSTEM_IDS = new Set(SYSTEM_PAGES.map(p => p.id));
@@ -90,10 +92,10 @@ const Components = (() => {
   // ─── NAVBAR ───────────────────────────────────────────────────────────────
   function navbar(activePage = '') {
     // Pages that only appear in sidebar, not in the top sub-bar
-    const navbarExcludeIds = new Set(['wings', 'apply', 'announcements', 'promotions', 'archive', 'aviation-document', 'counter-terrorism-wing', 'pursuit-assault-wing', 'shooting-skills-wing', 'roads-document', 'traffic-document', 'rapid-intervention-document', 'special-tasks-document', 'officers-document', 'staff-document', 'ops-document', 'regulations-document', 'investigation-document', 'narcotics-document', 'district-officers-document', 'amn90-r']);
+    const navbarExcludeIds = new Set(['amn14', 'amn12', 'announcements', 'promotions', 'archive', 'mstnd1', 'mstnd2', 'mstnd3', 'mstnd4', 'mstnd5', 'mstnd6', 'mstnd7', 'mstnd8', 'mstnd9', 'mstnd10', 'mstnd11', 'mstnd12', 'mstnd13', 'mstnd14', 'mstnd15', 'mstnd16', 'amn15', 'amn17']);
 
     // Order for navbar
-    const navbarOrder = ['home', 'leadership', 'managers', 'guide', 'centers', 'vehicles', 'inventory', 'college', 'attendance-reports', 'exams', 'field-title', 'uniform', 'database'];
+    const navbarOrder = ['home', 'amn1', 'amn2', 'amn4', 'amn3', 'amn6', 'amn5', 'amn7', 'amn8', 'amn9', 'amn10', 'amn11', 'amn13'];
 
     // Build links: system pages first (in order), then custom parent pages
     const links = [];
@@ -105,7 +107,7 @@ const Components = (() => {
       if (page.isHidden) continue;
       if (!canAccess(page)) continue;
 
-      const href = id === 'home' ? 'index.html' : `pages/${id}.html`;
+      const href = id === 'home' ? 'amn.html' : `pages/${id}.html`;
       links.push({
         href,
         label: `${iconHtml(page.emoji)} ${page.title}`,
@@ -129,7 +131,7 @@ const Components = (() => {
     return `
     <nav class="navbar" id="navbar">
       <div class="navbar-inner">
-        <a href="${BASE}index.html" class="navbar-logo">
+        <a href="${BASE}amn.html" class="navbar-logo">
           <img src="${BASE}assets/img/emblem.png" alt="شعار الأمن العام" class="nav-logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
           <!-- SVG Fallback shown only if image fails -->
           <div style="display:none; width:44px; height:44px; background:linear-gradient(135deg,#c9a227,#8a6d0f); border-radius:10px; align-items:center; justify-content:center; font-size:1.4rem;"><i class="fa-solid fa-shield-halved"></i></div>
@@ -176,18 +178,18 @@ const Components = (() => {
     const items = [];
 
     // 1. Core Section - القائمة الرئيسية
-    const coreIds = ['home', 'leadership', 'managers', 'guide', 'centers', 'vehicles', 'inventory'];
+    const coreIds = ['home', 'amn1', 'amn2', 'amn4', 'amn3', 'amn6', 'amn5'];
     let hasCore = false;
     for (const id of coreIds) {
       const p = sysPage(id);
       if (!p) continue;
-      const href = id === 'home' ? `${BASE}index.html` : `${BASE}pages/${id}.html`;
+      const href = id === 'home' ? `${BASE}amn.html` : `${BASE}pages/${id}.html`;
       const it = item(p, href);
       if (it) { items.push(it); hasCore = true; }
     }
 
     // 2. Knowledge Section
-    const knowledgeIds = ['college', 'attendance-reports', 'exams', 'field-title', 'uniform', 'database'];
+    const knowledgeIds = ['amn7', 'amn8', 'amn9', 'amn10', 'amn11', 'amn13'];
     const knowledgeItems = [];
     for (const id of knowledgeIds) {
       const p = sysPage(id);
@@ -202,7 +204,7 @@ const Components = (() => {
     }
 
     // 3. Community Section (apply only)
-    const commIds = ['apply'];
+    const commIds = ['amn12'];
     const commItems = [];
     for (const id of commIds) {
       const p = sysPage(id);
@@ -217,18 +219,18 @@ const Components = (() => {
     }
 
     // 5. Wings Section
-    const wingsPage = sysPage('wings');
+    const wingsPage = sysPage('amn14');
     if (wingsPage && canAccess(wingsPage)) {
       items.push({ divider: true });
       items.push({ label: wingsPage.title, section: true });
       items.push({
-        href: `${BASE}pages/wings.html`,
+        href: `${BASE}pages/amn14.html`,
         icon: iconHtml(wingsPage.emoji),
         label: 'استعراض الأجنحة',
-        page: 'wings'
+        page: 'amn14'
       });
       // Wing sub-pages
-      const wingSubs = SYSTEM_PAGES.filter(p => p.parentId === 'wings');
+      const wingSubs = SYSTEM_PAGES.filter(p => p.parentId === 'amn14');
       for (const sub of wingSubs) {
         if (!canAccess(sub)) continue;
         items.push({
@@ -382,16 +384,16 @@ const Components = (() => {
             <div>
               <div class="footer-col-title">الأقسام</div>
               <div class="footer-links">
-                <a href="${BASE}pages/leadership.html" class="footer-link">القيادة</a>
-                <a href="${BASE}pages/centers.html"    class="footer-link">المراكز</a>
-                <a href="${BASE}pages/inventory.html"  class="footer-link">العهدة</a>
+                <a href="${BASE}pages/amn1.html" class="footer-link">القيادة</a>
+                <a href="${BASE}pages/amn3.html"    class="footer-link">المراكز</a>
+                <a href="${BASE}pages/amn5.html"  class="footer-link">العهدة</a>
               </div>
             </div>
             <div>
               <div class="footer-col-title">التدريب</div>
               <div class="footer-links">
-                <a href="${BASE}pages/guide.html"    class="footer-link">الدليل الشامل</a>
-                <a href="${BASE}pages/college.html"  class="footer-link">كلية التدريب</a>
+                <a href="${BASE}pages/amn4.html"    class="footer-link">الدليل الشامل</a>
+                <a href="${BASE}pages/amn7.html"  class="footer-link">كلية التدريب</a>
               </div>
             </div>
           </div>
