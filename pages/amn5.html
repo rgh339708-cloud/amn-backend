@@ -1,0 +1,1681 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>العهدة العسكرية | الأمن العام</title>
+  <link rel="stylesheet" href="../assets/css/main.css?v=1.1.32">
+  <link rel="stylesheet" href="../assets/css/navbar.css?v=1.1.32">
+  <link rel="stylesheet" href="../assets/css/sidebar.css?v=1.1.32">
+  <link rel="stylesheet" href="../assets/css/footer.css">
+  <style>
+    /* ── Weapon Custody Page Styling (العهدة العسكرية) ── */
+    .custody-header-decor {
+      background: linear-gradient(145deg, rgba(13, 27, 75, 0.4) 0%, rgba(6, 12, 36, 0.45) 100%);
+      border: 1px solid rgba(201, 162, 39, 0.15);
+      border-radius: 24px;
+      padding: 40px 30px;
+      backdrop-filter: blur(12px);
+      box-shadow: var(--shadow-card);
+      text-align: center;
+      position: relative;
+      margin-bottom: 35px;
+      overflow: hidden;
+    }
+    
+    .custody-header-decor::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(201, 162, 39, 0.05) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    /* Brackets corners for the header */
+    .header-decor-corner {
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      border-color: rgba(201, 162, 39, 0.4);
+      border-style: solid;
+      pointer-events: none;
+    }
+    .header-decor-corner.tl { top: 20px; left: 20px; border-width: 2px 0 0 2px; }
+    .header-decor-corner.tr { top: 20px; right: 20px; border-width: 2px 2px 0 0; }
+    .header-decor-corner.bl { bottom: 20px; left: 20px; border-width: 0 0 2px 2px; }
+    .header-decor-corner.br { bottom: 20px; right: 20px; border-width: 0 2px 2px 0; }
+
+    .custody-icons-capsule {
+      display: inline-flex;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 30px;
+      padding: 6px 14px;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    
+    .custody-capsule-item {
+      font-size: 1.1rem;
+      width: 34px;
+      height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      color: rgba(255,255,255,0.45);
+      transition: all 0.3s;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    
+    .custody-capsule-item.active {
+      background: linear-gradient(135deg, var(--color-gold-primary), var(--color-gold-dark));
+      color: #05091e;
+      border-color: var(--color-gold-primary);
+      box-shadow: 0 0 12px rgba(201,162,39,0.35);
+    }
+
+    .custody-badge {
+      display: inline-block;
+      background: rgba(201, 162, 39, 0.08);
+      color: var(--color-gold-primary);
+      border: 1px solid rgba(201, 162, 39, 0.25);
+      padding: 4px 16px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      margin-bottom: 12px;
+      letter-spacing: 0.5px;
+    }
+
+    .custody-title {
+      font-size: 2.1rem;
+      font-weight: 900;
+      color: #fff;
+      margin: 8px 0;
+      letter-spacing: 1px;
+    }
+    
+    .custody-divider {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+      margin: 15px auto;
+      max-width: 300px;
+    }
+    
+    .custody-divider::before, .custody-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(201,162,39,0.3), transparent);
+    }
+    
+    .custody-divider span {
+      color: var(--color-gold-primary);
+      font-size: 0.75rem;
+    }
+
+    .custody-subtitle {
+      font-size: 0.92rem;
+      color: var(--color-text-secondary);
+      font-weight: 500;
+    }
+
+    /* ── Legal Notice Box ── */
+    .custody-notice {
+      background: rgba(201, 162, 39, 0.02);
+      border: 1px solid rgba(201, 162, 39, 0.18);
+      border-radius: 16px;
+      padding: 18px 22px;
+      margin-bottom: 30px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      position: relative;
+    }
+    
+    .custody-notice-icon {
+      font-size: 1.8rem;
+      color: var(--color-gold-primary);
+      background: rgba(201, 162, 39, 0.06);
+      border: 1px solid rgba(201, 162, 39, 0.2);
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    
+    .custody-notice-content {
+      text-align: right;
+    }
+
+    .custody-notice-content h4 {
+      color: var(--color-gold-primary);
+      font-size: 0.95rem;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+    
+    .custody-notice-content p {
+      color: rgba(255,255,255,0.7);
+      font-size: 0.83rem;
+      line-height: 1.6;
+      margin: 0;
+    }
+    
+    .custody-notice-content p strong.alert {
+      color: #e74c3c;
+    }
+    
+    .custody-notice-content p strong.highlight {
+      color: var(--color-gold-light);
+    }
+
+    /* ── Levels Tabs ── */
+    .custody-tabs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 30px;
+    }
+    
+    @media (max-width: 768px) {
+      .custody-tabs {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .custody-tab-btn {
+      background: rgba(11, 21, 64, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 16px 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      position: relative;
+      overflow: hidden;
+      text-align: right;
+    }
+    
+    .custody-tab-btn:hover {
+      background: rgba(201, 162, 39, 0.04);
+      border-color: rgba(201, 162, 39, 0.25);
+      transform: translateY(-2px);
+    }
+    
+    .custody-tab-btn.active {
+      background: linear-gradient(135deg, rgba(201, 162, 39, 0.08) 0%, rgba(11, 21, 64, 0.5) 100%);
+      border-color: var(--color-gold-primary);
+      box-shadow: 0 8px 25px rgba(201, 162, 39, 0.12);
+    }
+    
+    .custody-tab-info {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    
+    .custody-tab-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #fff;
+      transition: color 0.3s;
+    }
+    
+    .custody-tab-btn.active .custody-tab-title {
+      color: var(--color-gold-primary);
+    }
+    
+    .custody-tab-desc {
+      font-size: 0.78rem;
+      color: var(--color-text-secondary);
+    }
+    
+    .custody-tab-icon {
+      font-size: 1.6rem;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.05);
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+      color: rgba(255,255,255,0.4);
+    }
+    
+    .custody-tab-btn.active .custody-tab-icon {
+      background: rgba(201, 162, 39, 0.1);
+      border-color: rgba(201, 162, 39, 0.3);
+      color: var(--color-gold-primary);
+      transform: scale(1.05);
+    }
+
+    /* ── Active Level Banner ── */
+    .custody-level-banner {
+      background: linear-gradient(135deg, rgba(13, 24, 64, 0.45), rgba(7, 15, 37, 0.55));
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 16px 24px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    
+    .custody-level-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .custody-level-badge {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--color-text-secondary);
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 0.78rem;
+      letter-spacing: 0.5px;
+    }
+    
+    .custody-level-text {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #fff;
+    }
+    
+    .custody-level-desc {
+      font-size: 0.85rem;
+      color: var(--color-text-secondary);
+      text-align: left;
+      flex-grow: 1;
+    }
+    
+    @media (max-width: 768px) {
+      .custody-level-desc {
+        text-align: right;
+        width: 100%;
+      }
+    }
+
+    /* ── Weapon Cards Grid ── */
+    .weapons-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    .weapon-card {
+      background: rgba(11, 21, 64, 0.22);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 18px;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      backdrop-filter: blur(8px);
+    }
+    
+    .weapon-card:hover {
+      border-color: rgba(201, 162, 39, 0.3);
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(201, 162, 39, 0.08);
+      background: rgba(11, 21, 64, 0.32);
+    }
+
+    /* Card Top Header */
+    .weapon-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      z-index: 2;
+    }
+
+    .weapon-type-icon {
+      font-size: 0.9rem;
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .weapon-type-icon.service {
+      background: rgba(52, 152, 219, 0.1);
+      color: #3498db;
+      border: 1px solid rgba(52, 152, 219, 0.2);
+    }
+
+    .weapon-type-icon.non-lethal {
+      background: rgba(241, 196, 15, 0.1);
+      color: #f1c40f;
+      border: 1px solid rgba(241, 196, 15, 0.2);
+    }
+
+    .weapon-type-icon.lethal {
+      background: rgba(231, 76, 60, 0.1);
+      color: #e74c3c;
+      border: 1px solid rgba(231, 76, 60, 0.2);
+    }
+
+    .weapon-class-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-family: var(--font-arabic);
+    }
+
+    .weapon-class-pill.service {
+      background: rgba(52, 152, 219, 0.1);
+      color: #3498db;
+      border: 1px solid rgba(52, 152, 219, 0.25);
+    }
+
+    .weapon-class-pill.non-lethal {
+      background: rgba(241, 196, 15, 0.1);
+      color: #f1c40f;
+      border: 1px solid rgba(241, 196, 15, 0.25);
+    }
+
+    .weapon-class-pill.lethal {
+      background: rgba(231, 76, 60, 0.1);
+      color: #e74c3c;
+      border: 1px solid rgba(231, 76, 60, 0.25);
+    }
+    
+    .weapon-num {
+      opacity: 0.55;
+      font-family: var(--font-display);
+      margin-left: 2px;
+    }
+
+    /* Brackets Frame & Image */
+    .weapon-frame {
+      position: relative;
+      height: 125px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.02);
+      background: rgba(0, 0, 0, 0.15);
+      border-radius: 12px;
+      padding: 10px;
+    }
+    
+    .weapon-card:hover .weapon-frame {
+      background: rgba(0, 0, 0, 0.25);
+    }
+
+    /* Corner brackets */
+    .wcorner {
+      position: absolute;
+      width: 7px;
+      height: 7px;
+      border-color: rgba(255, 255, 255, 0.12);
+      border-style: solid;
+      pointer-events: none;
+      transition: all 0.3s;
+    }
+    
+    .weapon-card:hover .wcorner {
+      border-color: var(--color-gold-primary);
+    }
+    
+    .wcorner.tl { top: 8px; left: 8px; border-width: 1.5px 0 0 1.5px; }
+    .wcorner.tr { top: 8px; right: 8px; border-width: 1.5px 1.5px 0 0; }
+    .wcorner.bl { bottom: 8px; left: 8px; border-width: 0 0 1.5px 1.5px; }
+    .wcorner.br { bottom: 8px; right: 8px; border-width: 0 1.5px 1.5px 0; }
+
+    .weapon-svg-wrapper {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+    }
+    
+    .weapon-card:hover .weapon-svg-wrapper {
+      transform: scale(1.06);
+    }
+    
+    .weapon-svg-wrapper svg {
+      width: 90%;
+      height: 90%;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+      transition: all 0.3s;
+    }
+    
+    .weapon-card:hover .weapon-svg-wrapper svg {
+      filter: drop-shadow(0 0 8px rgba(201, 162, 39, 0.25));
+    }
+
+    /* Card Footer Titles */
+    .weapon-info {
+      text-align: center;
+      z-index: 2;
+    }
+
+    .weapon-title-ar {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 2px;
+      letter-spacing: 0.3px;
+      font-family: var(--font-arabic);
+      transition: color 0.3s;
+    }
+    
+    .weapon-card:hover .weapon-title-ar {
+      color: var(--color-gold-light);
+    }
+
+    .weapon-title-en {
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.32);
+      font-family: var(--font-display);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* ── Admin Custody Tools ── */
+    .custody-admin-toolbar {
+      display: none; /* Hide by default */
+      justify-content: flex-end;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    body.global-live-editing .custody-admin-toolbar.authorized {
+      display: flex; /* Show only when authorized AND in edit mode */
+    }
+    
+    .btn-edit-weapon {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      background: rgba(201, 162, 39, 0.08);
+      border: 1px solid rgba(201, 162, 39, 0.25);
+      color: var(--color-gold-primary);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.68rem;
+      font-weight: 800;
+      cursor: pointer;
+      z-index: 10;
+      transition: all 0.2s;
+      font-family: var(--font-arabic);
+      display: none; /* Hide by default, only show when edit mode is active */
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .btn-edit-weapon:hover {
+      background: var(--color-gold-primary);
+      color: #05091e;
+      box-shadow: 0 0 8px rgba(201, 162, 39, 0.3);
+    }
+
+    body.global-live-editing .btn-edit-weapon {
+      display: inline-flex; /* Show when edit mode is active */
+    }
+    
+    .btn-reset-custody {
+      background: rgba(192, 57, 43, 0.06);
+      border: 1px solid rgba(192, 57, 43, 0.25);
+      color: var(--color-red-alert);
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-family: var(--font-arabic);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .btn-reset-custody:hover {
+      background: var(--color-red-alert);
+      color: #fff;
+      box-shadow: 0 0 10px rgba(192, 57, 43, 0.3);
+    }
+
+    /* Draggable Card styles */
+    .weapon-card.draggable-card {
+      cursor: grab !important;
+      user-select: none;
+    }
+    
+    .weapon-card.draggable-card:active {
+      cursor: grabbing !important;
+    }
+    
+    .weapon-card.drag-over {
+      border: 2px dashed var(--color-gold-primary) !important;
+      box-shadow: 0 0 15px rgba(201, 162, 39, 0.25) !important;
+      transform: scale(0.98);
+      background: rgba(201, 162, 39, 0.05) !important;
+    }
+
+    /* ── Custody Modal Styling ── */
+    .custody-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(4, 7, 24, 0.75);
+      backdrop-filter: blur(15px);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      animation: modalFadeIn 0.3s ease-out;
+    }
+    
+    @keyframes modalFadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .custody-modal-content {
+      background: linear-gradient(145deg, rgba(13, 27, 75, 0.95) 0%, rgba(6, 12, 36, 0.98) 100%);
+      border: 1px solid rgba(201, 162, 39, 0.3);
+      border-radius: 24px;
+      width: 100%;
+      max-width: 550px;
+      padding: 30px;
+      position: relative;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 30px rgba(201, 162, 39, 0.15);
+      animation: modalScaleUp 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    
+    @keyframes modalScaleUp {
+      from { transform: scale(0.92); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    
+    .custody-modal-decor-corner {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      border-color: rgba(201, 162, 39, 0.5);
+      border-style: solid;
+      pointer-events: none;
+    }
+    .custody-modal-decor-corner.tl { top: 15px; left: 15px; border-width: 2px 0 0 2px; }
+    .custody-modal-decor-corner.tr { top: 15px; right: 15px; border-width: 2px 2px 0 0; }
+    .custody-modal-decor-corner.bl { bottom: 15px; left: 15px; border-width: 0 0 2px 2px; }
+    .custody-modal-decor-corner.br { bottom: 15px; right: 15px; border-width: 0 2px 2px 0; }
+    
+    .custody-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 15px;
+    }
+    
+    .custody-modal-title {
+      font-size: 1.3rem;
+      font-weight: 900;
+      color: #fff;
+      margin: 0;
+    }
+    
+    .custody-modal-close {
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 1.8rem;
+      cursor: pointer;
+      transition: color 0.2s;
+      line-height: 1;
+      padding: 0;
+    }
+    
+    .custody-modal-close:hover {
+      color: var(--color-red-alert);
+    }
+    
+    .form-group-custody {
+      margin-bottom: 18px;
+      text-align: right;
+    }
+    
+    .form-group-custody label {
+      display: block;
+      color: var(--color-gold-light);
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    
+    .form-group-custody input[type="text"],
+    .form-group-custody select {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      color: #fff;
+      padding: 10px 14px;
+      font-size: 0.9rem;
+      transition: all 0.3s;
+      font-family: var(--font-arabic);
+    }
+    
+    .form-group-custody input[type="text"]:focus,
+    .form-group-custody select:focus {
+      border-color: var(--color-gold-primary);
+      box-shadow: 0 0 10px rgba(201, 162, 39, 0.2);
+      outline: none;
+      background: rgba(0, 0, 0, 0.4);
+    }
+    
+    .form-row-custody {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    
+    @media (max-width: 500px) {
+      .form-row-custody {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .levels-checkbox-group {
+      display: flex;
+      gap: 12px;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 8px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      height: calc(100% - 25px);
+      align-items: center;
+    }
+    
+    .lvl-checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.85);
+      cursor: pointer;
+    }
+    
+    .lvl-checkbox-label input[type="checkbox"] {
+      accent-color: var(--color-gold-primary);
+      width: 15px;
+      height: 15px;
+      cursor: pointer;
+    }
+    
+    .image-selector-capsule {
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      padding: 14px;
+    }
+    
+    .visual-img-select {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(65px, 1fr));
+      gap: 10px;
+      max-height: 150px;
+      overflow-y: auto;
+      padding-right: 5px;
+    }
+    
+    .visual-img-select::-webkit-scrollbar {
+      width: 4px;
+    }
+    .visual-img-select::-webkit-scrollbar-thumb {
+      background: rgba(75, 140, 219, 0.4);
+      border-radius: 2px;
+    }
+    
+    .img-option-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 8px;
+      padding: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 60px;
+      position: relative;
+      transition: all 0.2s;
+    }
+    
+    .img-option-card:hover {
+      background: rgba(201, 162, 39, 0.05);
+      border-color: rgba(201, 162, 39, 0.2);
+    }
+    
+    .img-option-card.active {
+      background: rgba(201, 162, 39, 0.1);
+      border-color: var(--color-gold-primary);
+      box-shadow: 0 0 8px rgba(201, 162, 39, 0.3);
+    }
+    
+    .img-option-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    
+    .img-option-card .svg-preview {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .img-option-card .svg-preview svg {
+      width: 90%;
+      height: 90%;
+    }
+    
+    .img-option-label {
+      position: absolute;
+      bottom: 2px;
+      font-size: 0.55rem;
+      background: rgba(0, 0, 0, 0.7);
+      color: #fff;
+      padding: 1px 4px;
+      border-radius: 3px;
+      max-width: 90%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    
+    .custody-modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 25px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding-top: 20px;
+    }
+    
+    .btn-save-custody {
+      background: linear-gradient(135deg, var(--color-gold-primary), var(--color-gold-dark));
+      color: #05091e;
+      border: none;
+      padding: 10px 22px;
+      border-radius: 10px;
+      font-weight: 800;
+      cursor: pointer;
+      font-family: var(--font-arabic);
+      font-size: 0.88rem;
+      transition: all 0.3s;
+    }
+    
+    .btn-save-custody:hover {
+      box-shadow: 0 0 15px rgba(201, 162, 39, 0.4);
+      transform: translateY(-1px);
+    }
+    
+    .btn-cancel-custody {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.8);
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: var(--font-arabic);
+      font-size: 0.88rem;
+      transition: all 0.2s;
+    }
+    
+    .btn-cancel-custody:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+<div id="toast-container"></div>
+
+<script src="../assets/js/storage.js?v=1.1.32"></script>
+<script src="../assets/js/data.js?v=1.1.32"></script>
+<script src="../assets/js/auth.js?v=1.1.32"></script>
+<script src="../assets/js/components.js?v=1.1.32"></script>
+<script src="../assets/js/app.js?v=1.1.32"></script>
+
+<script>
+  document.write(Components.navbar('amn5'));
+  document.write(Components.sidebar('amn5'));
+</script>
+
+<main class="page-content">
+  <div class="page-header" style="display:none;">
+    <!-- Hidden but kept to satisfy structure -->
+  </div>
+
+  <div class="container page-wrapper" style="margin-top: 30px;">
+    
+    <!-- ── Header Decor ── -->
+    <div class="custody-header-decor animate-fade-in">
+      <span class="header-decor-corner tl"></span>
+      <span class="header-decor-corner tr"></span>
+      <span class="header-decor-corner bl"></span>
+      <span class="header-decor-corner br"></span>
+      
+      <div class="custody-icons-capsule">
+        <span class="custody-capsule-item"><i class="fa-solid fa-shield-halved"></i></span>
+        <span class="custody-capsule-item active"><i class="fa-solid fa-briefcase"></i></span>
+        <span class="custody-capsule-item"><i class="fa-solid fa-crosshairs"></i></span>
+      </div>
+      
+      <br>
+      <span class="custody-badge">عهدة عسكرية - 3 مستويات</span>
+      <h1 class="custody-title">العهدة العسكرية</h1>
+      
+      <div class="custody-divider">
+        <span><i class="fa-solid fa-star"></i></span>
+      </div>
+      
+      <p class="custody-subtitle">توزيع التسليح العسكري حسب الرتبة</p>
+    </div>
+
+    <!-- ── Legal Notice ── -->
+    <div class="custody-notice animate-on-scroll">
+      <div class="custody-notice-icon"><i class="fa-solid fa-shield-halved"></i></div>
+      <div class="custody-notice-content">
+        <h4>تنبيه قانوني</h4>
+        <p>العهدة العسكرية ملك للقطاع ويمنع منعاً باتاً إعطاء أو بيع المواطنين أي شيء منها - العقوبة: <strong class="alert">فساد عسكري وفصل من القطاع</strong> مهما كانت الرتبة. راجع <strong class="highlight">المادة 5</strong> في الدليل الشامل.</p>
+      </div>
+    </div>
+
+    <!-- ── Admin Control Toolbar ── -->
+    <div class="custody-admin-toolbar animate-on-scroll" id="admin-toolbar-el" style="display:none;">
+      <button class="btn-reset-custody" onclick="resetCustodyToDefault()">
+        <span><i class="fa-solid fa-arrows-rotate"></i></span> إعادة ضبط عهدة الأسلحة للقيم الافتراضية
+      </button>
+    </div>
+
+    <!-- ── Tabs ── -->
+    <div class="custody-tabs">
+      <!-- Tab 1 -->
+      <button class="custody-tab-btn active" id="tab-lvl-1" onclick="selectLevel(1)">
+        <div class="custody-tab-info">
+          <span class="custody-tab-title">جندي - عريف</span>
+          <span class="custody-tab-desc" id="tab-lvl-1-desc">8 قطعة عهدة</span>
+        </div>
+        <div class="custody-tab-icon"><i class="fa-solid fa-shield-halved"></i></div>
+      </button>
+      
+      <!-- Tab 2 -->
+      <button class="custody-tab-btn" id="tab-lvl-2" onclick="selectLevel(2)">
+        <div class="custody-tab-info">
+          <span class="custody-tab-title">وكيل رقيب - رئيس رقباء</span>
+          <span class="custody-tab-desc" id="tab-lvl-2-desc">9 قطعة عهدة</span>
+        </div>
+        <div class="custody-tab-icon"><i class="fa-solid fa-bookmark"></i></div>
+      </button>
+      
+      <!-- Tab 3 -->
+      <button class="custody-tab-btn" id="tab-lvl-3" onclick="selectLevel(3)">
+        <div class="custody-tab-info">
+          <span class="custody-tab-title">ملازم - فريق أول</span>
+          <span class="custody-tab-desc" id="tab-lvl-3-desc">10 قطعة عهدة</span>
+        </div>
+        <div class="custody-tab-icon"><i class="fa-solid fa-crown"></i></div>
+      </button>
+    </div>
+
+    <!-- ── Active Level Banner ── -->
+    <div class="custody-level-banner animate-on-scroll">
+      <div class="custody-level-title">
+        <span class="custody-level-badge">[ المستوى <span id="active-level-num">01</span> ]</span>
+        <span class="custody-level-text" id="active-level-text">من جندي إلى عريف</span>
+      </div>
+      <div class="custody-level-desc" id="active-level-desc">
+        العهدة الأساسية للرتب الميدانية الأولى، تشمل الأسلحة الدفاعية الأساسية وأدوات الخدمة.
+      </div>
+    </div>
+
+    <!-- ── Weapons Grid ── -->
+    <div class="weapons-grid animate-on-scroll" id="weapons-grid-el">
+      <!-- Loaded dynamically via JS -->
+    </div>
+    
+  </div>
+</main>
+
+<script>
+  const isAdmin = Auth.isLoggedIn() && Auth.getRoleInfo(Auth.getRole()).level >= 4;
+
+  // ── Backup default weapon items ──
+  const defaultItems = [
+    {
+      id: "01",
+      nameAr: "فلير",
+      nameEn: "Flare",
+      type: "service",
+      typeAr: "خدمة",
+      typeIcon: '<i class="fa-solid fa-wrench"></i>',
+      levels: [1, 2, 3],
+      img: "../assets/img/flare.png",
+      svg: `<svg viewBox="0 0 200 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="50" y="38" width="85" height="24" rx="4" fill="#4a4a4a" stroke="#686868" stroke-width="1.5"/>
+        <rect x="135" y="38" width="15" height="24" rx="2" fill="#e74c3c"/>
+        <line x1="75" y1="38" x2="75" y2="62" stroke="#252525" stroke-width="2"/>
+        <line x1="95" y1="38" x2="95" y2="62" stroke="#252525" stroke-width="2"/>
+        <line x1="115" y1="38" x2="115" y2="62" stroke="#252525" stroke-width="2"/>
+        <rect x="42" y="44" width="8" height="12" rx="1" fill="#1b1b1b"/>
+      </svg>`
+    },
+    {
+      id: "02",
+      nameAr: "مطاعة",
+      nameEn: "Nightstick",
+      type: "non-lethal",
+      typeAr: "غير قاتل",
+      typeIcon: "⚡",
+      levels: [1, 2, 3],
+      img: "../assets/img/nightstick.png",
+      svg: `<svg viewBox="0 0 200 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="20" y="47" width="160" height="6" rx="3" fill="#1a1a1a" stroke="#2e2e2e" stroke-width="1"/>
+        <rect x="135" y="51" width="6" height="32" rx="2" fill="#111" stroke="#252525" stroke-width="1"/>
+        <line x1="25" y1="47" x2="25" y2="53" stroke="#333" stroke-width="1"/>
+        <line x1="30" y1="47" x2="30" y2="53" stroke="#333" stroke-width="1"/>
+        <line x1="35" y1="47" x2="35" y2="53" stroke="#333" stroke-width="1"/>
+        <line x1="40" y1="47" x2="40" y2="53" stroke="#333" stroke-width="1"/>
+        <line x1="45" y1="47" x2="45" y2="53" stroke="#333" stroke-width="1"/>
+        <circle cx="16" cy="50" r="4.5" fill="#c9a227"/>
+      </svg>`
+    },
+    {
+      id: "03",
+      nameAr: "صاعق",
+      nameEn: "Stun Gun",
+      type: "non-lethal",
+      typeAr: "غير قاتل",
+      typeIcon: "⚡",
+      levels: [1, 2, 3],
+      img: "../assets/img/stun_gun.png",
+      svg: `<svg viewBox="0 0 200 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M45 28h85v28H98l-12 26H62l8-26H45V28z" fill="#252525" stroke="#3c3c3c" stroke-width="2"/>
+        <rect x="75" y="33" width="40" height="5" fill="#f1c40f" rx="1"/>
+        <rect x="50" y="43" width="20" height="4" fill="#f1c40f" rx="1"/>
+        <line x1="68" y1="56" x2="63" y2="76" stroke="#111" stroke-width="3"/>
+        <line x1="74" y1="56" x2="69" y2="76" stroke="#111" stroke-width="3"/>
+        <rect x="130" y="33" width="4" height="4" rx="1" fill="#888"/>
+        <rect x="130" y="47" width="4" height="4" rx="1" fill="#888"/>
+        <circle cx="123" cy="40" r="2.5" fill="#e74c3c"/>
+      </svg>`
+    },
+    {
+      id: "04",
+      nameAr: "مسدس",
+      nameEn: "Pistol",
+      type: "lethal",
+      typeAr: "قاتل",
+      typeIcon: '<i class="fa-solid fa-crosshairs"></i>',
+      levels: [1, 2, 3],
+      img: "../assets/img/pistol.png",
+      svg: `<svg viewBox="0 0 200 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="45" y="26" width="105" height="22" rx="2" fill="#2c2c2c" stroke="#444" stroke-width="1.5"/>
+        <rect x="148" y="25" width="3" height="3" fill="#111"/>
+        <circle cx="145" cy="28" r="0.8" fill="#e74c3c"/>
+        <path d="M55 48h80v7l-22 33H88l13-33H55v-7z" fill="#1e1e1e" stroke="#333" stroke-width="1.5"/>
+        <line x1="49" y1="29" x2="49" y2="44" stroke="#111" stroke-width="1.5"/>
+        <line x1="53" y1="29" x2="53" y2="44" stroke="#111" stroke-width="1.5"/>
+        <line x1="57" y1="29" x2="57" y2="44" stroke="#111" stroke-width="1.5"/>
+        <path d="M96 48c0 9-13 9-13 9" stroke="#444" stroke-width="1.5"/>
+        <path d="M89 51c-1 3-4 3-4 3" stroke="#c9a227" stroke-width="1.5"/>
+        <rect x="93" y="56" width="14" height="24" rx="2" fill="#111"/>
+      </svg>`
+    },
+    {
+      id: "05",
+      nameAr: "مسدس مصغر",
+      nameEn: "Compact Pistol",
+      type: "lethal",
+      typeAr: "قاتل",
+      typeIcon: '<i class="fa-solid fa-crosshairs"></i>',
+      levels: [1, 2, 3],
+      img: "../assets/img/compact_pistol.png",
+      svg: `<svg viewBox="0 0 200 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="55" y="29" width="85" height="20" rx="2" fill="#363636" stroke="#4f4f4f" stroke-width="1.5"/>
+        <line x1="60" y1="35" x2="135" y2="35" stroke="#c9a227" stroke-width="1.5"/>
+        <path d="M65 49h65v6l-18 28H90l10-28H65v-6z" fill="#202020" stroke="#383838" stroke-width="1.5"/>
+        <line x1="62" y1="32" x2="62" y2="46" stroke="#111" stroke-width="2"/>
+        <line x1="66" y1="32" x2="66" y2="46" stroke="#111" stroke-width="2"/>
+        <path d="M93 49c0 7-11 7-11 7" stroke="#444" stroke-width="1.5"/>
+        <path d="M87 52c-1 3-3 3-3 3" stroke="#e74c3c" stroke-width="1.5"/>
+        <rect x="93" y="55" width="13" height="20" rx="1.5" fill="#121212"/>
+      </svg>`
+    },
+    {
+      id: "06",
+      nameAr: "شوزن عسكري",
+      nameEn: "Combat Shotgun",
+      type: "lethal",
+      typeAr: "قاتل",
+      typeIcon: '<i class="fa-solid fa-crosshairs"></i>',
+      levels: [1, 2, 3],
+      img: "../assets/img/combat_shotgun.png",
+      svg: `<svg viewBox="0 0 200 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="20" y="39" width="130" height="4" fill="#333" rx="1"/>
+        <rect x="40" y="44" width="100" height="3" fill="#1f1f1f" rx="0.5"/>
+        <rect x="132" y="36" width="32" height="13" rx="2" fill="#262626" stroke="#3d3d3d" stroke-width="1.5"/>
+        <rect x="75" y="42" width="30" height="7" rx="1.5" fill="#444" stroke="#555" stroke-width="0.8"/>
+        <line x1="80" y1="42" x2="80" y2="49" stroke="#1c1c1c" stroke-width="1"/>
+        <line x1="85" y1="42" x2="85" y2="49" stroke="#1c1c1c" stroke-width="1"/>
+        <line x1="90" y1="42" x2="90" y2="49" stroke="#1c1c1c" stroke-width="1"/>
+        <line x1="95" y1="42" x2="95" y2="49" stroke="#1c1c1c" stroke-width="1"/>
+        <path d="M164 41l18 16v13l-13-4-5-25z" fill="#181818" stroke="#2a2a2a" stroke-width="1.5"/>
+        <path d="M138 49c0 4-5 4-5 4" stroke="#444" stroke-width="1.2"/>
+      </svg>`
+    },
+    {
+      id: "07",
+      nameAr: "مصباح يدوي",
+      nameEn: "Flashlight",
+      type: "service",
+      typeAr: "خدمة",
+      typeIcon: '<i class="fa-solid fa-wrench"></i>',
+      levels: [1, 2, 3],
+      img: "../assets/img/flashlight.png",
+      svg: `<svg viewBox="0 0 200 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="60" y="43" width="85" height="14" rx="2" fill="#3a3a3a" stroke="#505050" stroke-width="1"/>
+        <rect x="75" y="43" width="50" height="14" fill="none" stroke="#222" stroke-width="2" stroke-dasharray="3,3"/>
+        <path d="M145 37l18-7v40l-18-7V37z" fill="#4c4c4c" stroke="#606060" stroke-width="1"/>
+        <path d="M164 36l20-12v52l-20-12" fill="url(#beamGlowInv)" opacity="0.25"/>
+        <defs>
+          <linearGradient id="beamGlowInv" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#f1c40f"/>
+            <stop offset="100%" stop-color="#f1c40f" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <circle cx="134" cy="50" r="2.5" fill="#e74c3c"/>
+      </svg>`
+    },
+    {
+      id: "08",
+      nameAr: "طفاية حريق",
+      nameEn: "Fire Extinguisher",
+      type: "service",
+      typeAr: "خدمة",
+      typeIcon: '<i class="fa-solid fa-wrench"></i>',
+      levels: [1, 2, 3],
+      img: "../assets/img/fire_extinguisher.png",
+      svg: `<svg viewBox="0 0 200 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="80" y="21" width="36" height="62" rx="9" fill="#788485" stroke="#909b9c" stroke-width="1.8"/>
+        <rect x="80" y="32" width="36" height="36" fill="#4d4d4d"/>
+        <circle cx="98" cy="15" r="5" fill="#111" stroke="#ccc" stroke-width="1"/>
+        <line x1="98" y1="15" x2="101" y2="12" stroke="#e74c3c" stroke-width="1"/>
+        <path d="M88 13h18v3H88v-3z" fill="#333"/>
+        <path d="M90 7l12 6-2 2-10-8z" fill="#222"/>
+        <path d="M109 16c12 9 12 26 12 35" stroke="#222" stroke-width="2.5" fill="none"/>
+        <rect x="119" y="50" width="5" height="10" rx="0.8" fill="#111"/>
+      </svg>`
+    },
+    {
+      id: "09",
+      nameAr: "الرشاش الثقيل",
+      nameEn: "Heavy Rifle",
+      type: "lethal",
+      typeAr: "قاتل",
+      typeIcon: '<i class="fa-solid fa-crosshairs"></i>',
+      levels: [2, 3],
+      img: "../assets/img/heavy_rifle.png",
+      svg: `<svg viewBox="0 0 200 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="15" y="38" width="135" height="4" fill="#333" rx="1"/>
+        <rect x="35" y="34" width="8" height="12" fill="#222" rx="1"/>
+        <rect x="10" y="37" width="5" height="6" fill="#111" rx="0.5"/>
+        <rect x="45" y="44" width="35" height="3" fill="#222" rx="0.5"/>
+        <rect x="75" y="33" width="50" height="14" rx="1" fill="#2c2c2c" stroke="#3a3a3a" stroke-width="1"/>
+        <line x1="80" y1="33" x2="120" y2="33" stroke="#e67e22" stroke-width="1.8"/>
+        <rect x="110" y="23" width="22" height="7" fill="#151515" rx="1"/>
+        <rect x="105" y="26" width="32" height="2.5" fill="#333"/>
+        <rect x="128" y="30" width="38" height="18" rx="2" fill="#202020" stroke="#353535" stroke-width="1.2"/>
+        <rect x="133" y="48" width="20" height="18" rx="2.5" fill="#181818" stroke="#282828" stroke-width="0.8"/>
+        <path d="M166 33l20 5v18l-10 1-10-24z" fill="#151515" stroke="#252525" stroke-width="1.2"/>
+        <path d="M161 48l-7 13h-7l4-13" fill="#111"/>
+        <path d="M136 50c-1 3-2 3-2 3" stroke="#e74c3c" stroke-width="1.8"/>
+      </svg>`
+    },
+    {
+      id: "10",
+      nameAr: "الرشاش الكاربون",
+      nameEn: "Carbon Rifle",
+      type: "lethal",
+      typeAr: "قاتل",
+      typeIcon: '<i class="fa-solid fa-crosshairs"></i>',
+      levels: [3],
+      img: "../assets/img/carbon_rifle.png",
+      svg: `<svg viewBox="0 0 200 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="25" y="36" width="55" height="3.5" fill="#444"/>
+        <rect x="15" y="33" width="25" height="9" rx="2" fill="#1b1b1b" stroke="#333" stroke-width="1"/>
+        <rect x="62" y="30" width="52" height="15" rx="2" fill="#242424" stroke="#3c3c3c" stroke-width="1"/>
+        <line x1="68" y1="30" x2="110" y2="45" stroke="#c9a227" stroke-width="1.2" opacity="0.3"/>
+        <line x1="73" y1="30" x2="115" y2="45" stroke="#c9a227" stroke-width="1.2" opacity="0.3"/>
+        <path d="M100 24h18l2 5H98l2-5z" fill="#1a1a1a" stroke="#c9a227" stroke-width="0.8"/>
+        <circle cx="110" cy="26.5" r="1.2" fill="#2ecc71" opacity="0.8"/>
+        <rect x="118" y="28" width="38" height="18" rx="2" fill="#2b2b2b" stroke="#444" stroke-width="1.5"/>
+        <path d="M128 46l-5 22h-10l3-22h12z" fill="#111" stroke="#222" stroke-width="1"/>
+        <rect x="156" y="31" width="20" height="12" rx="1" fill="#1f1f1f"/>
+        <line x1="156" y1="34" x2="185" y2="34" stroke="#444" stroke-width="2.5"/>
+        <line x1="156" y1="40" x2="185" y2="40" stroke="#444" stroke-width="2.5"/>
+        <rect x="180" y="27" width="8" height="22" rx="1.5" fill="#111"/>
+        <path d="M151 46l-5 14h-6l3-14" fill="#151515"/>
+        <path d="M126 48c-1 3-2 3-2 3" stroke="#c9a227" stroke-width="1.8"/>
+      </svg>`
+    }
+  ];
+
+  // Load from Storage or fallback to default
+  let CUSTODY_ITEMS = Storage.get('ps_custody_items');
+  if (!CUSTODY_ITEMS || CUSTODY_ITEMS.length === 0) {
+    CUSTODY_ITEMS = JSON.parse(JSON.stringify(defaultItems));
+    Storage.set('ps_custody_items', defaultItems);
+  } else {
+    // Migrate: Ensure Carbon Rifle (id "10") has the correct image path if not edited
+    const carbonRifle = CUSTODY_ITEMS.find(item => item.id === "10");
+    if (carbonRifle && (!carbonRifle.img || carbonRifle.img === "")) {
+      carbonRifle.img = "../assets/img/carbon_rifle.png";
+      Storage.set('ps_custody_items', CUSTODY_ITEMS);
+    }
+    // Migrate: Ensure Heavy Rifle (id "09") has the correct image path if not edited
+    const heavyRifle = CUSTODY_ITEMS.find(item => item.id === "09");
+    if (heavyRifle && (!heavyRifle.img || heavyRifle.img === "")) {
+      heavyRifle.img = "../assets/img/heavy_rifle.png";
+      Storage.set('ps_custody_items', CUSTODY_ITEMS);
+    }
+    // Migrate: Ensure Compact Pistol (id "05") has the correct image path if not edited
+    const compactPistol = CUSTODY_ITEMS.find(item => item.id === "05");
+    if (compactPistol && (!compactPistol.img || compactPistol.img === "")) {
+      compactPistol.img = "../assets/img/compact_pistol.png";
+      Storage.set('ps_custody_items', CUSTODY_ITEMS);
+    }
+  }
+
+  let currentLevel = 1;
+
+  const levelsData = {
+    1: {
+      num: "01",
+      titleAr: "من جندي إلى عريف",
+      desc: "العهدة الأساسية للرتب الميدانية الأولى، تشمل الأسلحة الدفاعية الأساسية وأدوات الخدمة المعتمدة بوزارة الداخلية."
+    },
+    2: {
+      num: "02",
+      titleAr: "من وكيل رقيب إلى رئيس رقباء",
+      desc: "العهدة المتقدمة لرتب ضباط الصف والقيادات الميدانية المتوسطة، وتتضمن تسليحاً إضافياً مثل الرشاش الثقيل لدعم المهام الميدانية."
+    },
+    3: {
+      num: "03",
+      titleAr: "من ملازم إلى فريق أول",
+      desc: "العهدة الكاملة والقصوى للرتب القيادية والضباط بالقطاع، تشمل الرشاش الثقيل ورشاش الكاربون التكتيكي المتقدم."
+    }
+  };
+
+  function selectLevel(levelNum) {
+    currentLevel = levelNum;
+    
+    // Update tabs active state
+    document.querySelectorAll('.custody-tab-btn').forEach(btn => {
+      btn.classList.remove('active');
+    });
+    document.getElementById(`tab-lvl-${levelNum}`).classList.add('active');
+    
+    // Update active level banner info
+    const lvlInfo = levelsData[levelNum];
+    document.getElementById('active-level-num').innerText = lvlInfo.num;
+    document.getElementById('active-level-text').innerText = lvlInfo.titleAr;
+    document.getElementById('active-level-desc').innerText = lvlInfo.desc;
+    
+    // Render weapons grid
+    renderWeaponsGrid();
+  }
+
+  function renderWeaponsGrid() {
+    const grid = document.getElementById('weapons-grid-el');
+    grid.innerHTML = '';
+    
+    const filteredItems = CUSTODY_ITEMS.filter(item => item.levels.includes(currentLevel));
+    
+    filteredItems.forEach((item, idx) => {
+      // Determine dynamic item number format e.g. "01", "02"
+      const displayNum = String(idx + 1).padStart(2, '0');
+      
+      const mediaElement = item.img 
+        ? `<img src="${item.img}" alt="${item.nameAr}" style="width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));">` 
+        : item.svg;
+
+      const editBtn = isAdmin 
+        ? `<button class="btn-edit-weapon" onclick="openEditModal('${item.id}')">✏️ تعديل</button>` 
+        : '';
+
+      const card = document.createElement('div');
+      card.className = 'weapon-card animate-on-scroll';
+      card.setAttribute('data-id', item.id);
+      card.innerHTML = `
+        ${editBtn}
+        <div class="weapon-card-header">
+          <span class="weapon-type-icon ${item.type}">${item.typeIcon}</span>
+          <span class="weapon-class-pill ${item.type}">
+            <span class="weapon-num">${displayNum}</span> | ${item.typeAr}
+          </span>
+        </div>
+        <div class="weapon-frame">
+          <span class="wcorner tl"></span>
+          <span class="wcorner tr"></span>
+          <span class="wcorner bl"></span>
+          <span class="wcorner br"></span>
+          <div class="weapon-svg-wrapper">
+            ${mediaElement}
+          </div>
+        </div>
+        <div class="weapon-info">
+          <div class="weapon-title-ar">${item.nameAr}</div>
+          <div class="weapon-title-en">${item.nameEn}</div>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+
+    // Check if edit mode is active and toggle card dragging
+    const isEditActive = document.body.classList.contains('global-live-editing');
+    toggleCardDragging(isEditActive);
+  }
+
+  // ── Admin Functions ──
+
+  function openEditModal(itemId) {
+    const item = CUSTODY_ITEMS.find(i => i.id === itemId);
+    if (!item) return;
+
+    document.getElementById('edit-weapon-id').value = item.id;
+    document.getElementById('edit-name-ar').value = item.nameAr || '';
+    document.getElementById('edit-name-en').value = item.nameEn || '';
+    document.getElementById('edit-type').value = item.type || 'lethal';
+    document.getElementById('edit-img-path').value = item.img || '';
+
+    // Check checkboxes
+    document.getElementById('edit-lvl-1').checked = item.levels.includes(1);
+    document.getElementById('edit-lvl-2').checked = item.levels.includes(2);
+    document.getElementById('edit-lvl-3').checked = item.levels.includes(3);
+
+    // Populate visual image select
+    renderVisualImageSelect(item.img || '');
+
+    // Show modal
+    const modal = document.getElementById('custody-edit-modal');
+    modal.style.display = 'flex';
+  }
+
+  function renderVisualImageSelect(selectedPath) {
+    const container = document.getElementById('visual-img-select-container');
+    container.innerHTML = '';
+
+    const defaultWeaponImages = [
+      { name: "فلير", path: "../assets/img/flare.png" },
+      { name: "مطاعة", path: "../assets/img/nightstick.png" },
+      { name: "صاعق", path: "../assets/img/stun_gun.png" },
+      { name: "مسدس", path: "../assets/img/pistol.png" },
+      { name: "مسدس مصغر", path: "../assets/img/compact_pistol.png" },
+      { name: "شوزن عسكري", path: "../assets/img/combat_shotgun.png" },
+      { name: "مصباح يدوي", path: "../assets/img/flashlight.png" },
+      { name: "طفاية حريق", path: "../assets/img/fire_extinguisher.png" },
+      { name: "الرشاش الثقيل", path: "../assets/img/heavy_rifle.png" },
+      { name: "الرشاش الكاربون", path: "../assets/img/carbon_rifle.png" },
+      { name: "افتراضي (SVG)", path: "" }
+    ];
+
+    defaultWeaponImages.forEach(imgOpt => {
+      const isSel = (imgOpt.path === selectedPath) || (!selectedPath && imgOpt.path === "");
+      const card = document.createElement('div');
+      card.className = `img-option-card ${isSel ? 'active' : ''}`;
+      
+      let previewHtml = '';
+      if (imgOpt.path) {
+        previewHtml = `<img src="${imgOpt.path}" alt="${imgOpt.name}">`;
+      } else {
+        previewHtml = `<div class="svg-preview" style="font-size: 1.1rem;"><i class="fa-solid fa-gear"></i></div>`;
+      }
+
+      card.innerHTML = `
+        ${previewHtml}
+        <span class="img-option-label">${imgOpt.name}</span>
+      `;
+
+      card.onclick = () => {
+        // Deselect others
+        container.querySelectorAll('.img-option-card').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        // Update input field
+        document.getElementById('edit-img-path').value = imgOpt.path;
+      };
+
+      container.appendChild(card);
+    });
+  }
+
+  function closeEditModal() {
+    document.getElementById('custody-edit-modal').style.display = 'none';
+  }
+
+  function saveWeaponChanges() {
+    const id = document.getElementById('edit-weapon-id').value;
+    const item = CUSTODY_ITEMS.find(i => i.id === id);
+    if (!item) return;
+
+    const nameAr = document.getElementById('edit-name-ar').value.trim();
+    const nameEn = document.getElementById('edit-name-en').value.trim();
+    const type = document.getElementById('edit-type').value;
+    const imgPath = document.getElementById('edit-img-path').value.trim();
+
+    // Get levels
+    const levels = [];
+    if (document.getElementById('edit-lvl-1').checked) levels.push(1);
+    if (document.getElementById('edit-lvl-2').checked) levels.push(2);
+    if (document.getElementById('edit-lvl-3').checked) levels.push(3);
+
+    if (levels.length === 0) {
+      if (window.App && App.toast) {
+        App.toast('✕ يجب اختيار مستوى واحد على الأقل للعهدة!', 'error');
+      } else {
+        alert('يجب اختيار مستوى واحد على الأقل للعهدة!');
+      }
+      return;
+    }
+
+    // Set Arabic translation mapping for type
+    let typeAr = "خدمة";
+    let typeIcon = '<i class="fa-solid fa-wrench"></i>';
+    if (type === "lethal") {
+      typeAr = "قاتل";
+      typeIcon = '<i class="fa-solid fa-crosshairs"></i>';
+    } else if (type === "non-lethal") {
+      typeAr = "غير قاتل";
+      typeIcon = "⚡";
+    }
+
+    // Apply edits
+    item.nameAr = nameAr;
+    item.nameEn = nameEn;
+    item.type = type;
+    item.typeAr = typeAr;
+    item.typeIcon = typeIcon;
+    item.levels = levels;
+    
+    if (imgPath) {
+      item.img = imgPath;
+    } else {
+      delete item.img;
+    }
+
+    // Save back to local storage
+    Storage.set('ps_custody_items', CUSTODY_ITEMS);
+
+    // Refresh display
+    updateTabCounts();
+    selectLevel(currentLevel);
+    closeEditModal();
+
+    if (window.App && App.toast) {
+      App.toast('💾 تم حفظ تعديلات العهدة بنجاح!', 'success');
+    }
+  }
+
+  function resetCustodyToDefault() {
+    if (confirm('هل أنت متأكد من رغبتك في إعادة تعيين العهدة العسكرية بالكامل إلى القيم الافتراضية؟')) {
+      CUSTODY_ITEMS = JSON.parse(JSON.stringify(defaultItems));
+      Storage.set('ps_custody_items', defaultItems);
+      
+      updateTabCounts();
+      selectLevel(currentLevel);
+      
+      if (window.App && App.toast) {
+        App.toast('<i class="fa-solid fa-arrows-rotate"></i> تم إعادة ضبط العهدة بنجاح!', 'success');
+      }
+    }
+  }
+
+  function updateTabCounts() {
+    for (let i = 1; i <= 3; i++) {
+      const count = CUSTODY_ITEMS.filter(item => item.levels.includes(i)).length;
+      const descEl = document.getElementById(`tab-lvl-${i}-desc`);
+      if (descEl) {
+        descEl.innerText = `${count} قطعة عهدة`;
+      }
+    }
+  }
+
+  let draggedCardId = null;
+
+  function toggleCardDragging(active) {
+    // Only allow dragging if the user is authorized as admin
+    if (!isAdmin) return;
+
+    const cards = document.querySelectorAll('.weapon-card');
+    cards.forEach(card => {
+      if (active) {
+        card.setAttribute('draggable', 'true');
+        card.classList.add('draggable-card');
+        
+        card.ondragstart = (e) => {
+          // If clicking on edit button or input, do not drag
+          if (e.target.closest('.btn-edit-weapon')) {
+            e.preventDefault();
+            return;
+          }
+          
+          const itemId = card.dataset.id;
+          if (!itemId) return;
+          
+          draggedCardId = itemId;
+          card.style.opacity = '0.5';
+          e.dataTransfer.effectAllowed = 'move';
+        };
+        
+        card.ondragover = (e) => {
+          e.preventDefault();
+          if (draggedCardId) {
+            card.classList.add('drag-over');
+          }
+        };
+        
+        card.ondragleave = () => {
+          card.classList.remove('drag-over');
+        };
+        
+        card.ondrop = (e) => {
+          e.preventDefault();
+          card.classList.remove('drag-over');
+          
+          const targetId = card.dataset.id;
+          if (draggedCardId && targetId && draggedCardId !== targetId) {
+            const fromIdx = CUSTODY_ITEMS.findIndex(i => i.id === draggedCardId);
+            const toIdx = CUSTODY_ITEMS.findIndex(i => i.id === targetId);
+            
+            if (fromIdx !== -1 && toIdx !== -1) {
+              const [movedItem] = CUSTODY_ITEMS.splice(fromIdx, 1);
+              CUSTODY_ITEMS.splice(toIdx, 0, movedItem);
+              
+              // Persist order
+              Storage.set('ps_custody_items', CUSTODY_ITEMS);
+              
+              // Re-render grid
+              renderWeaponsGrid();
+              
+              if (window.App && App.toast) {
+                App.toast('<i class="fa-solid fa-arrows-rotate"></i> تم حفظ الترتيب الجديد للعهدة بنجاح!', 'success');
+              }
+            }
+          }
+          draggedCardId = null;
+        };
+        
+        card.ondragend = () => {
+          card.style.opacity = '1';
+          cards.forEach(c => c.classList.remove('drag-over'));
+          draggedCardId = null;
+        };
+        
+      } else {
+        card.removeAttribute('draggable');
+        card.classList.remove('draggable-card');
+        card.style.opacity = '1';
+        card.ondragstart = null;
+        card.ondragover = null;
+        card.ondragleave = null;
+        card.ondrop = null;
+        card.ondragend = null;
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    SeedData.init();
+    
+    // Add authorization class to admin toolbar instead of forcing display
+    if (isAdmin) {
+      const toolbar = document.getElementById('admin-toolbar-el');
+      if (toolbar) toolbar.classList.add('authorized');
+    }
+    
+    // Update visual tab counts
+    updateTabCounts();
+    
+    // Initialize with Level 1
+    selectLevel(1);
+    
+    // MutationObserver to listen for edit mode activation
+    const bodyObserver = new MutationObserver((mutations) => {
+      mutations.forEach(mutation => {
+        if (mutation.attributeName === 'class') {
+          const isActive = document.body.classList.contains('global-live-editing');
+          toggleCardDragging(isActive);
+        }
+      });
+    });
+    bodyObserver.observe(document.body, { attributes: true });
+
+    const footerDiv = document.createElement('div');
+    footerDiv.innerHTML = Components.footer();
+    document.body.appendChild(footerDiv.firstElementChild);
+  });
+</script>
+
+<!-- ── Glassmorphic Admin Modal Overlay ── -->
+<div class="custody-modal-overlay" id="custody-edit-modal" style="display:none;">
+  <div class="custody-modal-content">
+    <span class="custody-modal-decor-corner tl"></span>
+    <span class="custody-modal-decor-corner tr"></span>
+    <span class="custody-modal-decor-corner bl"></span>
+    <span class="custody-modal-decor-corner br"></span>
+    
+    <div class="custody-modal-header">
+      <h3 class="custody-modal-title"><i class="fa-solid fa-wrench"></i> تعديل بيانات العهدة</h3>
+      <button class="custody-modal-close" onclick="closeEditModal()">×</button>
+    </div>
+    
+    <div class="custody-modal-body">
+      <form id="custody-edit-form" onsubmit="event.preventDefault(); saveWeaponChanges();">
+        <input type="hidden" id="edit-weapon-id">
+        
+        <div class="form-group-custody">
+          <label for="edit-name-ar">الاسم بالكامل (عربي)</label>
+          <input type="text" id="edit-name-ar" required placeholder="مثال: مسدس مصغر">
+        </div>
+        
+        <div class="form-group-custody">
+          <label for="edit-name-en">الاسم بالكامل (إنجليزي)</label>
+          <input type="text" id="edit-name-en" required placeholder="مثال: Compact Pistol">
+        </div>
+        
+        <div class="form-row-custody">
+          <div class="form-group-custody">
+            <label for="edit-type">فئة السلاح / الأداة</label>
+            <select id="edit-type" required>
+              <option value="lethal"><i class="fa-solid fa-crosshairs"></i> قاتل</option>
+              <option value="non-lethal">⚡ غير قاتل</option>
+              <option value="service"><i class="fa-solid fa-wrench"></i> خدمة</option>
+            </select>
+          </div>
+          
+          <div class="form-group-custody">
+            <label>المستويات المتاحة بالصفحة</label>
+            <div class="levels-checkbox-group">
+              <label class="lvl-checkbox-label">
+                <input type="checkbox" id="edit-lvl-1" value="1"> مستوى 1
+              </label>
+              <label class="lvl-checkbox-label">
+                <input type="checkbox" id="edit-lvl-2" value="2"> مستوى 2
+              </label>
+              <label class="lvl-checkbox-label">
+                <input type="checkbox" id="edit-lvl-3" value="3"> مستوى 3
+              </label>
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-group-custody">
+          <label>صورة العهدة</label>
+          <div class="image-selector-capsule">
+            <!-- Visual Select -->
+            <div class="visual-img-select" id="visual-img-select-container">
+              <!-- Dynamic thumbnails of available images -->
+            </div>
+            <div style="margin-top: 10px;">
+              <label for="edit-img-path" style="font-size: 0.75rem; color: var(--color-text-secondary);">أو اكتب مسار صورة مخصص:</label>
+              <input type="text" id="edit-img-path" placeholder="مثال: ../assets/img/custom.png">
+            </div>
+          </div>
+        </div>
+        
+        <div class="custody-modal-actions">
+          <button type="submit" class="btn-save-custody">💾 حفظ التغييرات</button>
+          <button type="button" class="btn-cancel-custody" onclick="closeEditModal()">إلغاء</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
