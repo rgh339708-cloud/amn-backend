@@ -82,6 +82,32 @@
       margin-bottom: 6px;
     }
 
+    /* Medal Card Requirements Styling */
+    .medal-requirements {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: var(--space-4);
+      text-align: right;
+    }
+
+    .req-title {
+      font-size: 0.78rem;
+      font-weight: 850;
+      color: var(--color-gold-light);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .req-desc {
+      font-size: 0.75rem;
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+    }
+
     /* Section Divider Bar */
     .section-bar {
       display: flex;
@@ -310,62 +336,66 @@
       </p>
     </div>
 
-    <!-- Submission Conditions Box -->
-    <div class="condition-box animate-fade-up">
-      <div class="condition-title">
-        <i class="fa-solid fa-circle-info"></i> شروط الاستحقاق والتقديم العام:
-      </div>
-      <ul class="condition-list">
-        <li>يؤخذ بعين الاعتبار بأن يستحقها من يكمل شروط التواجد الأسبوعي.</li>
-        <li>يرفق مع طلب الاستحقاق عدد <strong>5 تقارير عمليات</strong>.</li>
-        <li>يجب ألا يكون قد مضى على تلك التقارير أكثر من <strong>30 يوماً</strong> منذ إعلان فتح طلب الاستحقاق.</li>
-        <li>الأنواط متاحة لرتبة <strong>جندي أول فما فوق</strong>.</li>
-      </ul>
-    </div>
-
-    <!-- Section Bar for Medals -->
-    <div class="section-bar animate-fade-up">
-      <div class="section-bar-right">
-        <div class="section-bar-badge"><i class="fa-solid fa-medal"></i></div>
-        <div>
-          <div class="section-bar-title">الأوسمة والأنواط المعتمدة</div>
-          <div class="section-bar-subtitle">الأنواط الرسمية المعلقة لرجال الأمن العام</div>
-        </div>
-      </div>
-      <div class="section-bar-left-badge" style="background: rgba(201, 162, 39, 0.1); border-color: rgba(201, 162, 39, 0.25); color: var(--color-gold-primary);">مفعلة</div>
-    </div>
-
     <!-- Medals Grid -->
     <div class="courses-grid animate-fade-up">
 
-      <!-- 1. Presence Medal (نوط التواجد) -->
-      <div class="course-card" onclick="showMedalNotification('نوط التواجد')">
-        <div class="course-card-arrow">←</div>
+      <!-- 1. Presence & Task Completion Medal (نوط التواجد وإكمال المهام) -->
+      <div class="course-card" style="cursor: default;">
         <div class="course-card-icon-container">
-          <img src="../assets/img/medal_presence.png" alt="نوط التواجد" class="course-card-emblem-img">
+          <img src="../assets/img/medal_presence.png" alt="نوط التواجد وإكمال المهام" class="course-card-emblem-img">
         </div>
-        <h3 class="course-card-title">نوط ( التواجد )</h3>
-        <h4 class="course-card-subtitle">الانضباط والتواجد الميداني</h4>
-        <p class="course-card-desc">يُمنح للعسكريين الذين لديهم تواجد مستمر وفاعل في الميدان وإنهاء عدد الساعات المطلوبة لرتبتهم.</p>
+        <h3 class="course-card-title">نوط ( التواجد وإكمال المهام )</h3>
+        <h4 class="course-card-subtitle">الانضباط والتواجد وإتمام التكليفات</h4>
+        <p class="course-card-desc">يُمنح للعسكريين الذين لديهم تواجد في الميدان وإنهاء عدد الساعات المطلوبة لرتبتهم، والذين يكملون المهام الموكلة لهم من قبل مدير الأمن العام.</p>
+        
+        <div class="medal-requirements">
+          <div class="req-title"><i class="fa-solid fa-circle-info"></i> شرط التقديم:</div>
+          <div class="req-desc">يؤخذ بعين الاعتبار بأن يستحقها من يكمل شروط التواجد الأسبوعي + يرفق عدد 5 تقارير عمليات على أن لا يكون مضى على تلك التقارير أكثر من 30 يوماً منذ إعلان فتح طلب الاستحقاق.</div>
+        </div>
+
         <div class="course-card-footer">
           <span>جندي أول فما فوق</span>
           <span class="course-card-footer-icon">⭐</span>
         </div>
       </div>
 
-      <!-- 2. Task Completion Medal (نوط إكمال المهام) -->
-      <div class="course-card" onclick="showMedalNotification('نوط إكمال المهام')">
-        <div class="course-card-arrow">←</div>
+      <!-- 2. Aviation Medal (نوط الطيران) -->
+      <div class="course-card" style="cursor: default;">
         <div class="course-card-icon-container">
-          <!-- We can use the same ribbon base with a slight gold filter/design or layout -->
-          <img src="../assets/img/medal_presence.png" alt="نوط إكمال المهام" class="course-card-emblem-img" style="filter: drop-shadow(0 4px 10px rgba(0,0,0,0.4)) hue-rotate(45deg);">
+          <img src="../assets/img/medal_aviation.png" alt="نوط الطيران" class="course-card-emblem-img">
         </div>
-        <h3 class="course-card-title">نوط ( اكمال المهام )</h3>
-        <h4 class="course-card-subtitle">إتمام التكليفات والمهام الرسمية</h4>
-        <p class="course-card-desc">يُمنح هذا النوط للعسكريين الذين يكملون المهام الموكلة لهم على أكمل وجه من قبل معالي مدير الأمن العام.</p>
+        <h3 class="course-card-title">نوط ( الطيران )</h3>
+        <h4 class="course-card-subtitle">إتمام ساعات التحليق الجوي</h4>
+        <p class="course-card-desc">يعطى هذا النوط عند إتمام 10 ساعات طيران خلال أسبوع واحد فقط في قطاع طيران الأمن العام.</p>
+        
+        <div class="medal-requirements">
+          <div class="req-title"><i class="fa-solid fa-circle-info"></i> شرط التقديم:</div>
+          <div class="req-desc">تفعيل قطاع طيران الأمن 10 ساعات طيران خلال أسبوع واحد فقط، على أن لا يكون مضى على تلك الساعات أكثر من 30 يوماً منذ إعلان فتح طلب الاستحقاق.</div>
+        </div>
+
         <div class="course-card-footer">
-          <span>جندي أول فما فوق</span>
-          <span class="course-card-footer-icon"><i class="fa-solid fa-circle-check"></i></span>
+          <span>وكيل رقيب فما فوق</span>
+          <span class="course-card-footer-icon">🚁</span>
+        </div>
+      </div>
+
+      <!-- 3. Course Honor Medal (نوط شرف الدورات) -->
+      <div class="course-card" style="cursor: default;">
+        <div class="course-card-icon-container">
+          <img src="../assets/img/medal_honor.png" alt="نوط شرف الدورات" class="course-card-emblem-img">
+        </div>
+        <h3 class="course-card-title">نوط ( شرف الدورات )</h3>
+        <h4 class="course-card-subtitle">تفعيل قطاعات الأمن العام ميدانياً</h4>
+        <p class="course-card-desc">يعطى هذا النوط للعسكريين المتميزين الذين يقومون بتفعيل قطاعات الأمن العام المختلفة في الميدان.</p>
+        
+        <div class="medal-requirements">
+          <div class="req-title"><i class="fa-solid fa-circle-info"></i> شرط التقديم:</div>
+          <div class="req-desc">تفعيل إحدى القطاعات التالية لمدة 10 ساعات خلال أسبوع واحد: (قوة المهمات والواجبات الخاصة، مكافحة المخدرات، أمن الطرق)، على أن لا يكون مضى على تلك الساعات أكثر من 30 يوماً منذ إعلان فتح طلب الاستحقاق.</div>
+        </div>
+
+        <div class="course-card-footer">
+          <span>كافة الرتب</span>
+          <span class="course-card-footer-icon">⚔️</span>
         </div>
       </div>
 
@@ -373,11 +403,11 @@
 
   </div>
 
-  <script src="../assets/js/storage.js?v=1.1.33"></script>
-  <script src="../assets/js/data.js?v=1.1.33"></script>
-  <script src="../assets/js/auth.js?v=1.1.33"></script>
-  <script src="../assets/js/components.js?v=1.1.33"></script>
-  <script src="../assets/js/app.js?v=1.1.33"></script>
+  <script src="../assets/js/storage.js?v=1.1.34"></script>
+  <script src="../assets/js/data.js?v=1.1.34"></script>
+  <script src="../assets/js/auth.js?v=1.1.34"></script>
+  <script src="../assets/js/components.js?v=1.1.34"></script>
+  <script src="../assets/js/app.js?v=1.1.34"></script>
   <script>
     // Inject navbar and sidebar
     document.write(Components.navbar('amn7'));
@@ -390,14 +420,6 @@
       footerDiv.innerHTML = Components.footer();
       body.appendChild(footerDiv.firstElementChild);
     });
-
-    function showMedalNotification(medalName) {
-      if (window.App && App.toast) {
-        App.toast(`ℹ️ طلبات التقديم لـ (${medalName}) ستُفتح قريباً!`, 'info');
-      } else {
-        alert(`طلبات التقديم لـ (${medalName}) ستُفتح قريباً!`);
-      }
-    }
   </script>
 </body>
 
