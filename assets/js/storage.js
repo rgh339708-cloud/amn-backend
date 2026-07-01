@@ -117,6 +117,30 @@ async function fetchWithTimeout(resource, options = {}) {
 const Storage = (() => {
   const PREFIX = 'ps_';
 
+  // IDs of old/renamed system pages that must NEVER be stored in ps_pages
+  const OLD_PAGE_IDS = new Set(['leadership','managers','centers','guide','inventory','vehicles','college','attendance-reports','exams','field-title','uniform','apply','database','wings','aviation-document','counter-terrorism-wing','pursuit-assault-wing','shooting-skills-wing','roads-document','traffic-document','rapid-intervention-document','special-tasks-document','officers-document','staff-document','ops-document','regulations-document','investigation-document','narcotics-document','thunderbolt-document','district-officers-document','amn90-r']);
+
+  // Immediately purge old page IDs from localStorage on script load
+  (function purgeOldPagesFromLocalStorage() {
+    try {
+      const raw = localStorage.getItem('ps_pages');
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) return;
+      const cleaned = parsed.filter(p => p && p.id && !OLD_PAGE_IDS.has(p.id));
+      if (cleaned.length !== parsed.length) {
+        localStorage.setItem('ps_pages', JSON.stringify(cleaned));
+        // Also remove from unsynced list so server copy wins
+        try {
+          const unsynced = JSON.parse(localStorage.getItem('ps_unsynced_keys') || '[]');
+          const idx = unsynced.indexOf('ps_pages');
+          if (idx !== -1) { unsynced.splice(idx, 1); localStorage.setItem('ps_unsynced_keys', JSON.stringify(unsynced)); }
+        } catch(e) {}
+        console.log('[Storage] Purged old page IDs from ps_pages localStorage.');
+      }
+    } catch(e) {}
+  })();
+
   const keys = {
     USERS:          `${PREFIX}users`,
     CURRENT_USER:   `${PREFIX}current_user`,
@@ -140,6 +164,7 @@ const Storage = (() => {
     EXAM_VIOLATIONS: `${PREFIX}exam_violations`,
     DISCORD_LOGS:   `${PREFIX}discord_logs`,
     QBANK_REQUESTS: `${PREFIX}qbank_requests`,
+    DOC_ACCESS_LOGS: `${PREFIX}doc_access_logs`,
   };
 
   const lastWriteTime = {};
@@ -464,7 +489,19 @@ const Storage = (() => {
                          key !== keys.CURRENT_USER && 
                          key !== keys.INITIALIZED;
       
-      const payloadData = isArrayKey ? getCollection(key) : data;
+      let payloadData = isArrayKey ? getCollection(key) : data;
+
+      // Purge old page IDs before retrying sync for ps_pages
+      if (key === 'ps_pages' && Array.isArray(payloadData)) {
+        const before = payloadData.length;
+        payloadData = payloadData.filter(p => p && p.id && !OLD_PAGE_IDS.has(p.id));
+        if (payloadData.length !== before) {
+          localStorage.setItem('ps_pages', JSON.stringify(payloadData));
+          console.log('[Storage Sync] Purged old page IDs from ps_pages before retry sync.');
+        }
+        // If no custom pages remain, nothing to sync — just mark as synced
+        if (payloadData.length === 0) { markKeySynced(key); continue; }
+      }
       
       try {
         const apiBase = getApiBase();
