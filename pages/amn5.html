@@ -1231,6 +1231,12 @@
       compactPistol.img = "../assets/img/compact_pistol.png";
       needsSave = true;
     }
+    // Migrate: Ensure Flare (id "01") has the correct image path
+    const flareItem = CUSTODY_ITEMS.find(item => item.id === "01");
+    if (flareItem && (!flareItem.img || !flareItem.img.includes("flare.png"))) {
+      flareItem.img = "../assets/img/flare.png";
+      needsSave = true;
+    }
     if (needsSave) {
       Storage.set('ps_custody_items', CUSTODY_ITEMS);
     }
