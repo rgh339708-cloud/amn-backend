@@ -1212,22 +1212,26 @@
     CUSTODY_ITEMS = JSON.parse(JSON.stringify(defaultItems));
     Storage.set('ps_custody_items', defaultItems);
   } else {
-    // Migrate: Ensure Carbon Rifle (id "10") has the correct image path if not edited
+    let needsSave = false;
+    // Migrate: Ensure Carbon Rifle (id "10") has the correct image path
     const carbonRifle = CUSTODY_ITEMS.find(item => item.id === "10");
-    if (carbonRifle && (!carbonRifle.img || carbonRifle.img === "")) {
+    if (carbonRifle && (!carbonRifle.img || !carbonRifle.img.includes("carbon_rifle.png"))) {
       carbonRifle.img = "../assets/img/carbon_rifle.png";
-      Storage.set('ps_custody_items', CUSTODY_ITEMS);
+      needsSave = true;
     }
-    // Migrate: Ensure Heavy Rifle (id "09") has the correct image path if not edited
+    // Migrate: Ensure Heavy Rifle (id "09") has the correct image path
     const heavyRifle = CUSTODY_ITEMS.find(item => item.id === "09");
-    if (heavyRifle && (!heavyRifle.img || heavyRifle.img === "")) {
+    if (heavyRifle && (!heavyRifle.img || !heavyRifle.img.includes("heavy_rifle.png"))) {
       heavyRifle.img = "../assets/img/heavy_rifle.png";
-      Storage.set('ps_custody_items', CUSTODY_ITEMS);
+      needsSave = true;
     }
-    // Migrate: Ensure Compact Pistol (id "05") has the correct image path if not edited
+    // Migrate: Ensure Compact Pistol (id "05") has the correct image path
     const compactPistol = CUSTODY_ITEMS.find(item => item.id === "05");
-    if (compactPistol && (!compactPistol.img || compactPistol.img === "")) {
+    if (compactPistol && (!compactPistol.img || !compactPistol.img.includes("compact_pistol.png"))) {
       compactPistol.img = "../assets/img/compact_pistol.png";
+      needsSave = true;
+    }
+    if (needsSave) {
       Storage.set('ps_custody_items', CUSTODY_ITEMS);
     }
   }
