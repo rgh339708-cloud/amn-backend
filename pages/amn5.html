@@ -1255,6 +1255,24 @@
       pistolItem.img = "../assets/img/pistol.png";
       needsSave = true;
     }
+    // Migrate: Ensure Combat Shotgun (id "06") has the correct image path
+    const shotgunItem = CUSTODY_ITEMS.find(item => item.id === "06");
+    if (shotgunItem && (!shotgunItem.img || !shotgunItem.img.includes("combat_shotgun.png"))) {
+      shotgunItem.img = "../assets/img/combat_shotgun.png";
+      needsSave = true;
+    }
+    // Migrate: Ensure Flashlight (id "07") has the correct image path
+    const flashlightItem = CUSTODY_ITEMS.find(item => item.id === "07");
+    if (flashlightItem && (!flashlightItem.img || !flashlightItem.img.includes("flashlight.png"))) {
+      flashlightItem.img = "../assets/img/flashlight.png";
+      needsSave = true;
+    }
+    // Migrate: Ensure Fire Extinguisher (id "08") has the correct image path
+    const extinguisherItem = CUSTODY_ITEMS.find(item => item.id === "08");
+    if (extinguisherItem && (!extinguisherItem.img || !extinguisherItem.img.includes("fire_extinguisher.png"))) {
+      extinguisherItem.img = "../assets/img/fire_extinguisher.png";
+      needsSave = true;
+    }
     if (needsSave) {
       Storage.set('ps_custody_items', CUSTODY_ITEMS);
     }
