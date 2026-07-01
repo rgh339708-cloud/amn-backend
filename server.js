@@ -870,7 +870,7 @@ async function sendRecruitmentDecisionWebhook(application, newStatus, operatorNa
   req.end();
 }
 
-function sendAttendanceReportToDiscord(bookName, operatorStr, roomImage, records, courseType = 'أساسية') {
+function sendAttendanceReportToDiscord(bookName, operatorStr, roomImage, records, courseType = 'أساسية', trainingMembers = []) {
   const WEBHOOK_URL = 'https://discord.com/api/webhooks/1519343011417559041/kZrlK9SJX5afM8G8u_uFxhnsTjHQpncdZ8BwyZ89Z_a1VX5QPeWKD_Rc5_Ee4Zj3Vo4h';
 
   console.log('[Discord Report] Sending report via webhook for book:', bookName);
@@ -885,9 +885,11 @@ function sendAttendanceReportToDiscord(bookName, operatorStr, roomImage, records
     cleanOp = '—';
   }
 
+  const recs = records || [];
+
   let attendeesList = '';
-  if (records && records.length > 0) {
-    attendeesList = records.map((r) => {
+  if (recs.length > 0) {
+    attendeesList = recs.map((r) => {
       if (r.display_name && String(r.display_name).startsWith('<@')) return r.display_name;
       const rawId = r.user_id || r.discord || r.display_name;
       const cleanId = String(rawId).replace(/\D/g, '');
@@ -899,8 +901,86 @@ function sendAttendanceReportToDiscord(bookName, operatorStr, roomImage, records
     attendeesList = 'لا يوجد حضور';
   }
 
-  const countVal = records ? records.length : 0;
-  const reportDescription = `**  تقرير حضور المدربين \n الدورة / الدفتر \n${bookName}\n تصنيف الدورة\n${courseType}\n المسؤول عن التحضير \n${cleanOp}\n عدد الحاضرين \n${countVal}\n أسماء الحاضرين \n${attendeesList}**`;
+  // Filter expected members based on course / position / leadership matching bookName
+  const cleanBook = String(bookName || '').replace(/دورة/g, '').replace(/دفتر/g, '').replace(/تحضير/g, '').replace(/مدربين/g, '').trim().toLowerCase();
+  const keywords = cleanBook.split(/\s+/).filter(w => w.length > 2);
+
+  let expectedMembers = (trainingMembers || []).filter(m => {
+    const pos = String(m.position || m.leadership || m.role || '').trim().toLowerCase();
+    if (!pos) return true; // Default include if position not specified
+    if (keywords.length === 0) return true;
+    for (const kw of keywords) {
+      if (pos.includes(kw) || cleanBook.includes(pos.replace(/مدرب/g, '').trim())) return true;
+    }
+    return pos.includes(cleanBook) || cleanBook.includes(pos);
+  });
+
+  if (expectedMembers.length === 0 && (trainingMembers || []).length > 0) {
+    expectedMembers = trainingMembers; // Fallback to all training members if no specific position keyword match
+  }
+
+  // Helper to get Discord mention string
+  const getDiscordMention = (rawId, nameFallback) => {
+    const discordId = rawId ? String(rawId).replace(/\D/g, '') : '';
+    if (discordId.length >= 17) return `<@${discordId}>`;
+    if (String(rawId || '').startsWith('<@')) return rawId;
+    return nameFallback ? `@${nameFallback}` : `<@${rawId || 'عضو'}>`;
+  };
+
+  // Helper to check if an expected member attended
+  const memberAttended = (expMem) => {
+    const expDiscord = expMem.discord ? String(expMem.discord).replace(/\D/g, '') : '';
+    const expBadge = expMem.badge ? String(expMem.badge).replace(/\s+/g, '').toLowerCase() : '';
+    const expName = expMem.name ? expMem.name.trim() : '';
+
+    return recs.some(r => {
+      const rDiscord = String(r.user_id || r.discord || '').replace(/\D/g, '');
+      const rBadge = String(r.code || '').replace(/\s+/g, '').toLowerCase();
+      const rName = String(r.display_name || r.username || '').trim();
+
+      if (expDiscord && rDiscord && expDiscord === rDiscord) return true;
+      if (expBadge && rBadge && expBadge === rBadge) return true;
+      if (expName && rName && expName === rName) return true;
+      return false;
+    });
+  };
+
+  // 1. Absent Members (الغير حاضرين)
+  const absentMembers = expectedMembers.filter(m => !memberAttended(m));
+  let absentLines = '';
+  if (absentMembers.length > 0) {
+    absentLines = absentMembers.map(m => getDiscordMention(m.discord || m.id, m.name)).join('\n');
+  } else {
+    absentLines = 'لا يوجد غياب (الجميع حاضرين)';
+  }
+
+  // 2. Substitute Members (سد العجز) - Attendees not in (trainingMembers || [])
+  const substituteRecords = recs.filter(r => {
+    const rDiscord = String(r.user_id || r.discord || '').replace(/\D/g, '');
+    const rBadge = String(r.code || '').replace(/\s+/g, '').toLowerCase();
+    const rName = String(r.display_name || r.username || '').trim();
+
+    return !(trainingMembers || []).some(exp => {
+      const expDiscord = exp.discord ? String(exp.discord).replace(/\D/g, '') : '';
+      const expBadge = exp.badge ? String(exp.badge).replace(/\s+/g, '').toLowerCase() : '';
+      const expName = exp.name ? exp.name.trim() : '';
+
+      if (expDiscord && rDiscord && expDiscord === rDiscord) return true;
+      if (expBadge && rBadge && expBadge === rBadge) return true;
+      if (expName && rName && expName === rName) return true;
+      return false;
+    });
+  });
+
+  let substituteLines = '';
+  if (substituteRecords.length > 0) {
+    substituteLines = substituteRecords.map(r => getDiscordMention(r.user_id || r.discord, r.display_name || r.username)).join('\n');
+  } else {
+    substituteLines = 'لا يوجد سد عجز';
+  }
+
+  const countVal = recs.length;
+  const reportDescription = `**  تقرير حضور المدربين \n الدورة / الدفتر \n${bookName}\n تصنيف الدورة\n${courseType}\n المسؤول عن التحضير \n${cleanOp}\n عدد الحاضرين \n${countVal}\n أسماء الحاضرين \n${attendeesList}\n\n ❌ الغير حاضرين \n${absentLines}\n\n 🔄 سد العجز \n${substituteLines}**`;
 
   const embed = {
     description: reportDescription,
@@ -3089,13 +3169,6 @@ const server = http.createServer((req, res) => {
                 return;
               }
 
-              // If opening a new session, clear previous attendance records for this book so count starts fresh
-              if (status === 'open') {
-                db.run('DELETE FROM attendance_records WHERE book_id = ?', [book_id], (delErr) => {
-                  if (delErr) console.error('Failed to clear previous attendance records for book:', book_id, delErr);
-                });
-              }
-
               // Log the action
               db.run(`INSERT INTO attendance_book_logs (book_id, book_name, action, operator) VALUES (?, ?, ?, ?)`,
                 [book_id, bookName, actionLabel, operatorStr],
@@ -3110,11 +3183,24 @@ const server = http.createServer((req, res) => {
 
                   // If status is report_sent, fetch active attendees for current session and send report to Discord
                   if (status === 'report_sent') {
-                    db.all(`SELECT user_id, display_name, rank, code, timestamp FROM attendance_records WHERE book_id = ? ORDER BY id ASC`, [book_id], (errRecs, records) => {
-                      if (errRecs) {
-                        console.error('Error fetching records for Discord report:', errRecs);
-                      }
-                      sendAttendanceReportToDiscord(bookName, operator_id, bookRoomImage, records || [], bookCourseType);
+                    db.get(`SELECT timestamp FROM attendance_book_logs WHERE book_id = ? AND action = 'فتح التحضير' ORDER BY id DESC LIMIT 1`, [book_id], (errLog, lastOpenLog) => {
+                      const openTime = lastOpenLog ? lastOpenLog.timestamp : '1970-01-01 00:00:00';
+                      db.all(`SELECT user_id, display_name, rank, code, timestamp FROM attendance_records WHERE book_id = ? AND timestamp >= ? ORDER BY id ASC`, [book_id, openTime], (errRecs, records) => {
+                        if (errRecs) {
+                          console.error('Error fetching records for Discord report:', errRecs);
+                        }
+                        // Query training sheets from general_collections table
+                        db.get(`SELECT data_json FROM general_collections WHERE collection_key IN ('members_google_sheets_cache', 'ps_members_google_sheets_cache') ORDER BY id DESC LIMIT 1`, [], (errSheets, sheetRow) => {
+                          let trainingMembers = [];
+                          if (!errSheets && sheetRow && sheetRow.data_json) {
+                            try {
+                              const parsedData = JSON.parse(sheetRow.data_json);
+                              trainingMembers = parsedData['جدول الادارة العامه لشؤون تدريب الامن العام'] || [];
+                            } catch(e) {}
+                          }
+                          sendAttendanceReportToDiscord(bookName, operator_id, bookRoomImage, records || [], bookCourseType, trainingMembers);
+                        });
+                      });
                     });
                   }
 
@@ -3853,6 +3939,10 @@ const server = http.createServer((req, res) => {
           if (isArrayKey && !Array.isArray(parsed)) {
             parsed = parsed ? [parsed] : [];
           }
+          if (c.collection_key === 'ps_pages' && Array.isArray(parsed)) {
+            const oldIds = ['leadership', 'managers', 'centers', 'guide', 'inventory', 'vehicles', 'college', 'attendance-reports', 'exams', 'field-title', 'uniform', 'apply', 'database', 'wings', 'aviation-document', 'counter-terrorism-wing', 'pursuit-assault-wing', 'shooting-skills-wing', 'roads-document', 'traffic-document', 'rapid-intervention-document', 'special-tasks-document', 'officers-document', 'staff-document', 'ops-document', 'regulations-document', 'investigation-document', 'narcotics-document', 'thunderbolt-document', 'district-officers-document', 'amn90-r'];
+            parsed = parsed.filter(p => p && !oldIds.includes(p.id));
+          }
           collections[c.collection_key] = parsed;
         } catch (ex) {
           console.error(`Error parsing general collection ${c.collection_key}:`, ex);
@@ -4015,7 +4105,7 @@ const server = http.createServer((req, res) => {
               };
             });
             
-            executeBulkSync('exams', 'id', itemsToSave, (err, count) => {
+            executeBulkSync('amn9', 'id', itemsToSave, (err, count) => {
               if (err) {
                 res.writeHead(500, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({ error: err.message || 'Failed to bulk sync exams' }));
@@ -4359,6 +4449,11 @@ const server = http.createServer((req, res) => {
                 } else if (item) {
                   currentArray = Array.isArray(item) ? item : [item];
                 }
+              }
+
+              if (collection === 'ps_pages' && Array.isArray(currentArray)) {
+                const oldIds = ['leadership', 'managers', 'centers', 'guide', 'inventory', 'vehicles', 'college', 'attendance-reports', 'exams', 'field-title', 'uniform', 'apply', 'database', 'wings', 'aviation-document', 'counter-terrorism-wing', 'pursuit-assault-wing', 'shooting-skills-wing', 'roads-document', 'traffic-document', 'rapid-intervention-document', 'special-tasks-document', 'officers-document', 'staff-document', 'ops-document', 'regulations-document', 'investigation-document', 'narcotics-document', 'thunderbolt-document', 'district-officers-document', 'amn90-r'];
+                currentArray = currentArray.filter(x => x && !oldIds.includes(x.id));
               }
 
               const dataJson = JSON.stringify(currentArray);
@@ -5171,11 +5266,76 @@ function updateSettingsJsonBackend(newUrl) {
   }
 }
 
+function startZipWatcher() {
+  const fs = require('fs');
+  const path = require('path');
+  const { exec } = require('child_process');
+
+  const watchDirs = [
+    path.join(__dirname, 'pages'),
+    path.join(__dirname, 'assets'),
+    path.join(__dirname, 'auth')
+  ];
+  
+  const watchFiles = [
+    path.join(__dirname, 'index.html'),
+    path.join(__dirname, 'amn.html'),
+    path.join(__dirname, '200.html')
+  ];
+
+  let debounceTimer;
+
+  function triggerZipBuild(filename) {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      console.log(`[Auto-Zip] Detected change in: ${filename}. Rebuilding updated_site.zip...`);
+      exec('node scratch/zip_deploy.js', (err, stdout, stderr) => {
+        if (err) {
+          console.error('[Auto-Zip Error] Failed to rebuild zip:', err.message);
+        } else {
+          console.log('[Auto-Zip Success] updated_site.zip rebuilt successfully!');
+        }
+      });
+    }, 1500);
+  }
+
+  // Watch directories
+  watchDirs.forEach(dir => {
+    if (!fs.existsSync(dir)) return;
+    try {
+      fs.watch(dir, { recursive: true }, (eventType, filename) => {
+        if (filename && !filename.endsWith('.tmp') && !filename.includes('.git') && !filename.includes('node_modules')) {
+          triggerZipBuild(path.join(path.basename(dir), filename));
+        }
+      });
+    } catch (e) {
+      console.error(`[Auto-Zip Warning] Failed to watch directory ${dir}:`, e.message);
+    }
+  });
+
+  // Watch individual files
+  watchFiles.forEach(file => {
+    if (!fs.existsSync(file)) return;
+    try {
+      fs.watch(file, (eventType, filename) => {
+        triggerZipBuild(path.basename(file));
+      });
+    } catch (e) {
+      console.error(`[Auto-Zip Warning] Failed to watch file ${file}:`, e.message);
+    }
+  });
+
+  console.log('[Auto-Zip] Started background file watcher to keep updated_site.zip updated automatically.');
+}
+
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`==================================================`);
   console.log(`   Security Server running at:`);
   console.log(`   --> http://localhost:${PORT}`);
   console.log(`==================================================`);
+
+  // Start auto zip file watcher
+  startZipWatcher();
 
   // Start cloudflared tunnel automatically only if --tunnel flag or START_TUNNEL env is provided
   if (process.argv.includes('--tunnel') || process.env.START_TUNNEL === 'true') {
