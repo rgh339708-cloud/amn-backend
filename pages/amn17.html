@@ -230,6 +230,22 @@
       color: #fff;
       margin-bottom: 6px;
       text-align: right;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .medal-degree-badge {
+      font-size: 10px;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 8px;
+      background: rgba(201, 162, 39, 0.15);
+      border: 1px solid rgba(201, 162, 39, 0.3);
+      color: var(--color-gold-light);
+      white-space: nowrap;
     }
 
     .course-card-subtitle {
@@ -344,7 +360,7 @@
         <div class="course-card-icon-container">
           <img src="../assets/img/medal_presence.png" alt="نوط التواجد وإكمال المهام" class="course-card-emblem-img">
         </div>
-        <h3 class="course-card-title">نوط ( التواجد وإكمال المهام )</h3>
+        <h3 class="course-card-title"><span>نوط ( التواجد وإكمال المهام )</span> <span class="medal-degree-badge">الدرجة الأولى</span></h3>
         <h4 class="course-card-subtitle">الانضباط والتواجد وإتمام التكليفات</h4>
         <p class="course-card-desc">يُمنح للعسكريين الذين لديهم تواجد في الميدان وإنهاء عدد الساعات المطلوبة لرتبتهم، والذين يكملون المهام الموكلة لهم من قبل مدير الأمن العام.</p>
         
@@ -364,7 +380,7 @@
         <div class="course-card-icon-container">
           <img src="../assets/img/medal_aviation.png" alt="نوط الطيران" class="course-card-emblem-img">
         </div>
-        <h3 class="course-card-title">نوط ( الطيران )</h3>
+        <h3 class="course-card-title"><span>نوط ( الطيران )</span> <span class="medal-degree-badge">الدرجة الثانية</span></h3>
         <h4 class="course-card-subtitle">إتمام ساعات التحليق الجوي</h4>
         <p class="course-card-desc">يعطى هذا النوط عند إتمام 10 ساعات طيران خلال أسبوع واحد فقط في قطاع طيران الأمن العام.</p>
         
@@ -384,7 +400,7 @@
         <div class="course-card-icon-container">
           <img src="../assets/img/medal_honor.png" alt="نوط شرف الدورات" class="course-card-emblem-img">
         </div>
-        <h3 class="course-card-title">نوط ( شرف الدورات )</h3>
+        <h3 class="course-card-title"><span>نوط ( شرف الدورات )</span> <span class="medal-degree-badge">الدرجة الثالثة</span></h3>
         <h4 class="course-card-subtitle">تفعيل قطاعات الأمن العام ميدانياً</h4>
         <p class="course-card-desc">يعطى هذا النوط للعسكريين المتميزين الذين يقومون بتفعيل قطاعات الأمن العام المختلفة في الميدان.</p>
         
@@ -404,7 +420,7 @@
         <div class="course-card-icon-container">
           <img src="../assets/img/medal_traffic_security.png" alt="نوط السلامة المرورية، تنظيم الحشود، والأمن" class="course-card-emblem-img">
         </div>
-        <h3 class="course-card-title">نوط ( السلامة المرورية، تنظيم الحشود، والأمن )</h3>
+        <h3 class="course-card-title"><span>نوط ( السلامة المرورية، تنظيم الحشود، والأمن )</span> <span class="medal-degree-badge">الدرجة الرابعة</span></h3>
         <h4 class="course-card-subtitle">السلامة والتنظيم وحفظ الاستقرار</h4>
         <p class="course-card-desc" style="font-size: 0.78rem; line-height: 1.5;">
           • <strong>نوط السلامة المرورية:</strong> يُمنح لمن يفعل مهام المرور ويضمن سلامة الطرق ويقيم نقاطاً أمنية للحد من المخالفات المهددة للسلامة.<br>
@@ -430,7 +446,7 @@
         <div class="course-card-icon-container">
           <img src="../assets/img/medal_courage_service.png" alt="نوط الشجاعة، السرقات، والخدمة العسكرية" class="course-card-emblem-img">
         </div>
-        <h3 class="course-card-title">نوط ( الشجاعة، السرقات، والخدمة العسكرية )</h3>
+        <h3 class="course-card-title"><span>نوط ( الشجاعة، السرقات، والخدمة العسكرية )</span> <span class="medal-degree-badge">الدرجة الخامسة</span></h3>
         <h4 class="course-card-subtitle">الشجاعة والتفاوض والتميز بالخدمة</h4>
         <p class="course-card-desc" style="font-size: 0.78rem; line-height: 1.5;">
           • <strong>نوط الشجاعة:</strong> يُمنح للعسكريين الذين يحررون الرهائن ويحافظون على حياتهم وإخراجهم من الموقع دون إصابتهم بأي أذى.<br>
