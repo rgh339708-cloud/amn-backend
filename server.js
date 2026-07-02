@@ -887,20 +887,6 @@ function sendAttendanceReportToDiscord(bookName, operatorStr, roomImage, records
 
   const recs = records || [];
 
-  let attendeesList = '';
-  if (recs.length > 0) {
-    attendeesList = recs.map((r) => {
-      if (r.display_name && String(r.display_name).startsWith('<@')) return r.display_name;
-      const rawId = r.user_id || r.discord || r.display_name;
-      const cleanId = String(rawId).replace(/\D/g, '');
-      if (cleanId.length >= 17) return `<@${cleanId}>`;
-      if (String(rawId).startsWith('<@')) return rawId;
-      return `<@${rawId}>`;
-    }).join('\n');
-  } else {
-    attendeesList = 'لا يوجد حضور';
-  }
-
   // Filter expected members based on course / position / leadership matching bookName
   const cleanBook = String(bookName || '').replace(/دورة/g, '').replace(/دفتر/g, '').replace(/تحضير/g, '').replace(/مدربين/g, '').trim().toLowerCase();
   const keywords = cleanBook.split(/\s+/).filter(w => w.length > 2);
@@ -954,13 +940,13 @@ function sendAttendanceReportToDiscord(bookName, operatorStr, roomImage, records
     absentLines = 'لا يوجد غياب (الجميع حاضرين)';
   }
 
-  // 2. Substitute Members (سد العجز) - Attendees not in (trainingMembers || [])
+  // 2. Substitute Members (سد العجز) - Attendees not in expectedMembers
   const substituteRecords = recs.filter(r => {
     const rDiscord = String(r.user_id || r.discord || '').replace(/\D/g, '');
     const rBadge = String(r.code || '').replace(/\s+/g, '').toLowerCase();
     const rName = String(r.display_name || r.username || '').trim();
 
-    return !(trainingMembers || []).some(exp => {
+    return !(expectedMembers || []).some(exp => {
       const expDiscord = exp.discord ? String(exp.discord).replace(/\D/g, '') : '';
       const expBadge = exp.badge ? String(exp.badge).replace(/\s+/g, '').toLowerCase() : '';
       const expName = exp.name ? exp.name.trim() : '';
@@ -977,6 +963,21 @@ function sendAttendanceReportToDiscord(bookName, operatorStr, roomImage, records
     substituteLines = substituteRecords.map(r => getDiscordMention(r.user_id || r.discord, r.display_name || r.username)).join('\n');
   } else {
     substituteLines = 'لا يوجد سد عجز';
+  }
+
+  // 3. All Attendees (أسماء الحاضرين) - Show ALL who attended regardless of substitute status
+  let attendeesList = '';
+  if (recs.length > 0) {
+    attendeesList = recs.map((r) => {
+      if (r.display_name && String(r.display_name).startsWith('<@')) return r.display_name;
+      const rawId = r.user_id || r.discord || r.display_name;
+      const cleanId = String(rawId).replace(/\D/g, '');
+      if (cleanId.length >= 17) return `<@${cleanId}>`;
+      if (String(rawId).startsWith('<@')) return rawId;
+      return `<@${rawId}>`;
+    }).join('\n');
+  } else {
+    attendeesList = 'لا يوجد حضور';
   }
 
   const countVal = recs.length;
@@ -3189,16 +3190,32 @@ const server = http.createServer((req, res) => {
                         if (errRecs) {
                           console.error('Error fetching records for Discord report:', errRecs);
                         }
-                        // Query training sheets from general_collections table
-                        db.get(`SELECT data_json FROM general_collections WHERE collection_key IN ('members_google_sheets_cache', 'ps_members_google_sheets_cache') ORDER BY id DESC LIMIT 1`, [], (errSheets, sheetRow) => {
+                        // Load training sheets from cache file or fallback to general_collections table
+                        const cacheFilePath = path.join(PUBLIC_DIR, 'assets', 'data', 'members_google_sheets_cache.json');
+                        fs.readFile(cacheFilePath, 'utf8', (fsErr, fileData) => {
                           let trainingMembers = [];
-                          if (!errSheets && sheetRow && sheetRow.data_json) {
+                          if (!fsErr && fileData) {
                             try {
-                              const parsedData = JSON.parse(sheetRow.data_json);
+                              const parsedData = JSON.parse(fileData);
                               trainingMembers = parsedData['جدول الادارة العامه لشؤون تدريب الامن العام'] || [];
-                            } catch(e) {}
+                            } catch (e) {
+                              console.error('Error parsing sheets cache file:', e);
+                            }
                           }
-                          sendAttendanceReportToDiscord(bookName, operator_id, bookRoomImage, records || [], bookCourseType, trainingMembers);
+
+                          if (trainingMembers.length > 0) {
+                            sendAttendanceReportToDiscord(bookName, operator_id, bookRoomImage, records || [], bookCourseType, trainingMembers);
+                          } else {
+                            db.get(`SELECT data_json FROM general_collections WHERE collection_key IN ('members_google_sheets_cache', 'ps_members_google_sheets_cache') ORDER BY id DESC LIMIT 1`, [], (errSheets, sheetRow) => {
+                              if (!errSheets && sheetRow && sheetRow.data_json) {
+                                try {
+                                  const parsedData = JSON.parse(sheetRow.data_json);
+                                  trainingMembers = parsedData['جدول الادارة العامه لشؤون تدريب الامن العام'] || [];
+                                } catch (e) {}
+                              }
+                              sendAttendanceReportToDiscord(bookName, operator_id, bookRoomImage, records || [], bookCourseType, trainingMembers);
+                            });
+                          }
                         });
                       });
                     });
