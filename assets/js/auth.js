@@ -19,7 +19,7 @@ const Auth = (() => {
       emoji: '<i class="fa-solid fa-star"></i>',
       color: '#9b59b6',
       level: 5,
-      permissions: ['view', 'create', 'edit', 'delete', 'upload', 'manage_users', 'manage_content', 'manage_course_exams', 'manage_applications'],
+      permissions: ['view', 'resolve_retakes'],
     },
     academy_affairs: {
       label: 'رئاسة تدريب الامن العام',
@@ -69,12 +69,12 @@ const Auth = (() => {
   const SECTION_MIN_ROLE = {
     'admin':       'admin',
     'users':       'owner', // only Owner can manage members & change roles
-    'database':    'admin',
+    'amn13':    'admin',
     'applications':'admin',
     'reports':     'admin',
     'promotions':  'admin',
-    'exams':       'viewer',
-    'guide':       'admin',
+    'amn9':       'viewer',
+    'amn4':       'admin',
     'announcements': 'admin',
     'news':        'admin',
   };
@@ -651,7 +651,7 @@ const Auth = (() => {
     const currentBaseUrl = window.location.href.split('#')[0].split('?')[0];
 
     if (redirectBack && !redirectBack.includes('login.html') && !redirectBack.includes('login')) {
-      if (redirectBack.includes('dashboard.html') && !isAdminRole) {
+      if (redirectBack.includes('amn16.html') && !isAdminRole) {
         window.location.href = ROOT + 'index.html';
       } else {
         const destBaseUrl = redirectBack.split('#')[0].split('?')[0];
@@ -663,7 +663,7 @@ const Auth = (() => {
       }
     } else {
       if (isAdminRole) {
-        window.location.href = ROOT + 'pages/admin/dashboard.html';
+        window.location.href = ROOT + 'pages/admin/amn16.html';
       } else {
         const destBaseUrl = (window.location.origin + ROOT + 'index.html').split('#')[0].split('?')[0];
         if (currentBaseUrl === destBaseUrl || currentBaseUrl === window.location.origin + ROOT) {
@@ -1574,38 +1574,49 @@ const Auth = (() => {
   function seedSystemPages() {
     if (typeof Storage === 'undefined') return;
     let pages = Storage.getCollection(Storage.keys.PAGES) || [];
+    
+    // Self-healing: if localStorage has old system pages, clear them and force re-seed
+    const oldIds = ['leadership', 'managers', 'centers', 'guide', 'inventory', 'vehicles', 'college', 'attendance-reports', 'exams', 'field-title', 'uniform', 'apply', 'database', 'wings', 'aviation-document', 'counter-terrorism-wing', 'pursuit-assault-wing', 'shooting-skills-wing', 'roads-document', 'traffic-document', 'rapid-intervention-document', 'special-tasks-document', 'officers-document', 'staff-document', 'ops-document', 'regulations-document', 'investigation-document', 'narcotics-document', 'thunderbolt-document', 'district-officers-document', 'amn90-r'];
+    const hasOldPages = pages.some(p => p && oldIds.includes(p.id));
+    if (hasOldPages) {
+      console.log('[Self-Healing] Old system page IDs detected in storage. Purging and forcing remote sync...');
+      pages = [];
+      Storage.set(Storage.keys.PAGES, [], true);
+    }
+
     const systemPages = [
       { id: 'home', title: 'الرئيسية', emoji: '<i class="fa-solid fa-house"></i>', isSystem: true, allowedRoles: ['*'] },
-      { id: 'leadership', title: 'القيادة', emoji: '<i class="fa-solid fa-crown"></i>', isSystem: true, allowedRoles: ['*'] },
-      { id: 'managers', title: 'مدراء الأقسام', emoji: '<i class="fa-solid fa-medal"></i>', isSystem: true, allowedRoles: ['*'] },
-      { id: 'centers', title: 'المراكز', emoji: '<i class="fa-solid fa-building-shield"></i>', isSystem: true, allowedRoles: ['*'] },
-      { id: 'guide', title: 'الدليل الشامل', emoji: '<i class="fa-solid fa-book-open"></i>', isSystem: true, allowedRoles: ['*'] },
-      { id: 'inventory', title: 'العهدة', emoji: '<i class="fa-solid fa-box-open"></i>', isSystem: true, allowedRoles: ['*'] },
-      { id: 'vehicles', title: 'المركبات', emoji: '<i class="fa-solid fa-car-on"></i>', isSystem: true, allowedRoles: ['*'] },
-      { id: 'college', title: 'كلية التدريب', emoji: '<i class="fa-solid fa-graduation-cap"></i>', isSystem: true, allowedRoles: ['*'] },
-      { id: 'attendance-reports', title: 'تقارير الحضور', emoji: '<i class="fa-solid fa-clipboard-user"></i>', isSystem: true, allowedRoles: ['owner', 'assistant_owner', 'academy_affairs', 'admin', 'course_admin', 'college_trainee'] },
-      { id: 'exams', title: 'الاختبارات', emoji: '<i class="fa-solid fa-file-pen"></i>', isSystem: true, allowedRoles: ['*'] },
-      { id: 'field-title', title: 'التوجيهات الميدانية', emoji: '<i class="fa-solid fa-id-card"></i>', isSystem: true, allowedRoles: ['*'] },
-      { id: 'uniform', title: 'الزي العسكري', emoji: '<i class="fa-solid fa-shirt"></i>', isSystem: true, allowedRoles: ['*'] },
-      { id: 'apply', title: 'التقديم', emoji: '<i class="fa-solid fa-envelope-open-text"></i>', isSystem: true, allowedRoles: ['*'] },
-      { id: 'database', title: 'قاعدة البيانات', emoji: '<i class="fa-solid fa-lock"></i>', isSystem: true, allowedRoles: ['*'] },
-      { id: 'wings', title: 'أجنحة مدينة الـ 90', emoji: '🦅', isSystem: true, allowedRoles: ['*'] },
-      { id: 'aviation-document', title: 'مستند الجناح الجوي', emoji: '🚁', isSystem: true, parentId: 'wings', allowedRoles: ['*'] },
-      { id: 'counter-terrorism-wing', title: 'مستند جناح مكافحة الإرهاب', emoji: '⚔️', isSystem: true, parentId: 'wings', allowedRoles: ['*'] },
-      { id: 'pursuit-assault-wing', title: 'مستند جناح المداهمة والاقتحام', emoji: '🛡️', isSystem: true, parentId: 'wings', allowedRoles: ['*'] },
-      { id: 'shooting-skills-wing', title: 'جناح الرماية والتدريب الميداني', emoji: '🎯', isSystem: true, parentId: 'wings', allowedRoles: ['*'] },
-      { id: 'roads-document', title: 'مستند جناح أمن الطرق', emoji: '🛣️', isSystem: true, parentId: 'wings', allowedRoles: ['*'] },
-      { id: 'traffic-document', title: 'مستند جناح المرور', emoji: '🚥', isSystem: true, parentId: 'wings', allowedRoles: ['*'] },
-      { id: 'rapid-intervention-document', title: 'مستند جناح التدخل السريع', emoji: '⚡', isSystem: true, parentId: 'wings', allowedRoles: ['*'] },
-      { id: 'special-tasks-document', title: 'مستند جناح المهام الخاصة', emoji: '🔥', isSystem: true, parentId: 'wings', allowedRoles: ['*'] },
-      { id: 'officers-document', title: 'مستند الضباط', emoji: '🎖️', isSystem: true, parentId: 'wings', allowedRoles: ['*'] },
-      { id: 'staff-document', title: 'مستند الأفراد', emoji: '🎖️', isSystem: true, parentId: 'wings', allowedRoles: ['*'] },
-      { id: 'ops-document', title: 'مستند العمليات', emoji: '📞', isSystem: true, parentId: 'wings', allowedRoles: ['*'] },
-      { id: 'regulations-document', title: 'مستند الأنظمة واللوائح', emoji: '📜', isSystem: true, parentId: 'wings', allowedRoles: ['*'] },
-      { id: 'investigation-document', title: 'مستند المباحث', emoji: '🕵️', isSystem: true, parentId: 'wings', allowedRoles: ['*'] },
-      { id: 'narcotics-document', title: 'مستند مكافحة المخدرات', emoji: '💊', isSystem: true, parentId: 'wings', allowedRoles: ['*'] },
-      { id: 'district-officers-document', title: 'مستند قيادة أمن الطرق', emoji: '🛣️', isSystem: true, parentId: 'wings', allowedRoles: ['*'] },
-      { id: 'amn90-r', title: 'مدينة الـ 90 العسكرية', emoji: '🏰', isSystem: true, parentId: 'wings', allowedRoles: ['*'] }
+      { id: 'amn1', title: 'القيادة', emoji: '<i class="fa-solid fa-crown"></i>', isSystem: true, allowedRoles: ['*'] },
+      { id: 'amn2', title: 'مدراء الأقسام', emoji: '<i class="fa-solid fa-medal"></i>', isSystem: true, allowedRoles: ['*'] },
+      { id: 'amn3', title: 'المراكز', emoji: '<i class="fa-solid fa-building-shield"></i>', isSystem: true, allowedRoles: ['*'] },
+      { id: 'amn4', title: 'الدليل الشامل', emoji: '<i class="fa-solid fa-book-open"></i>', isSystem: true, allowedRoles: ['*'] },
+      { id: 'amn5', title: 'العهدة', emoji: '<i class="fa-solid fa-box-open"></i>', isSystem: true, allowedRoles: ['*'] },
+      { id: 'amn6', title: 'المركبات', emoji: '<i class="fa-solid fa-car-on"></i>', isSystem: true, allowedRoles: ['*'] },
+      { id: 'amn7', title: 'كلية التدريب', emoji: '<i class="fa-solid fa-graduation-cap"></i>', isSystem: true, allowedRoles: ['*'] },
+      { id: 'amn8', title: 'تقارير الحضور', emoji: '<i class="fa-solid fa-clipboard-user"></i>', isSystem: true, allowedRoles: ['owner', 'assistant_owner', 'academy_affairs', 'admin', 'course_admin', 'college_trainee'] },
+      { id: 'amn9', title: 'الاختبارات', emoji: '<i class="fa-solid fa-file-pen"></i>', isSystem: true, allowedRoles: ['*'] },
+      { id: 'amn10', title: 'التوجيهات الميدانية', emoji: '<i class="fa-solid fa-id-card"></i>', isSystem: true, allowedRoles: ['*'] },
+      { id: 'amn11', title: 'الزي العسكري', emoji: '<i class="fa-solid fa-shirt"></i>', isSystem: true, allowedRoles: ['*'] },
+      { id: 'amn12', title: 'التقديم', emoji: '<i class="fa-solid fa-envelope-open-text"></i>', isSystem: true, allowedRoles: ['*'] },
+      { id: 'amn13', title: 'قاعدة البيانات', emoji: '<i class="fa-solid fa-lock"></i>', isSystem: true, allowedRoles: ['*'] },
+      { id: 'amn14', title: 'أجنحة مدينة الـ 90', emoji: '🦅', isSystem: true, allowedRoles: ['*'] },
+      { id: 'mstnd1', title: 'مستند الجناح الجوي', emoji: '🚁', isSystem: true, parentId: 'amn14', allowedRoles: ['*'] },
+      { id: 'mstnd2', title: 'مستند جناح مكافحة الإرهاب', emoji: '⚔️', isSystem: true, parentId: 'amn14', allowedRoles: ['*'] },
+      { id: 'mstnd3', title: 'مستند جناح المداهمة والاقتحام', emoji: '🛡️', isSystem: true, parentId: 'amn14', allowedRoles: ['*'] },
+      { id: 'mstnd4', title: 'جناح الرماية والتدريب الميداني', emoji: '🎯', isSystem: true, parentId: 'amn14', allowedRoles: ['*'] },
+      { id: 'mstnd5', title: 'مستند جناح أمن الطرق', emoji: '🛣️', isSystem: true, parentId: 'amn14', allowedRoles: ['*'] },
+      { id: 'mstnd6', title: 'مستند جناح المرور', emoji: '🚥', isSystem: true, parentId: 'amn14', allowedRoles: ['*'] },
+      { id: 'mstnd7', title: 'مستند جناح التدخل السريع', emoji: '⚡', isSystem: true, parentId: 'amn14', allowedRoles: ['*'] },
+      { id: 'mstnd8', title: 'مستند جناح المهام الخاصة', emoji: '🔥', isSystem: true, parentId: 'amn14', allowedRoles: ['*'] },
+      { id: 'mstnd9', title: 'مستند الضباط', emoji: '🎖️', isSystem: true, parentId: 'amn14', allowedRoles: ['*'] },
+      { id: 'mstnd10', title: 'مستند الأفراد', emoji: '🎖️', isSystem: true, parentId: 'amn14', allowedRoles: ['*'] },
+      { id: 'mstnd11', title: 'مستند العمليات', emoji: '📞', isSystem: true, parentId: 'amn14', allowedRoles: ['*'] },
+      { id: 'mstnd12', title: 'مستند الأنظمة واللوائح', emoji: '📜', isSystem: true, parentId: 'amn14', allowedRoles: ['*'] },
+      { id: 'mstnd13', title: 'مستند المباحث', emoji: '🕵️', isSystem: true, parentId: 'amn14', allowedRoles: ['*'] },
+      { id: 'mstnd14', title: 'مستند مكافحة المخدرات', emoji: '💊', isSystem: true, parentId: 'amn14', allowedRoles: ['*'] },
+      { id: 'mstnd15', title: 'مستند الصاعقة والمظليين', emoji: '⚡', isSystem: true, parentId: 'amn14', allowedRoles: ['*'] },
+      { id: 'mstnd16', title: 'مستند قيادة أمن الطرق', emoji: '🛣️', isSystem: true, parentId: 'amn14', allowedRoles: ['*'] },
+      { id: 'amn15', title: 'مدينة الـ 90 العسكرية', emoji: '🏰', isSystem: true, parentId: 'amn14', allowedRoles: ['*'] }
     ];
 
     const systemIds = new Set(systemPages.map(s => s.id));
@@ -1671,8 +1682,8 @@ const Auth = (() => {
 
     // Direct authoritative permissions map for key system pages
     const systemAuthMap = {
-      'attendance-reports': ['owner', 'assistant_owner', 'academy_affairs', 'admin', 'course_admin', 'college_trainee'],
-      'database': ['*']
+      'amn8': ['owner', 'assistant_owner', 'academy_affairs', 'admin', 'course_admin', 'college_trainee'],
+      'amn13': ['*']
     };
 
     if (systemAuthMap[pageId]) {
@@ -1745,7 +1756,7 @@ window.Auth = Auth;
     }
     
     const filename = path.substring(path.lastIndexOf('/') + 1);
-    if (!filename || filename === 'index.html') {
+    if (!filename || filename === 'index.html' || filename === 'amn.html') {
       return 'home';
     }
     
@@ -1769,7 +1780,7 @@ window.Auth = Auth;
     const path = window.location.pathname;
     
     // Don't intercept access denied page on login/admin dashboard/auth itself
-    if (path.includes('/admin/login.html') || path.includes('/admin/dashboard.html') || path.includes('login.html')) {
+    if (path.includes('/admin/login.html') || path.includes('/admin/amn16.html') || path.includes('login.html')) {
       return;
     }
     

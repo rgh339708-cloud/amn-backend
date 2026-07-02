@@ -2745,15 +2745,53 @@
         return;
       }
 
+      // Build a lookup map from members sheets (الادارة + المعتمدين + الاساسي)
+      const sheetsCache = Storage.get('ps_members_google_sheets_cache') || Storage.get('members_google_sheets_cache') || {};
+      const memberTables = [
+        sheetsCache['جدول الامن العام - الادارة'] || [],
+        sheetsCache['جدول الامن العام - المعتمدين'] || [],
+        sheetsCache['جدول الامن العام - الاساسي'] || [],
+      ];
+      const allMembers = memberTables.flat();
+
+      const findMember = (logEntry) => {
+        const rawId = logEntry.user_id || logEntry.discordId || '';
+        const logDiscordClean = String(rawId).replace(/\D/g, '');
+        const logUsername = String(logEntry.username || '').trim().toLowerCase();
+
+        for (const m of allMembers) {
+          const mDiscordClean = String(m.discord || '').replace(/\D/g, '');
+          if (logDiscordClean && mDiscordClean && mDiscordClean === logDiscordClean) {
+            return m;
+          }
+        }
+
+        // Try username substring match
+        if (logUsername) {
+          for (const m of allMembers) {
+            const mName = String(m.name || '').trim().toLowerCase();
+            if (mName && logUsername.includes(mName)) {
+              return m;
+            }
+          }
+        }
+        return null;
+      };
+
       tbody.innerHTML = logs.map(l => {
         const rawId = l.user_id || l.discordId || '—';
         const discordId = String(rawId).replace(/\D/g, '');
-        const discordCell = discordId.length >= 17 ? `<code style="color:var(--color-gold-light); font-size:0.78rem;">${discordId}</code>` : '<span style="opacity:0.4;">—</span>';
+        const discordCell = discordId.length >= 10 ? `<code style="color:var(--color-gold-light); font-size:0.78rem;">${discordId}</code>` : '<span style="opacity:0.4;">—</span>';
+
+        const member = findMember(l);
+        const displayName = member ? member.name : (l.displayName || l.username);
+        const rank = member ? member.rank : (l.rank || '—');
+        const code = member ? (member.badge || '—') : (l.code || '—');
 
         return `
           <tr>
-            <td style="font-weight:700; color:#fff">${l.displayName || l.username} <span style="font-size:0.75rem; opacity:0.6; display:block;">(@${l.username})</span></td>
-            <td><span style="color:var(--color-gold-light); font-weight:800;">${l.rank || '—'}</span> <span style="font-size:0.75rem; opacity:0.6; display:block;">[${l.code || '—'}]</span></td>
+            <td style="font-weight:700; color:#fff">${displayName} <span style="font-size:0.75rem; opacity:0.6; display:block;">(@${l.username})</span></td>
+            <td><span style="color:var(--color-gold-light); font-weight:800;">${rank}</span> <span style="font-size:0.75rem; opacity:0.6; display:block;">[${code}]</span></td>
             <td>${discordCell}</td>
             <td style="font-weight:700; color:#fff;">${l.exam_title}</td>
             <td style="font-family:monospace; font-size:0.82rem; color:var(--color-gold-primary);">${l.document_url}</td>

@@ -5061,14 +5061,14 @@ const server = http.createServer((req, res) => {
           const opIds = ['1334568342345748565', '821825761673478144'];
           const opUsernames = ['3gjo', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'];
           
-          const isAuthorized = opUser && (opUser.role === 'owner' || opUser.role === 'assistant_owner' || 
+          const isAuthorized = opUser && (opUser.role === 'owner' || 
                               opIds.includes(operator_id) ||
                               (opUser.username && opUsernames.includes(opUser.username.toLowerCase())) ||
                               (opUser.display_name && opUsernames.includes(opUser.display_name.toLowerCase())));
                               
           if (!isAuthorized) {
             res.writeHead(403, { 'Content-Type': 'application/json; charset=utf-8' });
-            res.end(JSON.stringify({ error: 'غير مصرح لك بإجراء هذه العملية. هذه الصلاحية للمالك وقيادة الأمن العام فقط.' }));
+            res.end(JSON.stringify({ error: 'غير مصرح لك بإجراء هذه العملية. هذه الصلاحية للمالك فقط.' }));
             return;
           }
 
