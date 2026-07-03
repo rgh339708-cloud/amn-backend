@@ -4906,6 +4906,39 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  // POST /api/csv-sync/run - Manually trigger CSV Discord synchronization
+  if (pathname === '/api/csv-sync/run' && req.method === 'POST') {
+    runCsvDiscordSync()
+      .then(result => {
+        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify({ success: true, result }));
+      })
+      .catch(err => {
+        res.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify({ success: false, error: err.message }));
+      });
+    return;
+  }
+
+  // GET /api/csv-sync/logs - Get the CSV sync bot logs
+  if (pathname === '/api/csv-sync/logs' && req.method === 'GET') {
+    const logFile = path.join(__dirname, 'assets', 'data', 'csv_sync_log.json');
+    if (fs.existsSync(logFile)) {
+      try {
+        const data = fs.readFileSync(logFile, 'utf8');
+        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(data);
+      } catch (e) {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Failed to read log file' }));
+      }
+    } else {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify([]));
+    }
+    return;
+  }
+
   // POST /api/auth/upsert_user - Insert or update user details
   if (pathname === '/api/auth/upsert_user' && req.method === 'POST') {
     let body = '';
