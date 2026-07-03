@@ -524,7 +524,7 @@ async function runCsvDiscordSync() {
       // 4. تغيير الاسم المستعار إذا تغيّر
       const nameChanged = isNew || changes.some(c => c.includes('تغيير الاسم'));
       if (nameChanged && member.name) {
-        const nickname = `${member.rank ? member.rank + ' | ' : ''}${member.name}${member.code ? ' | ' + member.code : ''}`;
+        const nickname = `${member.code ? '[' + member.code + '] ' : ''}${member.name}`;
         try {
           await setNickname(guildId, member.discordId, nickname, discordToken);
           console.log(`[CSV Sync] ✅ تم تحديث الاسم: ${nickname}`);
