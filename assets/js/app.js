@@ -435,7 +435,7 @@ const App = (() => {
       const isAuthorizedAdmin = ['owner', 'assistant_owner', 'academy_affairs', 'admin'].includes(user.role);
       if (isAuthorizedAdmin) {
         adminBtnHtml = `
-          <a href="${ROOT}pages/admin/dashboard.html" class="dropdown-item admin-link" id="nav-admin-dashboard-btn">
+          <a href="${ROOT}pages/admin/amn16.html" class="dropdown-item admin-link" id="nav-admin-dashboard-btn">
             <i class="fa-solid fa-gear"></i>
             <span>لوحة التحكم</span>
           </a>
@@ -501,7 +501,7 @@ const App = (() => {
             <img src="${avatarUrl}" class="navbar-user-avatar" alt="Avatar" onerror="this.src='${ROOT}assets/img/emblem.png'">
           </div>
           <div class="navbar-user-dropdown-menu" id="navbar-user-dropdown-menu-list">
-            <a href="${ROOT}pages/amn90-r.html" class="dropdown-item">
+            <a href="${ROOT}pages/amn15.html" class="dropdown-item">
               <i class="fa-solid fa-user"></i>
               <span>الملف الشخصي</span>
             </a>
@@ -620,8 +620,8 @@ const App = (() => {
         }
       }
 
-      // Show Edit Mode switch strictly for the Owner
-      if (user.role === 'owner') {
+      // Show Edit Mode switch strictly for the Owner (Disabled)
+      if (false && user.role === 'owner') {
         let editBtn = document.getElementById('navbar-edit-toggle');
         let saveBtn = document.getElementById('navbar-save-toggle');
         let layoutBtn = document.getElementById('navbar-layout-toggle');
@@ -1141,6 +1141,36 @@ const App = (() => {
     });
   }
 
+  /* ── Alert Dialog ─────────────────────────────────── */
+  function alert(message, title = 'تنبيه') {
+    return new Promise(resolve => {
+      const overlay = document.createElement('div');
+      overlay.className = 'modal-overlay active';
+      overlay.innerHTML = `
+        <div class="modal" style="max-width:400px">
+          <div class="modal-header">
+            <h3 class="modal-title">ℹ️ ${title}</h3>
+          </div>
+          <div class="modal-body">
+            <p style="color:var(--color-text-secondary);line-height:1.7">${message}</p>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-gold" id="alert-ok" style="min-width:100px; padding: 8px 20px; border-radius: 8px; font-family: inherit;">حسناً</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+
+      overlay.querySelector('#alert-ok').addEventListener('click', () => {
+        overlay.remove();
+        resolve();
+      });
+      overlay.addEventListener('click', e => {
+        if (e.target === overlay) { overlay.remove(); resolve(); }
+      });
+    });
+  }
+
   /* ── Confirm Dialog ───────────────────────────────── */
   function confirm(message, title = 'تأكيد') {
     return new Promise(resolve => {
@@ -1332,7 +1362,8 @@ const App = (() => {
       });
     }
 
-    // Check if user is strictly owner to display dashboard controls
+    // Check if user is strictly owner to display dashboard controls (Disabled)
+    return;
     const currentUser = Auth.getCurrentUser();
     if (!currentUser || currentUser.role !== 'owner') return;
 
@@ -1856,19 +1887,19 @@ const App = (() => {
       if (isAuthorized) {
         const collegeLink = Array.from(subInner.querySelectorAll('a')).find(a => {
           const href = a.getAttribute('href');
-          return href && href.includes('college.html');
+          return href && href.includes('amn7.html');
         });
         const existingLink = Array.from(subInner.querySelectorAll('a')).find(a => {
           const href = a.getAttribute('href');
-          return href && href.includes('attendance-reports.html');
+          return href && href.includes('amn8.html');
         });
         if (collegeLink && !existingLink) {
           const collegeHref = collegeLink.getAttribute('href');
-          let attHref = 'pages/attendance-reports.html';
+          let attHref = 'pages/amn8.html';
           if (collegeHref.startsWith('../')) {
-            attHref = '../pages/attendance-reports.html';
+            attHref = '../pages/amn8.html';
           } else if (!collegeHref.includes('pages/')) {
-            attHref = 'attendance-reports.html';
+            attHref = 'amn8.html';
           }
           
           const attLink = document.createElement('a');
@@ -1880,7 +1911,7 @@ const App = (() => {
       } else {
         const existingLink = Array.from(subInner.querySelectorAll('a')).find(a => {
           const href = a.getAttribute('href');
-          return href && href.includes('attendance-reports.html');
+          return href && href.includes('amn8.html');
         });
         if (existingLink) existingLink.remove();
       }
@@ -1899,19 +1930,19 @@ const App = (() => {
       if (isAuthorized) {
         const collegeSidebarLink = Array.from(sidebarBody.querySelectorAll('a')).find(a => {
           const href = a.getAttribute('href');
-          return href && href.includes('college.html');
+          return href && href.includes('amn7.html');
         });
         const existingSidebarLink = Array.from(sidebarBody.querySelectorAll('a')).find(a => {
           const href = a.getAttribute('href');
-          return href && href.includes('attendance-reports.html');
+          return href && href.includes('amn8.html');
         });
         if (collegeSidebarLink && !existingSidebarLink) {
           const collegeHref = collegeSidebarLink.getAttribute('href');
-          let attHref = 'pages/attendance-reports.html';
+          let attHref = 'pages/amn8.html';
           if (collegeHref.startsWith('../')) {
-            attHref = '../pages/attendance-reports.html';
+            attHref = '../pages/amn8.html';
           } else if (!collegeHref.includes('pages/')) {
-            attHref = 'attendance-reports.html';
+            attHref = 'amn8.html';
           }
 
           const attSidebarLink = document.createElement('a');
@@ -1923,7 +1954,7 @@ const App = (() => {
       } else {
         const existingSidebarLink = Array.from(sidebarBody.querySelectorAll('a')).find(a => {
           const href = a.getAttribute('href');
-          return href && href.includes('attendance-reports.html');
+          return href && href.includes('amn8.html');
         });
         if (existingSidebarLink) existingSidebarLink.remove();
       }
@@ -1972,6 +2003,10 @@ const App = (() => {
       if (e.key === 'ps_exams') {
         checkActiveExamDocumentLock();
       }
+      if (e.key === 'ps_settings' || e.key === 'ps_settings_sync') {
+        checkMaintenanceSync();
+        checkActiveExamDocumentLock();
+      }
     });
 
     // Polling interval every 1.5 seconds to lock/unlock document in real-time
@@ -2002,14 +2037,15 @@ const App = (() => {
     initModals();
     initGlobalLiveEditor();
 
-    // Periodically sync settings with the server to auto-refresh when status changes
+    // Periodically sync settings with the server to auto-refresh when status changes (every 2 seconds for instant responsiveness)
     setInterval(async () => {
       try {
         await syncSettingsWithServer();
+        checkMaintenanceSync();
       } catch (e) {
         console.warn('[Sync] Periodic settings sync failed:', e);
       }
-    }, 10000); // Check every 10 seconds
+    }, 2000);
 
     // Log page entry
     try {
@@ -2019,15 +2055,42 @@ const App = (() => {
       if (!sessionStorage.getItem(sessionKey)) {
         sessionStorage.setItem(sessionKey, 'true');
         const pageNames = {
-          'index.html': 'الرئيسية',
+          'index.html': 'الرئيسية', 'amn.html': 'الرئيسية',
           'archive.html': 'أرشيف الصور',
-          'exams.html': 'اختبارات الدورات',
-          'college.html': 'كلية التدريب',
-          'amn90-r.html': 'الملف الشخصي',
-          'database.html': 'قاعدة البيانات',
-          'dashboard.html': 'لوحة التحكم',
           'login.html': 'تسجيل الدخول',
-          'custom.html': 'صفحة مخصصة'
+          'custom.html': 'صفحة مخصصة',
+          'amn1.html': 'القيادة',
+          'amn2.html': 'مدراء الأقسام',
+          'amn3.html': 'المراكز',
+          'amn4.html': 'الدليل الشامل',
+          'amn5.html': 'العهدة',
+          'amn6.html': 'المركبات',
+          'amn7.html': 'كلية التدريب',
+          'amn8.html': 'تقارير الحضور',
+          'amn9.html': 'الاختبارات',
+          'amn10.html': 'التوجيهات الميدانية',
+          'amn11.html': 'الزي العسكري',
+          'amn12.html': 'التقديم',
+          'amn13.html': 'قاعدة البيانات',
+          'amn14.html': 'أجنحة مدينة الـ 90',
+          'amn15.html': 'الملف الشخصي',
+          'amn16.html': 'لوحة التحكم',
+          'mstnd1.html': 'مستند الجناح الجوي',
+          'mstnd2.html': 'مستند جناح مكافحة الإرهاب',
+          'mstnd3.html': 'مستند جناح المداهمة والاقتحام',
+          'mstnd4.html': 'جناح الرماية والتدريب الميداني',
+          'mstnd5.html': 'مستند جناح أمن الطرق',
+          'mstnd6.html': 'مستند جناح المرور',
+          'mstnd7.html': 'مستند جناح التدخل السريع',
+          'mstnd8.html': 'مستند جناح المهام الخاصة',
+          'mstnd9.html': 'مستند الضباط',
+          'mstnd10.html': 'مستند الأفراد',
+          'mstnd11.html': 'مستند العمليات',
+          'mstnd12.html': 'مستند الأنظمة واللوائح',
+          'mstnd13.html': 'مستند المباحث',
+          'mstnd14.html': 'مستند مكافحة المخدرات',
+          'mstnd15.html': 'مستند الصاعقة والمظليين',
+          'mstnd16.html': 'مستند قيادة أمن الطرق'
         };
         const pageArName = pageNames[filename] || filename;
         if (typeof Logger !== 'undefined') {
@@ -2065,8 +2128,8 @@ const App = (() => {
     if (typeof Auth !== 'undefined' && Auth.isLoggedIn()) {
       const role = Auth.getRole();
       if (['owner', 'assistant_owner', 'admin'].includes(role)) {
-        // Warning banner is only shown on the control panel (dashboard.html)
-        if (path.includes('dashboard.html')) {
+        // Warning banner is only shown on the control panel (amn16.html)
+        if (path.includes('amn16.html')) {
           showAdminMaintenanceWarning();
         }
         return;
@@ -2082,11 +2145,11 @@ const App = (() => {
     const cleanFilename = filename.split('?')[0].split('#')[0];
     
     // Skip checking on home, exams, admin page, callback or login
-    const isExamsPage = cleanFilename === 'exams.html';
+    const isExamsPage = cleanFilename === 'amn9.html';
     const isAdminPage = path.includes('/admin/');
     const isCallback = cleanFilename === 'callback.html';
     const isLogin = cleanFilename === 'login.html';
-    const isHome = cleanFilename === 'index.html' || cleanFilename === '';
+    const isHome = cleanFilename === 'index.html' || cleanFilename === 'amn.html' || cleanFilename === '';
     
     if (isExamsPage || isAdminPage || isCallback || isLogin || isHome) return;
     
@@ -2110,6 +2173,37 @@ const App = (() => {
 
   function showExamLockOverlay(exam) {
     document.body.style.overflow = 'hidden';
+    
+    const path = window.location.pathname;
+    const filename = path.split('/').pop() || 'index.html';
+    const cleanFilename = filename.split('?')[0].split('#')[0];
+
+    // Log document access attempt if not logged recently for this session/visit
+    const visitLogKey = 'doc_access_logged_' + exam.id + '_' + cleanFilename;
+    if (!sessionStorage.getItem(visitLogKey)) {
+      sessionStorage.setItem(visitLogKey, 'true');
+      const currentUser = typeof Auth !== 'undefined' ? Auth.getCurrentUser() : null;
+      const logObj = {
+        id: 'doclog_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+        exam_id: exam.id,
+        exam_title: exam.title,
+        document_url: cleanFilename,
+        user_id: currentUser ? currentUser.id : '',
+        username: currentUser ? (currentUser.username || currentUser.globalName || 'زائر') : 'زائر',
+        displayName: currentUser ? (currentUser.displayName || currentUser.username || 'عضو') : 'عضو',
+        rank: currentUser ? (currentUser.rank || '—') : '—',
+        code: currentUser ? (currentUser.code || '—') : '—',
+        timestamp: new Date().toLocaleDateString('ar-SA') + ' ' + new Date().toLocaleTimeString('ar-SA', { hour12: false }),
+        createdAt: new Date().toISOString()
+      };
+      if (typeof Storage !== 'undefined' && Storage.addToCollection) {
+        Storage.addToCollection(Storage.keys.DOC_ACCESS_LOGS || 'ps_doc_access_logs', logObj);
+        try { localStorage.setItem('ps_doc_access_sync', Date.now().toString()); } catch(e){}
+      }
+      if (typeof Logger !== 'undefined') {
+        Logger.log('doc_access_attempt', `حاول العضو "${logObj.displayName}" دخول المستند المغلق (${cleanFilename}) أثناء فتح اختبار "${exam.title}"`);
+      }
+    }
     
     const displayMsg = 'تم إغلاق مستند الدورة أثناء فترة الاختبار.';
     
@@ -2170,8 +2264,8 @@ const App = (() => {
     const isSubpage = path.includes('/pages/');
     const isCallback = path.includes('callback.html');
     const isLogin = path.includes('login.html');
-    const isDatabase = path.includes('database.html');
-    const isExams = path.includes('exams.html');
+    const isDatabase = path.includes('amn13.html');
+    const isExams = path.includes('amn9.html');
 
     if (isSubpage && !isLogin && !isCallback && !isDatabase && !isExams) {
       let isLinked = false;
@@ -2451,7 +2545,7 @@ const App = (() => {
             Storage.set(Storage.keys.SETTINGS, merged);
 
             const path = window.location.pathname;
-            if (path.includes('dashboard.html')) {
+            if (path.includes('amn16.html')) {
               // Display clear indicator if local state differs from server state
               if (serverSettings.maintenanceMode !== localSettings.maintenanceMode) {
                 if (serverSettings.maintenanceMode === true && localSettings.maintenanceMode === false) {
@@ -2675,7 +2769,7 @@ const App = (() => {
 
   return {
     init, toast, toggleTheme, initParticles,
-    openModal, closeModal, confirm,
+    openModal, closeModal, confirm, alert,
     formatDate, timeAgo, animateCounter,
     syncSettingsWithServer,
     getSettingsApiUrl,

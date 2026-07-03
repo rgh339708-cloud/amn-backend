@@ -1873,7 +1873,7 @@
       App.toast('عذراً، لا تمتلك الصلاحية لمسح السجلات.', 'error');
       return;
     }
-    if (confirm(`هل أنت متأكد من مسح جميع سجلات "${type}" بالكامل؟ لا يمكن التراجع عن هذا الإجراء.`)) {
+    if (await App.confirm(`هل أنت متأكد من مسح جميع سجلات "${type}" بالكامل؟ لا يمكن التراجع عن هذا الإجراء.`, 'تأكيد مسح السجلات')) {
       let collectionKey = '';
       if (type === 'login_logs') collectionKey = 'ps_login_logs';
       else if (type === 'discord_links') collectionKey = 'ps_discord_links';
@@ -1996,11 +1996,11 @@
     });
   }
 
-  window.grantApplicationRetake = function(candidateName, discordId, prevScore) {
+  window.grantApplicationRetake = async function(candidateName, discordId, prevScore) {
     const user = Auth.getCurrentUser();
     const userName = user ? (user.globalName || user.username) : 'شؤون التجنيد';
     
-    if (!confirm(`هل أنت متأكد من منح المتقدم "${candidateName}" صلاحية إعادة الاختبار؟`)) {
+    if (!await App.confirm(`هل أنت متأكد من منح المتقدم "${candidateName}" صلاحية إعادة الاختبار؟`, 'تأكيد منح الإعادة')) {
       return;
     }
     
@@ -2661,8 +2661,8 @@
     });
   };
 
-  window.removeUserPermission = function(userId, username) {
-    if (!confirm(`هل أنت متأكد من إلغاء تعيين رتبة العضو "${username}" وإرجاع صلاحياته للوضع التلقائي المستند لـ Google Sheets؟`)) {
+  window.removeUserPermission = async function(userId, username) {
+    if (!await App.confirm(`هل أنت متأكد من إلغاء تعيين رتبة العضو "${username}" وإرجاع صلاحياته للوضع التلقائي المستند لـ Google Sheets؟`, 'تأكيد إزالة الرتبة اليدوية')) {
       return;
     }
 

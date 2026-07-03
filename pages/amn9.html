@@ -1605,7 +1605,7 @@
         if (isExamActive) {
           history.pushState(null, null, window.location.href);
           recordViolation('محاولة استخدام زر الرجوع للخلف بالمتصفح (Back Navigation Attempt)');
-          alert('ممنوع الرجوع للخلف أثناء تقديم الاختبار! تم تسجيل مخالفة.');
+          App.alert('ممنوع الرجوع للخلف أثناء تقديم الاختبار! تم تسجيل مخالفة.', 'مخالفة اختبار');
         }
       });
 
@@ -1876,14 +1876,14 @@
         .catch(err => console.error('Error fetching exam archive:', err));
     }
 
-    function deleteExamResult(id) {
+    async function deleteExamResult(id) {
       const userRole = Auth.getRole();
       const roleInfo = Auth.getRoleInfo(userRole);
       if (!roleInfo || roleInfo.level < 3.5) {
         App.toast('عذراً، غير مصرح لك بحذف النتائج!', 'error');
         return;
       }
-      if (confirm('هل أنت متأكد من حذف هذه المحاولة بشكل نهائي؟')) {
+      if (await App.confirm('هل أنت متأكد من حذف هذه المحاولة بشكل نهائي؟', 'حذف النتيجة')) {
         Storage.deleteExamAttempt(id)
           .then(res => {
             App.toast('🗑️ تم حذف محاولة الاختبار بنجاح.', 'success');
@@ -1896,14 +1896,14 @@
       }
     }
 
-    function clearAllExamResults() {
+    async function clearAllExamResults() {
       const userRole = Auth.getRole();
       const roleInfo = Auth.getRoleInfo(userRole);
       if (!roleInfo || roleInfo.level < 3.5) {
         App.toast('عذراً، غير مصرح لك بمسح السجلات!', 'error');
         return;
       }
-      if (confirm('هل أنت متأكد من رغبتك في مسح سجل اختبارات العساكر بالكامل؟ لا يمكن التراجع عن هذا الإجراء.')) {
+      if (await App.confirm('هل أنت متأكد من رغبتك في مسح سجل اختبارات العساكر بالكامل؟ لا يمكن التراجع عن هذا الإجراء.', 'مسح السجلات بالكامل')) {
         Storage.deleteExamAttempt('all')
           .then(res => {
             App.toast('🗑️ تم مسح سجل الاختبارات بالكامل.', 'success');
@@ -2235,14 +2235,14 @@
       renderExamsList();
     }
 
-    function deleteExam(examId) {
+    async function deleteExam(examId) {
       const role = Auth.getRole();
       const roleInfo = Auth.getRoleInfo(role);
       if (!roleInfo || roleInfo.level < 4.5) {
         App.toast('عذراً، غير مصرح لك بحذف الاختبارات!', 'error');
         return;
       }
-      if (confirm('هل أنت متأكد من رغبتك في حذف هذا الاختبار نهائياً مع كامل بنك الأسئلة الخاص به؟')) {
+      if (await App.confirm('هل أنت متأكد من رغبتك في حذف هذا الاختبار نهائياً مع كامل بنك الأسئلة الخاص به؟', 'حذف الاختبار نهائياً')) {
         const exams = Storage.getCollection(Storage.keys.EXAMS) || [];
         const matched = exams.find(e => e.id === examId);
         Storage.deleteFromCollection(Storage.keys.EXAMS, examId);
@@ -2696,14 +2696,14 @@
       }
     };
 
-    window.revokeQBankRequest = function(reqId) {
+    window.revokeQBankRequest = async function(reqId) {
       const userRole = Auth.getRole();
       const roleInfo = Auth.getRoleInfo(userRole);
       if (!roleInfo || roleInfo.level < 4.5) {
         App.toast('عذراً، إلغاء الإذن مقتصر فقط على رئاسة تدريب الأمن العام والقيادة العليا!', 'error');
         return;
       }
-      if (!confirm('هل أنت متأكد من سحب وإلغاء إذن الوصول لبنك الأسئلة من هذا المسؤول؟')) return;
+      if (!await App.confirm('هل أنت متأكد من سحب وإلغاء إذن الوصول لبنك الأسئلة من هذا المسؤول؟', 'سحب الصلاحية')) return;
 
       const currentUser = Auth.getCurrentUser();
       const adminName = currentUser ? (currentUser.displayName || currentUser.username) : 'رئاسة تدريب الأمن العام';
@@ -2802,14 +2802,14 @@
       }).join('');
     };
 
-    window.clearDocAccessLogs = function() {
+    window.clearDocAccessLogs = async function() {
       const role = Auth.getRole();
       const roleInfo = Auth.getRoleInfo(role);
       if (!roleInfo || roleInfo.level < 4.5) {
         App.toast('عذراً، مسح هذا السجل مقتصر فقط على القيادة ورئاسة التدريب!', 'error');
         return;
       }
-      if (confirm('هل أنت متأكد من رغبتك في مسح سجل محاولات دخول المستندات بالكامل؟')) {
+      if (await App.confirm('هل أنت متأكد من رغبتك في مسح سجل محاولات دخول المستندات بالكامل؟', 'موافق')) {
         Storage.set(Storage.keys.DOC_ACCESS_LOGS || 'ps_doc_access_logs', []);
         try { localStorage.setItem('ps_doc_access_sync', Date.now().toString()); } catch(e){}
         App.toast('🗑️ تم مسح سجل دخول المستندات بنجاح.', 'success');
@@ -2998,7 +2998,7 @@
       renderExamsList();
     }
 
-    function deleteQuestionFromBank(questionIndex) {
+    async function deleteQuestionFromBank(questionIndex) {
       const examId = document.getElementById('qbank-exam-id').value;
       const role = Auth.getRole();
       const roleInfo = Auth.getRoleInfo(role);
@@ -3006,7 +3006,7 @@
         App.toast('عذراً، غير مصرح لك بحذف الأسئلة إلا بموافقة رئاسة تدريب الأمن العام!', 'error');
         return;
       }
-      if (confirm('هل أنت متأكد من حذف هذا السؤال من البنك؟')) {
+      if (await App.confirm('هل أنت متأكد من حذف هذا السؤال من البنك؟', 'حذف سؤال')) {
         const exams = Storage.getCollection(Storage.keys.EXAMS) || [];
         const idx = exams.findIndex(e => e.id === examId);
         if (idx !== -1 && exams[idx].questions) {
@@ -3124,7 +3124,7 @@
       }
 
       if (existing) {
-        const confirmRetake = confirm(`لقد قمت بإجراء هذا الاختبار مسبقاً وحصلت على درجة ${existing.score}%. هل ترغب في تقديم طلب إعادة اختبار لمسؤول الدورة؟`);
+        const confirmRetake = await App.confirm(`لقد قمت بإجراء هذا الاختبار مسبقاً وحصلت على درجة ${existing.score}%. هل ترغب في تقديم طلب إعادة اختبار لمسؤول الدورة؟`, 'طلب إعادة اختبار');
         if (confirmRetake) {
           submitRetakeRequestForUser(id, existing.studentName, existing.studentDiscord, existing.studentRank, existing.score);
         }
@@ -3207,7 +3207,7 @@
             };
             Storage.saveViolation(dbViolationData).catch(e => console.error(e));
             App.toast('✕ خطأ: هذا الاختبار مفتوح بالفعل من جهاز/متصفح آخر!', 'error');
-            alert('عذراً، لا يمكنك فتح الاختبار من أكثر من جهاز أو تبويب في نفس الوقت!');
+            await App.alert('عذراً، لا يمكنك فتح الاختبار من أكثر من جهاز أو تبويب في نفس الوقت!', 'تنبيه تسجيل دخول متعدد');
             return;
           }
         }
@@ -3239,7 +3239,7 @@
       }
 
       if (existing) {
-        const confirmRetake = confirm(`هذا الاسم الميداني قام بتقديم هذا الاختبار مسبقاً وحصل على درجة ${existing.score}%. هل ترغب في تقديم طلب إعادة اختبار لمسؤول الدورة؟`);
+        const confirmRetake = await App.confirm(`هذا الاسم الميداني قام بتقديم هذا الاختبار مسبقاً وحصل على درجة ${existing.score}%. هل ترغب في تقديم طلب إعادة اختبار لمسؤول الدورة؟`, 'طلب إعادة اختبار');
         if (confirmRetake) {
           submitRetakeRequestForUser(activeExamIdToPrompt, existing.studentName, existing.studentDiscord, existing.studentRank, existing.score);
           closeNamePrompt();
@@ -3854,14 +3854,14 @@
         .catch(err => console.error(err));
     }
 
-    window.deleteViolation = function (id) {
+    window.deleteViolation = async function (id) {
       const userRole = Auth.getRole();
       const roleInfo = Auth.getRoleInfo(userRole);
       if (!roleInfo || roleInfo.level < 4.5) {
         App.toast('عذراً، غير مصرح لك بحذف المخالفات!', 'error');
         return;
       }
-      if (confirm('هل أنت متأكد من حذف هذه المخالفة من الأرشيف؟')) {
+      if (await App.confirm('هل أنت متأكد من حذف هذه المخالفة من الأرشيف؟', 'حذف مخالفة')) {
         Storage.deleteViolation(id)
           .then(res => {
             App.toast('🗑️ تم حذف المخالفة بنجاح.', 'success');
@@ -3874,14 +3874,14 @@
       }
     }
 
-    window.clearAllViolations = function () {
+    window.clearAllViolations = async function () {
       const userRole = Auth.getRole();
       const roleInfo = Auth.getRoleInfo(userRole);
       if (!roleInfo || roleInfo.level < 4.5) {
         App.toast('عذراً، غير مصرح لك بمسح سجل المخالفات بالكامل!', 'error');
         return;
       }
-      if (confirm('هل أنت متأكد من رغبتك في مسح سجل المخالفات بالكامل؟')) {
+      if (await App.confirm('هل أنت متأكد من رغبتك في مسح سجل المخالفات بالكامل؟', 'مسح جميع المخالفات')) {
         Storage.deleteViolation('all')
           .then(res => {
             App.toast('🗑️ تم مسح سجل المخالفات بنجاح.', 'success');
