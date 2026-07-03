@@ -589,18 +589,18 @@ async function runCsvDiscordSync(db) {
   }
   isSyncing = true;
 
-  const { discordToken, guildId } = loadConfig();
-  if (!discordToken || !guildId) {
-    console.error('[CSV Sync] خطأ: DISCORD_TOKEN أو GUILD_ID غير محدد.');
-    isSyncing = false;
-    return { error: 'Missing config' };
-  }
+  try {
+    const { discordToken, guildId } = loadConfig();
+    if (!discordToken || !guildId) {
+      console.error('[CSV Sync] خطأ: DISCORD_TOKEN أو GUILD_ID غير محدد.');
+      return { error: 'Missing config' };
+    }
 
-  console.log('[CSV Sync] ═══════════════════════════════════');
-  console.log('[CSV Sync] بدء المزامنة...');
+    console.log('[CSV Sync] ═══════════════════════════════════');
+    console.log('[CSV Sync] بدء المزامنة...');
 
-  const snapshot = await loadSnapshot(db);
-  const allMembers = [];
+    const snapshot = await loadSnapshot(db);
+    const allMembers = [];
 
   // 1. جلب وتحليل كل مصادر الـ CSV
   for (const source of CSV_SOURCES) {
@@ -619,7 +619,6 @@ async function runCsvDiscordSync(db) {
 
   if (mergedMembers.length === 0) {
     console.warn('[CSV Sync] لا يوجد أعضاء بعد التحليل والدمج. إنهاء.');
-    isSyncing = false;
     return { processed: 0 };
   }
 
@@ -812,15 +811,20 @@ async function runCsvDiscordSync(db) {
     }
   }
 
-  // 7. حفظ الـ snapshot المحدّث
-  await saveSnapshot(db, newSnapshot);
+    // 7. حفظ الـ snapshot المحدّث
+    await saveSnapshot(db, newSnapshot);
 
-  console.log(`[CSV Sync] ═══════════════════════════════════`);
-  console.log(`[CSV Sync] ✅ انتهت المزامنة: ${changedCount} تغيير، ${errorCount} خطأ.`);
-  console.log(`[CSV Sync] ═══════════════════════════════════`);
+    console.log(`[CSV Sync] ═══════════════════════════════════`);
+    console.log(`[CSV Sync] ✅ انتهت المزامنة: ${changedCount} تغيير، ${errorCount} خطأ.`);
+    console.log(`[CSV Sync] ═══════════════════════════════════`);
 
-  isSyncing = false;
-  return { processed: processedCount, changed: changedCount, errors: errorCount };
+    return { processed: processedCount, changed: changedCount, errors: errorCount };
+  } catch (syncErr) {
+    console.error('[CSV Sync] ❌ خطأ فادح في المزامنة:', syncErr);
+    return { error: syncErr.message };
+  } finally {
+    isSyncing = false;
+  }
 }
 
 function buildSnapshotEntry(member) {
