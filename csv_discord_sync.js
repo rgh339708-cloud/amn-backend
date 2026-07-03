@@ -698,12 +698,15 @@ async function runCsvDiscordSync(db) {
         }
       }
 
-      // ب. إزالة الرولات التي كانت مطلوبة سابقاً في الجدول ولكنها لم تعد مطلوبة الآن
+      // ب. تم إيقاف الإزالة التلقائية للرولات لمنع حدوث إزالة بالخطأ أثناء تعديل قوقل شيت
+      // (إذا رغبتم في سحب رول من عضو، يمكنكم سحبه يدوياً في الديسكورد)
+      /*
       for (const roleId of oldRequiredRoleIds) {
         if (!requiredRoleIds.has(roleId) && currentRoles.includes(roleId)) {
           rolesToRemove.add(roleId);
         }
       }
+      */
 
       // إزالة الرولات التي تقرر إزالتها (إذا كانت لدى العضو فعلياً في ديسكورد)
       for (const roleId of rolesToRemove) {
