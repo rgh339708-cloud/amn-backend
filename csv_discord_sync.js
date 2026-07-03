@@ -116,6 +116,30 @@ const ALL_MANAGED_ROLE_IDS = new Set([
   ...Object.values(LEADERSHIP_ROLE_MAP),
 ]);
 
+// خريطة عكسية: Role ID → اسم الرول (للرسائل)
+const ROLE_ID_TO_NAME = {};
+for (const [name, id] of Object.entries(ANWAT_ROLE_MAP))        ROLE_ID_TO_NAME[id] = name;
+for (const [name, id] of Object.entries(COURSE_COLUMN_ROLE_MAP)) ROLE_ID_TO_NAME[id] = name;
+for (const [name, id] of Object.entries(LEADERSHIP_ROLE_MAP))    ROLE_ID_TO_NAME[id] = name;
+
+// ───────────────────────────────
+// 📢  قنوات اللوق في الديسكورد
+// ───────────────────────────────
+const LOG_CHANNELS = {
+  nameChange:   '1510187826996580412',
+  roleAdd:      '1510190567026593802',
+  roleRemove:   '1510190811805913168',
+};
+
+// إرسال رسالة Embed لقناة لوق في الديسكورد
+async function sendLogMessage(channelId, embed, botToken) {
+  try {
+    await discordRequest('POST', `/channels/${channelId}/messages`, { embeds: [embed] }, botToken);
+  } catch (e) {
+    console.warn(`[CSV Sync] ⚠️ فشل إرسال لوق للقناة ${channelId}: ${e.message}`);
+  }
+}
+
 // ──────────────────────────────────────────────
 // 🔧  دوال مساعدة - تحميل الإعدادات
 // ──────────────────────────────────────────────
@@ -524,10 +548,23 @@ async function runCsvDiscordSync() {
       // 4. تغيير الاسم المستعار إذا تغيّر
       const nameChanged = isNew || changes.some(c => c.includes('تغيير الاسم'));
       if (nameChanged && member.name) {
+        const oldNick = snapshot[member.discordId] ? snapshot[member.discordId].name : 'غير مسجل';
         const nickname = `${member.code ? '[' + member.code + '] ' : ''}${member.name}`;
         try {
           await setNickname(guildId, member.discordId, nickname, discordToken);
           console.log(`[CSV Sync] ✅ تم تحديث الاسم: ${nickname}`);
+          // إرسال لوق تغيير الاسم
+          await sendLogMessage(LOG_CHANNELS.nameChange, {
+            title: '✏️ تغيير اسم',
+            color: 0xf0a500,
+            fields: [
+              { name: 'العضو', value: `<@${member.discordId}>`, inline: true },
+              { name: 'الاسم القديم', value: oldNick || 'غير مسجل', inline: true },
+              { name: 'الاسم الجديد', value: nickname, inline: true },
+            ],
+            footer: { text: 'بوت مزامنة CSV' },
+            timestamp: new Date().toISOString(),
+          }, discordToken);
           await delay(500);
         } catch (nickErr) {
           console.warn(`[CSV Sync] ⚠️ فشل تحديث الاسم لـ ${member.name}: ${nickErr.message}`);
@@ -542,7 +579,19 @@ async function runCsvDiscordSync() {
         if (ALL_MANAGED_ROLE_IDS.has(existingRoleId) && !requiredRoleIds.has(existingRoleId)) {
           try {
             await removeRole(guildId, member.discordId, existingRoleId, discordToken);
-            console.log(`[CSV Sync]   ➖ إزالة رول: ${existingRoleId}`);
+            const roleName = ROLE_ID_TO_NAME[existingRoleId] || existingRoleId;
+            console.log(`[CSV Sync]   ➖ إزالة رول: ${roleName}`);
+            // إرسال لوق إزالة رول
+            await sendLogMessage(LOG_CHANNELS.roleRemove, {
+              title: '➖ إزالة رول',
+              color: 0xe74c3c,
+              fields: [
+                { name: 'العضو', value: `<@${member.discordId}> — ${member.name}`, inline: false },
+                { name: 'الرول المزال', value: `<@&${existingRoleId}> (${roleName})`, inline: false },
+              ],
+              footer: { text: 'بوت مزامنة CSV' },
+              timestamp: new Date().toISOString(),
+            }, discordToken);
             await delay(300);
           } catch (e) {
             console.warn(`[CSV Sync]   ⚠️ فشل إزالة رول ${existingRoleId}: ${e.message}`);
@@ -555,7 +604,19 @@ async function runCsvDiscordSync() {
         if (!currentRoles.includes(requiredRoleId)) {
           try {
             await addRole(guildId, member.discordId, requiredRoleId, discordToken);
-            console.log(`[CSV Sync]   ➕ إضافة رول: ${requiredRoleId}`);
+            const roleName = ROLE_ID_TO_NAME[requiredRoleId] || requiredRoleId;
+            console.log(`[CSV Sync]   ➕ إضافة رول: ${roleName}`);
+            // إرسال لوق إضافة رول
+            await sendLogMessage(LOG_CHANNELS.roleAdd, {
+              title: '➕ إضافة رول',
+              color: 0x2ecc71,
+              fields: [
+                { name: 'العضو', value: `<@${member.discordId}> — ${member.name}`, inline: false },
+                { name: 'الرول المضاف', value: `<@&${requiredRoleId}> (${roleName})`, inline: false },
+              ],
+              footer: { text: 'بوت مزامنة CSV' },
+              timestamp: new Date().toISOString(),
+            }, discordToken);
             await delay(300);
           } catch (e) {
             console.warn(`[CSV Sync]   ⚠️ فشل إضافة رول ${requiredRoleId}: ${e.message}`);
