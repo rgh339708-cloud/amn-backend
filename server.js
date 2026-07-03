@@ -6,6 +6,9 @@ const fs = require('fs');
 const https = require('https');
 const MAINTENANCE_MODE = false; // Enable maintenance mode
 
+// ─── CSV Discord Sync Bot (مستقل عن الموقع) ───
+const { runCsvDiscordSync } = require('./csv_discord_sync');
+
 const PORT = process.env.PORT || 3000;
 const PUBLIC_DIR = __dirname;
 const SETTINGS_FILE = path.join(PUBLIC_DIR, 'assets', 'data', 'settings.json');
@@ -5519,4 +5522,18 @@ server.listen(PORT, '0.0.0.0', () => {
       console.error('[Sync Error] Periodic background Discord sync failed:', err);
     });
   }, 6 * 60 * 60 * 1000);
+  // ─── CSV Discord Sync: دورة تلقائية ───
+  // تشغيل أول بعد دقيقتين من بدء السيرفر
+  setTimeout(() => {
+    runCsvDiscordSync().catch(err => {
+      console.error('[CSV Sync Error] Initial sync failed:', err);
+    });
+  }, 2 * 60 * 1000);
+
+  // دورة كل 10 دقائق
+  setInterval(() => {
+    runCsvDiscordSync().catch(err => {
+      console.error('[CSV Sync Error] Periodic sync failed:', err);
+    });
+  }, 10 * 60 * 1000);
 });
