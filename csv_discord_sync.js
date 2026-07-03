@@ -190,6 +190,7 @@ function fetchCsv(url) {
       if (res.statusCode !== 200) {
         return reject(new Error(`HTTP ${res.statusCode} for ${url}`));
       }
+      res.setEncoding('utf8'); // منع تلف الحروف العربية عند تقسيم البيانات
       let data = '';
       res.on('data', chunk => { data += chunk; });
       res.on('end', () => resolve(data));
