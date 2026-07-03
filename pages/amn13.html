@@ -820,10 +820,10 @@
       <button class="tab-btn" id="tab-btn-fines" onclick="switchSheet(' جدول الغرامات 💵', this)">
         <span>💵</span> الغرامات
       </button>
-      <button class="tab-btn" id="tab-btn-training" onclick="switchSheet('جدول الادارة العامه لشؤون تدريب الامن العام', this)">
+      <button class="tab-btn" id="tab-btn-training" onclick="switchSheet('جدول الإدارة العامه لشؤون تدريب الامن العام', this)">
         <span><i class="fa-solid fa-book-bookmark"></i></span> تدريب الأمن العام
       </button>
-      <button class="tab-btn" id="tab-btn-military" onclick="switchSheet('الإدارة العامة لشؤون العسكرية', this)">
+      <button class="tab-btn" id="tab-btn-military" onclick="switchSheet('الادارة العامة لشؤون العسكرية', this)">
         <span><i class="fa-solid fa-shield-halved"></i></span> الشؤون العسكرية
       </button>
       <button class="tab-btn" id="tab-btn-finance" onclick="switchSheet('جدول الادارة العامة لشؤون الادارية والمالية', this)">
@@ -1136,9 +1136,9 @@
     "الإستقالات 🎯",
     " جدول الغرامات 💵",
     "جدول الادارة العامة لشؤون الادارية والمالية",
-    "جدول الادارة العامه لشؤون تدريب الامن العام",
+    "جدول الإدارة العامه لشؤون تدريب الامن العام",
     " جدول الادارة العامه لشؤون التجنيد",
-    "الإدارة العامة لشؤون العسكرية"
+    "الادارة العامة لشؤون العسكرية"
   ];
   
   let allMembers = [];
@@ -1189,10 +1189,16 @@
 
   async function loadDiscordUsersCache() {
     try {
-      const res = await fetch(`../assets/data/discord_users.json?t=${Date.now()}`);
+      const res = await fetch(`/api/auth/discord_users_cache?t=${Date.now()}`);
       if (res.ok) {
         discordUsersCache = await res.json();
-        console.log('[Discord Cache] Loaded Discord profiles cache successfully!');
+        console.log('[Discord Cache] Loaded Discord profiles cache from API successfully!');
+      } else {
+        const fallbackRes = await fetch(`../assets/data/discord_users.json?t=${Date.now()}`);
+        if (fallbackRes.ok) {
+          discordUsersCache = await fallbackRes.json();
+          console.log('[Discord Cache] Loaded Discord profiles cache from static fallback successfully!');
+        }
       }
     } catch (err) {
       console.warn('[Discord Cache] Failed to load Discord users cache:', err);
@@ -1354,6 +1360,8 @@
       let idxReason = cols.findIndex(c => c.includes("سبب الحكم") || c.includes("سبب الغرامة") || c.includes("سبب المخالفة") || c.includes("السبب") || c.includes("سبب"));
       let idxDate = cols.findIndex(c => c.includes("تاريخ اصدار المخالفة") || c.includes("تاريخ اصدار") || c.includes("تاريخ"));
       let idxPaid = cols.findIndex(c => c.includes("حالة السداد") || c.includes("السداد") || c.includes("سداد"));
+      let idxViolationLink = cols.findIndex(c => c.includes("رابط المخالفة") || c.includes("رابط") || c.includes("المخالفة"));
+      let idxFreezeStatus = cols.findIndex(c => c.includes("حالة التجميد") || c.includes("التجميد") || c.includes("تجميد"));
       
       // Fallback indices if sheet headers are missing or not detected (e.g. merged cells)
       if (idxDiscord === -1) idxDiscord = 0;
@@ -1364,7 +1372,9 @@
       if (idxFine === -1) idxFine = 8;
       if (idxReason === -1) idxReason = 10;
       if (idxDate === -1) idxDate = 12;
-      if (idxPaid === -1) idxPaid = 18;
+      if (idxViolationLink === -1) idxViolationLink = 17; // Column R
+      if (idxPaid === -1) idxPaid = 18; // Column S
+      if (idxFreezeStatus === -1) idxFreezeStatus = 19; // Column T
       
       const list = [];
       table.rows.forEach(row => {
@@ -1402,14 +1412,16 @@
           fine: valOf(idxFine) || "0",
           reason: reason,
           date: date,
-          paid: valOf(idxPaid)
+          paid: valOf(idxPaid),
+          violationLink: valOf(idxViolationLink),
+          freezeStatus: valOf(idxFreezeStatus)
         });
       });
       return list;
     }
     
     // Custom Military Administration Parsing
-    if (tabName === 'الإدارة العامة لشؤون العسكرية') {
+    if (tabName === 'الادارة العامة لشؤون العسكرية') {
       const list = [];
       table.rows.forEach(row => {
         if (!row || !row.c) return;
@@ -1561,7 +1573,7 @@
     }
 
     // Custom Training Sheet Parsing
-    if (tabName === 'جدول الادارة العامه لشؤون تدريب الامن العام') {
+    if (tabName === 'جدول الإدارة العامه لشؤون تدريب الامن العام') {
       const list = [];
       table.rows.forEach(row => {
         if (!row || !row.c) return;
@@ -1871,6 +1883,8 @@
           <th>مصدر الحكم</th>
           <th>الغرامة المستحقة</th>
           <th>سبب الحكم</th>
+          <th>رابط المخالفة</th>
+          <th>حالة التجميد</th>
           <th>حالة السداد</th>
         </tr>
       `;
@@ -1897,7 +1911,7 @@
           <th>ملاحظات مستلم الغرامة</th>
         </tr>
       `;
-    } else if (currentTab === 'الإدارة العامة لشؤون العسكرية') {
+    } else if (currentTab === 'الادارة العامة لشؤون العسكرية') {
       thead.innerHTML = `
         <tr>
           <th>Discord ID</th>
@@ -1911,7 +1925,7 @@
           <th>الملاحظات</th>
         </tr>
       `;
-    } else if (currentTab === 'جدول الادارة العامه لشؤون تدريب الامن العام') {
+    } else if (currentTab === 'جدول الإدارة العامه لشؤون تدريب الامن العام') {
       thead.innerHTML = `
         <tr>
           <th>Discord ID</th>
@@ -2017,11 +2031,11 @@
   // Generates table skeleton shimmer rows based on the columns of the active tab
   function getTableSkeletonHTML(tab) {
     let cols = 5;
-    if (tab === ' جدول الغرامات 💵') cols = 9;
+    if (tab === ' جدول الغرامات 💵') cols = 11;
     else if (tab === 'نظام الترقيات ⭐️جديد' || tab === 'الترقيات المسرعة ') cols = 4;
     else if (tab === 'الإستقالات 🎯') cols = 9;
-    else if (tab === 'الإدارة العامة لشؤون العسكرية') cols = 9;
-    else if (tab === 'جدول الادارة العامه لشؤون تدريب الامن العام') cols = 10;
+    else if (tab === 'الادارة العامة لشؤون العسكرية') cols = 9;
+    else if (tab === 'جدول الإدارة العامه لشؤون تدريب الامن العام') cols = 10;
     else if (tab === 'جدول الادارة العامة لشؤون الادارية والمالية') cols = 8;
     else if (tab === ' جدول الادارة العامه لشؤون التجنيد') cols = 8;
     else cols = 23; // main members tab
@@ -2416,6 +2430,15 @@
           if ((displayBadge === "—" || displayBadge === "G-90" || !displayBadge) && foundPerson.badge) displayBadge = foundPerson.badge;
         }
 
+        let freezeBadge = '';
+        const fsVal = String(r.freezeStatus || '').trim().toLowerCase();
+        const isFrozen = fsVal === 'true' || fsVal === 'yes' || fsVal === 'نعم' || fsVal === 'صح' || fsVal === 'مجمد' || fsVal === 'تجميد';
+        if (isFrozen) {
+          freezeBadge = `<span class="status-pill active" style="background: rgba(39,174,96,0.12); color: #2ecc71; border: 1px solid rgba(39,174,96,0.25); padding: 4px 8px; border-radius: 50%; font-size: 0.8rem; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px;">✓</span>`;
+        } else {
+          freezeBadge = `<span class="status-pill on_leave" style="background: rgba(231,76,60,0.12); color: #ff4757; border: 1px solid rgba(231,76,60,0.25); padding: 4px 8px; border-radius: 50%; font-size: 0.8rem; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px;">✕</span>`;
+        }
+
         return `
           <tr>
             ${getDiscordIdInfo(r)}
@@ -2426,6 +2449,8 @@
             <td>${r.source}</td>
             <td style="color:#ff4757; font-weight:700;">${formatFineAmount(r.fine)} ريال</td>
             <td>${r.reason}</td>
+            <td>${r.violationLink && (r.violationLink.startsWith('http') || r.violationLink.includes('docs.google.com')) ? `<a href="${r.violationLink}" target="_blank" style="color:var(--color-gold-primary); text-decoration:underline;"><i class="fa-solid fa-link"></i> الرابط</a>` : (r.violationLink || '—')}</td>
+            <td>${freezeBadge}</td>
             <td>${paidBadge}</td>
           </tr>
         `;
@@ -2496,7 +2521,7 @@
       return;
     }
 
-    if (currentTab === 'الإدارة العامة لشؤون العسكرية') {
+    if (currentTab === 'الادارة العامة لشؤون العسكرية') {
       tbody.innerHTML = list.map(r => {
         const statusHTML = getStatusHTML(r.status, true);
         const warningBadge = r.badgeDegree && r.badgeDegree !== 'لا يوجد انذارات' && r.badgeDegree !== '—'
@@ -2521,7 +2546,7 @@
       return;
     }
 
-    if (currentTab === 'جدول الادارة العامه لشؤون تدريب الامن العام') {
+    if (currentTab === 'جدول الإدارة العامه لشؤون تدريب الامن العام') {
       tbody.innerHTML = list.map(r => {
         const statusHTML = getStatusHTML(r.status, true);
         const salaryFormatted = r.salary && r.salary !== '—' ? `${formatFineAmount(r.salary)} ريال` : '—';
@@ -2773,7 +2798,16 @@
     if (!personFines.length) {
       finesListEl.innerHTML = `<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3);font-size:0.85rem"><i class="fa-solid fa-circle-check" style="font-size:2rem;color:rgba(46,204,113,0.4);display:block;margin-bottom:10px"></i>لا توجد مخالفات أو غرامات مسجلة على هذا الشخص.</div>`;
     } else {
-      const renderFine = (f, idx, isPaid) => `
+      const renderFine = (f, idx, isPaid) => {
+        let freezeBadge = '';
+        const fsVal = String(f.freezeStatus || '').trim().toLowerCase();
+        const isFrozen = fsVal === 'true' || fsVal === 'yes' || fsVal === 'نعم' || fsVal === 'صح' || fsVal === 'مجمد' || fsVal === 'تجميد';
+        if (isFrozen) {
+          freezeBadge = `<span class="status-pill active" style="background: rgba(39,174,96,0.12); color: #2ecc71; border: 1px solid rgba(39,174,96,0.25); padding: 4px 8px; border-radius: 50%; font-size: 0.8rem; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px;">✓</span>`;
+        } else {
+          freezeBadge = `<span class="status-pill on_leave" style="background: rgba(231,76,60,0.12); color: #ff4757; border: 1px solid rgba(231,76,60,0.25); padding: 4px 8px; border-radius: 50%; font-size: 0.8rem; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px;">✕</span>`;
+        }
+        return `
         <div class="fine-card" style="border-right: 4px solid ${isPaid ? '#2ecc71' : '#ff4757'}; ${isPaid ? 'opacity:0.7;' : ''}">
           <span class="fine-card-badge" style="background:${isPaid ? 'rgba(46,204,113,0.15); color:#2ecc71;' : 'rgba(255,71,87,0.15); color:#ff4757;'}">${isPaid ? '✓ مسدد' : `# ${idx + 1} غير مسدد`}</span>
           <div class="fine-card-amount" style="color:${isPaid ? '#2ecc71' : '#ff4757'}">${formatFineAmount(f.fine)} ريال</div>
@@ -2782,8 +2816,11 @@
             <div><div class="fine-card-lbl"><i class="fa-solid fa-scale-balanced"></i> القاضي</div><div class="fine-card-val">${f.judge || '—'}</div></div>
             <div><div class="fine-card-lbl"><i class="fa-solid fa-landmark"></i> مصدر الحكم</div><div class="fine-card-val">${f.source || '—'}</div></div>
             <div><div class="fine-card-lbl"><i class="fa-solid fa-calendar-days"></i> تاريخ الإصدار</div><div class="fine-card-val">${f.date || '—'}</div></div>
+            <div><div class="fine-card-lbl"><i class="fa-solid fa-link"></i> رابط المخالفة</div><div class="fine-card-val">${f.violationLink && (f.violationLink.startsWith('http') || f.violationLink.includes('docs.google.com')) ? `<a href="${f.violationLink}" target="_blank" style="color:var(--color-gold-primary); text-decoration:underline;">عرض الرابط</a>` : (f.violationLink || '—')}</div></div>
+            <div><div class="fine-card-lbl"><i class="fa-solid fa-snowflake"></i> حالة التجميد</div><div class="fine-card-val">${freezeBadge}</div></div>
           </div>
         </div>`;
+      };
       let html = '';
       if (unpaidFines.length > 0) {
         html += `<div style="font-size:0.78rem;font-weight:800;color:#ff4757;margin-bottom:8px;"><i class="fa-solid fa-triangle-exclamation"></i> غرامات غير مسددة (${unpaidFines.length})</div>`;

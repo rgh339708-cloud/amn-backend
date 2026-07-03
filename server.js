@@ -4881,6 +4881,25 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  // GET /api/auth/discord_users_cache - Serve live discord users cache JSON
+  if (pathname === '/api/auth/discord_users_cache' && req.method === 'GET') {
+    const discordUsersFile = path.join(PUBLIC_DIR, 'assets', 'data', 'discord_users.json');
+    if (fs.existsSync(discordUsersFile)) {
+      try {
+        const data = fs.readFileSync(discordUsersFile, 'utf8');
+        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(data);
+      } catch (e) {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Failed to read cache file' }));
+      }
+    } else {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({}));
+    }
+    return;
+  }
+
   // POST /api/auth/upsert_user - Insert or update user details
   if (pathname === '/api/auth/upsert_user' && req.method === 'POST') {
     let body = '';
