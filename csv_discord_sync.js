@@ -435,10 +435,46 @@ function parseLeadershipRoles(leadershipText) {
     for (const part of parts) {
       const trimmed = part.trim();
       const normalized = normalizeArabic(trimmed);
+      if (!normalized) continue;
+
+      // 1. مطابقة تامة أولاً (Exact Match) - وهي الأعلى أولوية
+      let matched = false;
       for (const [mapKey, roleId] of Object.entries(LEADERSHIP_ROLE_MAP)) {
-        if (normalizeArabic(mapKey) === normalized || normalizeArabic(mapKey).includes(normalized) || normalized.includes(normalizeArabic(mapKey))) {
+        if (normalizeArabic(mapKey) === normalized) {
           roles.add(roleId);
+          matched = true;
           break;
+        }
+      }
+
+      // 2. مطابقة جزئية إذا لم تنجح المطابقة التامة (مع حماية الرتب العامة)
+      if (!matched) {
+        for (const [mapKey, roleId] of Object.entries(LEADERSHIP_ROLE_MAP)) {
+          const mapKeyNorm = normalizeArabic(mapKey);
+          
+          // إذا كان المفتاح هو أحد الرتب العامة الحساسة، فلا نقبل إلا مطابقة تامة
+          const isGeneralRole = [
+            'ضباط الامن العام',
+            'كبار ضباط الامن العام',
+            'افراد الامن العام',
+            'قـيـادة قـطـاعـات اخـرى'
+          ].map(normalizeArabic).includes(mapKeyNorm);
+
+          if (isGeneralRole) {
+            // الرتب العامة يجب أن تطابق النص المدخل تماماً
+            if (mapKeyNorm === normalized) {
+              roles.add(roleId);
+              matched = true;
+              break;
+            }
+          } else {
+            // بقية المهام القيادية يمكن قبول المطابقة الجزئية لها
+            if (mapKeyNorm.includes(normalized) || normalized.includes(mapKeyNorm)) {
+              roles.add(roleId);
+              matched = true;
+              break;
+            }
+          }
         }
       }
     }
