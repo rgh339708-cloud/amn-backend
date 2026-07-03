@@ -1990,9 +1990,9 @@ function syncGoogleSheetsToDb(forceId = null, loginUser = null) {
 
     const MEMBER_TABS = [
       "جدول الادارة العامة لشؤون الادارية والمالية",
-      "جدول الادارة العامه لشؤون تدريب الامن العام",
+      "جدول الإدارة العامه لشؤون تدريب الامن العام",
       " جدول الادارة العامه لشؤون التجنيد",
-      "الإدارة العامة لشؤون العسكرية",
+      "الادارة العامة لشؤون العسكرية",
       "جدول الامن العام - المنتدبين",
       "جدول الامن العام - الادارة",
       "جدول الامن العام - الاساسي"
@@ -3197,7 +3197,7 @@ const server = http.createServer((req, res) => {
                           if (!fsErr && fileData) {
                             try {
                               const parsedData = JSON.parse(fileData);
-                              trainingMembers = parsedData['جدول الادارة العامه لشؤون تدريب الامن العام'] || [];
+                              trainingMembers = parsedData['جدول الإدارة العامه لشؤون تدريب الامن العام'] || [];
                             } catch (e) {
                               console.error('Error parsing sheets cache file:', e);
                             }
@@ -3210,7 +3210,7 @@ const server = http.createServer((req, res) => {
                               if (!errSheets && sheetRow && sheetRow.data_json) {
                                 try {
                                   const parsedData = JSON.parse(sheetRow.data_json);
-                                  trainingMembers = parsedData['جدول الادارة العامه لشؤون تدريب الامن العام'] || [];
+                                  trainingMembers = parsedData['جدول الإدارة العامه لشؤون تدريب الامن العام'] || [];
                                 } catch (e) {}
                               }
                               sendAttendanceReportToDiscord(bookName, operator_id, bookRoomImage, records || [], bookCourseType, trainingMembers);
@@ -5163,6 +5163,113 @@ const server = http.createServer((req, res) => {
         });
       } catch (ex) {
         res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'بيانات غير صالحة.' }));
+      }
+    });
+    return;
+  }
+
+  // POST /api/auth/refresh_discord_profile - Refresh a user's Discord profile details on demand
+  if (pathname === '/api/auth/refresh_discord_profile' && req.method === 'POST') {
+    let body = '';
+    req.on('data', chunk => { body += chunk; });
+    req.on('end', async () => {
+      try {
+        const data = JSON.parse(body);
+        const { discord_id } = data;
+        if (!discord_id || !/^\d{17,20}$/.test(discord_id)) {
+          res.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
+          res.end(JSON.stringify({ error: 'معرف الديسكورد غير صالح.' }));
+          return;
+        }
+
+        const config = loadConfig();
+        const botToken = config.discordToken;
+        if (!botToken) {
+          res.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8' });
+          res.end(JSON.stringify({ error: 'سيرفر الديسكورد غير مهيأ بالبوت.' }));
+          return;
+        }
+
+        try {
+          console.log(`[API Profile Refresh] Fetching user ${discord_id} from Discord API...`);
+          const discordUser = await fetchDiscordUserData(discord_id, botToken);
+          
+          if (!discordUser || !discordUser.id) {
+            res.writeHead(404, { 'Content-Type': 'application/json; charset=utf-8' });
+            res.end(JSON.stringify({ error: 'لم يتم العثور على المستخدم في ديسكورد.' }));
+            return;
+          }
+
+          const username = discordUser.username;
+          const display_name = discordUser.global_name || discordUser.username;
+          const bannerColor = discordUser.banner_color || null;
+          
+          let avatarUrl = '';
+          if (discordUser.avatar) {
+            const format = discordUser.avatar.startsWith('a_') ? 'gif' : 'png';
+            avatarUrl = `https://cdn.discordapp.com/avatars/${discord_id}/${discordUser.avatar}.${format}`;
+          }
+          
+          let bannerUrl = '';
+          if (discordUser.banner) {
+            const format = discordUser.banner.startsWith('a_') ? 'gif' : 'png';
+            bannerUrl = `https://cdn.discordapp.com/banners/${discord_id}/${discordUser.banner}.${format}`;
+          }
+
+          console.log(`[API Profile Refresh] Downloading media for user ${discord_id}...`);
+          const dlAvatar = await downloadDiscordMedia(discord_id, avatarUrl, 'avatar');
+          const dlBanner = await downloadDiscordMedia(discord_id, bannerUrl, 'banner');
+
+          // Update cache file immediately
+          updateDiscordUsersCacheFile(discord_id, username, display_name, dlAvatar, dlBanner, bannerColor);
+
+          // Update DB if user exists in the DB
+          db.get('SELECT id FROM users WHERE id = ?', [discord_id], (dbErr, existing) => {
+            if (existing) {
+              db.run(`UPDATE users SET 
+                        username = ?, 
+                        display_name = ?, 
+                        avatar = ?, 
+                        banner = ?, 
+                        avatar_url = ?, 
+                        banner_url = ?, 
+                        banner_color = ?, 
+                        last_sync = datetime('now'),
+                        updated_at = datetime('now')
+                      WHERE id = ?`,
+                [username, display_name, dlAvatar, dlBanner, avatarUrl, bannerUrl, bannerColor, discord_id],
+                (updErr) => {
+                  if (updErr) {
+                    console.error('❌ Database error updating refreshed user:', updErr);
+                  }
+                }
+              );
+            }
+          });
+
+          logSystemActivity('discord_profile_refresh', username, `قام المستخدم بتحديث بيانات ملفه الشخصي يدوياً من الديسكورد`);
+
+          res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+          res.end(JSON.stringify({ 
+            success: true, 
+            message: 'تم تحديث بيانات الملف الشخصي بنجاح!',
+            user: {
+              avatar: dlAvatar,
+              banner: dlBanner,
+              bannerColor: bannerColor,
+              username: username,
+              globalName: display_name
+            }
+          }));
+
+        } catch (discordErr) {
+          console.error('[API Profile Refresh Error]', discordErr);
+          res.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8' });
+          res.end(JSON.stringify({ error: `فشل في جلب البيانات من ديسكورد: ${discordErr.message}` }));
+        }
+      } catch (ex) {
+        res.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
         res.end(JSON.stringify({ error: 'بيانات غير صالحة.' }));
       }
     });
