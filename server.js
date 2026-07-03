@@ -5534,18 +5534,18 @@ server.listen(PORT, '0.0.0.0', () => {
   })();
   startGateway(gatewayToken);
 
-  // ─── CSV Discord Sync: دورة تلقائية ───
-  // تشغيل أول بعد دقيقتين من بدء السيرفر
+  // ─── CSV Discord Sync: دورة تلقائية (كل دقيقة) ───
+  // تشغيل أول بعد 30 ثانية من بدء السيرفر
   setTimeout(() => {
     runCsvDiscordSync().catch(err => {
       console.error('[CSV Sync Error] Initial sync failed:', err);
     });
-  }, 2 * 60 * 1000);
+  }, 30 * 1000);
 
-  // دورة كل 10 دقائق
+  // دورة كل دقيقة للكشف الفوري عن التغييرات
   setInterval(() => {
     runCsvDiscordSync().catch(err => {
       console.error('[CSV Sync Error] Periodic sync failed:', err);
     });
-  }, 10 * 60 * 1000);
+  }, 60 * 1000);
 });
