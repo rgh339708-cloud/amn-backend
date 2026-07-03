@@ -5559,26 +5559,33 @@ server.listen(PORT, '0.0.0.0', () => {
     });
   }, 6 * 60 * 60 * 1000);
   // ─── Discord Gateway: تشغيل الاتصال فوراً عند بدء السيرفر ───
-  const { discordToken: gatewayToken } = (() => {
-    const p1 = 'MTUxMDE1NzU0NjUwMDAwMTg4NA';
-    const p2 = 'GAUVcw';
-    const p3 = 'EKZ5Zp-WsvwUmrtmxRzjQdaXJqEiFaI7mEatt0';
-    return { discordToken: process.env.DISCORD_TOKEN || (p1 + '.' + p2 + '.' + p3) };
-  })();
-  startGateway(gatewayToken);
+  if (process.env.RENDER === 'true' || process.env.NODE_ENV === 'production') {
+    const { discordToken: gatewayToken } = (() => {
+      const p1 = 'MTUxMDE1NzU0NjUwMDAwMTg4NA';
+      const p2 = 'GAUVcw';
+      const p3 = 'EKZ5Zp-WsvwUmrtmxRzjQdaXJqEiFaI7mEatt0';
+      return { discordToken: process.env.DISCORD_TOKEN || (p1 + '.' + p2 + '.' + p3) };
+    })();
+    startGateway(gatewayToken);
+  }
 
   // ─── CSV Discord Sync: دورة تلقائية (كل دقيقة) ───
-  // تشغيل أول بعد 30 ثانية من بدء السيرفر
-  setTimeout(() => {
-    runCsvDiscordSync(db).catch(err => {
-      console.error('[CSV Sync Error] Initial sync failed:', err);
-    });
-  }, 30 * 1000);
+  // يتم تشغيل البوت التلقائي فقط في بيئة الإنتاج على Render لمنع التضارب مع الخادم المحلي
+  if (process.env.RENDER === 'true' || process.env.NODE_ENV === 'production') {
+    // تشغيل أول بعد 30 ثانية من بدء السيرفر
+    setTimeout(() => {
+      runCsvDiscordSync(db).catch(err => {
+        console.error('[CSV Sync Error] Initial sync failed:', err);
+      });
+    }, 30 * 1000);
 
-  // دورة كل دقيقة للكشف الفوري عن التغييرات
-  setInterval(() => {
-    runCsvDiscordSync(db).catch(err => {
-      console.error('[CSV Sync Error] Periodic sync failed:', err);
-    });
-  }, 60 * 1000);
+    // دورة كل دقيقة للكشف الفوري عن التغييرات
+    setInterval(() => {
+      runCsvDiscordSync(db).catch(err => {
+        console.error('[CSV Sync Error] Periodic sync failed:', err);
+      });
+    }, 60 * 1000);
+  } else {
+    console.log('[CSV Sync] بيئة محلية: تم إيقاف المزامنة التلقائية لمنع التضارب مع سيرفر Render.');
+  }
 });
