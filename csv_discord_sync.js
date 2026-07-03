@@ -183,8 +183,8 @@ function loadConfig() {
 function fetchCsv(url) {
   return new Promise((resolve, reject) => {
     https.get(url, (res) => {
-      // متابعة إعادة التوجيه
-      if (res.statusCode === 301 || res.statusCode === 302) {
+      // متابعة إعادة التوجيه (301, 302, 307, 308)
+      if ([301, 302, 307, 308].includes(res.statusCode)) {
         return fetchCsv(res.headers.location).then(resolve).catch(reject);
       }
       if (res.statusCode !== 200) {
