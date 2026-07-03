@@ -465,6 +465,37 @@ function detectChanges(oldSnapshot, newMember) {
   return { isNew: false, changes };
 }
 
+// دالة لدمج الأعضاء المكررين عبر الجداول المختلفة لمنع التضارب
+function mergeMembers(members) {
+  const merged = {};
+  for (const m of members) {
+    if (!merged[m.discordId]) {
+      merged[m.discordId] = { ...m, courses: { ...m.courses } };
+    } else {
+      const existing = merged[m.discordId];
+      if (!existing.name) existing.name = m.name;
+      if (!existing.code) existing.code = m.code;
+      if (!existing.rank) existing.rank = m.rank;
+      if (!existing.status) existing.status = m.status;
+      if (m.anwat) existing.anwat = m.anwat;
+      if (m.leadership) {
+        if (!existing.leadership) {
+          existing.leadership = m.leadership;
+        } else if (!existing.leadership.includes(m.leadership)) {
+          existing.leadership += ' / ' + m.leadership;
+        }
+      }
+      // دمج الدورات والونقات
+      for (const [courseName, val] of Object.entries(m.courses || {})) {
+        if (val) {
+          existing.courses[courseName] = true;
+        }
+      }
+    }
+  }
+  return Object.values(merged);
+}
+
 // ──────────────────────────────────────────────
 // 🚀  الدالة الرئيسية: مزامنة CSV مع الديسكورد
 // ──────────────────────────────────────────────
@@ -504,8 +535,10 @@ async function runCsvDiscordSync() {
     }
   }
 
-  if (allMembers.length === 0) {
-    console.warn('[CSV Sync] لا يوجد أعضاء بعد التحليل. إنهاء.');
+  const mergedMembers = mergeMembers(allMembers);
+
+  if (mergedMembers.length === 0) {
+    console.warn('[CSV Sync] لا يوجد أعضاء بعد التحليل والدمج. إنهاء.');
     isSyncing = false;
     return { processed: 0 };
   }
@@ -516,7 +549,7 @@ async function runCsvDiscordSync() {
   let errorCount     = 0;
   const newSnapshot  = { ...snapshot };
 
-  for (const member of allMembers) {
+  for (const member of mergedMembers) {
     const { isNew, changes } = detectChanges(snapshot, member);
 
     if (!isNew && changes.length === 0) {
