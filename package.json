@@ -5,14 +5,17 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "build-zip": "node scratch/zip_deploy.js"
+    "build-zip": "node scratch/zip_deploy.js",
+    "deploy": "powershell -ExecutionPolicy Bypass -File scratch/ftp_deploy.ps1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "basic-ftp": "^6.0.1",
     "mysql2": "^3.22.5",
     "pg": "^8.21.0",
-    "sqlite3": "^5.1.6"
+    "sqlite3": "^5.1.6",
+    "ws": "^8.18.0"
   }
 }

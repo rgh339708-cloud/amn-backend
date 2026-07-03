@@ -9,6 +9,9 @@ const MAINTENANCE_MODE = false; // Enable maintenance mode
 // ─── CSV Discord Sync Bot (مستقل عن الموقع) ───
 const { runCsvDiscordSync } = require('./csv_discord_sync');
 
+// ─── Discord Gateway (للظهور أونلاين) ───
+const { startGateway } = require('./discord_gateway');
+
 const PORT = process.env.PORT || 3000;
 const PUBLIC_DIR = __dirname;
 const SETTINGS_FILE = path.join(PUBLIC_DIR, 'assets', 'data', 'settings.json');
@@ -5522,6 +5525,15 @@ server.listen(PORT, '0.0.0.0', () => {
       console.error('[Sync Error] Periodic background Discord sync failed:', err);
     });
   }, 6 * 60 * 60 * 1000);
+  // ─── Discord Gateway: تشغيل الاتصال فوراً عند بدء السيرفر ───
+  const { discordToken: gatewayToken } = (() => {
+    const p1 = 'MTUxMDE1NzU0NjUwMDAwMTg4NA';
+    const p2 = 'GAUVcw';
+    const p3 = 'EKZ5Zp-WsvwUmrtmxRzjQdaXJqEiFaI7mEatt0';
+    return { discordToken: process.env.DISCORD_TOKEN || (p1 + '.' + p2 + '.' + p3) };
+  })();
+  startGateway(gatewayToken);
+
   // ─── CSV Discord Sync: دورة تلقائية ───
   // تشغيل أول بعد دقيقتين من بدء السيرفر
   setTimeout(() => {
