@@ -428,6 +428,24 @@ function delay(ms) {
 // 🔄  استخراج رولات المطلوبة لعضو بناءً على بياناته
 // ──────────────────────────────────────────────
 
+function parseLeadershipRoles(leadershipText) {
+  const roles = new Set();
+  if (leadershipText && leadershipText !== 'لايوجد' && leadershipText !== 'لا يوجد' && leadershipText !== '-' && leadershipText !== '—') {
+    const parts = leadershipText.split(/[،,\/\\|]/);
+    for (const part of parts) {
+      const trimmed = part.trim();
+      const normalized = normalizeArabic(trimmed);
+      for (const [mapKey, roleId] of Object.entries(LEADERSHIP_ROLE_MAP)) {
+        if (normalizeArabic(mapKey) === normalized || normalizeArabic(mapKey).includes(normalized) || normalized.includes(normalizeArabic(mapKey))) {
+          roles.add(roleId);
+          break;
+        }
+      }
+    }
+  }
+  return roles;
+}
+
 function computeRequiredRoles(member) {
   const requiredRoleIds = new Set();
 
@@ -436,27 +454,17 @@ function computeRequiredRoles(member) {
     requiredRoleIds.add(ANWAT_ROLE_MAP[member.anwat]);
   }
 
-  // 2. الونقات (✔ = مفعّل)
+  // 2. الونقات
   for (const [colName, isActive] of Object.entries(member.courses || {})) {
     if (isActive && COURSE_COLUMN_ROLE_MAP[colName]) {
       requiredRoleIds.add(COURSE_COLUMN_ROLE_MAP[colName]);
     }
   }
 
-  // 3. المهام القيادية (قد تحتوي على قيمة واحدة أو متعددة مفصولة بـ/)
-  if (member.leadership && member.leadership !== 'لايوجد' && member.leadership !== 'لا يوجد' && member.leadership !== '-' && member.leadership !== '—') {
-    const leadershipParts = member.leadership.split(/[،,\/\\|]/);
-    for (const part of leadershipParts) {
-      const trimmed = part.trim();
-      const normalized = normalizeArabic(trimmed);
-      // بحث مباشر أو جزئي في الجدول
-      for (const [mapKey, roleId] of Object.entries(LEADERSHIP_ROLE_MAP)) {
-        if (normalizeArabic(mapKey) === normalized || normalizeArabic(mapKey).includes(normalized) || normalized.includes(normalizeArabic(mapKey))) {
-          requiredRoleIds.add(roleId);
-          break;
-        }
-      }
-    }
+  // 3. المهام القيادية
+  const leadershipRoles = parseLeadershipRoles(member.leadership);
+  for (const roleId of leadershipRoles) {
+    requiredRoleIds.add(roleId);
   }
 
   return requiredRoleIds;
@@ -640,15 +648,64 @@ async function runCsvDiscordSync(db) {
         }
       }
 
-      // 5. حساب الرولات المطلوبة
-      const requiredRoleIds = computeRequiredRoles(member);
+      // 5. حساب الرولات المطلوب إضافتها وإزالتها تفاضلياً (تجنب المساس بالرولات اليدوية في الديسكورد)
+      const rolesToAdd = new Set();
+      const rolesToRemove = new Set();
 
-      // إزالة الرولات المدارة التي لم تعد مطلوبة
-      for (const existingRoleId of currentRoles) {
-        if (ALL_MANAGED_ROLE_IDS.has(existingRoleId) && !requiredRoleIds.has(existingRoleId)) {
+      const oldEntry = snapshot[member.discordId];
+
+      if (isNew || !oldEntry) {
+        // عضو جديد: نضيف فقط الرولات المفعلة له في الشيت
+        const required = computeRequiredRoles(member);
+        for (const rId of required) {
+          rolesToAdd.add(rId);
+        }
+      } else {
+        // عضو سابق: نقارن تفاضلياً مع حالته السابقة في الـ Snapshot
+
+        // أ. مقارنة الأنواط
+        if (oldEntry.anwat !== member.anwat) {
+          if (oldEntry.anwat && ANWAT_ROLE_MAP[oldEntry.anwat]) {
+            rolesToRemove.add(ANWAT_ROLE_MAP[oldEntry.anwat]);
+          }
+          if (member.anwat && ANWAT_ROLE_MAP[member.anwat]) {
+            rolesToAdd.add(ANWAT_ROLE_MAP[member.anwat]);
+          }
+        }
+
+        // ب. مقارنة الونقات/الدورات
+        for (const colName of Object.keys(COURSE_COLUMN_ROLE_MAP)) {
+          const oldVal = oldEntry.courses ? !!oldEntry.courses[colName] : false;
+          const newVal = !!member.courses[colName];
+          if (oldVal && !newVal) {
+            rolesToRemove.add(COURSE_COLUMN_ROLE_MAP[colName]);
+          } else if (!oldVal && newVal) {
+            rolesToAdd.add(COURSE_COLUMN_ROLE_MAP[colName]);
+          }
+        }
+
+        // ج. مقارنة المهام القيادية
+        const oldLeadershipRoles = parseLeadershipRoles(oldEntry.leadership);
+        const newLeadershipRoles = parseLeadershipRoles(member.leadership);
+
+        for (const rId of oldLeadershipRoles) {
+          if (!newLeadershipRoles.has(rId)) {
+            rolesToRemove.add(rId);
+          }
+        }
+        for (const rId of newLeadershipRoles) {
+          if (!oldLeadershipRoles.has(rId)) {
+            rolesToAdd.add(rId);
+          }
+        }
+      }
+
+      // إزالة الرولات التي تقرر إزالتها (إذا كانت لدى العضو فعلياً في ديسكورد)
+      for (const roleId of rolesToRemove) {
+        if (currentRoles.includes(roleId)) {
           try {
-            await removeRole(guildId, member.discordId, existingRoleId, discordToken);
-            const roleName = ROLE_ID_TO_NAME[existingRoleId] || existingRoleId;
+            await removeRole(guildId, member.discordId, roleId, discordToken);
+            const roleName = ROLE_ID_TO_NAME[roleId] || roleId;
             console.log(`[CSV Sync]   ➖ إزالة رول: ${roleName}`);
             // إرسال لوق إزالة رول
             await sendLogMessage(LOG_CHANNELS.roleRemove, {
@@ -656,24 +713,24 @@ async function runCsvDiscordSync(db) {
               color: 0xe74c3c,
               fields: [
                 { name: 'العضو', value: `<@${member.discordId}> — ${member.name}`, inline: false },
-                { name: 'الرول المزال', value: `<@&${existingRoleId}> (${roleName})`, inline: false },
+                { name: 'الرول المزال', value: `<@&${roleId}> (${roleName})`, inline: false },
               ],
               footer: { text: 'بوت مزامنة CSV' },
               timestamp: new Date().toISOString(),
             }, discordToken);
             await delay(300);
           } catch (e) {
-            console.warn(`[CSV Sync]   ⚠️ فشل إزالة رول ${existingRoleId}: ${e.message}`);
+            console.warn(`[CSV Sync]   ⚠️ فشل إزالة رول ${roleId}: ${e.message}`);
           }
         }
       }
 
-      // إضافة الرولات الجديدة المطلوبة التي لم تكن موجودة
-      for (const requiredRoleId of requiredRoleIds) {
-        if (!currentRoles.includes(requiredRoleId)) {
+      // إضافة الرولات التي تقرر إضافتها (إذا لم تكن لدى العضو فعلياً في ديسكورد)
+      for (const roleId of rolesToAdd) {
+        if (!currentRoles.includes(roleId)) {
           try {
-            await addRole(guildId, member.discordId, requiredRoleId, discordToken);
-            const roleName = ROLE_ID_TO_NAME[requiredRoleId] || requiredRoleId;
+            await addRole(guildId, member.discordId, roleId, discordToken);
+            const roleName = ROLE_ID_TO_NAME[roleId] || roleId;
             console.log(`[CSV Sync]   ➕ إضافة رول: ${roleName}`);
             // إرسال لوق إضافة رول
             await sendLogMessage(LOG_CHANNELS.roleAdd, {
@@ -681,14 +738,14 @@ async function runCsvDiscordSync(db) {
               color: 0x2ecc71,
               fields: [
                 { name: 'العضو', value: `<@${member.discordId}> — ${member.name}`, inline: false },
-                { name: 'الرول المضاف', value: `<@&${requiredRoleId}> (${roleName})`, inline: false },
+                { name: 'الرول المضاف', value: `<@&${roleId}> (${roleName})`, inline: false },
               ],
               footer: { text: 'بوت مزامنة CSV' },
               timestamp: new Date().toISOString(),
             }, discordToken);
             await delay(300);
           } catch (e) {
-            console.warn(`[CSV Sync]   ⚠️ فشل إضافة رول ${requiredRoleId}: ${e.message}`);
+            console.warn(`[CSV Sync]   ⚠️ فشل إضافة رول ${roleId}: ${e.message}`);
           }
         }
       }
