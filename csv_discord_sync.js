@@ -684,54 +684,24 @@ async function runCsvDiscordSync(db) {
       }
 
       // 5. حساب الرولات المطلوب إضافتها وإزالتها تفاضلياً (تجنب المساس بالرولات اليدوية في الديسكورد)
+      const requiredRoleIds = computeRequiredRoles(member);
+      const oldEntry = snapshot[member.discordId];
+      const oldRequiredRoleIds = oldEntry ? computeRequiredRoles(oldEntry) : new Set();
+
       const rolesToAdd = new Set();
       const rolesToRemove = new Set();
 
-      const oldEntry = snapshot[member.discordId];
-
-      if (isNew || !oldEntry) {
-        // عضو جديد: نضيف فقط الرولات المفعلة له في الشيت
-        const required = computeRequiredRoles(member);
-        for (const rId of required) {
-          rolesToAdd.add(rId);
+      // أ. إضافة الرولات المطلوبة حالياً في الجدول وغير موجودة لدى العضو في ديسكورد
+      for (const roleId of requiredRoleIds) {
+        if (!currentRoles.includes(roleId)) {
+          rolesToAdd.add(roleId);
         }
-      } else {
-        // عضو سابق: نقارن تفاضلياً مع حالته السابقة في الـ Snapshot
+      }
 
-        // أ. مقارنة الأنواط
-        if (oldEntry.anwat !== member.anwat) {
-          if (oldEntry.anwat && ANWAT_ROLE_MAP[oldEntry.anwat]) {
-            rolesToRemove.add(ANWAT_ROLE_MAP[oldEntry.anwat]);
-          }
-          if (member.anwat && ANWAT_ROLE_MAP[member.anwat]) {
-            rolesToAdd.add(ANWAT_ROLE_MAP[member.anwat]);
-          }
-        }
-
-        // ب. مقارنة الونقات/الدورات
-        for (const colName of Object.keys(COURSE_COLUMN_ROLE_MAP)) {
-          const oldVal = oldEntry.courses ? !!oldEntry.courses[colName] : false;
-          const newVal = !!member.courses[colName];
-          if (oldVal && !newVal) {
-            rolesToRemove.add(COURSE_COLUMN_ROLE_MAP[colName]);
-          } else if (!oldVal && newVal) {
-            rolesToAdd.add(COURSE_COLUMN_ROLE_MAP[colName]);
-          }
-        }
-
-        // ج. مقارنة المهام القيادية
-        const oldLeadershipRoles = parseLeadershipRoles(oldEntry.leadership);
-        const newLeadershipRoles = parseLeadershipRoles(member.leadership);
-
-        for (const rId of oldLeadershipRoles) {
-          if (!newLeadershipRoles.has(rId)) {
-            rolesToRemove.add(rId);
-          }
-        }
-        for (const rId of newLeadershipRoles) {
-          if (!oldLeadershipRoles.has(rId)) {
-            rolesToAdd.add(rId);
-          }
+      // ب. إزالة الرولات التي كانت مطلوبة سابقاً في الجدول ولكنها لم تعد مطلوبة الآن
+      for (const roleId of oldRequiredRoleIds) {
+        if (!requiredRoleIds.has(roleId) && currentRoles.includes(roleId)) {
+          rolesToRemove.add(roleId);
         }
       }
 
