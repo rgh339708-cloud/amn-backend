@@ -296,7 +296,23 @@ function splitCsvRow(line) {
 // 💾  تحميل وحفظ الـ snapshot
 // ──────────────────────────────────────────────
 
-function loadSnapshot() {
+async function loadSnapshot(db) {
+  if (db) {
+    try {
+      const dbSnapshot = await new Promise((resolve, reject) => {
+        db.get('SELECT data_json FROM general_collections WHERE collection_key = ?', ['csv_discord_snapshot'], (err, row) => {
+          if (err) reject(err);
+          else resolve(row ? row.data_json : null);
+        });
+      });
+      if (dbSnapshot) {
+        return JSON.parse(dbSnapshot);
+      }
+    } catch (e) {
+      console.warn('[CSV Sync] Failed to read snapshot from DB, falling back to local file:', e.message);
+    }
+  }
+
   if (!fs.existsSync(SNAPSHOT_FILE)) return {};
   try {
     return JSON.parse(fs.readFileSync(SNAPSHOT_FILE, 'utf8'));
@@ -305,11 +321,26 @@ function loadSnapshot() {
   }
 }
 
-function saveSnapshot(snapshot) {
+async function saveSnapshot(db, snapshot) {
+  if (db) {
+    try {
+      await new Promise((resolve, reject) => {
+        db.run('INSERT OR REPLACE INTO general_collections (collection_key, data_json) VALUES (?, ?)', ['csv_discord_snapshot', JSON.stringify(snapshot)], (err) => {
+          if (err) reject(err);
+          else resolve();
+        });
+      });
+      console.log('[CSV Sync] Snapshot successfully saved to database.');
+      return;
+    } catch (e) {
+      console.error('[CSV Sync] Failed to save snapshot to DB, saving to local file:', e.message);
+    }
+  }
+
   try {
     fs.writeFileSync(SNAPSHOT_FILE, JSON.stringify(snapshot, null, 2), 'utf8');
   } catch (e) {
-    console.error('[CSV Sync] فشل حفظ الـ snapshot:', e.message);
+    console.error('[CSV Sync] فشل حفظ الـ snapshot محلياً:', e.message);
   }
 }
 
@@ -502,7 +533,7 @@ function mergeMembers(members) {
 
 let isSyncing = false;
 
-async function runCsvDiscordSync() {
+async function runCsvDiscordSync(db) {
   if (isSyncing) {
     console.log('[CSV Sync] مزامنة جارية بالفعل، تخطي...');
     return { skipped: true };
@@ -519,7 +550,7 @@ async function runCsvDiscordSync() {
   console.log('[CSV Sync] ═══════════════════════════════════');
   console.log('[CSV Sync] بدء المزامنة...');
 
-  const snapshot = loadSnapshot();
+  const snapshot = await loadSnapshot(db);
   const allMembers = [];
 
   // 1. جلب وتحليل كل مصادر الـ CSV
@@ -684,7 +715,7 @@ async function runCsvDiscordSync() {
   }
 
   // 7. حفظ الـ snapshot المحدّث
-  saveSnapshot(newSnapshot);
+  await saveSnapshot(db, newSnapshot);
 
   console.log(`[CSV Sync] ═══════════════════════════════════`);
   console.log(`[CSV Sync] ✅ انتهت المزامنة: ${changedCount} تغيير، ${errorCount} خطأ.`);

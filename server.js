@@ -4908,7 +4908,7 @@ const server = http.createServer((req, res) => {
 
   // POST /api/csv-sync/run - Manually trigger CSV Discord synchronization
   if (pathname === '/api/csv-sync/run' && req.method === 'POST') {
-    runCsvDiscordSync()
+    runCsvDiscordSync(db)
       .then(result => {
         res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
         res.end(JSON.stringify({ success: true, result }));
@@ -5570,14 +5570,14 @@ server.listen(PORT, '0.0.0.0', () => {
   // ─── CSV Discord Sync: دورة تلقائية (كل دقيقة) ───
   // تشغيل أول بعد 30 ثانية من بدء السيرفر
   setTimeout(() => {
-    runCsvDiscordSync().catch(err => {
+    runCsvDiscordSync(db).catch(err => {
       console.error('[CSV Sync Error] Initial sync failed:', err);
     });
   }, 30 * 1000);
 
   // دورة كل دقيقة للكشف الفوري عن التغييرات
   setInterval(() => {
-    runCsvDiscordSync().catch(err => {
+    runCsvDiscordSync(db).catch(err => {
       console.error('[CSV Sync Error] Periodic sync failed:', err);
     });
   }, 60 * 1000);
