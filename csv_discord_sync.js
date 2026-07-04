@@ -150,9 +150,10 @@ async function sendLogMessage(channelId, embed, botToken) {
 
 function loadConfig() {
   const envPaths = [
-    path.join(__dirname, '..', 'DISCORD', '.env'),
-    path.join(__dirname, '.env'),
+    path.join(process.env.HOME || process.env.USERPROFILE || '', 'OneDrive', 'Documents', 'DISCORD', '.env'),
     path.join(process.env.HOME || process.env.USERPROFILE || '', 'DISCORD', '.env'),
+    path.join(__dirname, '..', 'DISCORD', '.env'),
+    path.join(__dirname, '.env')
   ];
 
   for (const envPath of envPaths) {
@@ -167,7 +168,6 @@ function loadConfig() {
             process.env[key.trim()] = value;
           }
         }
-        break;
       } catch (e) {}
     }
   }
@@ -686,7 +686,6 @@ async function runCsvDiscordSync(db) {
       // 5. حساب الرولات المطلوب إضافتها وإزالتها تفاضلياً (تجنب المساس بالرولات اليدوية في الديسكورد)
       const requiredRoleIds = computeRequiredRoles(member);
       const oldEntry = snapshot[member.discordId];
-      const oldRequiredRoleIds = oldEntry ? computeRequiredRoles(oldEntry) : new Set();
 
       const rolesToAdd = new Set();
       const rolesToRemove = new Set();
@@ -698,15 +697,12 @@ async function runCsvDiscordSync(db) {
         }
       }
 
-      // ب. تم إيقاف الإزالة التلقائية للرولات لمنع حدوث إزالة بالخطأ أثناء تعديل قوقل شيت
-      // (إذا رغبتم في سحب رول من عضو، يمكنكم سحبه يدوياً في الديسكورد)
-      /*
-      for (const roleId of oldRequiredRoleIds) {
+      // ب. إزالة الرولات التي ألغيت من الجدول وموجودة لدى العضو في ديسكورد
+      for (const roleId of ALL_MANAGED_ROLE_IDS) {
         if (!requiredRoleIds.has(roleId) && currentRoles.includes(roleId)) {
           rolesToRemove.add(roleId);
         }
       }
-      */
 
       // إزالة الرولات التي تقرر إزالتها (إذا كانت لدى العضو فعلياً في ديسكورد)
       for (const roleId of rolesToRemove) {
@@ -783,6 +779,62 @@ async function runCsvDiscordSync(db) {
       });
     }
   }
+
+    // 6.5. الكشف عن الأعضاء الذين تم حذفهم من الجدول بالكامل وإزالة رولاتهم
+    const activeDiscordIds = new Set(mergedMembers.map(m => m.discordId));
+    for (const oldDiscordId of Object.keys(snapshot)) {
+      if (!activeDiscordIds.has(oldDiscordId)) {
+        console.log(`[CSV Sync] 🗑️ تم حذف العضو من الجدول: ${snapshot[oldDiscordId].name} (${oldDiscordId})`);
+        
+        try {
+          const guildMember = await getGuildMember(guildId, oldDiscordId, discordToken);
+          const currentRoles = guildMember.roles || [];
+          const oldEntry = snapshot[oldDiscordId];
+          
+          for (const roleId of ALL_MANAGED_ROLE_IDS) {
+            if (currentRoles.includes(roleId)) {
+              try {
+                await removeRole(guildId, oldDiscordId, roleId, discordToken);
+                const roleName = ROLE_ID_TO_NAME[roleId] || roleId;
+                console.log(`[CSV Sync]   ➖ إزالة رول (بسبب الحذف من الجدول): ${roleName}`);
+                
+                await sendLogMessage(LOG_CHANNELS.roleRemove, {
+                  title: '➖ إزالة رول (حذف من الجدول)',
+                  color: 0xe74c3c,
+                  fields: [
+                    { name: 'العضو', value: `<@${oldDiscordId}> — ${oldEntry.name}`, inline: false },
+                    { name: 'الرول المزال', value: `<@&${roleId}> (${roleName})`, inline: false },
+                  ],
+                  footer: { text: 'بوت مزامنة CSV' },
+                  timestamp: new Date().toISOString(),
+                }, discordToken);
+                await delay(300);
+              } catch (e) {
+                console.warn(`[CSV Sync]   ⚠️ فشل إزالة رول ${roleId} للعضو المحذوف ${oldDiscordId}: ${e.message}`);
+              }
+            }
+          }
+        } catch (fetchErr) {
+          if (fetchErr.message.includes('404') || fetchErr.message.includes('10007')) {
+            console.log(`[CSV Sync] العضو المحذوف ${oldDiscordId} غير موجود بالفعل في السيرفر.`);
+          } else {
+            console.warn(`[CSV Sync] فشل جلب بيانات العضو المحذوف ${oldDiscordId}: ${fetchErr.message}`);
+          }
+        }
+
+        // حذف العضو من الـ snapshot الجديد لكي لا يعالج مجدداً
+        delete newSnapshot[oldDiscordId];
+        changedCount++;
+
+        appendLog({
+          discordId: oldDiscordId,
+          name: snapshot[oldDiscordId].name,
+          action: 'حذف من الجدول',
+          changes: ['تم حذف العضو من جداول البيانات بالكامل وإزالة رولاته المدارة'],
+          status: 'success'
+        });
+      }
+    }
 
     // 7. حفظ الـ snapshot المحدّث
     await saveSnapshot(db, newSnapshot);
