@@ -861,7 +861,7 @@ async function sendRecruitmentDecisionWebhook(application, newStatus, operatorNa
   });
   const webhookPath = targetWebhook.replace('https://discord.com', '');
   const options = {
-    hostname: 'webhook.lewisakura.moe',
+    hostname: 'discord.com',
     path: webhookPath,
     method: 'POST',
     headers: {
@@ -1016,7 +1016,7 @@ function sendAttendanceReportToDiscord(bookName, operatorStr, roomImage, records
     }
     const webhookPath = WEBHOOK_URL.replace('https://discord.com', '');
     const options = {
-      hostname: 'webhook.lewisakura.moe',
+      hostname: 'discord.com',
       path: webhookPath,
       method: 'POST',
       headers: {
@@ -5717,12 +5717,12 @@ server.listen(PORT, '0.0.0.0', () => {
       });
     }, 30 * 1000);
 
-    // دورة كل دقيقة للكشف الفوري عن التغييرات
+    // دورة كل 2 ساعة لمنع حظر الـ IP وتخطي حدود ديسكورد (ويمكن للمشرفين تشغيلها يدوياً من لوحة التحكم في أي وقت)
     setInterval(() => {
       runCsvDiscordSync(db).catch(err => {
         console.error('[CSV Sync Error] Periodic sync failed:', err);
       });
-    }, 60 * 1000);
+    }, 2 * 60 * 60 * 1000);
   } else {
     console.log('[CSV Sync] بيئة محلية: تم إيقاف المزامنة التلقائية لمنع التضارب مع سيرفر Render.');
   }
