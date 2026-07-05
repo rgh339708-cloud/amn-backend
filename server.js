@@ -897,23 +897,9 @@ function sendAttendanceReportToDiscord(bookName, operatorStr, roomImage, records
 
   const recs = records || [];
 
-  // Filter expected members based on course / position / leadership matching bookName
-  const cleanBook = String(bookName || '').replace(/دورة/g, '').replace(/دفتر/g, '').replace(/تحضير/g, '').replace(/مدربين/g, '').trim().toLowerCase();
-  const keywords = cleanBook.split(/\s+/).filter(w => w.length > 2);
-
-  let expectedMembers = (trainingMembers || []).filter(m => {
-    const pos = String(m.position || m.leadership || m.role || '').trim().toLowerCase();
-    if (!pos) return true; // Default include if position not specified
-    if (keywords.length === 0) return true;
-    for (const kw of keywords) {
-      if (pos.includes(kw) || cleanBook.includes(pos.replace(/مدرب/g, '').trim())) return true;
-    }
-    return pos.includes(cleanBook) || cleanBook.includes(pos);
-  });
-
-  if (expectedMembers.length === 0 && (trainingMembers || []).length > 0) {
-    expectedMembers = trainingMembers; // Fallback to all training members if no specific position keyword match
-  }
+  // Use ALL training members as expected members for absence tracking.
+  // All members in the training sheet are expected to attend any session.
+  const expectedMembers = (trainingMembers || []).length > 0 ? trainingMembers : [];
 
   // Helper to get Discord mention string
   const getDiscordMention = (rawId, nameFallback) => {
