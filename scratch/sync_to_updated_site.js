@@ -4,10 +4,10 @@ const path = require('path');
 const files = [
   'assets/js/auth.js',
   'assets/js/app.js',
-  'pages/admin/dashboard.html',
-  'pages/attendance-reports.html',
-  'pages/amn90-r.html',
-  'pages/apply.html'
+  'pages/admin/amn16.html',
+  'pages/amn8.html',
+  'pages/amn15.html',
+  'pages/amn12.html'
 ];
 
 files.forEach(f => {

@@ -1124,7 +1124,30 @@
   }
 
   function renderMemberAvatarCell(r) {
-    return `<div style="font-weight:700;color:#fff">${r.name}</div>`;
+    let badgeHTML = '';
+    
+    // Only display promo status badges on main security tabs where promotion is checked
+    const isAllowedPromoTab = currentTab === 'جدول الامن العام - الاساسي' || 
+                              currentTab === 'جدول الامن العام - المنتدبين' || 
+                              currentTab === 'جدول الامن العام - الادارة';
+                              
+    if (isAllowedPromoTab) {
+      const promo = checkMemberPromoStatus(r);
+      if (promo.eligibleRegular && promo.eligibleSpeed) {
+        badgeHTML = `<span class="promo-pill-badge both" style="background: rgba(46, 204, 113, 0.12); border: 1px solid rgba(46, 204, 113, 0.4); color: #2ecc71; font-size: 0.65rem; padding: 2px 6px; border-radius: 6px; font-weight: 800; margin-right: 6px; display: inline-block;">أساسية واستثنائية</span>`;
+      } else if (promo.eligibleRegular) {
+        badgeHTML = `<span class="promo-pill-badge basic" style="background: rgba(52, 152, 219, 0.12); border: 1px solid rgba(52, 152, 219, 0.4); color: #3498db; font-size: 0.65rem; padding: 2px 6px; border-radius: 6px; font-weight: 800; margin-right: 6px; display: inline-block;">أساسية</span>`;
+      } else if (promo.eligibleSpeed) {
+        badgeHTML = `<span class="promo-pill-badge speed" style="background: rgba(230, 126, 34, 0.12); border: 1px solid rgba(230, 126, 34, 0.4); color: #e67e22; font-size: 0.65rem; padding: 2px 6px; border-radius: 6px; font-weight: 800; margin-right: 6px; display: inline-block;">استثنائية</span>`;
+      }
+    }
+    
+    return `
+      <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+        <div style="font-weight:700;color:#fff">${r.name}</div>
+        ${badgeHTML}
+      </div>
+    `;
   }
 
   const SPREADSHEET_ID = "1deRenpRLjJYNqp2zBbzBm3iegqGjqXoPuJAM4iI01y0";
@@ -1186,6 +1209,16 @@
     'ملازم أول':  { to: 'نقيب',       days: 35, hours: 45, reports: null, courses: [] },
     'نقيب':       { to: 'رائد',       days: 35, hours: 45, reports: null, courses: [] },
   };
+
+  // ── Promotion Requirements: الترقيات المسرعة (الاستثنائية) ──
+  const PROMO_REQS_SPEED = {
+    'جندي':        { to: 'عريف',        days: 7,   hours: 20,  reports: 15,  repType: 'تقرير عمليات',            courses: ['العمليات'] },
+    'عريف':        { to: 'وكيل رقيب',  days: 7,   hours: 30,  reports: 20,  repType: 'تقرير عمليات',            courses: ['أمن الطرق', 'المرور'] },
+    'وكيل رقيب':  { to: 'رقيب',       days: 7,   hours: 35,  reports: 22,  repType: 'تقرير عمليات',            courses: ['ضابط منطقة', 'الجناح الجوي'] },
+    'رقيب':       { to: 'رقيب أول',   days: 7,   hours: 40,  reports: 24,  repType: 'تقرير ضباط مناطق',       courses: ['المهمات'] },
+    'رقيب أول':   { to: 'رئيس رقباء', days: 7,   hours: 50,  reports: 25,  repType: 'تقرير ضباط مناطق',       courses: ['مكافحة المخدرات'] },
+  };
+
   let discordUsersCache = {};
 
   async function loadDiscordUsersCache() {
@@ -1968,6 +2001,7 @@
         </tr>
       `;
     } else {
+      const headerStyle = promoFilterOnly ? 'color: #f0cb52 !important;' : '';
       thead.innerHTML = `
         <tr>
           <th rowspan="2">Discord ID</th>
@@ -1976,7 +2010,7 @@
           <th rowspan="2">الرتبة</th>
           <th rowspan="2">المنصب</th>
           <th rowspan="2">الحالة</th>
-          <th rowspan="2">تاريخ اليوم</th>
+          <th rowspan="2" style="${headerStyle}">تاريخ الترقية</th>
           <th rowspan="2">درجة الأنواط</th>
           <th colspan="9" style="text-align:center; background: rgba(201,162,39,0.08); border-bottom: 1px solid rgba(201,162,39,0.25);"><i class="fa-solid fa-book-bookmark"></i> الدورات التدريبية</th>
           <th colspan="5" style="text-align:center; background: rgba(46,204,113,0.08); border-bottom: 1px solid rgba(46,204,113,0.25);"><i class="fa-solid fa-medal"></i> الونقات العسكرية</th>
@@ -2281,15 +2315,7 @@
     filterDB();
   }
 
-  function isEligibleForPromotion(r) {
-    if (!r || !r.rank) return false;
-
-    const rawNormalized = (r.rank || '').replace(/\s*ركن\s*/g, '').trim();
-    const normalizedRank = cleanArabicString(rawNormalized);
-
-    const isMutandib = currentTab === 'جدول الامن العام - المنتدبين';
-    const reqsTable = isMutandib ? PROMO_REQS_MUTANDIB : PROMO_REQS_AFRAD;
-
+  function checkPromotionTable(r, reqsTable, normalizedRank) {
     let reqs = null;
     let currentRankIndex = -1;
     const rankKeys = Object.keys(reqsTable);
@@ -2300,9 +2326,9 @@
         break;
       }
     }
-    if (!reqs) return false;
+    if (!reqs) return null;
 
-    // Collect courses from current rank AND ALL lower ranks (not just the immediate previous)
+    // Collect courses from current rank AND ALL lower ranks
     const requiredCourses = [...(reqs.courses || [])];
     for (let i = 0; i < currentRankIndex; i++) {
       const lowerRankKey = rankKeys[i];
@@ -2317,7 +2343,7 @@
     const completedCourses = r.regularCourses || [];
     if (uniqueRequiredCourses.length > 0) {
       const hasAllCourses = uniqueRequiredCourses.every(c => completedCourses.includes(c));
-      if (!hasAllCourses) return false;
+      if (!hasAllCourses) return null;
     }
 
     // Check required time/hours (duration since last promo or join date)
@@ -2348,7 +2374,39 @@
       } catch (e) {}
     }
 
-    return diffDays >= reqs.days;
+    if (diffDays >= reqs.days) {
+      return { reqs, diffDays };
+    }
+    return null;
+  }
+
+  function checkMemberPromoStatus(r) {
+    if (!r || !r.rank) return { eligibleRegular: false, eligibleSpeed: false };
+
+    const rawNormalized = (r.rank || '').replace(/\s*ركن\s*/g, '').trim();
+    const normalizedRank = cleanArabicString(rawNormalized);
+
+    const isMutandib = currentTab === 'جدول الامن العام - المنتدبين';
+    const reqsTable = isMutandib ? PROMO_REQS_MUTANDIB : PROMO_REQS_AFRAD;
+
+    const regResult = checkPromotionTable(r, reqsTable, normalizedRank);
+    
+    let speedResult = null;
+    if (!isMutandib) {
+      speedResult = checkPromotionTable(r, PROMO_REQS_SPEED, normalizedRank);
+    }
+
+    return {
+      eligibleRegular: regResult !== null,
+      eligibleSpeed: speedResult !== null,
+      regDetails: regResult,
+      speedDetails: speedResult
+    };
+  }
+
+  function isEligibleForPromotion(r) {
+    const status = checkMemberPromoStatus(r);
+    return status.eligibleRegular || status.eligibleSpeed;
   }
 
   function filterDB() {
@@ -2684,7 +2742,7 @@
           <td style="color:var(--color-gold-primary);font-weight:700">${r.rank || '—'}</td>
           <td>${renderPositionCell(r.position)}</td>
           <td>${statusHTML}</td>
-          <td>${getFormattedLastActive(r)}</td>
+          <td style="${promoFilterOnly ? 'color: #f0cb52 !important; font-weight: 800;' : ''}">${r.joinDate || '—'}</td>
           <td>${degreeHTML}</td>
           <!-- الدورات -->
           <td>${renderCheck(hasRC("العمليات"))}</td>
@@ -2711,6 +2769,9 @@
   // ── Info Modal Logics ──
   let activeModalTab = 'discord';
   let activeModalPersonName = '';
+  let activeModalPerson = null;
+  let activeModalIsMutandib = false;
+  let currentModalPromoType = 'regular';
   
   function redirectToUserProfile() {
     if (activeModalPersonName) {
@@ -2792,6 +2853,11 @@
     const isMainTabClick = MAIN_TABS.map(cleanTabStr).includes(clickedStr);
     const isFinesTableClick = clickedStr.includes('الغرامات') || clickedStr.includes('غرامات');
     const showFinesTab = isMainTabClick || isFinesTableClick;
+
+    const isMutandib = clickedStr.includes('المنتدبين');
+    activeModalPerson = person;
+    activeModalIsMutandib = isMutandib;
+    currentModalPromoType = 'regular';
 
     // Profile (Discord) tab: always visible for ALL tables
     document.getElementById('modal-tab-content-discord').style.display = 'block';
@@ -2876,192 +2942,7 @@
 
     // Promo tab logic
     if (isMainTabClick) {
-      let diffDays = 0;
-      const pDateStr = (person.joinDate || '').trim();
-      if (pDateStr && pDateStr !== '-' && pDateStr !== '—' && pDateStr !== '') {
-        try {
-          let pDate = null;
-          if (/^\d{4,6}$/.test(pDateStr)) {
-            pDate = new Date(Date.UTC(1899, 11, 30) + parseInt(pDateStr) * 86400000);
-          } else if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(pDateStr)) {
-            const [d, m, y] = pDateStr.split('/');
-            pDate = new Date(Date.UTC(+y, +m - 1, +d));
-          } else if (/^\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2}$/.test(pDateStr)) {
-            const clean = pDateStr.replace(/\//g, '-');
-            pDate = new Date(clean + (clean.length === 10 ? 'T00:00:00Z' : ''));
-          } else if (/^\d{1,2}-\d{1,2}-\d{4}$/.test(pDateStr)) {
-            const [d, m, y] = pDateStr.split('-');
-            pDate = new Date(Date.UTC(+y, +m - 1, +d));
-          } else {
-            pDate = new Date(pDateStr);
-          }
-
-          if (pDate && !isNaN(pDate.getTime())) {
-            const todayUTC = Date.UTC(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
-            diffDays = Math.max(0, Math.round((todayUTC - pDate.getTime()) / 86400000));
-          }
-        } catch (e) { console.warn('Date parse error:', pDateStr, e); }
-      }
-
-      const isMutandib = _clickedTab === 'جدول الامن العام - المنتدبين';
-      const rawNormalized = (person.rank || '').replace(/\s*ركن\s*/g, '').trim();
-      const normalizedRank = cleanArabicString(rawNormalized);
-      
-      const reqsTable = isMutandib ? PROMO_REQS_MUTANDIB : PROMO_REQS_AFRAD;
-      let reqs = null;
-      let currentRankIndex = -1;
-      const rankKeys = Object.keys(reqsTable);
-      for (let i = 0; i < rankKeys.length; i++) {
-        if (cleanArabicString(rankKeys[i]) === normalizedRank) {
-          reqs = reqsTable[rankKeys[i]];
-          currentRankIndex = i;
-          break;
-        }
-      }
-      
-      const completedCourses = person.regularCourses || [];
-      const AFRAD_RANKS    = ['جندي','جندي أول','عريف','وكيل رقيب','رقيب','رقيب أول','رئيس رقباء'].map(cleanArabicString);
-      const DUBBAT_RANKS   = ['ملازم','ملازم أول','نقيب'].map(cleanArabicString);
-      const KIBAR_RANKS    = ['رائد','مقدم','عقيد','عميد','لواء'].map(cleanArabicString);
-      let rankCategory, catColor, catBg;
-      if (isMutandib) {
-        rankCategory = 'معتمدين'; catColor = '#a78bfa'; catBg = 'rgba(167,139,250,0.12)';
-      } else if (AFRAD_RANKS.includes(normalizedRank)) {
-        rankCategory = 'أفراد الأمن العام'; catColor = '#38bdf8'; catBg = 'rgba(56,189,248,0.1)';
-      } else if (DUBBAT_RANKS.includes(normalizedRank)) {
-        rankCategory = 'ضباط'; catColor = '#fb923c'; catBg = 'rgba(251,146,60,0.1)';
-      } else if (KIBAR_RANKS.includes(normalizedRank)) {
-        rankCategory = 'كبار ضباط'; catColor = '#f0cb52'; catBg = 'rgba(240,203,82,0.1)';
-      } else {
-        rankCategory = '—'; catColor = 'rgba(255,255,255,0.5)'; catBg = 'rgba(255,255,255,0.04)';
-      }
-
-      const promoContent = document.getElementById('modal-tab-content-promo');
-
-      if (!reqs) {
-        promoContent.innerHTML = `
-          <div style="text-align:center; padding:50px 20px; color:rgba(255,255,255,0.3); font-size:0.9rem;">
-            <i class="fa-solid fa-medal"></i> لا توجد متطلبات ترقية متاحة لهذه الرتبة حالياً<br>
-            <span style="font-size:0.75rem; opacity:0.6">ربما وصلت لأعلى رتبة أو الرتبة غير مسجلة</span>
-          </div>`;
-      } else {
-        const fillPct = Math.min(100, Math.round((diffDays / reqs.days) * 100));
-        const daysOk  = diffDays >= reqs.days;
-        const barColor = daysOk ? 'linear-gradient(90deg,#2ecc71,#27ae60)' : 'linear-gradient(90deg,#e67e22,#d35400)';
-
-        // Build list of required courses for current and previous rank (if any)
-        const requiredCoursesList = [];
-        if (reqs.courses && reqs.courses.length > 0) {
-          reqs.courses.forEach(c => requiredCoursesList.push({ name: c, rankName: rankKeys[currentRankIndex], isCurrentRank: true }));
-        }
-        if (currentRankIndex > 0) {
-          const prevRankKey = rankKeys[currentRankIndex - 1];
-          const prevReqs = reqsTable[prevRankKey];
-          if (prevReqs && prevReqs.courses && prevReqs.courses.length > 0) {
-            prevReqs.courses.forEach(c => {
-              if (!requiredCoursesList.some(item => item.name === c)) {
-                requiredCoursesList.push({ name: c, rankName: prevRankKey, isCurrentRank: false });
-              }
-            });
-          }
-        }
-
-        const coursesHTML = requiredCoursesList.length > 0
-          ? requiredCoursesList.map(item => {
-              const done = completedCourses.includes(item.name);
-              const rankLabel = item.isCurrentRank ? 'الرتبة الحالية' : `الرتبة السابقة (${item.rankName})`;
-              return `<div class="promo-condition-item" style="${done ? 'border-color:rgba(46,204,113,0.2);background:rgba(46,204,113,0.03)' : ''}">
-                <div>
-                  <div style="font-weight:700;font-size:0.85rem;color:#fff"><i class="fa-solid fa-graduation-cap"></i> دورة: ${item.name}</div>
-                  <div style="font-size:0.72rem;color:rgba(255,255,255,0.4);margin-top:2px">دورة مطلوبة لـ: ${rankLabel}</div>
-                </div>
-                <span class="promo-status-badge ${done ? 'success' : 'warning'}">${done ? '✓ مكتملة' : '⏳ لم تكتمل'}</span>
-              </div>`;
-            }).join('')
-          : '';
-
-        const noteHTML = reqs.note
-          ? `<div class="promo-condition-item" style="border-color:rgba(52,152,219,0.25);background:rgba(52,152,219,0.04)">
-              <div>
-                <div style="font-weight:700;font-size:0.85rem;color:#fff"><i class="fa-solid fa-landmark"></i> ${reqs.note}</div>
-              </div>
-              <span class="promo-status-badge warning">⏳ مطلوب</span>
-            </div>`
-          : '';
-
-        const reportsHTML = reqs.reports
-          ? `<div class="promo-condition-item">
-              <div>
-                <div style="font-weight:700;font-size:0.85rem;color:#fff">📋 ${reqs.reports} ${reqs.repType}</div>
-                <div style="font-size:0.72rem;color:rgba(255,255,255,0.4);margin-top:2px">عدد التقارير المطلوبة</div>
-              </div>
-              <span class="promo-status-badge warning">⏳ تحقق مع القيادة</span>
-            </div>`
-          : '';
-
-        promoContent.innerHTML = `
-          <!-- الرتبة الحالية → التالية -->
-          <div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:18px;
-                      padding:14px 18px;background:rgba(201,162,39,0.05);border:1px solid rgba(201,162,39,0.15);border-radius:12px;">
-            <div style="text-align:center;">
-              <div style="font-size:0.68rem;color:rgba(255,255,255,0.4);margin-bottom:4px;">الرتبة الحالية</div>
-              <div style="font-weight:900;color:var(--color-gold-primary);font-size:0.95rem;">${person.rank || '—'}</div>
-            </div>
-            <div style="font-size:1.5rem;color:var(--color-gold-primary);">&#8592;</div>
-            <div style="text-align:center;">
-              <div style="font-size:0.68rem;color:rgba(255,255,255,0.4);margin-bottom:4px;">الرتبة التالية</div>
-              <div style="font-weight:900;color:#2ecc71;font-size:0.95rem;">${reqs.to}</div>
-            </div>
-            <div style="margin-right:auto;padding-right:4px;">
-              <div style="font-size:0.68rem;color:rgba(255,255,255,0.4);margin-bottom:4px;">التصنيف</div>
-              <div style="display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;
-                           background:${catBg};border:1px solid ${catColor}40;font-size:0.75rem;font-weight:800;color:${catColor};">
-                ${rankCategory}
-              </div>
-            </div>
-          </div>
-
-          <!-- شريط تقدم الأيام -->
-          <div class="promo-card">
-            <div class="promo-days-row">
-              <span style="font-weight:800;font-size:0.9rem;color:#fff"><i class="fa-solid fa-calendar-days"></i> المدة منذ آخر ترقية</span>
-              <span class="promo-days-val" style="color:${daysOk ? '#2ecc71' : '#e67e22'}">${diffDays} / ${reqs.days} يوم</span>
-            </div>
-            <div class="promo-bar-bg">
-              <div class="promo-bar-fill" style="width:${fillPct}%;background:${barColor};"></div>
-            </div>
-            <div style="font-size:0.78rem;font-weight:700;color:${daysOk ? '#2ecc71' : '#e67e22'};">
-              ${daysOk ? `✓ أكملت المدة + ${diffDays - reqs.days} يوم إضافي` : `⏳ تبقى ${reqs.days - diffDays} يوم للاستحقاق`}
-            </div>
-          </div>
-
-          <h4 style="font-weight:800;color:#fff;margin-bottom:12px;font-size:0.88rem">📋 متطلبات الترقية الرسمية</h4>
-
-          <!-- الساعات -->
-          <div class="promo-condition-item">
-            <div>
-              <div style="font-weight:700;font-size:0.85rem;color:#fff">⏱️ ${reqs.hours} ساعة عمل</div>
-              <div style="font-size:0.72rem;color:rgba(255,255,255,0.4);margin-top:2px">عدد الساعات المطلوبة للترقية</div>
-            </div>
-            <span class="promo-status-badge warning">⏳ تحقق مع القيادة</span>
-          </div>
-
-          ${reportsHTML}
-          ${coursesHTML}
-          ${noteHTML}
-
-          <!-- خلاصة -->
-          <div class="promo-condition-item" style="margin-top:10px;border-top:1px solid rgba(201,162,39,0.12);background:rgba(201,162,39,0.02);">
-            <div>
-              <div style="font-weight:800;font-size:0.85rem;color:${daysOk ? '#2ecc71' : '#e67e22'}">حالة شرط المدة الزمنية</div>
-              <div style="font-size:0.72rem;color:rgba(255,255,255,0.45);margin-top:2px;">
-                ${daysOk ? 'شرط المدة محقق — راجع القيادة للتحقق من باقي الشروط' : `تبقى ${reqs.days - diffDays} يوماً لإكمال الفترة الزمنية القانونية`}
-              </div>
-            </div>
-            <span class="promo-status-badge ${daysOk ? 'success' : 'warning'}">${daysOk ? '✓ محقق' : '⏳ جارٍ'}</span>
-          </div>
-        `;
-      }
+      renderModalPromoTabContent();
     }
 
     // ── Discord tab populating ──
@@ -3284,6 +3165,223 @@
 
     document.getElementById('info-modal').classList.add('active');
   }
+
+  window.switchModalPromoType = function(type) {
+    currentModalPromoType = type;
+    renderModalPromoTabContent();
+  };
+
+  function renderModalPromoTabContent() {
+    const person = activeModalPerson;
+    if (!person) return;
+
+    const rawNormalized = (person.rank || '').replace(/\s*ركن\s*/g, '').trim();
+    const normalizedRank = cleanArabicString(rawNormalized);
+
+    const isMutandib = activeModalIsMutandib;
+    const baseReqsTable = isMutandib ? PROMO_REQS_MUTANDIB : PROMO_REQS_AFRAD;
+    
+    // Check if both systems exist for this rank (only Afrad can have Speed/exceptional promos)
+    const hasRegular = baseReqsTable[rawNormalized] !== undefined || baseReqsTable[person.rank] !== undefined;
+    const hasSpeed = !isMutandib && (PROMO_REQS_SPEED[rawNormalized] !== undefined || PROMO_REQS_SPEED[person.rank] !== undefined);
+    
+    // Determine which reqs table to use
+    let reqsTable = baseReqsTable;
+    if (currentModalPromoType === 'speed' && hasSpeed) {
+      reqsTable = PROMO_REQS_SPEED;
+    }
+
+    let reqs = null;
+    let currentRankIndex = -1;
+    const rankKeys = Object.keys(reqsTable);
+    for (let i = 0; i < rankKeys.length; i++) {
+      if (cleanArabicString(rankKeys[i]) === normalizedRank) {
+        reqs = reqsTable[rankKeys[i]];
+        currentRankIndex = i;
+        break;
+      }
+    }
+
+    const promoContent = document.getElementById('modal-tab-content-promo');
+    if (!promoContent) return;
+
+    if (!reqs) {
+      promoContent.innerHTML = `
+        <div style="text-align:center; padding:50px 20px; color:rgba(255,255,255,0.3); font-size:0.9rem;">
+          <i class="fa-solid fa-medal"></i> لا توجد متطلبات ترقية متاحة لهذه الرتبة حالياً<br>
+          <span style="font-size:0.75rem; opacity:0.6">ربما وصلت لأعلى رتبة أو الرتبة غير مسجلة</span>
+        </div>`;
+      return;
+    }
+
+    // Parse date and calculate diffDays
+    let diffDays = 0;
+    const pDateStr = (person.joinDate || '').trim();
+    if (pDateStr && pDateStr !== '-' && pDateStr !== '—' && pDateStr !== '') {
+      try {
+        let pDate = null;
+        if (/^\d{4,6}$/.test(pDateStr)) {
+          pDate = new Date(Date.UTC(1899, 11, 30) + parseInt(pDateStr) * 86400000);
+        } else if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(pDateStr)) {
+          const [d, m, y] = pDateStr.split('/');
+          pDate = new Date(Date.UTC(+y, +m - 1, +d));
+        } else if (/^\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2}$/.test(pDateStr)) {
+          const clean = pDateStr.replace(/\//g, '-');
+          pDate = new Date(clean + (clean.length === 10 ? 'T00:00:00Z' : ''));
+        } else if (/^\d{1,2}-\d{1,2}-\d{4}$/.test(pDateStr)) {
+          const [d, m, y] = pDateStr.split('-');
+          pDate = new Date(Date.UTC(+y, +m - 1, +d));
+        } else {
+          pDate = new Date(pDateStr);
+        }
+
+        if (pDate && !isNaN(pDate.getTime())) {
+          const todayUTC = Date.UTC(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
+          diffDays = Math.max(0, Math.round((todayUTC - pDate.getTime()) / 86400000));
+        }
+      } catch (e) { console.warn('Date parse error:', pDateStr, e); }
+    }
+
+    const fillPct = Math.min(100, Math.round((diffDays / reqs.days) * 100));
+    const daysOk  = diffDays >= reqs.days;
+    const barColor = daysOk ? 'linear-gradient(90deg,#2ecc71,#27ae60)' : 'linear-gradient(90deg,#e67e22,#d35400)';
+
+    // Build list of required courses for current and previous rank (if any)
+    const requiredCoursesList = [];
+    if (reqs.courses && reqs.courses.length > 0) {
+      reqs.courses.forEach(c => requiredCoursesList.push({ name: c, rankName: rankKeys[currentRankIndex], isCurrentRank: true }));
+    }
+    for (let i = 0; i < currentRankIndex; i++) {
+      const prevRankKey = rankKeys[i];
+      const prevReqs = reqsTable[prevRankKey];
+      if (prevReqs && prevReqs.courses && prevReqs.courses.length > 0) {
+        prevReqs.courses.forEach(c => {
+          if (!requiredCoursesList.some(item => item.name === c)) {
+            requiredCoursesList.push({ name: c, rankName: prevRankKey, isCurrentRank: false });
+          }
+        });
+      }
+    }
+
+    const completedCourses = person.regularCourses || [];
+    const coursesHTML = requiredCoursesList.length > 0
+      ? requiredCoursesList.map(item => {
+          const done = completedCourses.includes(item.name);
+          if (!item.isCurrentRank && done) return null;
+          const rankLabel = item.isCurrentRank ? 'الرتبة الحالية' : `الرتبة السابقة (${item.rankName})`;
+          return `<div class="promo-condition-item" style="${done ? 'border-color:rgba(46,204,113,0.2);background:rgba(46,204,113,0.03)' : ''}">
+            <div>
+              <div style="font-weight:700;font-size:0.85rem;color:#fff"><i class="fa-solid fa-graduation-cap"></i> دورة: ${item.name}</div>
+              <div style="font-size:0.72rem;color:rgba(255,255,255,0.4);margin-top:2px">دورة مطلوبة لـ: ${rankLabel}</div>
+            </div>
+            <span class="promo-status-badge ${done ? 'success' : 'warning'}">${done ? '✓ مكتملة' : '⏳ لم تكتمل'}</span>
+          </div>`;
+        }).filter(h => h !== null).join('')
+      : '';
+
+    const noteHTML = reqs.note
+      ? `<div class="promo-condition-item" style="border-color:rgba(52,152,219,0.25);background:rgba(52,152,219,0.04)">
+          <div>
+            <div style="font-weight:700;font-size:0.85rem;color:#fff"><i class="fa-solid fa-landmark"></i> ${reqs.note}</div>
+          </div>
+          <span class="promo-status-badge warning">⏳ مطلوب</span>
+        </div>`
+      : '';
+
+    const reportsHTML = reqs.reports
+      ? `<div class="promo-condition-item">
+          <div>
+            <div style="font-weight:700;font-size:0.85rem;color:#fff">📋 ${reqs.reports} ${reqs.repType}</div>
+            <div style="font-size:0.72rem;color:rgba(255,255,255,0.4);margin-top:2px">عدد التقارير المطلوبة</div>
+          </div>
+          <span class="promo-status-badge warning">⏳ تحقق مع القيادة</span>
+        </div>`
+      : '';
+
+    // Segment selector HTML (only shown if both promo paths exist)
+    let selectorHTML = '';
+    if (hasRegular && hasSpeed) {
+      selectorHTML = `
+        <div class="promo-type-selector" style="display: flex; gap: 8px; margin-bottom: 18px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px; justify-content: center; width: 100%;">
+          <button class="promo-type-btn" onclick="switchModalPromoType('regular')" style="flex: 1; background: ${currentModalPromoType === 'regular' ? 'linear-gradient(135deg, var(--color-gold-primary), #3465b0)' : 'rgba(255,255,255,0.02)'}; border: 1px solid ${currentModalPromoType === 'regular' ? 'var(--color-gold-primary)' : 'rgba(255,255,255,0.1)'}; color: ${currentModalPromoType === 'regular' ? '#05091e' : 'rgba(255,255,255,0.7)'}; padding: 8px 16px; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 0.8rem; transition: all 0.2s;">أساسية</button>
+          <button class="promo-type-btn" onclick="switchModalPromoType('speed')" style="flex: 1; background: ${currentModalPromoType === 'speed' ? 'linear-gradient(135deg, var(--color-gold-primary), #3465b0)' : 'rgba(255,255,255,0.02)'}; border: 1px solid ${currentModalPromoType === 'speed' ? 'var(--color-gold-primary)' : 'rgba(255,255,255,0.1)'}; color: ${currentModalPromoType === 'speed' ? '#05091e' : 'rgba(255,255,255,0.7)'}; padding: 8px 16px; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 0.8rem; transition: all 0.2s;">استثنائية (مسرعة)</button>
+        </div>
+      `;
+    }
+
+    const AFRAD_RANKS    = ['جندي','جندي أول','عريف','وكيل رقيب','رقيب','رقيب أول','رئيس رقباء'].map(cleanArabicString);
+    const DUBBAT_RANKS   = ['ملازم','ملازم أول','نقيب'].map(cleanArabicString);
+    const KIBAR_RANKS    = ['رائد','مقدم','عقيد','عميد','لواء'].map(cleanArabicString);
+    let rankCategory, catColor, catBg;
+    if (isMutandib) {
+      rankCategory = 'معتمدين'; catColor = '#a78bfa'; catBg = 'rgba(167,139,250,0.12)';
+    } else if (AFRAD_RANKS.includes(normalizedRank)) {
+      rankCategory = 'أفراد الأمن العام'; catColor = '#38bdf8'; catBg = 'rgba(56,189,248,0.1)';
+    } else if (DUBBAT_RANKS.includes(normalizedRank)) {
+      rankCategory = 'ضباط'; catColor = '#fb923c'; catBg = 'rgba(251,146,60,0.1)';
+    } else if (KIBAR_RANKS.includes(normalizedRank)) {
+      rankCategory = 'كبار ضباط'; catColor = '#f0cb52'; catBg = 'rgba(240,203,82,0.1)';
+    } else {
+      rankCategory = '—'; catColor = 'rgba(255,255,255,0.5)'; catBg = 'rgba(255,255,255,0.04)';
+    }
+
+    const promoTypeLabel = currentModalPromoType === 'speed' ? 'استثنائية' : 'أساسية';
+
+    promoContent.innerHTML = `
+      ${selectorHTML}
+
+      <!-- الرتبة الحالية → التالية -->
+      <div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:18px;
+                  padding:14px 18px;background:rgba(201,162,39,0.05);border:1px solid rgba(201,162,39,0.15);border-radius:12px;">
+        <div style="text-align:center;">
+          <div style="font-size:0.68rem;color:rgba(255,255,255,0.4);margin-bottom:4px;">الرتبة الحالية</div>
+          <div style="font-weight:900;color:var(--color-gold-primary);font-size:0.95rem;">${person.rank || '—'}</div>
+        </div>
+        <div style="font-size:1.5rem;color:var(--color-gold-primary);">&#8592;</div>
+        <div style="text-align:center;">
+          <div style="font-size:0.68rem;color:rgba(255,255,255,0.4);margin-bottom:4px;">الرتبة التالية (${promoTypeLabel})</div>
+          <div style="font-weight:900;color:#2ecc71;font-size:0.95rem;">${reqs.to}</div>
+        </div>
+        <div style="margin-right:auto;padding-right:4px;">
+          <div style="font-size:0.68rem;color:rgba(255,255,255,0.4);margin-bottom:4px;">التصنيف</div>
+          <div style="display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;
+                       background:${catBg};border:1px solid ${catColor}40;font-size:0.75rem;font-weight:800;color:${catColor};">
+            ${rankCategory}
+          </div>
+        </div>
+      </div>
+
+      <!-- شريط تقدم الأيام -->
+      <div class="promo-card">
+        <div class="promo-days-row">
+          <span style="font-weight:800;font-size:0.9rem;color:#fff"><i class="fa-solid fa-calendar-days"></i> المدة منذ آخر ترقية</span>
+          <span class="promo-days-val" style="color:${daysOk ? '#2ecc71' : '#e67e22'}">${diffDays} / ${reqs.days} يوم</span>
+        </div>
+        <div class="promo-bar-bg">
+          <div class="promo-bar-fill" style="width:${fillPct}%;background:${barColor};"></div>
+        </div>
+        <div style="font-size:0.78rem;font-weight:700;color:${daysOk ? '#2ecc71' : '#e67e22'};">
+          ${daysOk ? `✓ أكملت المدة + ${diffDays - reqs.days} يوم إضافي` : `⏳ تبقى ${reqs.days - diffDays} يوم للاستحقاق`}
+        </div>
+      </div>
+
+      <h4 style="font-weight:800;color:#fff;margin-bottom:12px;font-size:0.88rem">📋 متطلبات الترقية الرسمية (${promoTypeLabel})</h4>
+
+      <!-- الساعات -->
+      <div class="promo-condition-item">
+        <div>
+          <div style="font-weight:700;font-size:0.85rem;color:#fff">⏱️ ${reqs.hours} ساعة عمل</div>
+          <div style="font-size:0.72rem;color:rgba(255,255,255,0.4);margin-top:2px">عدد الساعات المطلوبة للترقية</div>
+        </div>
+        <span class="promo-status-badge warning">⏳ تحقق مع القيادة</span>
+      </div>
+
+      ${reportsHTML}
+      ${coursesHTML}
+      ${noteHTML}
+    `;
+  }
+
   // ── Apply Table Permissions ──
   document.addEventListener('DOMContentLoaded', () => {
     // We add a slight delay to ensure Auth is fully loaded if it's async, though it's sync here.

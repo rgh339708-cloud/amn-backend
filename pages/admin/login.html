@@ -5,17 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>بوابة التحكم الإداري | الأمن العام</title>
   
-  <link rel="stylesheet" href="../../assets/css/main.css?v=1.1.27">
+  <link rel="stylesheet" href="../../assets/css/main.css?v=1.1.32">
   <link rel="stylesheet" href="../../assets/css/admin.css?v=1.1.27">
-  <script src="../../assets/js/storage.js?v=1.1.30"></script>
-  <script src="../../assets/js/data.js?v=1.1.27"></script>
-  <script src="../../assets/js/auth.js?v=1.1.30"></script>
-  <script src="../../assets/js/app.js?v=1.1.31"></script>
+  <script src="../../assets/js/storage.js?v=1.1.32"></script>
+  <script src="../../assets/js/data.js?v=1.1.32"></script>
+  <script src="../../assets/js/auth.js?v=1.1.32"></script>
+  <script src="../../assets/js/app.js?v=1.1.32"></script>
   <script>
     // Synchronous route guard for login page
     if (Auth.isLoggedIn()) {
       if (['owner', 'assistant_owner', 'admin'].includes(Auth.getRole())) {
-        window.location.href = 'dashboard.html';
+        window.location.href = 'amn16.html';
       } else {
         window.location.href = '../../index.html';
       }
@@ -418,7 +418,7 @@
     // If user is already logged in, redirect appropriately
     if (Auth.isLoggedIn()) {
       if (['owner', 'assistant_owner', 'admin'].includes(Auth.getRole())) {
-        window.location.href = 'dashboard.html';
+        window.location.href = 'amn16.html';
       } else {
         window.location.href = '../../index.html';
       }
@@ -432,9 +432,9 @@
         // Redirect back to dashboard after successful login
         let dest = window.location.href;
         if (dest.includes('login.html')) {
-          dest = dest.replace('login.html', 'dashboard.html');
+          dest = dest.replace('login.html', 'amn16.html');
         } else {
-          dest = 'pages/admin/dashboard.html';
+          dest = 'pages/admin/amn16.html';
         }
         localStorage.setItem('auth_redirect_back', dest);
         window.location.href = Auth.getDiscordAuthUrl();
@@ -460,7 +460,7 @@
         
         setTimeout(() => {
           if (['owner', 'assistant_owner', 'admin'].includes(res.user.role)) {
-            window.location.href = 'dashboard.html';
+            window.location.href = 'amn16.html';
           } else {
             window.location.href = '../../index.html';
           }
@@ -512,7 +512,7 @@
         App.toast('تمت المصادقة الثنائية بنجاح عبر بريد Google المعتمد! <i class="fa-solid fa-shield-halved"></i>', 'success');
         
         setTimeout(() => {
-          window.location.href = 'dashboard.html';
+          window.location.href = 'amn16.html';
         }, 1200);
       } else {
         // Access Denied

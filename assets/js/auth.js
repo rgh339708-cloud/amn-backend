@@ -1376,9 +1376,9 @@ const Auth = (() => {
       'جدول الامن العام - الادارة': 'الإدارة',
       'جدول الامن العام - المنتدبين': 'المعتمدين',
       'جدول الادارة العامة لشؤون الادارية والمالية': 'الشؤون الإدارية والمالية',
-      'جدول الادارة العامه لشؤون تدريب الامن العام': 'شؤون التدريب',
+      'جدول الإدارة العامه لشؤون تدريب الامن العام': 'شؤون التدريب',
       ' جدول الادارة العامه لشؤون التجنيد': 'شؤون التجنيد',
-      'الإدارة العامة لشؤون العسكرية': 'الشؤون العسكرية'
+      'الادارة العامة لشؤون العسكرية': 'الشؤون العسكرية'
     };
 
     // Filter out non-personnel tabs
@@ -1599,7 +1599,7 @@ const Auth = (() => {
       { id: 'amn11', title: 'الزي العسكري', emoji: '<i class="fa-solid fa-shirt"></i>', isSystem: true, allowedRoles: ['*'] },
       { id: 'amn12', title: 'التقديم', emoji: '<i class="fa-solid fa-envelope-open-text"></i>', isSystem: true, allowedRoles: ['*'] },
       { id: 'amn13', title: 'قاعدة البيانات', emoji: '<i class="fa-solid fa-lock"></i>', isSystem: true, allowedRoles: ['*'] },
-      { id: 'amn14', title: 'أجنحة مدينة الـ 90', emoji: '🦅', isSystem: true, allowedRoles: ['*'] },
+      { id: 'amn14', title: 'الونقات', emoji: '🦅', isSystem: true, allowedRoles: ['*'] },
       { id: 'mstnd1', title: 'مستند الجناح الجوي', emoji: '🚁', isSystem: true, parentId: 'amn14', allowedRoles: ['*'] },
       { id: 'mstnd2', title: 'مستند جناح مكافحة الإرهاب', emoji: '⚔️', isSystem: true, parentId: 'amn14', allowedRoles: ['*'] },
       { id: 'mstnd3', title: 'مستند جناح المداهمة والاقتحام', emoji: '🛡️', isSystem: true, parentId: 'amn14', allowedRoles: ['*'] },
@@ -1646,6 +1646,10 @@ const Auth = (() => {
         let sysUpdated = false;
         if (!exists.isSystem) {
           exists.isSystem = true;
+          sysUpdated = true;
+        }
+        if (exists.title !== sys.title) {
+          exists.title = sys.title;
           sysUpdated = true;
         }
         if (exists.emoji !== sys.emoji) {

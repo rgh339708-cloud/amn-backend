@@ -306,6 +306,60 @@
       width: 120px;
       height: 16px;
     }
+
+    /* ── Progress bar and fields for promotions ── */
+    .promo-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 18px;
+    }
+    .promo-days-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .promo-days-val {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--gold-light);
+    }
+    .promo-bar-bg {
+      width: 100%;
+      height: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+    .promo-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #2ecc71, #27ae60);
+      width: 0%;
+      border-radius: 6px;
+      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .promo-condition-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      background: rgba(0, 0, 0, 0.15);
+      border-radius: 8px;
+      margin-top: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.02);
+    }
+    .promo-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
   </style>
 </head>
 <body>
@@ -386,10 +440,16 @@
 
   async function loadDiscordUsersCache() {
     try {
-      const res = await fetch(`../assets/data/discord_users.json?t=${Date.now()}`);
+      const res = await fetch(`/api/auth/discord_users_cache?t=${Date.now()}`);
       if (res.ok) {
         discordUsersCache = await res.json();
-        console.log('[Discord Cache] Loaded Discord profiles cache successfully!');
+        console.log('[Discord Cache] Loaded Discord profiles cache from API successfully!');
+      } else {
+        const fallbackRes = await fetch(`../assets/data/discord_users.json?t=${Date.now()}`);
+        if (fallbackRes.ok) {
+          discordUsersCache = await fallbackRes.json();
+          console.log('[Discord Cache] Loaded Discord profiles cache from static fallback successfully!');
+        }
       }
     } catch (err) {
       console.warn('[Discord Cache] Failed to load Discord users cache:', err);
@@ -457,6 +517,56 @@
     // Render profile details
     renderProfile();
   });
+
+  function cleanArabicString(str) {
+    return String(str || '')
+      .trim()
+      .replace(/[أإآ]/g, 'ا')
+      .replace(/ى/g, 'ي')
+      .replace(/ة/g, 'ه')
+      .replace(/\s+/g, ' ');
+  }
+
+  // ── Promotion Requirements: أفراد الأمن العام (الأساسي + الإدارة) ──
+  const PROMO_REQS_AFRAD = {
+    'جندي':        { to: 'جندي أول',    days: 7,   hours: 10,  reports: 5,   repType: 'تقرير عمليات',            courses: ['العمليات'] },
+    'جندي أول':   { to: 'عريف',        days: 7,   hours: 12,  reports: 7,   repType: 'تقرير عمليات',            courses: ['المرور'] },
+    'عريف':        { to: 'وكيل رقيب',  days: 14,  hours: 30,  reports: 16,  repType: 'تقرير عمليات',            courses: ['أمن الطرق'] },
+    'وكيل رقيب':  { to: 'رقيب',       days: 14,  hours: 35,  reports: 18,  repType: 'تقرير عمليات',            courses: ['ضابط منطقة', 'الجناح الجوي'] },
+    'رقيب':       { to: 'رقيب أول',   days: 28,  hours: 70,  reports: 35,  repType: 'تقرير ضباط مناطق',       courses: ['المهمات'] },
+    'رقيب أول':   { to: 'رئيس رقباء', days: 30,  hours: 75,  reports: 38,  repType: 'تقرير ضباط مناطق',       courses: ['مكافحة المخدرات'] },
+    'رئيس رقباء': { to: 'ملازم',      days: 45,  hours: 113, reports: 61,  repType: 'تقرير ضباط مناطق',       courses: [], note: 'اجتياز كلية الضباط الأمنية' },
+    'ملازم':      { to: 'ملازم أول',  days: 30,  hours: 75,  reports: 38,  repType: 'تقرير ضابط منطقة',        courses: [] },
+    'ملازم أول':  { to: 'نقيب',       days: 35,  hours: 88,  reports: 45,  repType: 'تقرير ضابط منطقة',        courses: [] },
+    'نقيب':       { to: 'رائد',       days: 45,  hours: 113, reports: 61,  repType: 'تقرير ضابط منطقة',        courses: [] },
+    'رائد':       { to: 'مقدم',       days: 65,  hours: 163, reports: 91,  repType: 'تقرير إشراف كبار ضباط', courses: [] },
+    'مقدم':       { to: 'عقيد',       days: 80,  hours: 200, reports: 110, repType: 'تقرير إشراف كبار ضباط', courses: [] },
+    'عقيد':       { to: 'عميد',       days: 85,  hours: 213, reports: 116, repType: 'تقرير إشراف كبار ضباط', courses: [] },
+    'عميد':       { to: 'لواء',       days: 130, hours: 325, reports: 170, repType: 'تقرير إشراف كبار ضباط', courses: [] },
+  };
+
+  // ── Promotion Requirements: معتمدين الأمن العام (المنتدبين) ──
+  const PROMO_REQS_MUTANDIB = {
+    'جندي':        { to: 'جندي أول',    days: 7,  hours: 7,  reports: null, courses: ['العمليات'] },
+    'جندي أول':   { to: 'عريف',        days: 7,  hours: 10, reports: null, courses: ['المرور'] },
+    'عريف':        { to: 'وكيل رقيب',  days: 7,  hours: 10, reports: null, courses: ['أمن الطرق'] },
+    'وكيل رقيب':  { to: 'رقيب',       days: 14, hours: 15, reports: null, courses: ['ضابط منطقة', 'الجناح الجوي'] },
+    'رقيب':       { to: 'رقيب أول',   days: 14, hours: 15, reports: null, courses: ['المهمات'] },
+    'رقيب أول':   { to: 'رئيس رقباء', days: 14, hours: 20, reports: null, courses: ['مكافحة المخدرات'] },
+    'رئيس رقباء': { to: 'ملازم',      days: 21, hours: 30, reports: null, courses: [], note: 'اجتياز كلية الضباط الأمنية' },
+    'ملازم':      { to: 'ملازم أول',  days: 30, hours: 40, reports: null, courses: [] },
+    'ملازم أول':  { to: 'نقيب',       days: 35, hours: 45, reports: null, courses: [] },
+    'نقيب':       { to: 'رائد',       days: 35, hours: 45, reports: null, courses: [] },
+  };
+
+  // ── Promotion Requirements: الترقيات المسرعة (الاستثنائية) ──
+  const PROMO_REQS_SPEED = {
+    'جندي':        { to: 'عريف',        days: 7,   hours: 20,  reports: 15,  repType: 'تقرير عمليات',            courses: ['العمليات'] },
+    'عريف':        { to: 'وكيل رقيب',  days: 7,   hours: 30,  reports: 20,  repType: 'تقرير عمليات',            courses: ['أمن الطرق', 'المرور'] },
+    'وكيل رقيب':  { to: 'رقيب',       days: 7,   hours: 35,  reports: 22,  repType: 'تقرير عمليات',            courses: ['ضابط منطقة', 'الجناح الجوي'] },
+    'رقيب':       { to: 'رقيب أول',   days: 7,   hours: 40,  reports: 24,  repType: 'تقرير ضباط مناطق',       courses: ['المهمات'] },
+    'رقيب أول':   { to: 'رئيس رقباء', days: 7,   hours: 50,  reports: 25,  repType: 'تقرير ضباط مناطق',       courses: ['مكافحة المخدرات'] },
+  };
 
   function renderProfile() {
     const container = document.getElementById('profile-container-inner');
@@ -657,7 +767,9 @@
       unit: dbUser ? (dbUser.department || targetUser.unit || 'إدارة العمليات') : (targetUser.unit || 'إدارة العمليات'),
       joinDate: targetUser.joinDate || '—',
       status: dbUser ? (dbUser.status || targetUser.status || 'active') : (targetUser.status || 'active'),
-      id: discordId
+      id: discordId,
+      regularCourses: targetUser.regularCourses || [],
+      courses: targetUser.courses || []
     };
 
     if (dbUser) {
@@ -903,8 +1015,253 @@
         </div>
       </div>
 
+      <!-- Tabs Selector -->
+      <div class="profile-tabs" style="margin-top: 25px;">
+        <button class="p-tab-btn active" id="btn-p-tab-fines" onclick="switchProfileTab('fines')"><i class="fa-solid fa-scale-balanced"></i> المخالفات والغرامات</button>
+        <button class="p-tab-btn" id="btn-p-tab-promos" onclick="switchProfileTab('promos')"><i class="fa-solid fa-clock-rotate-left"></i> سجل الترقيات</button>
+        <button class="p-tab-btn" id="btn-p-tab-reqs" onclick="switchProfileTab('reqs')"><i class="fa-solid fa-medal"></i> متطلبات الترقية</button>
+      </div>
 
+      <!-- Fines Tab Content -->
+      <div id="p-tab-content-fines" class="p-tab-content active" style="margin-top: 20px;">
+        ${finesHTML}
+      </div>
+
+      <!-- Promos Tab Content -->
+      <div id="p-tab-content-promos" class="p-tab-content" style="margin-top: 20px; display: none;">
+        ${promosHTML}
+      </div>
+
+      <!-- Reqs Tab Content -->
+      <div id="p-tab-content-reqs" class="p-tab-content" style="margin-top: 20px; display: none;">
+      </div>
     `;
+
+    // Initialize promotion calculation logic variables
+    const rawNormalized = (user.rank || '').replace(/\s*ركن\s*/g, '').trim();
+    const normalizedRank = cleanArabicString(rawNormalized);
+
+    // Cross-reference which sheets table has the user to detect mutandib status
+    let matchedTabName = '';
+    for (const tabName in sheets) {
+      if (tabName === ' جدول الغرامات 💵') continue;
+      const found = sheets[tabName].some(r => r.name === user.name || (r.badge && r.badge === user.badge));
+      if (found) {
+        matchedTabName = tabName;
+        break;
+      }
+    }
+    const isMutandibUser = matchedTabName === 'جدول الامن العام - المنتدبين';
+    const baseReqsTable = isMutandibUser ? PROMO_REQS_MUTANDIB : PROMO_REQS_AFRAD;
+
+    // Check if both systems exist for this rank (only Afrad can have Speed/exceptional promos)
+    const hasRegular = baseReqsTable[rawNormalized] !== undefined || baseReqsTable[user.rank] !== undefined;
+    const hasSpeed = !isMutandibUser && (PROMO_REQS_SPEED[rawNormalized] !== undefined || PROMO_REQS_SPEED[user.rank] !== undefined);
+
+    let currentProfilePromoType = 'regular';
+
+    function renderPromoRequirements() {
+      const reqsTabEl = document.getElementById('p-tab-content-reqs');
+      if (!reqsTabEl) return;
+
+      let reqsTable = baseReqsTable;
+      if (currentProfilePromoType === 'speed' && hasSpeed) {
+        reqsTable = PROMO_REQS_SPEED;
+      }
+
+      let reqs = null;
+      let currentRankIndex = -1;
+      const rankKeys = Object.keys(reqsTable);
+      for (let i = 0; i < rankKeys.length; i++) {
+        if (cleanArabicString(rankKeys[i]) === normalizedRank) {
+          reqs = reqsTable[rankKeys[i]];
+          currentRankIndex = i;
+          break;
+        }
+      }
+
+      if (!reqs) {
+        reqsTabEl.innerHTML = `
+          <div style="text-align:center; padding:50px 20px; color:rgba(255,255,255,0.3); font-size:0.9rem;">
+            <i class="fa-solid fa-medal"></i> لا توجد متطلبات ترقية متاحة لهذه الرتبة حالياً<br>
+            <span style="font-size:0.75rem; opacity:0.6">ربما وصلت لأعلى رتبة أو الرتبة غير مسجلة</span>
+          </div>`;
+        return;
+      }
+
+      // Parse date and calculate diffDays
+      let diffDays = 0;
+      const pDateStr = (user.joinDate || '').trim();
+      if (pDateStr && pDateStr !== '-' && pDateStr !== '—' && pDateStr !== '') {
+        try {
+          let pDate = null;
+          if (/^\d{4,6}$/.test(pDateStr)) {
+            pDate = new Date(Date.UTC(1899, 11, 30) + parseInt(pDateStr) * 86400000);
+          } else if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(pDateStr)) {
+            const [d, m, y] = pDateStr.split('/');
+            pDate = new Date(Date.UTC(+y, +m - 1, +d));
+          } else if (/^\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2}$/.test(pDateStr)) {
+            const clean = pDateStr.replace(/\//g, '-');
+            pDate = new Date(clean + (clean.length === 10 ? 'T00:00:00Z' : ''));
+          } else if (/^\d{1,2}-\d{1,2}-\d{4}$/.test(pDateStr)) {
+            const [d, m, y] = pDateStr.split('-');
+            pDate = new Date(Date.UTC(+y, +m - 1, +d));
+          } else {
+            pDate = new Date(pDateStr);
+          }
+
+          if (pDate && !isNaN(pDate.getTime())) {
+            const todayUTC = Date.UTC(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
+            diffDays = Math.max(0, Math.round((todayUTC - pDate.getTime()) / 86400000));
+          }
+        } catch (e) { console.warn('Date parse error:', pDateStr, e); }
+      }
+
+      const fillPct = Math.min(100, Math.round((diffDays / reqs.days) * 100));
+      const daysOk  = diffDays >= reqs.days;
+      const barColor = daysOk ? 'linear-gradient(90deg,#2ecc71,#27ae60)' : 'linear-gradient(90deg,#e67e22,#d35400)';
+
+      // Build required courses list
+      const requiredCoursesList = [];
+      if (reqs.courses && reqs.courses.length > 0) {
+        reqs.courses.forEach(c => requiredCoursesList.push({ name: c, rankName: rankKeys[currentRankIndex], isCurrentRank: true }));
+      }
+      for (let i = 0; i < currentRankIndex; i++) {
+        const prevRankKey = rankKeys[i];
+        const prevReqs = reqsTable[prevRankKey];
+        if (prevReqs && prevReqs.courses && prevReqs.courses.length > 0) {
+          prevReqs.courses.forEach(c => {
+            if (!requiredCoursesList.some(item => item.name === c)) {
+              requiredCoursesList.push({ name: c, rankName: prevRankKey, isCurrentRank: false });
+            }
+          });
+        }
+      }
+
+      const completedCourses = user.regularCourses || [];
+      const coursesHTML = requiredCoursesList.length > 0
+        ? requiredCoursesList.map(item => {
+            const done = completedCourses.includes(item.name);
+            if (!item.isCurrentRank && done) return null;
+            const rankLabel = item.isCurrentRank ? 'الرتبة الحالية' : `الرتبة السابقة (${item.rankName})`;
+            return `<div class="promo-condition-item" style="${done ? 'border-color:rgba(46,204,113,0.2);background:rgba(46,204,113,0.03)' : ''}">
+              <div>
+                <div style="font-weight:700;font-size:0.85rem;color:#fff"><i class="fa-solid fa-graduation-cap"></i> دورة: ${item.name}</div>
+                <div style="font-size:0.72rem;color:rgba(255,255,255,0.4);margin-top:2px">دورة مطلوبة لـ: ${rankLabel}</div>
+              </div>
+              <span class="promo-status-badge" style="background:${done ? 'rgba(46,204,113,0.12)' : 'rgba(230,126,34,0.12)'}; color:${done ? '#2ecc71' : '#e67e22'}; border: 1px solid ${done ? 'rgba(46,204,113,0.25)' : 'rgba(230,126,34,0.25)'};">${done ? '✓ مكتملة' : '⏳ لم تكتمل'}</span>
+            </div>`;
+          }).filter(h => h !== null).join('')
+        : '';
+
+      const noteHTML = reqs.note
+        ? `<div class="promo-condition-item" style="border-color:rgba(52,152,219,0.25);background:rgba(52,152,219,0.04)">
+            <div>
+              <div style="font-weight:700;font-size:0.85rem;color:#fff"><i class="fa-solid fa-landmark"></i> ${reqs.note}</div>
+            </div>
+            <span class="promo-status-badge warning" style="background:rgba(230,126,34,0.12); color:#e67e22; border: 1px solid rgba(230,126,34,0.25);">⏳ مطلوب</span>
+          </div>`
+        : '';
+
+      const reportsHTML = reqs.reports
+        ? `<div class="promo-condition-item">
+            <div>
+              <div style="font-weight:700;font-size:0.85rem;color:#fff">📋 ${reqs.reports} ${reqs.repType}</div>
+              <div style="font-size:0.72rem;color:rgba(255,255,255,0.4);margin-top:2px">عدد التقارير المطلوبة</div>
+            </div>
+            <span class="promo-status-badge warning" style="background:rgba(230,126,34,0.12); color:#e67e22; border: 1px solid rgba(230,126,34,0.25);">⏳ تحقق مع القيادة</span>
+          </div>`
+        : '';
+
+      // Selector HTML (only shown if both promo paths exist)
+      let selectorHTML = '';
+      if (hasRegular && hasSpeed) {
+        selectorHTML = `
+          <div class="promo-type-selector" style="display: flex; gap: 8px; margin-bottom: 18px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px; justify-content: center; width: 100%;">
+            <button class="promo-type-btn" onclick="window.switchProfilePromoType('regular')" style="flex: 1; background: ${currentProfilePromoType === 'regular' ? 'linear-gradient(135deg, var(--gold), #3465b0)' : 'rgba(255,255,255,0.02)'}; border: 1px solid ${currentProfilePromoType === 'regular' ? 'var(--gold)' : 'rgba(255,255,255,0.1)'}; color: ${currentProfilePromoType === 'regular' ? '#05091e' : 'rgba(255,255,255,0.7)'}; padding: 8px 16px; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 0.8rem; transition: all 0.2s; font-family: inherit;">أساسية</button>
+            <button class="promo-type-btn" onclick="window.switchProfilePromoType('speed')" style="flex: 1; background: ${currentProfilePromoType === 'speed' ? 'linear-gradient(135deg, var(--gold), #3465b0)' : 'rgba(255,255,255,0.02)'}; border: 1px solid ${currentProfilePromoType === 'speed' ? 'var(--gold)' : 'rgba(255,255,255,0.1)'}; color: ${currentProfilePromoType === 'speed' ? '#05091e' : 'rgba(255,255,255,0.7)'}; padding: 8px 16px; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 0.8rem; transition: all 0.2s; font-family: inherit;">استثنائية (مسرعة)</button>
+          </div>
+        `;
+      }
+
+      const promoTypeLabel = currentProfilePromoType === 'speed' ? 'استثنائية' : 'أساسية';
+
+      reqsTabEl.innerHTML = `
+        ${selectorHTML}
+
+        <!-- الرتبة الحالية → التالية -->
+        <div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:18px;
+                    padding:14px 18px;background:rgba(201,162,39,0.05);border:1px solid rgba(201,162,39,0.15);border-radius:12px;">
+          <div style="text-align:center;">
+            <div style="font-size:0.68rem;color:rgba(255,255,255,0.4);margin-bottom:4px;">الرتبة الحالية</div>
+            <div style="font-weight:900;color:var(--gold-light);font-size:0.95rem;">${user.rank || '—'}</div>
+          </div>
+          <div style="font-size:1.5rem;color:var(--gold-light);">&#8592;</div>
+          <div style="text-align:center;">
+            <div style="font-size:0.68rem;color:rgba(255,255,255,0.4);margin-bottom:4px;">الرتبة التالية (${promoTypeLabel})</div>
+            <div style="font-weight:900;color:#2ecc71;font-size:0.95rem;">${reqs.to}</div>
+          </div>
+        </div>
+
+        <!-- شريط تقدم الأيام -->
+        <div class="promo-card">
+          <div class="promo-days-row">
+            <span style="font-weight:800;font-size:0.9rem;color:#fff"><i class="fa-solid fa-calendar-days"></i> المدة منذ آخر ترقية</span>
+            <span class="promo-days-val" style="color:${daysOk ? '#2ecc71' : '#e67e22'}">${diffDays} / ${reqs.days} يوم</span>
+          </div>
+          <div class="promo-bar-bg">
+            <div class="promo-bar-fill" style="width:${fillPct}%;background:${barColor};"></div>
+          </div>
+          <div style="font-size:0.78rem;font-weight:700;color:${daysOk ? '#2ecc71' : '#e67e22'};">
+            ${daysOk ? `✓ أكملت المدة + ${diffDays - reqs.days} يوم إضافي` : `⏳ تبقى ${reqs.days - diffDays} يوم للاستحقاق`}
+          </div>
+        </div>
+
+        <h4 style="font-weight:800;color:#fff;margin-bottom:12px;font-size:0.88rem">📋 متطلبات الترقية الرسمية (${promoTypeLabel})</h4>
+
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <!-- الساعات -->
+          <div class="promo-condition-item">
+            <div>
+              <div style="font-weight:700;font-size:0.85rem;color:#fff">⏱️ ${reqs.hours} ساعة عمل</div>
+              <div style="font-size:0.72rem;color:rgba(255,255,255,0.4);margin-top:2px">عدد الساعات المطلوبة للترقية</div>
+            </div>
+            <span class="promo-status-badge warning" style="background:rgba(230,126,34,0.12); color:#e67e22; border: 1px solid rgba(230,126,34,0.25);">⏳ تحقق مع القيادة</span>
+          </div>
+
+          ${reportsHTML}
+          ${coursesHTML}
+          ${noteHTML}
+        </div>
+      `;
+    }
+
+    window.switchProfilePromoType = function(type) {
+      currentProfilePromoType = type;
+      renderPromoRequirements();
+    };
+
+    window.switchProfileTab = function(tabName) {
+      document.querySelectorAll('.p-tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      document.querySelectorAll('.p-tab-content').forEach(content => {
+        content.style.display = 'none';
+      });
+
+      const activeBtn = document.getElementById('btn-p-tab-' + tabName);
+      if (activeBtn) {
+        activeBtn.classList.add('active');
+      }
+      const activeContent = document.getElementById('p-tab-content-' + tabName);
+      if (activeContent) {
+        activeContent.style.display = 'block';
+      }
+
+      if (tabName === 'reqs') {
+        renderPromoRequirements();
+      }
+    };
   }
 
 </script>

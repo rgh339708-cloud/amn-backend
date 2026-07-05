@@ -3482,6 +3482,56 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  // GET /api/test_proxy - Test proxy connection with browser headers
+  if (pathname === '/api/test_proxy' && req.method === 'GET') {
+    const testRequest = (hostname, pathUrl) => {
+      return new Promise((resolve) => {
+        const payload = JSON.stringify({
+          content: 'Test message with browser headers'
+        });
+        const options = {
+          hostname: hostname,
+          path: pathUrl,
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Content-Length': Buffer.byteLength(payload),
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'application/json, text/plain, */*',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+          }
+        };
+        const req = https.request(options, (res) => {
+          let body = '';
+          res.on('data', chunk => body += chunk);
+          res.on('end', () => {
+            resolve({
+              statusCode: res.statusCode,
+              headers: res.headers,
+              bodySnippet: body.substring(0, 500)
+            });
+          });
+        });
+        req.on('error', (err) => {
+          resolve({ error: err.message });
+        });
+        req.write(payload);
+        req.end();
+      });
+    };
+
+    Promise.all([
+      testRequest('discord.com', '/api/webhooks/1519343011417559041/kZrlK9SJX5afM8G8u_uFxhnsTjHQpncdZ8BwyZ89Z_a1VX5QPeWKD_Rc5_Ee4Zj3Vo4h'),
+      testRequest('webhook.lewisakura.moe', '/api/webhooks/1519343011417559041/kZrlK9SJX5afM8G8u_uFxhnsTjHQpncdZ8BwyZ89Z_a1VX5QPeWKD_Rc5_Ee4Zj3Vo4h')
+    ]).then(([resDiscord, resLewis]) => {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ discord: resDiscord, lewisakura: resLewis }));
+    });
+    return;
+  }
+
   // ----- Exam Archive API -----
   // POST /api/exams – create or update an exam attempt
   if (pathname === '/api/exams' && req.method === 'POST') {

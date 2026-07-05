@@ -37,7 +37,7 @@ const Components = (() => {
     { id: 'amn11',                      title: 'الزي العسكري',                    emoji: '<i class="fa-solid fa-shirt"></i>',               allowedRoles: ['*'] },
     { id: 'amn12',                      title: 'التقديم',                         emoji: '<i class="fa-solid fa-envelope-open-text"></i>',  allowedRoles: ['*'] },
     { id: 'amn13',                      title: 'قاعدة البيانات',                  emoji: '<i class="fa-solid fa-database"></i>',             allowedRoles: ['*'] },
-    { id: 'amn14',                      title: 'أجنحة مدينة الـ 90',             emoji: '🦅',                                              allowedRoles: ['*'] },
+    { id: 'amn14',                      title: 'الونقات',                        emoji: '🦅',                                              allowedRoles: ['*'] },
     // Wings sub-pages
     { id: 'mstnd1',                     title: 'مستند الجناح الجوي',              emoji: '🚁',  parentId: 'amn14', allowedRoles: ['*'] },
     { id: 'mstnd2',                     title: 'مستند جناح مكافحة الإرهاب',      emoji: '⚔️', parentId: 'amn14', allowedRoles: ['*'] },
@@ -226,7 +226,7 @@ const Components = (() => {
       items.push({
         href: `${BASE}pages/amn14.html`,
         icon: iconHtml(wingsPage.emoji),
-        label: 'استعراض الأجنحة',
+        label: 'استعراض الونقات',
         page: 'amn14'
       });
       // Wing sub-pages

@@ -260,7 +260,7 @@ async function migrate() {
       { name: 'login_logs', query: 'SELECT * FROM login_logs' },
       { name: 'discord_links', query: 'SELECT * FROM discord_links' },
       { name: 'courses', query: 'SELECT * FROM courses' },
-      { name: 'exams', query: 'SELECT * FROM exams' },
+      { name: 'amn9', query: 'SELECT * FROM exams' },
       { name: 'exam_results', query: 'SELECT * FROM exam_results' },
       { name: 'retake_requests', query: 'SELECT * FROM retake_requests' },
       { name: 'exam_violations', query: 'SELECT * FROM exam_violations' },

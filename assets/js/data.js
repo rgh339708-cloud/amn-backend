@@ -429,7 +429,7 @@ const SeedData = (() => {
         isOpen: false,
         openedAt: '',
         closedAt: '',
-        documentUrl: 'ops-document.html',
+        documentUrl: 'mstnd11.html',
         questionsCountToShow: 15,
         questions: [
           {
@@ -710,7 +710,7 @@ const SeedData = (() => {
         department: 'القيادة العامة',
         emoji: '<i class="fa-solid fa-crown"></i>',
         bio: 'القائد العام لجهاز الأمن العام وصاحب الرؤية التطويرية الشاملة للمنظومة الأمنية والميدانية.',
-        type: 'leadership',
+        type: 'amn1',
         joinedDate: '2022-01-01',
         achievements: 'وسام الملك عبدالعزيز من الدرجة الممتازة، نوط الإنقاذ، نوط الإتقان',
         phone: '011-401-1111',
@@ -725,7 +725,7 @@ const SeedData = (() => {
         department: 'القيادة العامة',
         emoji: '⭐',
         bio: 'نائب مدير الأمن العام والمشرف العام على التخطيط العملياتي والتنسيق المشترك بين مختلف القطاعات.',
-        type: 'leadership',
+        type: 'amn1',
         joinedDate: '2022-06-15',
         achievements: 'نوط المعركة، نوط الإدارة العسكرية، نوط الابتكار العملياتي',
         phone: '011-401-2222',
