@@ -945,7 +945,11 @@ function sendAttendanceReportToDiscord(bookName, operatorStr, roomImage, records
   const absentMembers = expectedMembers.filter(m => !memberAttended(m));
   let absentLines = '';
   if (absentMembers.length > 0) {
-    absentLines = absentMembers.map(m => getDiscordMention(m.discord || m.id, m.name)).join('\n');
+    if (absentMembers.length > 50) {
+      absentLines = absentMembers.slice(0, 50).map(m => getDiscordMention(m.discord || m.id, m.name)).join('\n') + `\n... و ${absentMembers.length - 50} آخرين`;
+    } else {
+      absentLines = absentMembers.map(m => getDiscordMention(m.discord || m.id, m.name)).join('\n');
+    }
   } else {
     absentLines = 'لا يوجد غياب (الجميع حاضرين)';
   }
@@ -970,7 +974,11 @@ function sendAttendanceReportToDiscord(bookName, operatorStr, roomImage, records
 
   let substituteLines = '';
   if (substituteRecords.length > 0) {
-    substituteLines = substituteRecords.map(r => getDiscordMention(r.user_id || r.discord, r.display_name || r.username)).join('\n');
+    if (substituteRecords.length > 50) {
+      substituteLines = substituteRecords.slice(0, 50).map(r => getDiscordMention(r.user_id || r.discord, r.display_name || r.username)).join('\n') + `\n... و ${substituteRecords.length - 50} آخرين`;
+    } else {
+      substituteLines = substituteRecords.map(r => getDiscordMention(r.user_id || r.discord, r.display_name || r.username)).join('\n');
+    }
   } else {
     substituteLines = 'لا يوجد سد عجز';
   }
@@ -978,14 +986,19 @@ function sendAttendanceReportToDiscord(bookName, operatorStr, roomImage, records
   // 3. All Attendees (أسماء الحاضرين) - Show ALL who attended regardless of substitute status
   let attendeesList = '';
   if (recs.length > 0) {
-    attendeesList = recs.map((r) => {
+    const attendeesMapped = recs.map((r) => {
       if (r.display_name && String(r.display_name).startsWith('<@')) return r.display_name;
       const rawId = r.user_id || r.discord || r.display_name;
       const cleanId = String(rawId).replace(/\D/g, '');
       if (cleanId.length >= 17) return `<@${cleanId}>`;
       if (String(rawId).startsWith('<@')) return rawId;
       return `<@${rawId}>`;
-    }).join('\n');
+    });
+    if (attendeesMapped.length > 50) {
+      attendeesList = attendeesMapped.slice(0, 50).join('\n') + `\n... و ${attendeesMapped.length - 50} آخرين`;
+    } else {
+      attendeesList = attendeesMapped.join('\n');
+    }
   } else {
     attendeesList = 'لا يوجد حضور';
   }
@@ -1002,7 +1015,7 @@ function sendAttendanceReportToDiscord(bookName, operatorStr, roomImage, records
     }
   };
 
-  if (roomImage) {
+  if (roomImage && (roomImage.startsWith('http://') || roomImage.startsWith('https://'))) {
     embed.image = { url: roomImage };
   }
 
@@ -1026,18 +1039,72 @@ function sendAttendanceReportToDiscord(bookName, operatorStr, roomImage, records
     res.on('end', () => {
       if (res.statusCode === 200 || res.statusCode === 204) {
         console.log('✅ Attendance report sent to Discord via webhook successfully!');
+        logSystemActivity('discord_webhook_success', 'النظام', `تم إرسال تقرير حضور "${bookName}" إلى ديسكورد بنجاح.`);
       } else {
         console.error('❌ Discord webhook error. Status:', res.statusCode, 'Body:', body);
+        logSystemActivity('discord_webhook_error', 'النظام', `فشل إرسال تقرير حضور "${bookName}" إلى ديسكورد. كود الحالة: ${res.statusCode}، الرد: ${body}`);
       }
     });
   });
 
   req.on('error', (err) => {
     console.error('❌ Failed to send Discord webhook:', err.message);
+    logSystemActivity('discord_webhook_error', 'النظام', `فشل إرسال تقرير حضور "${bookName}" إلى ديسكورد. الخطأ: ${err.message}`);
   });
 
   req.write(payload);
   req.end();
+}
+
+const sentExamNotifications = new Set();
+
+function sendExamNotificationToDiscord(attempt) {
+  if (!attempt || !attempt.id) return;
+  const attemptKey = String(attempt.id);
+  if (sentExamNotifications.has(attemptKey)) return;
+  sentExamNotifications.add(attemptKey);
+  
+  if (sentExamNotifications.size > 1000) {
+    const firstKey = sentExamNotifications.values().next().value;
+    sentExamNotifications.delete(firstKey);
+  }
+
+  const PASS_CHANNEL_ID = '1523165844778254466';
+  const FAIL_CHANNEL_ID = '1523165574874661005';
+
+  const isPass = attempt.pass_status === 'نجاح';
+  const targetChannel = isPass ? PASS_CHANNEL_ID : FAIL_CHANNEL_ID;
+
+  const traineeName = attempt.trainee_name || 'غير معروف';
+  const rank = attempt.rank || '—';
+  const code = attempt.code || '—';
+  const examName = attempt.exam_name || attempt.course_name || 'اختبار';
+  const score = attempt.score !== undefined ? attempt.score : 0;
+  const duration = attempt.duration || 0;
+  const discordId = attempt.discord_id || '';
+  
+  const userMention = discordId ? `<@${discordId}>` : (code !== '—' ? `<@${code}>` : '—');
+
+  const embed = {
+    title: isPass ? '🎓 اجتياز اختبار جديد - ناجح' : '❌ عدم اجتياز اختبار - راسب',
+    color: isPass ? 3066993 : 15158332,
+    fields: [
+      { name: '👤 الاسم', value: `**${traineeName}**`, inline: true },
+      { name: '🎖️ الرتبة', value: rank, inline: true },
+      { name: '🆔 المعرف / الكود', value: userMention, inline: true },
+      { name: '📝 اسم الاختبار', value: examName, inline: true },
+      { name: '📊 النتيجة', value: `**${score}%**`, inline: true },
+      { name: '⏱️ مدة الاختبار', value: `${duration} دقيقة`, inline: true }
+    ],
+    timestamp: new Date().toISOString(),
+    footer: {
+      text: 'شؤون تدريب الأمن العام • نظام الاختبارات'
+    }
+  };
+
+  sendDiscordChannelMessage(targetChannel, { embeds: [embed] }, config.discordToken)
+    .then(() => console.log(`[Exam Discord Notify] Successfully sent exam result embed to channel ${targetChannel}`))
+    .catch(err => console.error('[Exam Discord Notify Error] Failed to send exam result to Discord:', err.message));
 }
 
 async function resolveDiscordUserId(inputStr) {
@@ -1680,6 +1747,9 @@ function syncSaveResultFromClient(item, callback) {
         examiner: dbItem.examiner
       };
       dbInsertOrReplace('exam_attempts', 'id', itemAttempts, function(attErr) {
+        if (!attErr && (itemResults.pass_status === 'نجاح' || itemResults.pass_status === 'رسوب')) {
+          sendExamNotificationToDiscord(itemResults);
+        }
         if (callback) callback(attErr, this.changes);
       });
     });
@@ -1742,6 +1812,9 @@ function syncSaveResultFromClient(item, callback) {
         };
         
         dbInsertOrReplace('exam_results', 'id', itemResults, function(resErr) {
+          if (!resErr && (itemResults.pass_status === 'نجاح' || itemResults.pass_status === 'رسوب')) {
+            sendExamNotificationToDiscord(itemResults);
+          }
           if (callback) callback(resErr, newId);
         });
       });
@@ -1804,6 +1877,13 @@ function syncSaveAttempt(data, callback) {
           paramsResults.push(pk);
           const sqlResults = `UPDATE exam_results SET ${updatesResults.join(', ')} WHERE id = ?`;
           db.run(sqlResults, paramsResults, function(resErr) {
+            if (!resErr) {
+              db.get('SELECT * FROM exam_results WHERE id = ?', [pk], (getErr, fullRow) => {
+                if (!getErr && fullRow && (fullRow.pass_status === 'نجاح' || fullRow.pass_status === 'رسوب')) {
+                  sendExamNotificationToDiscord(fullRow);
+                }
+              });
+            }
             if (callback) callback(resErr, this.changes);
           });
         } else {
@@ -1872,6 +1952,9 @@ function syncSaveAttempt(data, callback) {
         };
         
         dbInsertOrReplace('exam_results', 'id', itemResults, function(resErr) {
+          if (!resErr && (itemResults.pass_status === 'نجاح' || itemResults.pass_status === 'رسوب')) {
+            sendExamNotificationToDiscord(itemResults);
+          }
           if (callback) callback(resErr, newId);
         });
       });
