@@ -32,44 +32,43 @@ function loadConfig() {
     mysqlPort: ''
   };
   const envPaths = [
-    path.join(__dirname, '..', 'DISCORD', '.env'),
-    path.join(__dirname, '.env'),
+    path.join(process.env.USERPROFILE || 'C:\\Users\\rayan', 'OneDrive', 'Documents', 'DISCORD', '.env'),
     path.join('c:', 'Users', 'rayan', 'OneDrive', 'Documents', 'DISCORD', '.env'),
-    path.join(process.env.USERPROFILE || 'C:\\Users\\rayan', 'OneDrive', 'Documents', 'DISCORD', '.env')
+    path.join(__dirname, '..', 'DISCORD', '.env'),
+    path.join(__dirname, '.env')
   ];
-  let envPath = '';
+  
+  let loadedCount = 0;
   for (const p of envPaths) {
     if (fs.existsSync(p)) {
-      envPath = p;
-      break;
+      try {
+        const content = fs.readFileSync(p, 'utf8');
+        content.split('\n').forEach(line => {
+          const parts = line.trim().split('=');
+          if (parts.length >= 2 && !parts[0].startsWith('#')) {
+            const key = parts[0].trim();
+            const value = parts.slice(1).join('=').trim().replace(/^['"]|['"]$/g, '');
+            if (key === 'SPREADSHEET_ID') config.spreadsheetId = value;
+            if (key === 'SPREADSHEET_GID') config.spreadsheetGid = value;
+            if (key === 'DISCORD_TOKEN') config.discordToken = value;
+            if (key === 'DATABASE_URL') config.databaseUrl = value;
+            if (key === 'GUILD_ID') config.guildId = value;
+            if (key === 'MANAGED_ROLES') config.managedRoles = value.split(',').map(r => r.trim());
+            if (key === 'MYSQL_HOST') config.mysqlHost = value;
+            if (key === 'MYSQL_USER') config.mysqlUser = value;
+            if (key === 'MYSQL_PASSWORD') config.mysqlPassword = value;
+            if (key === 'MYSQL_DATABASE') config.mysqlDatabase = value;
+            if (key === 'MYSQL_PORT') config.mysqlPort = value;
+          }
+        });
+        console.log(`[Config] Successfully loaded environment variables from ${p}`);
+        loadedCount++;
+      } catch (e) {
+        console.error(`[Config Error] Failed to read env config from ${p}:`, e.message);
+      }
     }
   }
-  if (envPath) {
-    try {
-      const content = fs.readFileSync(envPath, 'utf8');
-      content.split('\n').forEach(line => {
-        const parts = line.trim().split('=');
-        if (parts.length >= 2 && !parts[0].startsWith('#')) {
-          const key = parts[0].trim();
-          const value = parts.slice(1).join('=').trim().replace(/^['"]|['"]$/g, '');
-          if (key === 'SPREADSHEET_ID') config.spreadsheetId = value;
-          if (key === 'SPREADSHEET_GID') config.spreadsheetGid = value;
-          if (key === 'DISCORD_TOKEN') config.discordToken = value;
-          if (key === 'DATABASE_URL') config.databaseUrl = value;
-          if (key === 'GUILD_ID') config.guildId = value;
-          if (key === 'MANAGED_ROLES') config.managedRoles = value.split(',').map(r => r.trim());
-          if (key === 'MYSQL_HOST') config.mysqlHost = value;
-          if (key === 'MYSQL_USER') config.mysqlUser = value;
-          if (key === 'MYSQL_PASSWORD') config.mysqlPassword = value;
-          if (key === 'MYSQL_DATABASE') config.mysqlDatabase = value;
-          if (key === 'MYSQL_PORT') config.mysqlPort = value;
-        }
-      });
-      console.log(`[Config] Successfully loaded environment variables from ${envPath}`);
-    } catch (e) {
-      console.error('[Config Error] Failed to read common env config:', e.message);
-    }
-  } else {
+  if (loadedCount === 0) {
     console.warn('[Config Warning] No .env file found in any of the search paths.');
   }
 
@@ -2608,7 +2607,8 @@ function cleanArabicString(str) {
     .replace(/\s+/g, ' ')
     .replace(/[أإآ]/g, 'ا')
     .replace(/ة/g, 'ه')
-    .replace(/ى/g, 'ي');
+    .replace(/ى/g, 'ي')
+    .replace(/ـ/g, ''); // إزالة الكشيدة (التطويل)
 }
 
 let isDiscordSyncing = false;

@@ -1041,7 +1041,8 @@
       .replace(/\s+/g, ' ')
       .replace(/[أإآ]/g, 'ا')
       .replace(/ة/g, 'ه')
-      .replace(/ى/g, 'ي');
+      .replace(/ى/g, 'ي')
+      .replace(/ـ/g, ''); // إزالة الكشيدة (التطويل)
   }
 
   function cleanPositionValue(val) {
@@ -2366,6 +2367,46 @@
     renderDB(filtered);
   }
 
+  window.togglePositions = function(toggleEl, event) {
+    if (event) event.stopPropagation();
+    const hiddenSpan = toggleEl.nextElementSibling;
+    if (!hiddenSpan) return;
+    const isHidden = hiddenSpan.style.display === 'none';
+    hiddenSpan.style.display = isHidden ? 'inline-flex' : 'none';
+    const count = hiddenSpan.children.length;
+    toggleEl.innerHTML = isHidden 
+      ? '<i class="fa-solid fa-angle-up"></i> إخفاء' 
+      : `+${count} إضافي`;
+  };
+
+  function renderPositionCell(positionStr) {
+    if (!positionStr || positionStr === 'لا يوجد' || positionStr === 'لايوجد' || positionStr === '-' || positionStr === '—') {
+      return `<span class="pos-badge">عضو</span>`;
+    }
+    
+    const parts = positionStr.split(/[،,\/\\|]+/).map(p => p.trim()).filter(Boolean);
+    if (parts.length === 0) {
+      return `<span class="pos-badge">عضو</span>`;
+    }
+    
+    if (parts.length <= 1) {
+      return `<span class="pos-badge has-pos">${parts[0]}</span>`;
+    }
+    
+    const first = parts[0];
+    const remaining = parts.slice(1);
+    
+    return `
+      <div class="pos-badges-wrap" style="display: inline-flex; flex-wrap: wrap; gap: 4px; align-items: center; max-width: 320px;">
+        <span class="pos-badge has-pos">${first}</span>
+        <span class="pos-badge-toggle" onclick="togglePositions(this, event)" style="cursor: pointer; background: rgba(255,255,255,0.06); border: 1px dashed rgba(255,255,255,0.2); color: rgba(255,255,255,0.6); padding: 3px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; transition: all 0.2s;" onmouseover="this.style.background='rgba(201,162,39,0.1)'; this.style.borderColor='var(--color-gold-primary)'; this.style.color='var(--color-gold-primary)';" onmouseout="this.style.background='rgba(255,255,255,0.06)'; this.style.borderColor='rgba(255,255,255,0.2)'; this.style.color='rgba(255,255,255,0.6)';">+${remaining.length} إضافي</span>
+        <span class="pos-badges-hidden" style="display: none; flex-wrap: wrap; gap: 4px; align-items: center;">
+          ${remaining.map(p => `<span class="pos-badge has-pos">${p}</span>`).join('')}
+        </span>
+      </div>
+    `;
+  }
+
   function renderDB(list) {
     const tbody = document.getElementById('db-tbody');
     if (!tbody) return;
@@ -2535,7 +2576,7 @@
             <td onclick="_clickedTab=currentTab; showPersonModal('${r.name}')" style="font-weight: 800; color: #fff; cursor: pointer;" onmouseover="this.style.color='var(--color-gold-primary)'; this.style.textDecoration='underline';" onmouseout="this.style.color='#fff'; this.style.textDecoration='none';">${renderMemberAvatarCell(r)}</td>
             <td><span class="badge-code-left" style="position:static; margin:0; display:inline-block;">${r.badge || '—'}</span></td>
             <td style="color:var(--color-gold-primary);font-weight:700">${r.rank || '—'}</td>
-            <td><span class="pos-badge ${r.position ? 'has-pos' : ''}">${r.position || 'عضو'}</span></td>
+            <td>${renderPositionCell(r.position)}</td>
             <td>${statusHTML}</td>
             <td>${getFormattedLastActive(r)}</td>
             <td>${warningBadge}</td>
@@ -2561,7 +2602,7 @@
             <td onclick="_clickedTab=currentTab; showPersonModal('${r.name}')" style="font-weight: 800; color: #fff; cursor: pointer;" onmouseover="this.style.color='var(--color-gold-primary)'; this.style.textDecoration='underline';" onmouseout="this.style.color='#fff'; this.style.textDecoration='none';">${renderMemberAvatarCell(r)}</td>
             <td><span class="badge-code-left" style="position:static; margin:0; display:inline-block;">${r.badge || '—'}</span></td>
             <td style="color:var(--color-gold-primary);font-weight:700">${r.rank || '—'}</td>
-            <td><span class="pos-badge ${r.position ? 'has-pos' : ''}">${r.position || 'عضو'}</span></td>
+            <td>${renderPositionCell(r.position)}</td>
             <td>${statusHTML}</td>
             <td>${getFormattedLastActive(r)}</td>
             <td style="color:var(--color-gold-light);font-weight:700">${salaryFormatted}</td>
@@ -2584,7 +2625,7 @@
             <td onclick="_clickedTab=currentTab; showPersonModal('${r.name}')" style="font-weight: 800; color: #fff; cursor: pointer;" onmouseover="this.style.color='var(--color-gold-primary)'; this.style.textDecoration='underline';" onmouseout="this.style.color='#fff'; this.style.textDecoration='none';">${renderMemberAvatarCell(r)}</td>
             <td><span class="badge-code-left" style="position:static; margin:0; display:inline-block;">${r.badge || '—'}</span></td>
             <td style="color:var(--color-gold-primary);font-weight:700">${r.rank || '—'}</td>
-            <td><span class="pos-badge ${r.position ? 'has-pos' : ''}">${r.position || 'عضو'}</span></td>
+            <td>${renderPositionCell(r.position)}</td>
             <td>${statusHTML}</td>
             <td>${getFormattedLastActive(r)}</td>
             <td>${notesHTML}</td>
@@ -2607,7 +2648,7 @@
             <td onclick="_clickedTab=currentTab; showPersonModal('${r.name}')" style="font-weight: 800; color: #fff; cursor: pointer;" onmouseover="this.style.color='var(--color-gold-primary)'; this.style.textDecoration='underline';" onmouseout="this.style.color='#fff'; this.style.textDecoration='none';">${renderMemberAvatarCell(r)}</td>
             <td><span class="badge-code-left" style="position:static; margin:0; display:inline-block;">${r.badge || '—'}</span></td>
             <td style="color:var(--color-gold-primary);font-weight:700">${r.rank || '—'}</td>
-            <td><span class="pos-badge ${r.position ? 'has-pos' : ''}">${r.position || 'عضو'}</span></td>
+            <td>${renderPositionCell(r.position)}</td>
             <td>${statusHTML}</td>
             <td>${getFormattedLastActive(r)}</td>
             <td>${warningsHTML}</td>
@@ -2641,7 +2682,7 @@
           <td onclick="_clickedTab=currentTab; showPersonModal('${r.name}')" style="font-weight: 800; color: #fff; cursor: pointer;" onmouseover="this.style.color='var(--color-gold-primary)'; this.style.textDecoration='underline';" onmouseout="this.style.color='#fff'; this.style.textDecoration='none';">${renderMemberAvatarCell(r)}</td>
           <td><span class="badge-code-left" style="position:static; margin:0; display:inline-block;">${r.badge || '—'}</span></td>
           <td style="color:var(--color-gold-primary);font-weight:700">${r.rank || '—'}</td>
-          <td><span class="pos-badge ${hasPosClass}">${r.position || 'لا يوجد'}</span></td>
+          <td>${renderPositionCell(r.position)}</td>
           <td>${statusHTML}</td>
           <td>${getFormattedLastActive(r)}</td>
           <td>${degreeHTML}</td>

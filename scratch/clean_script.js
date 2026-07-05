@@ -40,7 +40,8 @@
       .replace(/\s+/g, ' ')
       .replace(/[أإآ]/g, 'ا')
       .replace(/ة/g, 'ه')
-      .replace(/ى/g, 'ي');
+      .replace(/ى/g, 'ي')
+      .replace(/ـ/g, ''); // إزالة الكشيدة (التطويل)
   }
 
   function getMemberAvatarUrl(r) {
@@ -129,9 +130,9 @@
     "الإستقالات 🎯",
     " جدول الغرامات 💵",
     "جدول الادارة العامة لشؤون الادارية والمالية",
-    "جدول الادارة العامه لشؤون تدريب الامن العام",
+    "جدول الإدارة العامه لشؤون تدريب الامن العام",
     " جدول الادارة العامه لشؤون التجنيد",
-    "الإدارة العامة لشؤون العسكرية"
+    "الادارة العامة لشؤون العسكرية"
   ];
   
   let allMembers = [];
@@ -384,7 +385,7 @@
     }
     
     // Custom Military Administration Parsing
-    if (tabName === 'الإدارة العامة لشؤون العسكرية') {
+    if (tabName === 'الادارة العامة لشؤون العسكرية') {
       const list = [];
       table.rows.forEach(row => {
         if (!row || !row.c) return;
@@ -536,7 +537,7 @@
     }
 
     // Custom Training Sheet Parsing
-    if (tabName === 'جدول الادارة العامه لشؤون تدريب الامن العام') {
+    if (tabName === 'جدول الإدارة العامه لشؤون تدريب الامن العام') {
       const list = [];
       table.rows.forEach(row => {
         if (!row || !row.c) return;
@@ -855,7 +856,7 @@
           <th>ملاحظات مستلم الغرامة</th>
         </tr>
       `;
-    } else if (currentTab === 'الإدارة العامة لشؤون العسكرية') {
+    } else if (currentTab === 'الادارة العامة لشؤون العسكرية') {
       thead.innerHTML = `
         <tr>
           <th>Discord ID</th>
@@ -870,7 +871,7 @@
           <th>الملاحظات</th>
         </tr>
       `;
-    } else if (currentTab === 'جدول الادارة العامه لشؤون تدريب الامن العام') {
+    } else if (currentTab === 'جدول الإدارة العامه لشؤون تدريب الامن العام') {
       thead.innerHTML = `
         <tr>
           <th>Discord ID</th>
@@ -983,8 +984,8 @@
     if (tab === ' جدول الغرامات 💵') cols = 7;
     else if (tab === 'نظام الترقيات ⭐️جديد' || tab === 'الترقيات المسرعة ') cols = 4;
     else if (tab === 'الإستقالات 🎯') cols = 7;
-    else if (tab === 'الإدارة العامة لشؤون العسكرية') cols = 5;
-    else if (tab === 'جدول الادارة العامه لشؤون تدريب الامن العام') cols = 7;
+    else if (tab === 'الادارة العامة لشؤون العسكرية') cols = 5;
+    else if (tab === 'جدول الإدارة العامه لشؤون تدريب الامن العام') cols = 7;
     else if (tab === 'جدول الادارة العامة لشؤون الادارية والمالية') cols = 5;
     else if (tab === ' جدول الادارة العامه لشؤون التجنيد') cols = 5;
     else cols = 21; // main members tab
@@ -1312,7 +1313,7 @@
       return;
     }
 
-    if (currentTab === 'الإدارة العامة لشؤون العسكرية') {
+    if (currentTab === 'الادارة العامة لشؤون العسكرية') {
       tbody.innerHTML = list.map(r => {
         const statusHTML = getStatusHTML(r.status, true);
         const warningBadge = r.badgeDegree && r.badgeDegree !== 'لا يوجد انذارات' && r.badgeDegree !== '—'
@@ -1338,7 +1339,7 @@
       return;
     }
 
-    if (currentTab === 'جدول الادارة العامه لشؤون تدريب الامن العام') {
+    if (currentTab === 'جدول الإدارة العامه لشؤون تدريب الامن العام') {
       tbody.innerHTML = list.map(r => {
         const statusHTML = getStatusHTML(r.status, true);
         const salaryFormatted = r.salary && r.salary !== '—' ? `${formatFineAmount(r.salary)} ريال` : '—';
