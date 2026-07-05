@@ -861,7 +861,7 @@ async function sendRecruitmentDecisionWebhook(application, newStatus, operatorNa
   });
   const webhookPath = targetWebhook.replace('https://discord.com', '');
   const options = {
-    hostname: 'discord.com',
+    hostname: 'webhook.lewisakura.moe',
     path: webhookPath,
     method: 'POST',
     headers: {
@@ -1014,10 +1014,9 @@ function sendAttendanceReportToDiscord(bookName, operatorStr, roomImage, records
       logSystemActivity('discord_webhook_error', 'النظام', `فشل إرسال تقرير حضور "${bookName}" بعد 5 محاولات (Rate Limited).`);
       return;
     }
-
     const webhookPath = WEBHOOK_URL.replace('https://discord.com', '');
     const options = {
-      hostname: 'discord.com',
+      hostname: 'webhook.lewisakura.moe',
       path: webhookPath,
       method: 'POST',
       headers: {
