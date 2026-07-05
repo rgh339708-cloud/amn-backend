@@ -909,71 +909,48 @@ if (require.main === module) {
     }
   }
 
-  // 2. إعداد الاتصال بقاعدة بيانات MySQL المشتركة
+  // 2. إعداد الاتصال بقاعدة بيانات SQLite المحلية (منفصل عن هوستنجر)
   let db = null;
-  if (mysqlConfig && mysqlConfig.host) {
-    try {
-      const mysql = require('mysql2');
-      const pool = mysql.createPool({
-        host: mysqlConfig.host,
-        user: mysqlConfig.user,
-        password: mysqlConfig.password,
-        database: mysqlConfig.database,
-        port: mysqlConfig.port || 3306,
-        waitForConnections: true,
-        connectionLimit: 3,
-        queueLimit: 0
-      });
-
-      function convertSqlToMysql(sql) {
-        let mySql = sql;
-        mySql = mySql.replace(/"(\w+)"/g, '`$1`');
-        mySql = mySql.replace(/INSERT OR REPLACE INTO/gi, 'REPLACE INTO');
-        mySql = mySql.replace(/datetime\('now'\)/gi, "NOW()");
-        return mySql;
-      }
-
-      db = {
-        get(sql, params = [], callback) {
-          if (typeof params === 'function') {
-            callback = params;
-            params = [];
-          }
-          const mySql = convertSqlToMysql(sql);
-          pool.query(mySql, params, (err, res) => {
-            if (err) {
-              console.error('[CSV Sync DB Error] get:', err.message);
-              if (callback) callback(err, null);
-            } else {
-              const row = res && res.length > 0 ? res[0] : null;
-              if (callback) callback(null, row);
-            }
-          });
-        },
-        run(sql, params = [], callback) {
-          if (typeof params === 'function') {
-            callback = params;
-            params = [];
-          }
-          const mySql = convertSqlToMysql(sql);
-          pool.query(mySql, params, (err, res) => {
-            if (err) {
-              console.error('[CSV Sync DB Error] run:', err.message);
-              if (callback) callback(err);
-            } else {
-              const context = {
-                lastID: res ? res.insertId : null,
-                changes: res ? res.affectedRows : 0
-              };
-              if (callback) callback.call(context, null);
-            }
-          });
-        }
-      };
-      console.log('[CSV Sync] تم الاتصال بقاعدة بيانات MySQL المشتركة بنجاح.');
-    } catch (dbErr) {
-      console.error('[CSV Sync Warning] فشل تهيئة اتصال MySQL، سيتم استخدام الكاش المحلي للمزامنة:', dbErr.message);
+  try {
+    const sqlite3 = require('sqlite3').verbose();
+    const dbPath = path.join(__dirname, 'assets', 'data', 'exam_archive.db');
+    
+    // التأكد من وجود المجلد
+    const dbDir = path.dirname(dbPath);
+    if (!fs.existsSync(dbDir)) {
+      fs.mkdirSync(dbDir, { recursive: true });
     }
+
+    const sqliteDb = new sqlite3.Database(dbPath, (err) => {
+      if (err) {
+        console.error('[CSV Sync DB Error] فشل الاتصال بقاعدة بيانات SQLite:', err.message);
+      } else {
+        console.log('[CSV Sync] تم الاتصال بقاعدة بيانات SQLite المحلية بنجاح:', dbPath);
+        sqliteDb.run(`CREATE TABLE IF NOT EXISTS general_collections (
+          collection_key TEXT PRIMARY KEY,
+          data_json TEXT
+        )`);
+      }
+    });
+
+    db = {
+      get(sql, params = [], callback) {
+        if (typeof params === 'function') {
+          callback = params;
+          params = [];
+        }
+        sqliteDb.get(sql, params, callback);
+      },
+      run(sql, params = [], callback) {
+        if (typeof params === 'function') {
+          callback = params;
+          params = [];
+        }
+        sqliteDb.run(sql, params, callback);
+      }
+    };
+  } catch (dbErr) {
+    console.error('[CSV Sync Warning] فشل تهيئة اتصال SQLite، سيتم استخدام الكاش المحلي للمزامنة:', dbErr.message);
   }
 
   // 3. تشغيل المزامنة في دورة مستمرة

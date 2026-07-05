@@ -897,9 +897,41 @@ function sendAttendanceReportToDiscord(bookName, operatorStr, roomImage, records
 
   const recs = records || [];
 
-  // Use ALL training members as expected members for absence tracking.
-  // All members in the training sheet are expected to attend any session.
-  const expectedMembers = (trainingMembers || []).length > 0 ? trainingMembers : [];
+  // Filter expected members based on the book's training course type
+  let expectedMembers = [];
+  if ((trainingMembers || []).length > 0) {
+    const nameLower = String(bookName || '').toLowerCase();
+    let positionKeywords = [];
+    
+    if (nameLower.includes('طيران')) {
+      positionKeywords = ['طيران'];
+    } else if (nameLower.includes('عمليات')) {
+      positionKeywords = ['عمليات'];
+    } else if (nameLower.includes('مرور')) {
+      positionKeywords = ['مرور'];
+    } else if (nameLower.includes('طرق')) {
+      positionKeywords = ['طرق'];
+    } else if (nameLower.includes('مهمات') || nameLower.includes('واجبات')) {
+      positionKeywords = ['مهمات'];
+    } else if (nameLower.includes('مخدرات')) {
+      positionKeywords = ['مخدرات'];
+    } else if (nameLower.includes('مناطق')) {
+      positionKeywords = ['مناطق'];
+    } else if (nameLower.includes('بحث') || nameLower.includes('تحري')) {
+      positionKeywords = ['بحث', 'تحري'];
+    } else if (nameLower.includes('علوم') || nameLower.includes('كلية')) {
+      positionKeywords = ['علوم', 'كلية'];
+    }
+
+    if (positionKeywords.length > 0) {
+      expectedMembers = trainingMembers.filter(m => {
+        const pos = String(m.position || '').toLowerCase();
+        return positionKeywords.some(kw => pos.includes(kw));
+      });
+    } else {
+      expectedMembers = trainingMembers;
+    }
+  }
 
   // Helper to get Discord mention string
   const getDiscordMention = (rawId, nameFallback) => {
