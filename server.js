@@ -1007,39 +1007,59 @@ function sendAttendanceReportToDiscord(bookName, operatorStr, roomImage, records
 
   const payload = JSON.stringify({ embeds: [embed] });
 
-  // Parse webhook URL
-  const webhookPath = WEBHOOK_URL.replace('https://discord.com', '');
-  const options = {
-    hostname: 'discord.com',
-    path: webhookPath,
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Content-Length': Buffer.byteLength(payload)
+  // Helper: send webhook with automatic retry on 429 rate limit
+  function doSendWebhook(retryCount) {
+    if (retryCount > 5) {
+      console.error('❌ Gave up sending Discord webhook after 5 retries for:', bookName);
+      logSystemActivity('discord_webhook_error', 'النظام', `فشل إرسال تقرير حضور "${bookName}" بعد 5 محاولات (Rate Limited).`);
+      return;
     }
-  };
 
-  const req = https.request(options, (res) => {
-    let body = '';
-    res.on('data', chunk => { body += chunk; });
-    res.on('end', () => {
-      if (res.statusCode === 200 || res.statusCode === 204) {
-        console.log('✅ Attendance report sent to Discord via webhook successfully!');
-        logSystemActivity('discord_webhook_success', 'النظام', `تم إرسال تقرير حضور "${bookName}" إلى ديسكورد بنجاح.`);
-      } else {
-        console.error('❌ Discord webhook error. Status:', res.statusCode, 'Body:', body);
-        logSystemActivity('discord_webhook_error', 'النظام', `فشل إرسال تقرير حضور "${bookName}" إلى ديسكورد. كود الحالة: ${res.statusCode}، الرد: ${body}`);
+    const webhookPath = WEBHOOK_URL.replace('https://discord.com', '');
+    const options = {
+      hostname: 'discord.com',
+      path: webhookPath,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(payload)
       }
+    };
+
+    const req = https.request(options, (res) => {
+      let body = '';
+      res.on('data', chunk => { body += chunk; });
+      res.on('end', () => {
+        if (res.statusCode === 200 || res.statusCode === 204) {
+          console.log(`✅ Attendance report sent to Discord successfully! (attempt ${retryCount + 1})`);
+          logSystemActivity('discord_webhook_success', 'النظام', `تم إرسال تقرير حضور "${bookName}" إلى ديسكورد بنجاح.`);
+        } else if (res.statusCode === 429) {
+          // Rate limited — parse retry_after from Discord response or use fallback
+          let retryAfterMs = 10000; // default 10s
+          try {
+            const parsed = JSON.parse(body);
+            if (parsed.retry_after) retryAfterMs = Math.ceil(parsed.retry_after * 1000);
+          } catch (e) {}
+          console.warn(`⚠️ Discord rate limited (429). Retrying in ${retryAfterMs}ms... (attempt ${retryCount + 1})`);
+          logSystemActivity('discord_webhook_retry', 'النظام', `تقرير حضور "${bookName}" محجوب مؤقتاً من ديسكورد (429). إعادة المحاولة خلال ${Math.ceil(retryAfterMs/1000)} ثانية (المحاولة ${retryCount + 1}).`);
+          setTimeout(() => doSendWebhook(retryCount + 1), retryAfterMs);
+        } else {
+          console.error(`❌ Discord webhook error. Status: ${res.statusCode}, Body: ${body}`);
+          logSystemActivity('discord_webhook_error', 'النظام', `فشل إرسال تقرير حضور "${bookName}" إلى ديسكورد. كود الحالة: ${res.statusCode}، الرد: ${body}`);
+        }
+      });
     });
-  });
 
-  req.on('error', (err) => {
-    console.error('❌ Failed to send Discord webhook:', err.message);
-    logSystemActivity('discord_webhook_error', 'النظام', `فشل إرسال تقرير حضور "${bookName}" إلى ديسكورد. الخطأ: ${err.message}`);
-  });
+    req.on('error', (err) => {
+      console.error('❌ Failed to send Discord webhook:', err.message);
+      logSystemActivity('discord_webhook_error', 'النظام', `فشل إرسال تقرير حضور "${bookName}" إلى ديسكورد. الخطأ: ${err.message}`);
+    });
 
-  req.write(payload);
-  req.end();
+    req.write(payload);
+    req.end();
+  }
+
+  doSendWebhook(0);
 }
 
 const sentExamNotifications = new Set();
