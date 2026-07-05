@@ -5707,23 +5707,9 @@ server.listen(PORT, '0.0.0.0', () => {
     startGateway(gatewayToken);
   }
 
-  // ─── CSV Discord Sync: دورة تلقائية (كل دقيقة) ───
-  // يتم تشغيل البوت التلقائي فقط في بيئة الإنتاج على Render لمنع التضارب مع الخادم المحلي
-  if (process.env.RENDER === 'true' || process.env.NODE_ENV === 'production') {
-    // تشغيل أول بعد 30 ثانية من بدء السيرفر
-    setTimeout(() => {
-      runCsvDiscordSync(db).catch(err => {
-        console.error('[CSV Sync Error] Initial sync failed:', err);
-      });
-    }, 30 * 1000);
-
-    // دورة كل 2 ساعة لمنع حظر الـ IP وتخطي حدود ديسكورد (ويمكن للمشرفين تشغيلها يدوياً من لوحة التحكم في أي وقت)
-    setInterval(() => {
-      runCsvDiscordSync(db).catch(err => {
-        console.error('[CSV Sync Error] Periodic sync failed:', err);
-      });
-    }, 2 * 60 * 60 * 1000);
-  } else {
-    console.log('[CSV Sync] بيئة محلية: تم إيقاف المزامنة التلقائية لمنع التضارب مع سيرفر Render.');
-  }
+  // ─── CSV Discord Sync: تم إيقاف التشغيل التلقائي على Render ───
+  // تم نقل تشغيل البوت التلقائي بالكامل ليعمل بشكل مستقل وخارجي (على خادم منفصل أو جهاز محلي)
+  // لمنع حظر عنوان الـ IP الخاص بسيرفر الاستضافة Render وتفادي حظر ديسكورد/Cloudflare.
+  // ملاحظة: يمكن للمشرفين تشغيل المزامنة يدوياً من لوحة التحكم في أي وقت عبر الطلب (/api/csv-sync/run).
+  console.log('[CSV Sync] تم إيقاف المزامنة التلقائية على خادم Render (تعمل الآن بشكل مستقل وخارجي).');
 });

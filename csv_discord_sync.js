@@ -878,14 +878,116 @@ module.exports = { runCsvDiscordSync };
 // ──────────────────────────────────────────────
 
 if (require.main === module) {
-  console.log('[CSV Sync] تشغيل يدوي مباشر...');
-  runCsvDiscordSync()
-    .then(result => {
-      console.log('[CSV Sync] نتيجة:', result);
-      process.exit(0);
-    })
-    .catch(err => {
-      console.error('[CSV Sync] خطأ فادح:', err);
-      process.exit(1);
-    });
+  console.log('[CSV Sync] تشغيل مباشر في وضع مستقل (دورة تلقائية كل 60 ثانية)...');
+  
+  // 1. تحميل الإعدادات من ملف .env
+  const envPath = path.join(__dirname, '.env');
+  let mysqlConfig = null;
+  
+  if (fs.existsSync(envPath)) {
+    try {
+      const content = fs.readFileSync(envPath, 'utf8');
+      const lines = content.split('\n');
+      mysqlConfig = {};
+      lines.forEach(line => {
+        const parts = line.trim().split('=');
+        if (parts.length >= 2 && !parts[0].startsWith('#')) {
+          const key = parts[0].trim();
+          const value = parts.slice(1).join('=').trim().replace(/^['"]|['"]$/g, '');
+          if (key === 'MYSQL_HOST') mysqlConfig.host = value;
+          if (key === 'MYSQL_USER') mysqlConfig.user = value;
+          if (key === 'MYSQL_PASSWORD') mysqlConfig.password = value;
+          if (key === 'MYSQL_DATABASE') mysqlConfig.database = value;
+          if (key === 'MYSQL_PORT') mysqlConfig.port = value;
+          if (key === 'DISCORD_TOKEN') process.env.DISCORD_TOKEN = value;
+          if (key === 'GUILD_ID') process.env.GUILD_ID = value;
+        }
+      });
+      console.log('[CSV Sync] تم تحميل إعدادات البيئة من ملف .env نجاح.');
+    } catch (e) {
+      console.error('[CSV Sync Warning] فشل قراءة ملف .env:', e.message);
+    }
+  }
+
+  // 2. إعداد الاتصال بقاعدة بيانات MySQL المشتركة
+  let db = null;
+  if (mysqlConfig && mysqlConfig.host) {
+    try {
+      const mysql = require('mysql2');
+      const pool = mysql.createPool({
+        host: mysqlConfig.host,
+        user: mysqlConfig.user,
+        password: mysqlConfig.password,
+        database: mysqlConfig.database,
+        port: mysqlConfig.port || 3306,
+        waitForConnections: true,
+        connectionLimit: 3,
+        queueLimit: 0
+      });
+
+      function convertSqlToMysql(sql) {
+        let mySql = sql;
+        mySql = mySql.replace(/"(\w+)"/g, '`$1`');
+        mySql = mySql.replace(/INSERT OR REPLACE INTO/gi, 'REPLACE INTO');
+        mySql = mySql.replace(/datetime\('now'\)/gi, "NOW()");
+        return mySql;
+      }
+
+      db = {
+        get(sql, params = [], callback) {
+          if (typeof params === 'function') {
+            callback = params;
+            params = [];
+          }
+          const mySql = convertSqlToMysql(sql);
+          pool.query(mySql, params, (err, res) => {
+            if (err) {
+              console.error('[CSV Sync DB Error] get:', err.message);
+              if (callback) callback(err, null);
+            } else {
+              const row = res && res.length > 0 ? res[0] : null;
+              if (callback) callback(null, row);
+            }
+          });
+        },
+        run(sql, params = [], callback) {
+          if (typeof params === 'function') {
+            callback = params;
+            params = [];
+          }
+          const mySql = convertSqlToMysql(sql);
+          pool.query(mySql, params, (err, res) => {
+            if (err) {
+              console.error('[CSV Sync DB Error] run:', err.message);
+              if (callback) callback(err);
+            } else {
+              const context = {
+                lastID: res ? res.insertId : null,
+                changes: res ? res.affectedRows : 0
+              };
+              if (callback) callback.call(context, null);
+            }
+          });
+        }
+      };
+      console.log('[CSV Sync] تم الاتصال بقاعدة بيانات MySQL المشتركة بنجاح.');
+    } catch (dbErr) {
+      console.error('[CSV Sync Warning] فشل تهيئة اتصال MySQL، سيتم استخدام الكاش المحلي للمزامنة:', dbErr.message);
+    }
+  }
+
+  // 3. تشغيل المزامنة في دورة مستمرة
+  async function runLoop() {
+    console.log(`\n[CSV Sync] [${new Date().toLocaleTimeString('ar')}] بدء دورة المزامنة التلقائية...`);
+    try {
+      const result = await runCsvDiscordSync(db);
+      console.log('[CSV Sync] نتيجة الدورة:', result);
+    } catch (e) {
+      console.error('[CSV Sync Loop Error]:', e);
+    }
+    console.log('[CSV Sync] بانتظار الدورة القادمة خلال 60 ثانية...');
+    setTimeout(runLoop, 60 * 1000);
+  }
+
+  runLoop();
 }
