@@ -5134,6 +5134,27 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  // GET /api/diagnostic - Temporary endpoint to inspect Render environment variables
+  if (pathname === '/api/diagnostic' && req.method === 'GET') {
+    const token = process.env.DISCORD_TOKEN || 'not_set';
+    const maskedToken = token !== 'not_set' ? token.substring(0, 10) + '...' + token.substring(token.length - 10) : 'not_set';
+    const appId = token !== 'not_set' ? (() => {
+      try {
+        return Buffer.from(token.split('.')[0], 'base64').toString('utf8');
+      } catch(e) { return 'error'; }
+    })() : 'not_set';
+    
+    res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify({
+      RENDER: process.env.RENDER || 'false',
+      NODE_ENV: process.env.NODE_ENV || 'not_set',
+      GUILD_ID: process.env.GUILD_ID || 'not_set',
+      appId: appId,
+      maskedToken: maskedToken
+    }));
+    return;
+  }
+
   // GET /api/csv-sync/logs - Get the CSV sync bot logs
   if (pathname === '/api/csv-sync/logs' && req.method === 'GET') {
     const logFile = path.join(__dirname, 'assets', 'data', 'csv_sync_log.json');
