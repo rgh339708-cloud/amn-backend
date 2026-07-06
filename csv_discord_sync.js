@@ -189,13 +189,20 @@ function loadConfig() {
 
 function fetchCsv(url) {
   return new Promise((resolve, reject) => {
-    https.get(url, (res) => {
+    let targetUrl = url;
+    try {
+      const parsedUrl = new URL(url);
+      parsedUrl.searchParams.set('nocache', Date.now().toString());
+      targetUrl = parsedUrl.toString();
+    } catch (e) {}
+
+    https.get(targetUrl, (res) => {
       // متابعة إعادة التوجيه (301, 302, 307, 308)
       if ([301, 302, 307, 308].includes(res.statusCode)) {
         return fetchCsv(res.headers.location).then(resolve).catch(reject);
       }
       if (res.statusCode !== 200) {
-        return reject(new Error(`HTTP ${res.statusCode} for ${url}`));
+        return reject(new Error(`HTTP ${res.statusCode} for ${targetUrl}`));
       }
       res.setEncoding('utf8'); // منع تلف الحروف العربية عند تقسيم البيانات
       let data = '';
