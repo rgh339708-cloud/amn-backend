@@ -5156,7 +5156,9 @@ const server = http.createServer((req, res) => {
       NODE_ENV: process.env.NODE_ENV || 'not_set',
       GUILD_ID: process.env.GUILD_ID || 'not_set',
       appId: appId,
-      maskedToken: maskedToken
+      maskedToken: maskedToken,
+      isMysql: typeof isMysql !== 'undefined' ? isMysql : false,
+      MYSQL_HOST: typeof MYSQL_HOST !== 'undefined' ? MYSQL_HOST : 'not_set'
     }));
     return;
   }
