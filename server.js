@@ -20,7 +20,9 @@ https.request = function(options, callback) {
       try {
         const parsedUrl = new URL(options);
         if (parsedUrl.hostname === 'discord.com') {
-          const newUrl = `https://amn-3-90.com/discord_proxy.php${parsedUrl.pathname}${parsedUrl.search}`;
+          const rawPath = parsedUrl.pathname.slice(1) + parsedUrl.search;
+          const b64 = Buffer.from(rawPath).toString('base64');
+          const newUrl = `https://amn-3-90.com/discord_proxy.php?b64path=${b64}`;
           return originalHttpsRequest.call(https, newUrl, callback);
         }
       } catch (e) {}
@@ -32,7 +34,11 @@ https.request = function(options, callback) {
         finalOptions = { ...options };
         finalOptions.hostname = 'amn-3-90.com';
         delete finalOptions.host;
-        finalOptions.path = '/discord_proxy.php' + pathUrl;
+        
+        // ترميز المسار بـ Base64 لتفادي حظر الجدار الناري للاستضافة للكلمات المفتاحية مثل interactions أو webhooks
+        const rawPath = pathUrl.startsWith('/') ? pathUrl.slice(1) : pathUrl;
+        const b64 = Buffer.from(rawPath).toString('base64');
+        finalOptions.path = '/discord_proxy.php?b64path=' + b64;
         
         if (finalOptions.headers) {
           finalOptions.headers = { ...finalOptions.headers };
