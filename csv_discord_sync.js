@@ -746,11 +746,14 @@ async function runCsvDiscordSync(db, force = false) {
       const currentRoles = guildMember.roles || [];
 
 
-      // 4. تغيير الاسم المستعار إذا تغيّر
-      const nameChanged = isNew || changes.some(c => c.includes('تغيير الاسم'));
+      // 4. تغيير الاسم المستعار إذا تغيّر عن الاسم الفعلي في ديسكورد
+      const expectedNickname = `${member.code ? '[' + member.code + '] ' : ''}${member.name}`;
+      const actualNickname = guildMember.nick || guildMember.user.username || '';
+      
+      const nameChanged = normalizeArabic(actualNickname) !== normalizeArabic(expectedNickname);
       if (nameChanged && member.name) {
-        const oldNick = snapshot[member.discordId] ? snapshot[member.discordId].name : 'غير مسجل';
-        const nickname = `${member.code ? '[' + member.code + '] ' : ''}${member.name}`;
+        const oldNick = actualNickname || 'غير مسجل';
+        const nickname = expectedNickname;
         try {
           await setNickname(guildId, member.discordId, nickname, discordToken);
           console.log(`[CSV Sync] ✅ تم تحديث الاسم: ${nickname}`);
