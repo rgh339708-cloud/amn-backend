@@ -42,8 +42,13 @@ https.request = function(options, callback) {
         
         if (finalOptions.headers) {
           finalOptions.headers = { ...finalOptions.headers };
+          const hasAuth = finalOptions.headers['Authorization'] || finalOptions.headers['authorization'];
+          const isBot = hasAuth && String(hasAuth).startsWith('Bot ');
+          
           if (!finalOptions.headers['User-Agent'] && !finalOptions.headers['user-agent']) {
-            finalOptions.headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)';
+            finalOptions.headers['User-Agent'] = isBot 
+              ? 'DiscordBot (https://github.com/discord/discord-api-docs, 1.0.0)' 
+              : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)';
           }
         }
       }
