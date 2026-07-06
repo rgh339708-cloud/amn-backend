@@ -305,7 +305,54 @@ function splitCsvRow(line) {
 // 💾  تحميل وحفظ الـ snapshot
 // ──────────────────────────────────────────────
 
+function fetchSnapshotFromHostinger() {
+  return new Promise((resolve) => {
+    const https = require('https');
+    https.get('https://amn-3-90.com/snapshot.php', (res) => {
+      let body = '';
+      res.on('data', chunk => body += chunk);
+      res.on('end', () => {
+        try {
+          resolve(JSON.parse(body));
+        } catch (e) {
+          resolve({});
+        }
+      });
+    }).on('error', () => resolve({}));
+  });
+}
+
+function saveSnapshotToHostinger(snapshot) {
+  return new Promise((resolve) => {
+    const https = require('https');
+    const payload = JSON.stringify(snapshot);
+    const options = {
+      hostname: 'amn-3-90.com',
+      path: '/snapshot.php',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(payload)
+      }
+    };
+    const req = https.request(options, (res) => {
+      res.on('data', () => {});
+      res.on('end', () => resolve(true));
+    });
+    req.on('error', () => resolve(false));
+    req.write(payload);
+    req.end();
+  });
+}
+
 async function loadSnapshot(db) {
+  console.log('[CSV Sync] Fetching snapshot from Hostinger persistent storage...');
+  const hostingerSnapshot = await fetchSnapshotFromHostinger();
+  if (hostingerSnapshot && Object.keys(hostingerSnapshot).length > 0) {
+    console.log(`[CSV Sync] Successfully loaded snapshot from Hostinger with ${Object.keys(hostingerSnapshot).length} members.`);
+    return hostingerSnapshot;
+  }
+
   if (db) {
     try {
       const dbSnapshot = await new Promise((resolve, reject) => {
@@ -331,6 +378,14 @@ async function loadSnapshot(db) {
 }
 
 async function saveSnapshot(db, snapshot) {
+  console.log('[CSV Sync] Saving snapshot to Hostinger persistent storage...');
+  const hostingerSaved = await saveSnapshotToHostinger(snapshot);
+  if (hostingerSaved) {
+    console.log('[CSV Sync] Snapshot successfully saved to Hostinger persistent storage.');
+  } else {
+    console.error('[CSV Sync] Failed to save snapshot to Hostinger.');
+  }
+
   if (db) {
     try {
       await new Promise((resolve, reject) => {
@@ -340,7 +395,6 @@ async function saveSnapshot(db, snapshot) {
         });
       });
       console.log('[CSV Sync] Snapshot successfully saved to database.');
-      return;
     } catch (e) {
       console.error('[CSV Sync] Failed to save snapshot to DB, saving to local file:', e.message);
     }
@@ -631,6 +685,19 @@ async function runCsvDiscordSync(db, force = false) {
   let changedCount   = 0;
   let errorCount     = 0;
   const newSnapshot  = { ...snapshot };
+
+  const isFirstRun = Object.keys(snapshot).length === 0;
+  if (isFirstRun && !force) {
+    console.log('[CSV Sync] ℹ️ First run detected (empty snapshot). Initializing snapshot from CSV without API calls to avoid rate limits...');
+    for (const member of mergedMembers) {
+      if (member.discordId) {
+        newSnapshot[member.discordId] = buildSnapshotEntry(member);
+      }
+    }
+    await saveSnapshot(db, newSnapshot);
+    console.log('[CSV Sync] ✅ Snapshot initialized successfully. Future changes will be synced.');
+    return { processed: mergedMembers.length, changed: 0, errors: 0 };
+  }
 
   for (const member of mergedMembers) {
     const { isNew, changes } = detectChanges(snapshot, member);
