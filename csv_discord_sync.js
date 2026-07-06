@@ -731,33 +731,61 @@ async function runCsvDiscordSync(db, force = false) {
   }
 
   for (const member of mergedMembers) {
-    const { isNew, changes } = detectChanges(snapshot, member);
+    if (!member.discordId) continue;
 
-    if (!force && !isNew && changes.length === 0) {
-      // لا تغيير — نتجاهل هذا العضو تماماً
+    // 1. جلب بيانات العضو ورولاته من الذاكرة (Cached)
+    const guildMember = guildMembersMap.get(member.discordId);
+    if (!guildMember) {
+      console.warn(`[CSV Sync] ⚠️ العضو ${member.name} (${member.discordId}) غير موجود في السيرفر.`);
+      delete newSnapshot[member.discordId];
+      continue;
+    }
+
+    const currentRoles = guildMember.roles || [];
+    const expectedNickname = `${member.code ? '[' + member.code + '] ' : ''}${member.name}`;
+    const actualNickname = guildMember.nick || guildMember.user.username || '';
+    
+    const nameChanged = normalizeArabic(actualNickname) !== normalizeArabic(expectedNickname);
+    const requiredRoleIds = computeRequiredRoles(member);
+
+    const rolesToAdd = new Set();
+    const rolesToRemove = new Set();
+
+    // أ. إضافة الرولات المطلوبة حالياً في الجدول وغير موجودة لدى العضو في ديسكورد
+    for (const roleId of requiredRoleIds) {
+      if (!currentRoles.includes(roleId)) {
+        rolesToAdd.add(roleId);
+      }
+    }
+
+    // ب. إزالة الرولات التي ألغيت من الجدول وموجودة لدى العضو في ديسكورد
+    for (const roleId of ALL_MANAGED_ROLE_IDS) {
+      if (!requiredRoleIds.has(roleId) && currentRoles.includes(roleId)) {
+        rolesToRemove.add(roleId);
+      }
+    }
+
+    // إذا لم يكن هناك تغيير في الاسم أو الرتب، نتجاوزه تماماً لتفادي الضغط أو حظر الاستضافة
+    if (!nameChanged && rolesToAdd.size === 0 && rolesToRemove.size === 0) {
       continue;
     }
 
     processedCount++;
-    console.log(`[CSV Sync] 🔄 معالجة: ${member.name} (${member.discordId}) | ${changes.join(', ')}`);
+    const changes = [];
+    if (nameChanged) {
+      changes.push(`تغيير الاسم: "${actualNickname}" → "${expectedNickname}"`);
+    }
+    for (const r of rolesToAdd) {
+      changes.push(`إضافة رول: "${ROLE_ID_TO_NAME[r] || r}"`);
+    }
+    for (const r of rolesToRemove) {
+      changes.push(`إزالة رول: "${ROLE_ID_TO_NAME[r] || r}"`);
+    }
+
+    console.log(`[CSV Sync] 🔄 معالجة (تلقائية/تصحيحية): ${member.name} (${member.discordId}) | ${changes.join(', ')}`);
 
     try {
-      // 3. جلب بيانات العضو ورولاته من الذاكرة (Cached)
-      const guildMember = guildMembersMap.get(member.discordId);
-      if (!guildMember) {
-        console.warn(`[CSV Sync] ⚠️ العضو ${member.name} (${member.discordId}) غير موجود في السيرفر.`);
-        // لا نحفظه في الكاش لكي يحاول البوت مزامنته مجدداً في الدورات القادمة بمجرد دخوله السيرفر
-        delete newSnapshot[member.discordId];
-        continue;
-      }
-      const currentRoles = guildMember.roles || [];
-
-
       // 4. تغيير الاسم المستعار إذا تغيّر عن الاسم الفعلي في ديسكورد
-      const expectedNickname = `${member.code ? '[' + member.code + '] ' : ''}${member.name}`;
-      const actualNickname = guildMember.nick || guildMember.user.username || '';
-      
-      const nameChanged = normalizeArabic(actualNickname) !== normalizeArabic(expectedNickname);
       if (nameChanged && member.name) {
         const oldNick = actualNickname || 'غير مسجل';
         const nickname = expectedNickname;
@@ -779,27 +807,6 @@ async function runCsvDiscordSync(db, force = false) {
           await delay(500);
         } catch (nickErr) {
           console.warn(`[CSV Sync] ⚠️ فشل تحديث الاسم لـ ${member.name}: ${nickErr.message}`);
-        }
-      }
-
-      // 5. حساب الرولات المطلوب إضافتها وإزالتها تفاضلياً (تجنب المساس بالرولات اليدوية في الديسكورد)
-      const requiredRoleIds = computeRequiredRoles(member);
-      const oldEntry = snapshot[member.discordId];
-
-      const rolesToAdd = new Set();
-      const rolesToRemove = new Set();
-
-      // أ. إضافة الرولات المطلوبة حالياً في الجدول وغير موجودة لدى العضو في ديسكورد
-      for (const roleId of requiredRoleIds) {
-        if (!currentRoles.includes(roleId)) {
-          rolesToAdd.add(roleId);
-        }
-      }
-
-      // ب. إزالة الرولات التي ألغيت من الجدول وموجودة لدى العضو في ديسكورد
-      for (const roleId of ALL_MANAGED_ROLE_IDS) {
-        if (!requiredRoleIds.has(roleId) && currentRoles.includes(roleId)) {
-          rolesToRemove.add(roleId);
         }
       }
 
