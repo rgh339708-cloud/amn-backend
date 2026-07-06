@@ -467,6 +467,27 @@ async function getGuildMember(guildId, userId, botToken) {
   return JSON.parse(result.body);
 }
 
+// جلب كل الأعضاء وتخزينهم في الذاكرة لتفادي استدعاءات API الفردية
+async function fetchGuildMembersMap(guildId, botToken) {
+  const membersMap = new Map();
+  try {
+    console.log('[CSV Sync] Fetching guild members list to cache in memory...');
+    const result = await discordRequest('GET', `/guilds/${guildId}/members?limit=1000`, null, botToken);
+    const membersList = JSON.parse(result.body);
+    if (Array.isArray(membersList)) {
+      for (const m of membersList) {
+        if (m.user && m.user.id) {
+          membersMap.set(m.user.id, m);
+        }
+      }
+      console.log(`[CSV Sync] Cached ${membersMap.size} guild members in memory.`);
+    }
+  } catch (e) {
+    console.error('[CSV Sync Warning] Failed to fetch and cache guild members list:', e.message);
+  }
+  return membersMap;
+}
+
 // إضافة رول لعضو
 async function addRole(guildId, userId, roleId, botToken) {
   await discordRequest('PUT', `/guilds/${guildId}/members/${userId}/roles/${roleId}`, {}, botToken);
@@ -685,6 +706,9 @@ async function runCsvDiscordSync(db, force = false) {
   let changedCount   = 0;
   let errorCount     = 0;
   const newSnapshot  = { ...snapshot };
+  
+  // جلب وتخزين قائمة أعضاء السيرفر بالكامل في الذاكرة لتجنب استدعاءات API الفردية
+  const guildMembersMap = await fetchGuildMembersMap(guildId, discordToken);
 
   const isFirstRun = Object.keys(snapshot).length === 0;
   if (isFirstRun && !force) {
@@ -711,21 +735,15 @@ async function runCsvDiscordSync(db, force = false) {
     console.log(`[CSV Sync] 🔄 معالجة: ${member.name} (${member.discordId}) | ${changes.join(', ')}`);
 
     try {
-      // 3. جلب الرولات الحالية للعضو من الديسكورد
-      let currentRoles = [];
-      try {
-        const guildMember = await getGuildMember(guildId, member.discordId, discordToken);
-        currentRoles = guildMember.roles || [];
-      } catch (fetchErr) {
-        // إذا لم يكن العضو في السيرفر، نتجاوزه
-        if (fetchErr.message.includes('404') || fetchErr.message.includes('10007')) {
-          console.warn(`[CSV Sync] ⚠️ العضو ${member.name} (${member.discordId}) غير موجود في السيرفر.`);
-          // لا نحفظه في الكاش لكي يحاول البوت مزامنته مجدداً في الدورات القادمة بمجرد دخوله السيرفر
-          delete newSnapshot[member.discordId];
-          continue;
-        }
-        throw fetchErr;
+      // 3. جلب بيانات العضو ورولاته من الذاكرة (Cached)
+      const guildMember = guildMembersMap.get(member.discordId);
+      if (!guildMember) {
+        console.warn(`[CSV Sync] ⚠️ العضو ${member.name} (${member.discordId}) غير موجود في السيرفر.`);
+        // لا نحفظه في الكاش لكي يحاول البوت مزامنته مجدداً في الدورات القادمة بمجرد دخوله السيرفر
+        delete newSnapshot[member.discordId];
+        continue;
       }
+      const currentRoles = guildMember.roles || [];
 
       await delay(force ? 1000 : 300); // تجنب Rate Limit (أطول في المزامنة الشاملة لتفادي حظر الاستضافة)
 
