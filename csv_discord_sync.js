@@ -586,7 +586,7 @@ function mergeMembers(members) {
 
 let isSyncing = false;
 
-async function runCsvDiscordSync(db) {
+async function runCsvDiscordSync(db, force = false) {
   if (isSyncing) {
     console.log('[CSV Sync] مزامنة جارية بالفعل، تخطي...');
     return { skipped: true };
@@ -635,7 +635,7 @@ async function runCsvDiscordSync(db) {
   for (const member of mergedMembers) {
     const { isNew, changes } = detectChanges(snapshot, member);
 
-    if (!isNew && changes.length === 0) {
+    if (!force && !isNew && changes.length === 0) {
       // لا تغيير — نتجاهل هذا العضو تماماً
       continue;
     }
@@ -653,13 +653,14 @@ async function runCsvDiscordSync(db) {
         // إذا لم يكن العضو في السيرفر، نتجاوزه
         if (fetchErr.message.includes('404') || fetchErr.message.includes('10007')) {
           console.warn(`[CSV Sync] ⚠️ العضو ${member.name} (${member.discordId}) غير موجود في السيرفر.`);
-          newSnapshot[member.discordId] = buildSnapshotEntry(member);
+          // لا نحفظه في الكاش لكي يحاول البوت مزامنته مجدداً في الدورات القادمة بمجرد دخوله السيرفر
+          delete newSnapshot[member.discordId];
           continue;
         }
         throw fetchErr;
       }
 
-      await delay(300); // تجنب Rate Limit
+      await delay(force ? 1000 : 300); // تجنب Rate Limit (أطول في المزامنة الشاملة لتفادي حظر الاستضافة)
 
       // 4. تغيير الاسم المستعار إذا تغيّر
       const nameChanged = isNew || changes.some(c => c.includes('تغيير الاسم'));

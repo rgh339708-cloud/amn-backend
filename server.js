@@ -5121,7 +5121,8 @@ const server = http.createServer((req, res) => {
 
   // POST /api/csv-sync/run - Manually trigger CSV Discord synchronization
   if (pathname === '/api/csv-sync/run' && req.method === 'POST') {
-    runCsvDiscordSync(db)
+    const force = reqUrl.query && reqUrl.query.force === 'true';
+    runCsvDiscordSync(db, force)
       .then(result => {
         res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
         res.end(JSON.stringify({ success: true, result }));
@@ -5782,9 +5783,27 @@ server.listen(PORT, '0.0.0.0', () => {
     startGateway(gatewayToken);
   }
 
-  // ─── CSV Discord Sync: تم إيقاف التشغيل التلقائي على Render ───
-  // تم نقل تشغيل البوت التلقائي بالكامل ليعمل بشكل مستقل وخارجي (على خادم منفصل أو جهاز محلي)
-  // لمنع حظر عنوان الـ IP الخاص بسيرفر الاستضافة Render وتفادي حظر ديسكورد/Cloudflare.
-  // ملاحظة: يمكن للمشرفين تشغيل المزامنة يدوياً من لوحة التحكم في أي وقت عبر الطلب (/api/csv-sync/run).
-  console.log('[CSV Sync] تم إيقاف المزامنة التلقائية على خادم Render (تعمل الآن بشكل مستقل وخارجي).');
+  // ─── CSV Discord Sync: المزامنة التلقائية لجداول CSV مع الديسكورد ───
+  // يتم تشغيل المزامنة تلقائياً كل 5 دقائق. 
+  // تستخدم المزامنة البروكسي (discord_proxy.php) تلقائياً على خادم Render لتجنب حظر الـ IP.
+  setTimeout(() => {
+    runCsvDiscordSync(db).catch(err => {
+      console.error('[Sync Error] Initial background CSV sync failed:', err);
+    });
+  }, 30000); // بدء التشغيل الأول بعد 30 ثانية من إقلاع السيرفر
+
+  setInterval(() => {
+    runCsvDiscordSync(db).catch(err => {
+      console.error('[Sync Error] Periodic background CSV sync failed:', err);
+    });
+  }, 5 * 60 * 1000); // التكرار كل 5 دقائق
+
+  // تشغيل مزامنة شاملة (Force Sync) كل 24 ساعة لتصحيح أي رتب تم تعديلها يدوياً أو أخطاء
+  setInterval(() => {
+    console.log('[CSV Sync] بدء المزامنة الشاملة اليومية (Force Sync)...');
+    runCsvDiscordSync(db, true).catch(err => {
+      console.error('[Sync Error] Daily force CSV sync failed:', err);
+    });
+  }, 24 * 60 * 60 * 1000); // كل 24 ساعة
+  console.log('[CSV Sync] تم تفعيل المزامنة التلقائية كل 5 دقائق والمزامنة الشاملة اليومية بنجاح.');
 });
