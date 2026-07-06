@@ -4,7 +4,50 @@ const path = require('path');
 const url = require('url');
 const fs = require('fs');
 const https = require('https');
+
+// ─── Global Discord Interceptor for Render Hosting ───
+// Bypasses Cloudflare Error 1015 (Discord block on Render IP addresses)
+const originalHttpsRequest = https.request;
+https.request = function(options, callback) {
+  let finalOptions = options;
+  const isRender = process.env.RENDER === 'true' || process.env.NODE_ENV === 'production';
+  
+  if (isRender && options) {
+    let hostname = '';
+    let pathUrl = '';
+    
+    if (typeof options === 'string') {
+      try {
+        const parsedUrl = new URL(options);
+        if (parsedUrl.hostname === 'discord.com') {
+          const newUrl = `https://amn-3-90.com/discord_proxy.php${parsedUrl.pathname}${parsedUrl.search}`;
+          return originalHttpsRequest.call(https, newUrl, callback);
+        }
+      } catch (e) {}
+    } else {
+      hostname = options.hostname || options.host;
+      pathUrl = options.path;
+      
+      if (hostname === 'discord.com') {
+        finalOptions = { ...options };
+        finalOptions.hostname = 'amn-3-90.com';
+        delete finalOptions.host;
+        finalOptions.path = '/discord_proxy.php' + pathUrl;
+        
+        if (finalOptions.headers) {
+          finalOptions.headers = { ...finalOptions.headers };
+          if (!finalOptions.headers['User-Agent'] && !finalOptions.headers['user-agent']) {
+            finalOptions.headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)';
+          }
+        }
+      }
+    }
+  }
+  return originalHttpsRequest.call(https, finalOptions, callback);
+};
+
 const MAINTENANCE_MODE = false; // Enable maintenance mode
+
 
 // ─── CSV Discord Sync Bot (مستقل عن الموقع) ───
 const { runCsvDiscordSync } = require('./csv_discord_sync');
