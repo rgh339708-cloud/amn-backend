@@ -5780,7 +5780,7 @@ server.listen(PORT, '0.0.0.0', () => {
       const p3 = 'EKZ5Zp-WsvwUmrtmxRzjQdaXJqEiFaI7mEatt0';
       return { discordToken: process.env.DISCORD_TOKEN || (p1 + '.' + p2 + '.' + p3) };
     })();
-    startGateway(gatewayToken);
+    startGateway(gatewayToken, db);
   }
 
   // ─── CSV Discord Sync: المزامنة التلقائية لجداول CSV مع الديسكورد ───

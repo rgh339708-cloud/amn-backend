@@ -6,6 +6,10 @@
 // =====================================================================
 
 const WebSocket = require('ws');
+const https = require('https');
+const { runCsvDiscordSync } = require('./csv_discord_sync');
+
+let gatewayDb = null;
 
 // ──────────────────────────────────────────────
 // إعدادات
@@ -108,6 +112,9 @@ function connectGateway(botToken) {
           sessionId = d.session_id;
           resumeUrl = d.resume_gateway_url;
           console.log(`[Gateway] 🟢 البوت أونلاين! Session: ${sessionId}`);
+          registerSlashCommand(botToken);
+        } else if (t === 'INTERACTION_CREATE') {
+          handleInteraction(d, botToken);
         }
         break;
 
@@ -229,12 +236,121 @@ function scheduleReconnect(botToken, ms) {
 // تصدير
 // ──────────────────────────────────────────────
 
-function startGateway(botToken) {
+function startGateway(botToken, db) {
   if (!botToken) {
     console.error('[Gateway] ❌ لا يوجد DISCORD_TOKEN!');
     return;
   }
+  gatewayDb = db;
   connectGateway(botToken);
+}
+
+function getAppIdFromToken(token) {
+  try {
+    const part = token.split('.')[0];
+    return Buffer.from(part, 'base64').toString('utf8');
+  } catch (e) {
+    return '1510157546500001884'; // Fallback Client ID
+  }
+}
+
+function discordApiRequest(method, endpoint, body, botToken) {
+  return new Promise((resolve, reject) => {
+    const bodyStr = body ? JSON.stringify(body) : '';
+    const options = {
+      hostname: 'discord.com',
+      path: `/api/v10${endpoint}`,
+      method,
+      headers: {
+        'Authorization': `Bot ${botToken}`,
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(bodyStr),
+      },
+    };
+
+    const req = https.request(options, (res) => {
+      let data = '';
+      res.on('data', c => { data += c; });
+      res.on('end', () => {
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          resolve(data ? JSON.parse(data) : null);
+        } else {
+          reject(new Error(`Discord API ${res.statusCode}: ${data}`));
+        }
+      });
+    });
+    req.on('error', reject);
+    if (bodyStr) req.write(bodyStr);
+    req.end();
+  });
+}
+
+async function registerSlashCommand(botToken) {
+  const appId = getAppIdFromToken(botToken);
+  const guildId = process.env.GUILD_ID || '1272212444936404992';
+  const commandData = {
+    name: 'svnc',
+    description: 'مزامنة رتب ومعلومات الأعضاء بشكل شامل مع شيت جوجل (Force Sync)',
+    default_member_permissions: '8' // Admin only
+  };
+
+  try {
+    console.log('[Gateway] ⚙️ جاري تسجيل أمر Slash Command (/svnc) في الديسكورد...');
+    await discordApiRequest(
+      'POST',
+      `/applications/${appId}/guilds/${guildId}/commands`,
+      commandData,
+      botToken
+    );
+    console.log('[Gateway] ✅ تم تسجيل أمر Slash Command (/svnc) بنجاح في السيرفر.');
+  } catch (e) {
+    console.error('[Gateway] ⚠️ فشل تسجيل أمر Slash Command:', e.message);
+  }
+}
+
+function sendInteractionResponse(interactionId, interactionToken, payload) {
+  return discordApiRequest('POST', `/interactions/${interactionId}/${interactionToken}/callback`, payload, '');
+}
+
+function editInteractionResponse(appId, interactionToken, payload) {
+  return discordApiRequest('PATCH', `/webhooks/${appId}/${interactionToken}/messages/@original`, payload, '');
+}
+
+async function handleInteraction(interaction, botToken) {
+  if (interaction.type === 2 && interaction.data && interaction.data.name === 'svnc') {
+    const interactionId = interaction.id;
+    const interactionToken = interaction.token;
+    const appId = interaction.application_id;
+
+    try {
+      // 1. إرسال استجابة مؤقتة Defer
+      await sendInteractionResponse(interactionId, interactionToken, { type: 5 });
+    } catch (e) {
+      console.error('[Gateway] Failed to send defer response:', e.message);
+      return;
+    }
+
+    console.log(`[Gateway] ⏳ بدء تشغيل المزامنة الشاملة بطلب من ${interaction.member?.user?.username || 'مجهول'}...`);
+    try {
+      // 2. تشغيل المزامنة الشاملة
+      const result = await runCsvDiscordSync(gatewayDb, true);
+      
+      let message = '';
+      if (result.skipped) {
+        message = '⚠️ المزامنة جارية بالفعل حالياً، يرجى المحاولة لاحقاً.';
+      } else if (result.error) {
+        message = `❌ حدث خطأ أثناء المزامنة: ${result.error}`;
+      } else {
+        message = `✅ تم الانتهاء من المزامنة الشاملة بنجاح!\n* إجمالي الأعضاء الذين تم فحصهم: **${result.processed}**\n* التغييرات المطبقة: **${result.changed}**\n* الأخطاء: **${result.errors}**`;
+      }
+
+      // 3. تحديث الرسالة بالنتيجة
+      await editInteractionResponse(appId, interactionToken, { content: message });
+    } catch (err) {
+      console.error('[Gateway] Error in slash command sync:', err.message);
+      await editInteractionResponse(appId, interactionToken, { content: `❌ حدث خطأ فادح: ${err.message}` });
+    }
+  }
 }
 
 module.exports = { startGateway };
