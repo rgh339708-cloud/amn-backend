@@ -908,10 +908,10 @@ async function sendRecruitmentDecisionWebhook(application, newStatus, operatorNa
     content: isApproved ? `**🔔 القبول النهائي للمتقدم: ${userMention}**` : `**🔔 نعتذر عن قبول المتقدم: ${userMention}**`,
     embeds: [embed]
   });
-  const webhookPath = targetWebhook.replace('https://discord.com', '');
+  const parsedUrl = new URL(targetWebhook);
   const options = {
-    hostname: 'discord.com',
-    path: webhookPath,
+    hostname: parsedUrl.hostname,
+    path: parsedUrl.pathname + parsedUrl.search,
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -1095,10 +1095,10 @@ function sendAttendanceReportToDiscord(bookName, operatorStr, roomImage, records
       logSystemActivity('discord_webhook_error', 'النظام', `فشل إرسال تقرير حضور "${bookName}" بعد 5 محاولات (Rate Limited).`);
       return;
     }
-    const webhookPath = WEBHOOK_URL.replace('https://discord.com', '');
+    const parsedUrl = new URL(WEBHOOK_URL);
     const options = {
-      hostname: 'discord.com',
-      path: webhookPath,
+      hostname: parsedUrl.hostname,
+      path: parsedUrl.pathname + parsedUrl.search,
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
