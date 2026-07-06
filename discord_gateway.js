@@ -319,6 +319,40 @@ function editInteractionResponse(appId, interactionToken, payload) {
 }
 
 async function handleInteraction(interaction, botToken) {
+  if (interaction.type === 2 && interaction.data && interaction.data.name === 'restart') {
+    const interactionId = interaction.id;
+    const interactionToken = interaction.token;
+    const appId = interaction.application_id;
+
+    const roles = interaction.member?.roles || [];
+    const permissions = interaction.member?.permissions || '0';
+    const isAuthorized = roles.includes('1272532955792932985') || (BigInt(permissions) & 8n) === 8n;
+
+    if (!isAuthorized) {
+      try {
+        await sendInteractionResponse(interactionId, interactionToken, {
+          type: 4,
+          data: { content: '❌ عذراً، ليس لديك صلاحية استخدام هذا الأمر.', flags: 64 }
+        });
+      } catch (e) {}
+      return;
+    }
+
+    try {
+      await sendInteractionResponse(interactionId, interactionToken, {
+        type: 4,
+        data: { content: '🔄 جاري إعادة تشغيل خادم البوت بالكامل للتصحيح وتحديث البيانات... انتظر 10 ثوانٍ.' }
+      });
+      console.log('[Gateway] 🔄 Bot restart requested via slash command. Exiting process...');
+      setTimeout(() => {
+        process.exit(0);
+      }, 1000);
+    } catch (e) {
+      console.error('[Gateway] Failed to handle restart command:', e.message);
+    }
+    return;
+  }
+
   if (interaction.type === 2 && interaction.data && interaction.data.name === 'svnc') {
     const interactionId = interaction.id;
     const interactionToken = interaction.token;
