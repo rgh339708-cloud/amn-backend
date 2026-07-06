@@ -257,15 +257,18 @@ function getAppIdFromToken(token) {
 function discordApiRequest(method, endpoint, body, botToken) {
   return new Promise((resolve, reject) => {
     const bodyStr = body ? JSON.stringify(body) : '';
+    const headers = {
+      'Content-Type': 'application/json',
+      'Content-Length': Buffer.byteLength(bodyStr),
+    };
+    if (botToken) {
+      headers['Authorization'] = `Bot ${botToken}`;
+    }
     const options = {
       hostname: 'discord.com',
       path: `/api/v10${endpoint}`,
       method,
-      headers: {
-        'Authorization': `Bot ${botToken}`,
-        'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(bodyStr),
-      },
+      headers
     };
 
     const req = https.request(options, (res) => {
