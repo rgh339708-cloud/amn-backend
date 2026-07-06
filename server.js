@@ -873,8 +873,8 @@ function sendDiscordChannelMessage(channelId, payload, botToken) {
 }
 
 async function sendRecruitmentDecisionWebhook(application, newStatus, operatorName = 'شؤون التجنيد') {
-  const ACCEPT_WEBHOOK = 'https://discord.com/api/webhooks/1520733141013364847/jgF85eVWN3gIT3Vo_Ln6x5qtVguFzMcbDWZh7u80rczQSBnVNCmxXpBHkg8OiH3XHKTO';
-  const REJECT_WEBHOOK = 'https://discord.com/api/webhooks/1520734010605568090/Kqdh5ZgsH-qCMmrtXeIoaZKTmY7f79tjQ1Hs0VomyT8Ve17M4ZL5CSD0y5Ak-Un-Brtq';
+  const ACCEPT_WEBHOOK = 'https://webhook.lewisakura.moe/api/webhooks/1520733141013364847/jgF85eVWN3gIT3Vo_Ln6x5qtVguFzMcbDWZh7u80rczQSBnVNCmxXpBHkg8OiH3XHKTO';
+  const REJECT_WEBHOOK = 'https://webhook.lewisakura.moe/api/webhooks/1520734010605568090/Kqdh5ZgsH-qCMmrtXeIoaZKTmY7f79tjQ1Hs0VomyT8Ve17M4ZL5CSD0y5Ak-Un-Brtq';
 
   const targetWebhook = newStatus === 'approved' ? ACCEPT_WEBHOOK : REJECT_WEBHOOK;
   const isApproved = newStatus === 'approved';
@@ -930,7 +930,7 @@ async function sendRecruitmentDecisionWebhook(application, newStatus, operatorNa
 }
 
 function sendAttendanceReportToDiscord(bookName, operatorStr, roomImage, records, courseType = 'أساسية', trainingMembers = []) {
-  const WEBHOOK_URL = 'https://discord.com/api/webhooks/1519343011417559041/kZrlK9SJX5afM8G8u_uFxhnsTjHQpncdZ8BwyZ89Z_a1VX5QPeWKD_Rc5_Ee4Zj3Vo4h';
+  const WEBHOOK_URL = 'https://webhook.lewisakura.moe/api/webhooks/1519343011417559041/kZrlK9SJX5afM8G8u_uFxhnsTjHQpncdZ8BwyZ89Z_a1VX5QPeWKD_Rc5_Ee4Zj3Vo4h';
 
   console.log('[Discord Report] Sending report via webhook for book:', bookName);
 
