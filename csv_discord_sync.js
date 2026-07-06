@@ -745,7 +745,6 @@ async function runCsvDiscordSync(db, force = false) {
       }
       const currentRoles = guildMember.roles || [];
 
-      await delay(force ? 1000 : 300); // تجنب Rate Limit (أطول في المزامنة الشاملة لتفادي حظر الاستضافة)
 
       // 4. تغيير الاسم المستعار إذا تغيّر
       const nameChanged = isNew || changes.some(c => c.includes('تغيير الاسم'));
