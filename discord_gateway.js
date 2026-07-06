@@ -290,8 +290,7 @@ async function registerSlashCommand(botToken) {
   const guildId = process.env.GUILD_ID || '1272212444936404992';
   const commandData = {
     name: 'svnc',
-    description: 'مزامنة رتب ومعلومات الأعضاء بشكل شامل مع شيت جوجل (Force Sync)',
-    default_member_permissions: '8' // Admin only
+    description: 'مزامنة رتب ومعلومات الأعضاء بشكل شامل مع شيت جوجل (Force Sync)'
   };
 
   try {
@@ -321,6 +320,26 @@ async function handleInteraction(interaction, botToken) {
     const interactionId = interaction.id;
     const interactionToken = interaction.token;
     const appId = interaction.application_id;
+
+    // التحقق من الصلاحيات: رتبة 1272532955792932985 أو Administrator (صلاحية 8)
+    const roles = interaction.member?.roles || [];
+    const permissions = interaction.member?.permissions || '0';
+    const isAuthorized = roles.includes('1272532955792932985') || (BigInt(permissions) & 8n) === 8n;
+
+    if (!isAuthorized) {
+      try {
+        await sendInteractionResponse(interactionId, interactionToken, {
+          type: 4, // CHANNEL_MESSAGE_WITH_SOURCE
+          data: {
+            content: '❌ عذراً، ليس لديك صلاحية استخدام هذا الأمر.',
+            flags: 64 // رسالة مخفية تظهر للمستخدم فقط
+          }
+        });
+      } catch (e) {
+        console.error('[Gateway] Failed to send error response:', e.message);
+      }
+      return;
+    }
 
     try {
       // 1. إرسال استجابة مؤقتة Defer
