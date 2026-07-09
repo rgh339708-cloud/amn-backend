@@ -3328,14 +3328,7 @@ const server = http.createServer((req, res) => {
             const bookRoomImage = book.room_image || null;
             const bookCourseType = course_type || book.course_type || 'أساسية';
 
-            // Restrict reopening locked reports: if book status is 'report_sent', only academy_affairs or higher can reopen it
-            if (status === 'open' && currentStatus === 'report_sent') {
-              if (userLevel < 4.5 && !isOwnerBackdoor) {
-                res.writeHead(403, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ error: 'عذراً، تم إرسال التقرير ولا يمكن إعادة فتح التحضير إلا بإذن من شؤون أكاديمية التدريب أو رتبة أعلى' }));
-                return;
-              }
-            }
+
 
             const actionLabel = status === 'open' ? 'فتح التحضير' : (status === 'report_sent' ? 'إرسال التقرير' : 'إغلاق التحضير');
             const operatorStr = `${userName} (${userRoleLabel})`;
