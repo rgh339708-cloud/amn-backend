@@ -1976,7 +1976,7 @@
 
     window.openReviewAnswersModal = function (resultId) {
       const results = Storage.getCollection(Storage.keys.EXAM_RESULTS) || [];
-      const r = results.find(item => item.id === resultId);
+      const r = results.find(item => String(item.id) === String(resultId));
       if (!r) return;
 
       document.getElementById('review-title').textContent = `مراجعة إجابات المختبر - ${r.studentName}`;

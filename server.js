@@ -295,6 +295,9 @@ async function initializeMysqlSchema(pool) {
     duration INTEGER,
     status VARCHAR(255),
     examiner VARCHAR(255),
+    passing_score INTEGER DEFAULT 80,
+    questions_json LONGTEXT,
+    user_answers_json LONGTEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   )`);
 
@@ -359,6 +362,9 @@ async function initializeMysqlSchema(pool) {
     pass_status VARCHAR(255),
     duration INTEGER,
     examiner VARCHAR(255),
+    passing_score INTEGER DEFAULT 80,
+    questions_json LONGTEXT,
+    user_answers_json LONGTEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   )`);
 
@@ -424,6 +430,16 @@ async function initializeMysqlSchema(pool) {
     await queryAsync(`ALTER TABLE exam_attempts ADD COLUMN discord_id VARCHAR(255)`);
     await queryAsync(`ALTER TABLE exam_attempts ADD COLUMN badge_code VARCHAR(255)`);
     await queryAsync(`ALTER TABLE exam_attempts ADD COLUMN attempt_count INTEGER DEFAULT 1`);
+  } catch(e) {}
+  try {
+    await queryAsync(`ALTER TABLE exam_results ADD COLUMN questions_json LONGTEXT`);
+    await queryAsync(`ALTER TABLE exam_results ADD COLUMN user_answers_json LONGTEXT`);
+    await queryAsync(`ALTER TABLE exam_results ADD COLUMN passing_score INTEGER DEFAULT 80`);
+  } catch(e) {}
+  try {
+    await queryAsync(`ALTER TABLE exam_attempts ADD COLUMN questions_json LONGTEXT`);
+    await queryAsync(`ALTER TABLE exam_attempts ADD COLUMN user_answers_json LONGTEXT`);
+    await queryAsync(`ALTER TABLE exam_attempts ADD COLUMN passing_score INTEGER DEFAULT 80`);
   } catch(e) {}
   try {
     await queryAsync(`ALTER TABLE attendance_records ADD COLUMN room_image TEXT`);
@@ -549,12 +565,18 @@ function initializeSqliteSchema(sqliteDb) {
     duration INTEGER,
     status TEXT,
     examiner TEXT,
+    passing_score INTEGER DEFAULT 80,
+    questions_json TEXT,
+    user_answers_json TEXT,
     created_at TEXT DEFAULT (datetime('now'))
   )`, () => {
     // Add columns if they do not exist
     sqliteDb.run("ALTER TABLE exam_results ADD COLUMN discord_id TEXT", () => {});
     sqliteDb.run("ALTER TABLE exam_results ADD COLUMN badge_code TEXT", () => {});
     sqliteDb.run("ALTER TABLE exam_results ADD COLUMN attempt_count INTEGER DEFAULT 1", () => {});
+    sqliteDb.run("ALTER TABLE exam_results ADD COLUMN questions_json TEXT", () => {});
+    sqliteDb.run("ALTER TABLE exam_results ADD COLUMN user_answers_json TEXT", () => {});
+    sqliteDb.run("ALTER TABLE exam_results ADD COLUMN passing_score INTEGER DEFAULT 80", () => {});
 
     // Migrate existing exam_attempts data to exam_results if any
     sqliteDb.get("SELECT COUNT(*) as cnt FROM exam_results", (err, row) => {
@@ -636,11 +658,17 @@ function initializeSqliteSchema(sqliteDb) {
     pass_status TEXT,
     duration INTEGER,
     examiner TEXT,
+    passing_score INTEGER DEFAULT 80,
+    questions_json TEXT,
+    user_answers_json TEXT,
     created_at TEXT DEFAULT (datetime('now'))
   )`, () => {
     sqliteDb.run("ALTER TABLE exam_attempts ADD COLUMN discord_id TEXT", () => {});
     sqliteDb.run("ALTER TABLE exam_attempts ADD COLUMN badge_code TEXT", () => {});
     sqliteDb.run("ALTER TABLE exam_attempts ADD COLUMN attempt_count INTEGER DEFAULT 1", () => {});
+    sqliteDb.run("ALTER TABLE exam_attempts ADD COLUMN questions_json TEXT", () => {});
+    sqliteDb.run("ALTER TABLE exam_attempts ADD COLUMN user_answers_json TEXT", () => {});
+    sqliteDb.run("ALTER TABLE exam_attempts ADD COLUMN passing_score INTEGER DEFAULT 80", () => {});
   });
 
   // 11. exam_errors table
@@ -1781,7 +1809,10 @@ function mapClientResultToDb(item) {
     end_time: item.endTime || item.end_time || '',
     duration: item.duration !== undefined ? item.duration : 0,
     status: item.status || 'pending',
-    examiner: item.examiner || ''
+    examiner: item.examiner || '',
+    passing_score: item.passingScore !== undefined ? item.passingScore : (item.passing_score !== undefined ? item.passing_score : 80),
+    questions_json: Array.isArray(item.questions) ? JSON.stringify(item.questions) : (typeof item.questions_json === 'string' ? item.questions_json : '[]'),
+    user_answers_json: Array.isArray(item.userAnswers) ? JSON.stringify(item.userAnswers) : (typeof item.user_answers_json === 'string' ? item.user_answers_json : (Array.isArray(item.userAnswersJson) ? JSON.stringify(item.userAnswersJson) : '[]'))
   };
 }
 
@@ -1810,7 +1841,10 @@ function syncSaveResultFromClient(item, callback) {
       end_time: dbItem.end_time,
       duration: dbItem.duration,
       status: dbItem.status,
-      examiner: dbItem.examiner
+      examiner: dbItem.examiner,
+      passing_score: dbItem.passing_score,
+      questions_json: dbItem.questions_json,
+      user_answers_json: dbItem.user_answers_json
     };
     dbInsertOrReplace('exam_results', 'id', itemResults, function(err) {
       if (err) {
@@ -1835,7 +1869,10 @@ function syncSaveResultFromClient(item, callback) {
         end_time: dbItem.end_time,
         duration: dbItem.duration,
         status: dbItem.status,
-        examiner: dbItem.examiner
+        examiner: dbItem.examiner,
+        passing_score: dbItem.passing_score,
+        questions_json: dbItem.questions_json,
+        user_answers_json: dbItem.user_answers_json
       };
       dbInsertOrReplace('exam_attempts', 'id', itemAttempts, function(attErr) {
         if (!attErr && (itemResults.pass_status === 'نجاح' || itemResults.pass_status === 'رسوب')) {
@@ -1871,7 +1908,10 @@ function syncSaveResultFromClient(item, callback) {
         end_time: dbItem.end_time,
         duration: dbItem.duration,
         status: dbItem.status,
-        examiner: dbItem.examiner
+        examiner: dbItem.examiner,
+        passing_score: dbItem.passing_score,
+        questions_json: dbItem.questions_json,
+        user_answers_json: dbItem.user_answers_json
       };
       
       dbInsertOrReplace('exam_attempts', 'id', itemAttempts, function(err) {
@@ -1899,7 +1939,10 @@ function syncSaveResultFromClient(item, callback) {
           end_time: dbItem.end_time,
           duration: dbItem.duration,
           status: dbItem.status,
-          examiner: dbItem.examiner
+          examiner: dbItem.examiner,
+          passing_score: dbItem.passing_score,
+          questions_json: dbItem.questions_json,
+          user_answers_json: dbItem.user_answers_json
         };
         
         dbInsertOrReplace('exam_results', 'id', itemResults, function(resErr) {
@@ -1923,12 +1966,18 @@ function syncSaveAttempt(data, callback) {
     // 1. Update exam_attempts
     const updatesAttempts = [];
     const paramsAttempts = [];
-    const validAttemptsCols = ['trainee_name', 'rank', 'code', 'discord_id', 'badge_code', 'attempt_count', 'course_name', 'exam_name', 'score', 'pass_status', 'start_time', 'end_time', 'duration', 'status', 'examiner'];
+    const validAttemptsCols = ['trainee_name', 'rank', 'code', 'discord_id', 'badge_code', 'attempt_count', 'course_name', 'exam_name', 'score', 'pass_status', 'start_time', 'end_time', 'duration', 'status', 'examiner', 'questions_json', 'user_answers_json', 'passing_score'];
     
     Object.keys(data).forEach(key => {
-      if (key !== 'id' && validAttemptsCols.includes(key)) {
-        updatesAttempts.push(`"${key}" = ?`);
-        paramsAttempts.push(data[key]);
+      let fieldName = key;
+      let val = data[key];
+      if (key === 'questions') { fieldName = 'questions_json'; val = JSON.stringify(val); }
+      else if (key === 'userAnswers') { fieldName = 'user_answers_json'; val = JSON.stringify(val); }
+      else if (key === 'passingScore') { fieldName = 'passing_score'; }
+      
+      if (fieldName !== 'id' && validAttemptsCols.includes(fieldName)) {
+        updatesAttempts.push(`"${fieldName}" = ?`);
+        paramsAttempts.push(val);
       }
     });
     
@@ -1945,7 +1994,7 @@ function syncSaveAttempt(data, callback) {
         // 2. Update exam_results
         const updatesResults = [];
         const paramsResults = [];
-        const validResultsCols = ['user_id', 'trainee_name', 'rank', 'code', 'discord_id', 'badge_code', 'attempt_count', 'course_name', 'exam_name', 'score', 'pass_status', 'start_time', 'end_time', 'duration', 'status', 'examiner'];
+        const validResultsCols = ['user_id', 'trainee_name', 'rank', 'code', 'discord_id', 'badge_code', 'attempt_count', 'course_name', 'exam_name', 'score', 'pass_status', 'start_time', 'end_time', 'duration', 'status', 'examiner', 'questions_json', 'user_answers_json', 'passing_score'];
         
         Object.keys(data).forEach(key => {
           let fieldName = key;
@@ -1957,6 +2006,9 @@ function syncSaveAttempt(data, callback) {
           else if (key === 'passed') { fieldName = 'pass_status'; val = val ? 'نجاح' : 'رسوب'; }
           else if (key === 'entryTime') { fieldName = 'start_time'; }
           else if (key === 'endTime') { fieldName = 'end_time'; }
+          else if (key === 'questions') { fieldName = 'questions_json'; val = JSON.stringify(val); }
+          else if (key === 'userAnswers') { fieldName = 'user_answers_json'; val = JSON.stringify(val); }
+          else if (key === 'passingScore') { fieldName = 'passing_score'; }
           
           if (fieldName !== 'id' && validResultsCols.includes(fieldName)) {
             updatesResults.push(`"${fieldName}" = ?`);
@@ -2011,7 +2063,10 @@ function syncSaveAttempt(data, callback) {
         end_time: data.end_time || '—',
         duration: data.duration !== undefined ? data.duration : 0,
         status: data.status || 'started',
-        examiner: data.examiner || '—'
+        examiner: data.examiner || '—',
+        passing_score: data.passingScore !== undefined ? data.passingScore : (data.passing_score !== undefined ? data.passing_score : 80),
+        questions_json: Array.isArray(data.questions) ? JSON.stringify(data.questions) : (typeof data.questions_json === 'string' ? data.questions_json : '[]'),
+        user_answers_json: Array.isArray(data.userAnswers) ? JSON.stringify(data.userAnswers) : (typeof data.user_answers_json === 'string' ? data.user_answers_json : '[]')
       };
       
       dbInsertOrReplace('exam_attempts', 'id', itemAttempts, function(err) {
@@ -2039,7 +2094,10 @@ function syncSaveAttempt(data, callback) {
           end_time: data.end_time || '—',
           duration: data.duration !== undefined ? data.duration : 0,
           status: data.status || 'started',
-          examiner: data.examiner || '—'
+          examiner: data.examiner || '—',
+          passing_score: data.passingScore !== undefined ? data.passingScore : (data.passing_score !== undefined ? data.passing_score : 80),
+          questions_json: Array.isArray(data.questions) ? JSON.stringify(data.questions) : (typeof data.questions_json === 'string' ? data.questions_json : '[]'),
+          user_answers_json: Array.isArray(data.userAnswers) ? JSON.stringify(data.userAnswers) : (typeof data.user_answers_json === 'string' ? data.user_answers_json : '[]')
         };
         
         dbInsertOrReplace('exam_results', 'id', itemResults, function(resErr) {
@@ -4121,7 +4179,10 @@ const server = http.createServer((req, res) => {
         entryTime: r.start_time,
         endTime: r.end_time,
         date: r.created_at ? (r.created_at instanceof Date ? `${r.created_at.getFullYear()}/${String(r.created_at.getMonth() + 1).padStart(2, '0')}/${String(r.created_at.getDate()).padStart(2, '0')}` : String(r.created_at).split(/[ T]/)[0].replace(/-/g, '/')) : '—',
-        duration: r.duration
+        duration: r.duration,
+        passingScore: r.passing_score || 80,
+        questions: (() => { try { return r.questions_json ? JSON.parse(r.questions_json) : []; } catch(e) { return []; } })(),
+        userAnswers: (() => { try { return r.user_answers_json ? JSON.parse(r.user_answers_json) : []; } catch(e) { return []; } })()
       }));
       collections['ps_retake_requests'] = retakeRequests.map(r => ({
         id: r.id,
@@ -4350,7 +4411,7 @@ const server = http.createServer((req, res) => {
               };
             });
             
-            executeBulkSync('amn9', 'id', itemsToSave, (err, count) => {
+            executeBulkSync('exams', 'id', itemsToSave, (err, count) => {
               if (err) {
                 res.writeHead(500, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({ error: err.message || 'Failed to bulk sync exams' }));
