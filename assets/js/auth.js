@@ -8,7 +8,7 @@ const Auth = (() => {
   /* ── Role Definitions ─────────────────────────────── */
   const ROLES = {
     owner: {
-      label: 'المالك',
+      label: 'المشرف العام',
       emoji: '<i class="fa-solid fa-crown"></i>',
       color: '#c9a227',
       level: 6,
@@ -68,7 +68,7 @@ const Auth = (() => {
   /* ── Section Access Control ───────────────────────── */
   const SECTION_MIN_ROLE = {
     'admin':       'admin',
-    'users':       'owner', // only Owner can manage members & change roles
+    'users':       'assistant_owner', // only Owner & assistant_owner can manage members & change roles
     'amn13':    'admin',
     'applications':'admin',
     'reports':     'admin',
@@ -720,7 +720,7 @@ const Auth = (() => {
           (userData.username && ownerUsernames.includes(userData.username.toLowerCase()))) {
         matchedUser = {
           role: 'owner',
-          rank: 'المالك',
+          rank: 'المشرف العام',
           username: userData.global_name || userData.username || userData.username,
           discord: userData.username,
           status: 'active'
@@ -901,7 +901,7 @@ const Auth = (() => {
                 resolvedRole = resolveRoleFromRank(userRank, 'viewer');
               }
               session.role = isOwner ? 'owner' : resolvedRole;
-              session.rank = isOwner ? 'المالك' : (serverUser.rank || 'مشاهد');
+              session.rank = isOwner ? 'المشرف العام' : (serverUser.rank || 'مشاهد');
               session.department = serverUser.department || '';
               session.code = serverUser.code || '';
               session.status = serverUser.status || 'active';
@@ -946,7 +946,7 @@ const Auth = (() => {
                   username: session.username || userData.username,
                   discord: session.discord || userData.username,
                   role: isOwner ? 'owner' : 'viewer',
-                  rank: isOwner ? 'المالك' : (userRank || 'مشاهد'),
+                  rank: isOwner ? 'المشرف العام' : (userRank || 'مشاهد'),
                   department: userDepartment,
                   code: userCode,
                   status: 'active',
@@ -985,7 +985,7 @@ const Auth = (() => {
                 }
                 if (isOwner && dbUser.role !== 'owner') {
                   dbUser.role = 'owner';
-                  dbUser.rank = 'المالك';
+                  dbUser.rank = 'المشرف العام';
                   updated = true;
                 }
                 if (updated) {
@@ -996,7 +996,7 @@ const Auth = (() => {
                   resolvedRole = resolveRoleFromRank(userRank, 'viewer');
                 }
                 session.role = isOwner ? 'owner' : resolvedRole;
-                session.rank = isOwner ? 'المالك' : (dbUser.rank || 'مشاهد');
+                session.rank = isOwner ? 'المشرف العام' : (dbUser.rank || 'مشاهد');
                 session.department = dbUser.department || '';
                 session.code = dbUser.code || '';
                 session.status = dbUser.status || 'active';
@@ -1050,7 +1050,7 @@ const Auth = (() => {
         discord: '3gjo',
         globalName: '3gjo',
         role: 'owner',
-        rank: 'المالك',
+        rank: 'المشرف العام',
         avatar: 'assets/img/avatars/1334568342345748565_e2dcb67601cdaefd19b887ad9c1105a9.png',
         banner: null,
         bannerColor: '#c9a227',
@@ -1412,7 +1412,7 @@ const Auth = (() => {
     if (isOwner) {
       found = true;
       if (tables.length === 0) {
-        tables.push('المالك');
+        tables.push('المشرف العام');
       }
       if (!registeredName || registeredName === '3gjo' || registeredName === 'OnlyRyan' || registeredName === 'سداح الحربي' || registeredName === 'z6tw' || registeredName === 'ifm711') {
         if (user.id === '1120142432554713261' || (user.discord && user.discord.toLowerCase() === 'z6tw')) {
@@ -1427,7 +1427,7 @@ const Auth = (() => {
         badge = 'CC | P-20';
       }
       if (!highestRank || highestRank === 'عضو') {
-        highestRank = 'المالك';
+        highestRank = 'المشرف العام';
       }
     }
 
@@ -1530,7 +1530,7 @@ const Auth = (() => {
           
           if (isOwner) {
             dbUser.role = 'owner';
-            dbUser.rank = 'المالك';
+            dbUser.rank = 'المشرف العام';
           } else {
             // Automatically resolve role from rank if rank was updated on server
             dbUser.role = resolveRoleFromRank(dbUser.rank, dbUser.role);

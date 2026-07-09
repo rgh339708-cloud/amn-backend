@@ -313,7 +313,7 @@ const App = (() => {
         `;
         
         const roles = [
-          { value: 'owner', label: 'المالك (الأساسي)' },
+          { value: 'owner', label: 'المشرف العام (الأساسي)' },
           { value: 'assistant_owner', label: 'قيادة الامن العام' },
           { value: 'academy_affairs', label: 'رئاسة تدريب الامن العام' },
           { value: 'admin', label: 'شؤون أكاديمية التدريب' },
@@ -476,7 +476,7 @@ const App = (() => {
             </div>
             <div style="width: 100%;">
               <select id="dropdown-preview-role-select" style="width: 100%; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(201, 162, 39, 0.3); border-radius: 6px; color: #fff; padding: 6px 10px; font-size: 11.5px; font-weight: 700; cursor: pointer; outline: none; font-family: var(--font-arabic); direction: rtl;">
-                <option value="owner" ${currentPreview === 'owner' ? 'selected' : ''} style="background: #0d122b; color: #fff;">المالك (الأساسي)</option>
+                <option value="owner" ${currentPreview === 'owner' ? 'selected' : ''} style="background: #0d122b; color: #fff;">المشرف العام (الأساسي)</option>
                 <option value="assistant_owner" ${currentPreview === 'assistant_owner' ? 'selected' : ''} style="background: #0d122b; color: #fff;">قيادة الامن العام</option>
                 <option value="academy_affairs" ${currentPreview === 'academy_affairs' ? 'selected' : ''} style="background: #0d122b; color: #fff;">رئاسة تدريب الامن العام</option>
                 <option value="admin" ${currentPreview === 'admin' ? 'selected' : ''} style="background: #0d122b; color: #fff;">شؤون أكاديمية التدريب</option>

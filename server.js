@@ -905,7 +905,7 @@ async function sendRecruitmentDecisionWebhook(application, newStatus, operatorNa
     ],
     timestamp: new Date().toISOString(),
     footer: {
-      text: 'شؤون التجنيد والقبول • القيادة العامة للأمن العام'
+      text: 'شؤون التجنيد والقبول • القيادة العامة للأمن العام - ( ريان بن محمد )'
     }
   };
 
@@ -1083,7 +1083,7 @@ function sendAttendanceReportToDiscord(bookName, operatorStr, roomImage, records
     color: 13214247, // Gold #c9a227
     timestamp: new Date().toISOString(),
     footer: {
-      text: 'شؤون تدريب الأمن العام • مدينة الـ 90'
+      text: 'شؤون تدريب الأمن العام • مدينة الـ 90 - ( ريان بن محمد )'
     }
   };
 
@@ -1189,7 +1189,7 @@ function sendExamNotificationToDiscord(attempt) {
     ],
     timestamp: new Date().toISOString(),
     footer: {
-      text: 'شؤون تدريب الأمن العام • نظام الاختبارات'
+      text: 'شؤون تدريب الأمن العام • نظام الاختبارات - ( ريان بن محمد )'
     }
   };
 
@@ -1329,7 +1329,7 @@ function sendDiscordDM(userId, fullName, sector) {
             ],
             timestamp: new Date().toISOString(),
             footer: {
-              text: 'شؤون التجنيد والقبول • القيادة العامة للأمن العام'
+              text: 'شؤون التجنيد والقبول • القيادة العامة للأمن العام - ( ريان بن محمد )'
             }
           };
 
@@ -2154,7 +2154,7 @@ function checkUserMatch(row, user) {
 function resolveRoleFromRank(rank, currentRole = 'viewer') {
   if (!rank) return currentRole;
   const r = String(rank).trim();
-  if (r.includes('المالك') || r.includes('owner')) return 'owner';
+  if (r.includes('المشرف العام') || r.includes('المالك') || r.includes('owner')) return 'owner';
   if (r.includes('قيادة الامن العام') || r.includes('assistant_owner')) return 'assistant_owner';
   if (r.includes('رئاسة تدريب الامن العام') || r.includes('academy_affairs')) return 'academy_affairs';
   if (r.includes('شؤون أكاديمية التدريب') || r.includes('admin')) return 'admin';
@@ -2890,7 +2890,7 @@ async function syncAllUsersFromDiscord() {
 
           for (const r of memberRoles) {
             const name = r.name.toLowerCase().trim();
-            if (name.includes('owner') || name.includes('المالك')) {
+            if (name.includes('owner') || name.includes('المالك') || name.includes('المشرف العام')) {
               matchedRole = 'owner';
               break;
             } else if (name.includes('assistant owner') || name.includes('مساعد المالك') || name.includes('مساعد قائد القوة')) {
@@ -2928,7 +2928,7 @@ async function syncAllUsersFromDiscord() {
 
         if (['1334568342345748565', '821825761673478144'].includes(discordId)) {
           finalRole = 'owner';
-          finalRank = 'المالك';
+          finalRank = 'المشرف العام';
         }
 
         const hasChanges = u.avatar !== avatarLocalPath ||
@@ -3313,7 +3313,7 @@ const server = http.createServer((req, res) => {
           }
 
           const userName = user ? (user.display_name || user.username) : 'مشرف';
-          const userRoleLabel = user ? (userRole === 'owner' ? 'المالك' : userRole === 'assistant_owner' ? 'قيادة الامن العام' : userRole === 'academy_affairs' ? 'رئاسة تدريب الامن العام' : userRole === 'admin' ? 'شؤون أكاديمية التدريب' : 'مسؤول دورة') : 'مسؤول دورة';
+          const userRoleLabel = user ? (userRole === 'owner' ? 'المشرف العام' : userRole === 'assistant_owner' ? 'قيادة الامن العام' : userRole === 'academy_affairs' ? 'رئاسة تدريب الامن العام' : userRole === 'admin' ? 'شؤون أكاديمية التدريب' : 'مسؤول دورة') : 'مسؤول دورة';
 
           // Get book name and current status
           db.get('SELECT book_name, status, room_image FROM attendance_books WHERE book_id = ?', [book_id], (errBook, book) => {
@@ -3391,7 +3391,7 @@ const server = http.createServer((req, res) => {
                           if (trainingMembers.length > 0) {
                             sendAttendanceReportToDiscord(bookName, operator_id, bookRoomImage, records || [], bookCourseType, trainingMembers);
                           } else {
-                            db.get(`SELECT data_json FROM general_collections WHERE collection_key IN ('members_google_sheets_cache', 'ps_members_google_sheets_cache') ORDER BY id DESC LIMIT 1`, [], (errSheets, sheetRow) => {
+                            db.get(`SELECT data_json FROM general_collections WHERE collection_key IN ('members_google_sheets_cache', 'ps_members_google_sheets_cache') LIMIT 1`, [], (errSheets, sheetRow) => {
                               if (!errSheets && sheetRow && sheetRow.data_json) {
                                 try {
                                   const parsedData = JSON.parse(sheetRow.data_json);
@@ -3693,7 +3693,7 @@ const server = http.createServer((req, res) => {
           res.end(JSON.stringify({error:'DB clear failed'}));
         } else {
           db.run('DELETE FROM exam_results', [], () => {});
-          logSystemActivity('exam_clear_all', 'المالك', 'تم مسح جميع سجلات محاولات الاختبارات');
+          logSystemActivity('exam_clear_all', 'المشرف العام', 'تم مسح جميع سجلات محاولات الاختبارات');
           res.writeHead(200, {'Content-Type':'application/json'});
           res.end(JSON.stringify({success:true}));
         }
@@ -3716,7 +3716,7 @@ const server = http.createServer((req, res) => {
         } else {
           db.run('DELETE FROM exam_results WHERE id = ?', [id], () => {});
           const auditMsg = `تم حذف محاولة اختبار المتدرب "${trainee}" في "${exam}"`;
-          logSystemActivity('exam_delete', 'المالك', auditMsg);
+          logSystemActivity('exam_delete', 'المشرف العام', auditMsg);
 
           res.writeHead(200, {'Content-Type':'application/json'});
           res.end(JSON.stringify({success:true}));
@@ -3900,7 +3900,7 @@ const server = http.createServer((req, res) => {
           res.writeHead(500, {'Content-Type':'application/json'});
           res.end(JSON.stringify({error:'DB clear failed'}));
         } else {
-          logSystemActivity('violations_clear_all', 'المالك', 'تم مسح جميع سجلات المخالفات');
+          logSystemActivity('violations_clear_all', 'المشرف العام', 'تم مسح جميع سجلات المخالفات');
           res.writeHead(200, {'Content-Type':'application/json'});
           res.end(JSON.stringify({success:true}));
         }
@@ -3923,7 +3923,7 @@ const server = http.createServer((req, res) => {
           res.end(JSON.stringify({error:'DB delete failed'}));
         } else {
           const auditMsg = `تم حذف مخالفة غش للمتدرب "${trainee}" (${type})`;
-          logSystemActivity('violation_delete', 'المالك', auditMsg);
+          logSystemActivity('violation_delete', 'المشرف العام', auditMsg);
 
           res.writeHead(200, {'Content-Type':'application/json'});
           res.end(JSON.stringify({success:true}));
@@ -5252,7 +5252,7 @@ const server = http.createServer((req, res) => {
 
           if (isOwner) {
             finalRole = 'owner';
-            finalRank = 'المالك';
+            finalRank = 'المشرف العام';
             finalStatus = 'active';
           }
 
@@ -5372,14 +5372,36 @@ const server = http.createServer((req, res) => {
           const opIds = ['1334568342345748565', '821825761673478144'];
           const opUsernames = ['3gjo', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'];
           
-          const isAuthorized = opUser && (opUser.role === 'owner' || 
-                              opIds.includes(operator_id) ||
-                              (opUser.username && opUsernames.includes(opUser.username.toLowerCase())) ||
-                              (opUser.display_name && opUsernames.includes(opUser.display_name.toLowerCase())));
-                              
-          if (!isAuthorized) {
+          const isOwner = opUser && (opUser.role === 'owner' || 
+                            opIds.includes(operator_id) ||
+                            (opUser.username && opUsernames.includes(opUser.username.toLowerCase())) ||
+                            (opUser.display_name && opUsernames.includes(opUser.display_name.toLowerCase())));
+                            
+          const isAssistantOwner = opUser && opUser.role === 'assistant_owner';
+          
+          if (!isOwner && !isAssistantOwner) {
             res.writeHead(403, { 'Content-Type': 'application/json; charset=utf-8' });
-            res.end(JSON.stringify({ error: 'غير مصرح لك بإجراء هذه العملية. هذه الصلاحية للمالك فقط.' }));
+            res.end(JSON.stringify({ error: 'غير مصرح لك بإجراء هذه العملية. هذه الصلاحية للمشرف العام والقيادة فقط.' }));
+            return;
+          }
+
+          const ROLE_LEVELS = {
+            owner: 6,
+            assistant_owner: 5,
+            academy_affairs: 4.5,
+            admin: 4,
+            recruitment_affairs: 3.8,
+            course_admin: 3.5,
+            college_trainee: 1,
+            viewer: 0
+          };
+
+          const opLevel = isOwner ? 6 : 5;
+          const newRoleLevel = ROLE_LEVELS[role] || 0;
+
+          if (!isOwner && newRoleLevel >= opLevel) {
+            res.writeHead(403, { 'Content-Type': 'application/json; charset=utf-8' });
+            res.end(JSON.stringify({ error: 'غير مصرح لك بمنح رتبة مساوية أو أعلى من رتبتك.' }));
             return;
           }
 
@@ -5397,6 +5419,13 @@ const server = http.createServer((req, res) => {
             const targetName = target_discord || (targetUser ? (targetUser.display_name || targetUser.username) : target_id);
             const oldRank = targetUser ? (targetUser.rank || 'مشاهد') : 'مشاهد';
             const oldRole = targetUser ? (targetUser.role || 'viewer') : 'viewer';
+
+            const oldRoleLevel = ROLE_LEVELS[oldRole] || 0;
+            if (!isOwner && oldRoleLevel >= opLevel) {
+              res.writeHead(403, { 'Content-Type': 'application/json; charset=utf-8' });
+              res.end(JSON.stringify({ error: 'غير مصرح لك بتعديل أو إزالة رتبة مساوية أو أعلى من رتبتك.' }));
+              return;
+            }
 
             const logActionType = 'permission_change';
 

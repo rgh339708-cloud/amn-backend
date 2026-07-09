@@ -311,7 +311,7 @@
             <div class="role-header">
               <div class="role-icon owner"><i class="fa-solid fa-crown"></i></div>
               <div>
-                <div class="role-name">المالك</div>
+                <div class="role-name">المشرف العام</div>
                 <div class="role-desc">المدير العام والقيادة العليا</div>
               </div>
             </div>
@@ -749,9 +749,14 @@
               <option value="rejected">مرفوض</option>
             </select>
           </div>
-          <button class="btn-action secondary" onclick="refreshRecruitmentData()" style="padding:8px 16px; border-radius:8px;">
-            <i class="fa-solid fa-arrows-rotate"></i> تحديث فوري
-          </button>
+          <div style="display:flex; gap:10px;">
+            <button id="btn-clear-recruitment" class="btn-action danger" onclick="clearRecruitmentApplications()" style="padding:8px 16px; border-radius:8px; display: none;">
+              <i class="fa-solid fa-trash-can"></i> مسح السجلات
+            </button>
+            <button class="btn-action secondary" onclick="refreshRecruitmentData()" style="padding:8px 16px; border-radius:8px;">
+              <i class="fa-solid fa-arrows-rotate"></i> تحديث فوري
+            </button>
+          </div>
         </div>
 
         <!-- Applications Table Card -->
@@ -795,7 +800,7 @@
               <i class="fa-solid fa-crown"></i>
             </div>
             <div>
-              <div style="font-size:0.75rem; color:var(--color-text-secondary);">القيادة والمالك</div>
+              <div style="font-size:0.75rem; color:var(--color-text-secondary);">القيادة والمشرف العام</div>
               <div style="font-size:1.35rem; font-weight:800;" id="perm-stat-owners">0</div>
             </div>
           </div>
@@ -834,7 +839,7 @@
             <input type="text" class="form-input" id="search-permissions" oninput="renderPermissionsTable()" placeholder="🔍 بحث باسم العضو أو حساب Discord أو المعرف..." style="max-width:340px; padding:8px 14px;">
             <select class="form-select" id="filter-permissions-role" onchange="renderPermissionsTable()" style="max-width:200px; padding:8px 12px; background:#0f1530; border:1px solid rgba(255,255,255,0.08); color:#fff; border-radius:8px;">
               <option value="">كل الرتب والمناصب</option>
-              <option value="owner">المالك</option>
+              <option value="owner">المشرف العام</option>
               <option value="assistant_owner">قيادة الأمن العام</option>
               <option value="academy_affairs">رئاسة تدريب الأمن العام</option>
               <option value="admin">شؤون أكاديمية التدريب</option>
@@ -970,7 +975,7 @@
         <div class="form-group">
           <label class="form-label" for="perm-rank-select">اختر الرتبة العسكرية لمنحها:</label>
           <select class="form-select" id="perm-rank-select" style="width:100%; padding: 12px; background: #0b1232; border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 8px;">
-            <option value="owner" data-rank="المالك">المالك</option>
+            <option value="owner" data-rank="المشرف العام">المشرف العام</option>
             <option value="assistant_owner" data-rank="قيادة الأمن العام">قيادة الأمن العام</option>
             <option value="academy_affairs" data-rank="رئاسة تدريب الأمن العام">رئاسة تدريب الأمن العام</option>
             <option value="admin" data-rank="شؤون أكاديمية التدريب">شؤون أكاديمية التدريب</option>
@@ -1160,10 +1165,16 @@
       document.getElementById('search-recruitment')?.addEventListener('input', renderRecruitmentTable);
       document.getElementById('filter-recruitment-sector')?.addEventListener('change', renderRecruitmentTable);
       document.getElementById('filter-recruitment-status')?.addEventListener('change', renderRecruitmentTable);
+
+      // Show clear recruitment button if owner or assistant_owner (الملاك والقيادة)
+      if (['owner', 'assistant_owner'].includes(userRole)) {
+        const btnClear = document.getElementById('btn-clear-recruitment');
+        if (btnClear) btnClear.style.display = 'inline-flex';
+      }
     }
 
-    // Show permissions management tab if owner ONLY
-    if (user && ['owner'].includes(user.role)) {
+    // Show permissions management tab if owner or assistant_owner
+    if (user && ['owner', 'assistant_owner'].includes(user.role)) {
       const navPerms = document.getElementById('nav-item-permissions');
       if (navPerms) navPerms.style.display = 'flex';
       renderPermissionsTable();
@@ -2075,6 +2086,33 @@
     }
   }
 
+  window.clearRecruitmentApplications = async function() {
+    const user = Auth.getCurrentUser();
+    const userRole = Auth.getRole();
+    const userName = user ? (user.globalName || user.username) : 'مشرف';
+
+    if (!['owner', 'assistant_owner'].includes(userRole)) {
+      App.toast('عذراً، هذه الصلاحية مخصصة للملاك والقيادة فقط.', 'error');
+      return;
+    }
+
+    if (await App.confirm('هل أنت متأكد من مسح جميع طلبات التجنيد والقبول بالكامل؟ لا يمكن التراجع عن هذا الإجراء.', 'تأكيد مسح السجلات')) {
+      Storage.set('ps_applications', []);
+      App.toast('🗑️ تم مسح سجلات التقديم على التجنيد بنجاح.', 'success');
+      
+      // Log in audit logs
+      if (typeof Logger !== 'undefined') {
+        Logger.log('recruitment_clear', `قام "${userName}" بمسح جميع سجلات وطلبات التجنيد بالكامل.`);
+      }
+
+      setTimeout(() => {
+        Storage.loadAllFromServer().then(() => {
+          renderRecruitmentTable();
+        });
+      }, 500);
+    }
+  }
+
 
   /* ───────────────────────────────────────────────────
      RANKS & PERMISSIONS MANAGEMENT ENGINE
@@ -2273,15 +2311,24 @@
           `<span style="background:rgba(255,255,255,0.04); color:rgba(255,255,255,0.55); border:1px solid rgba(255,255,255,0.08); font-size:0.75rem; padding:3px 8px; border-radius:6px; display:inline-flex; align-items:center; gap:4px;"><i class="fa-solid fa-arrows-rotate"></i> تلقائي Sheets${u.sheetDepts ? ' (' + u.sheetDepts + ')' : ''}</span>`
         );
 
-      // Check if this row belongs to an owner
+      // Check if this row belongs to an owner/protected account
+      const opRole = currentLoggedInUser ? currentLoggedInUser.role : 'viewer';
+      const isOperatorOwner = ['owner'].includes(opRole) || (currentLoggedInUser && (ownerIds.includes(currentLoggedInUser.id) || (currentLoggedInUser.username && ownerUsernames.includes(currentLoggedInUser.username.toLowerCase()))));
+      const opLevel = isOperatorOwner ? 6 : (Auth.getRoleInfo(opRole).level || 0);
+      
+      const targetRole = u.role || 'viewer';
+      const targetLevel = Auth.getRoleInfo(targetRole).level || 0;
+      
       const isTargetOwner = ownerIds.includes(u.id) || 
                             (u.username && ownerUsernames.includes(u.username.toLowerCase())) || 
                             u.role === 'owner';
+      
+      const isTargetProtected = isTargetOwner || (!isOperatorOwner && targetLevel >= opLevel);
 
       // Buttons authorization - sheet-only members get grant button only
       let actionsHtml = '';
-      if (isTargetOwner) {
-        actionsHtml = `<span style="font-size:0.78rem; color:var(--color-text-muted); font-style:italic;">ملاك البوابة (محمي)</span>`;
+      if (isTargetProtected) {
+        actionsHtml = `<span style="font-size:0.78rem; color:var(--color-text-muted); font-style:italic;">محمي (رتبة مساوية أو أعلى)</span>`;
       } else if (u.isSheetOnly) {
         actionsHtml = `
           <div style="display:flex; gap:8px;">
@@ -2405,6 +2452,38 @@
     document.getElementById('perm-edit-id').value = '';
     document.getElementById('permission-modal-title').textContent = 'منح رتبة عسكرية وصلاحيات جديدة';
     document.getElementById('btn-save-permission').textContent = 'منح الصلاحيات';
+
+    // Filter dropdown options based on operator role level
+    const selectRank = document.getElementById('perm-rank-select');
+    const currentLoggedInUser = Auth.getCurrentUser();
+    if (selectRank && currentLoggedInUser) {
+      const opRole = currentLoggedInUser.role || 'viewer';
+      const ownerIds = ['1334568342345748565', '821825761673478144'];
+      const ownerUsernames = ['3gjo', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'];
+      const isOperatorOwner = ['owner'].includes(opRole) || 
+                              (ownerIds.includes(currentLoggedInUser.id) || 
+                               (currentLoggedInUser.username && ownerUsernames.includes(currentLoggedInUser.username.toLowerCase())));
+      const opLevel = isOperatorOwner ? 6 : (Auth.getRoleInfo(opRole).level || 0);
+
+      // Hide or disable options with level >= opLevel
+      Array.from(selectRank.options).forEach(opt => {
+        const optRole = opt.value;
+        const optLevel = Auth.getRoleInfo(optRole).level || 0;
+        if (!isOperatorOwner && optLevel >= opLevel) {
+          opt.style.display = 'none';
+          opt.disabled = true;
+        } else {
+          opt.style.display = 'block';
+          opt.disabled = false;
+        }
+      });
+      
+      // Auto select the first enabled option if currently selected is disabled
+      if (selectRank.selectedOptions[0] && selectRank.selectedOptions[0].disabled) {
+        const firstEnabled = Array.from(selectRank.options).find(o => !o.disabled);
+        if (firstEnabled) firstEnabled.selected = true;
+      }
+    }
 
     // Show selection modes
     const selectModeRadios = document.querySelectorAll('input[name="account-select-mode"]');

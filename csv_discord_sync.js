@@ -801,7 +801,7 @@ async function runCsvDiscordSync(db, force = false) {
               { name: 'الاسم القديم', value: oldNick || 'غير مسجل', inline: true },
               { name: 'الاسم الجديد', value: nickname, inline: true },
             ],
-            footer: { text: 'بوت مزامنة CSV' },
+            footer: { text: 'بوت مزامنة CSV - ( ريان بن محمد )' },
             timestamp: new Date().toISOString(),
           }, discordToken);
           await delay(500);
@@ -825,7 +825,7 @@ async function runCsvDiscordSync(db, force = false) {
                 { name: 'العضو', value: `<@${member.discordId}> — ${member.name}`, inline: false },
                 { name: 'الرول المزال', value: `<@&${roleId}> (${roleName})`, inline: false },
               ],
-              footer: { text: 'بوت مزامنة CSV' },
+              footer: { text: 'بوت مزامنة CSV - ( ريان بن محمد )' },
               timestamp: new Date().toISOString(),
             }, discordToken);
             await delay(300);
@@ -850,7 +850,7 @@ async function runCsvDiscordSync(db, force = false) {
                 { name: 'العضو', value: `<@${member.discordId}> — ${member.name}`, inline: false },
                 { name: 'الرول المضاف', value: `<@&${roleId}> (${roleName})`, inline: false },
               ],
-              footer: { text: 'بوت مزامنة CSV' },
+              footer: { text: 'بوت مزامنة CSV - ( ريان بن محمد )' },
               timestamp: new Date().toISOString(),
             }, discordToken);
             await delay(300);
@@ -911,7 +911,7 @@ async function runCsvDiscordSync(db, force = false) {
                     { name: 'العضو', value: `<@${oldDiscordId}> — ${oldEntry.name}`, inline: false },
                     { name: 'الرول المزال', value: `<@&${roleId}> (${roleName})`, inline: false },
                   ],
-                  footer: { text: 'بوت مزامنة CSV' },
+                  footer: { text: 'بوت مزامنة CSV - ( ريان بن محمد )' },
                   timestamp: new Date().toISOString(),
                 }, discordToken);
                 await delay(300);

@@ -1019,7 +1019,7 @@
                   <th>نوع المخالفة</th>
                   <th>تاريخ ورصد المخالفة</th>
                   <th>عدد المخالفات في الجلسة</th>
-                  <th>إجراءات المالك</th>
+                  <th>إجراءات المشرف العام</th>
                 </tr>
               </thead>
               <tbody id="violations-tbody">
@@ -1724,7 +1724,7 @@
         }
       }
 
-      const isAuthorizedToCreate = roleInfo && roleInfo.level >= 4.0;
+      const isAuthorizedToCreate = roleInfo && roleInfo.level >= 4.5;
       const createBtn = document.getElementById('btn-create-exam');
       if (createBtn) createBtn.style.display = isAuthorizedToCreate ? 'inline-block' : 'none';
       const clearBtn = document.getElementById('btn-clear-results');
@@ -2122,6 +2122,7 @@
       const roleInfo = Auth.getRoleInfo(role);
       const canManageExams = Auth.isLoggedIn() && roleInfo && (roleInfo.permissions.includes('*') || roleInfo.permissions.includes('manage_course_exams') || roleInfo.permissions.includes('toggle_exams'));
       const canDeleteExams = Auth.isLoggedIn() && roleInfo && (roleInfo.level >= 4.5);
+      const canEditExamSettings = Auth.isLoggedIn() && roleInfo && (roleInfo.permissions.includes('*') || roleInfo.level >= 4.5);
 
       tbody.innerHTML = exams.map(e => {
         const statusText = e.isOpen ? '<i class="fa-solid fa-circle-check" style="color: #2ecc71;"></i> مفتوح' : '<i class="fa-solid fa-circle-exclamation" style="color: #e74c3c;"></i> مغلق';
@@ -2135,10 +2136,10 @@
           ? `<span style="font-size:0.75rem; color:#2ecc71;">تم الفتح: ${e.openedAt}</span>`
           : (e.closedAt ? `<span style="font-size:0.75rem; color:#ff4757;">أغلق في: ${e.closedAt}</span>` : '<span style="color:rgba(255,255,255,0.25);">—</span>');
 
-        const editBtns = canManageExams ? `
-        <button class="action-btn-el approve" style="background:rgba(201,162,39,0.08); border-color:rgba(201,162,39,0.3); color:var(--color-gold-primary);" onclick="checkAndOpenQuestionBank('${e.id}')"><i class="fa-solid fa-file-pen"></i> بنك الأسئلة</button>
-        <button class="action-btn-el approve" style="background:rgba(255,255,255,0.05); border-color:rgba(255,255,255,0.1); color:#fff;" onclick="openEditExamModal('${e.id}')"><i class="fa-solid fa-gear"></i> الإعدادات</button>
-      ` : '';
+        const editBtns = `
+          ${canManageExams ? `<button class="action-btn-el approve" style="background:rgba(201,162,39,0.08); border-color:rgba(201,162,39,0.3); color:var(--color-gold-primary);" onclick="checkAndOpenQuestionBank('${e.id}')"><i class="fa-solid fa-file-pen"></i> بنك الأسئلة</button>` : ''}
+          ${canEditExamSettings ? `<button class="action-btn-el approve" style="background:rgba(255,255,255,0.05); border-color:rgba(255,255,255,0.1); color:#fff;" onclick="openEditExamModal('${e.id}')"><i class="fa-solid fa-gear"></i> الإعدادات</button>` : ''}
+        `;
 
         const deleteBtn = canDeleteExams ? `
         <button class="action-btn-el reject" style="background:rgba(231,76,60,0.1); border-color:rgba(231,76,60,0.25);" onclick="deleteExam('${e.id}')">🗑️ حذف</button>
@@ -2310,8 +2311,8 @@
     function openCreateExamModal() {
       const role = Auth.getRole();
       const roleInfo = Auth.getRoleInfo(role);
-      if (!roleInfo || roleInfo.level < 4.0) {
-        App.toast('عذراً، غير مصرح لك بإنشاء الاختبارات جديدة!', 'error');
+      if (!roleInfo || roleInfo.level < 4.5) {
+        App.toast('عذراً، غير مصرح لك بإنشاء اختبارات جديدة!', 'error');
         return;
       }
       document.getElementById('edit-exam-id').value = '';
@@ -2330,9 +2331,9 @@
     function openEditExamModal(examId) {
       const role = Auth.getRole();
       const roleInfo = Auth.getRoleInfo(role);
-      const canManageExams = Auth.isLoggedIn() && roleInfo && (roleInfo.permissions.includes('*') || roleInfo.permissions.includes('manage_course_exams'));
-      if (!canManageExams) {
-        App.toast('عذراً، غير مصرح لك بتعديل الاختبارات!', 'error');
+      const canEditExamSettings = Auth.isLoggedIn() && roleInfo && (roleInfo.permissions.includes('*') || roleInfo.level >= 4.5);
+      if (!canEditExamSettings) {
+        App.toast('عذراً، غير مصرح لك بتعديل إعدادات الاختبارات!', 'error');
         return;
       }
       const exam = Storage.findById(Storage.keys.EXAMS, examId);
@@ -2358,9 +2359,9 @@
     function saveExamDetails() {
       const role = Auth.getRole();
       const roleInfo = Auth.getRoleInfo(role);
-      const canManageExams = Auth.isLoggedIn() && roleInfo && (roleInfo.permissions.includes('*') || roleInfo.permissions.includes('manage_course_exams'));
-      if (!canManageExams) {
-        App.toast('عذراً، غير مصرح لك بحفظ الاختبارات!', 'error');
+      const canEditExamSettings = Auth.isLoggedIn() && roleInfo && (roleInfo.permissions.includes('*') || roleInfo.level >= 4.5);
+      if (!canEditExamSettings) {
+        App.toast('عذراً، غير مصرح لك بحفظ إعدادات الاختبارات!', 'error');
         return;
       }
       const id = document.getElementById('edit-exam-id').value;
@@ -2373,7 +2374,7 @@
       const showcount = document.getElementById('edit-exam-showcount').value ? parseInt(document.getElementById('edit-exam-showcount').value) : null;
       const desc = document.getElementById('edit-exam-desc').value.trim();
 
-      if (!id && roleInfo.level < 4.0) {
+      if (!id && (!roleInfo || roleInfo.level < 4.5)) {
         App.toast('عذراً، غير مصرح لك بإنشاء اختبارات جديدة!', 'error');
         return;
       }
