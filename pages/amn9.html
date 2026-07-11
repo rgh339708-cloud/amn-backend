@@ -2389,7 +2389,7 @@
           });
 
           // Filter by active hand raise activity
-          logs = logs.filter(r => r.hand_raised === 1 || r.hand_approved === 1 || r.bypass_count > 0);
+          logs = logs.filter(r => Number(r.hand_raised) === 1 || Number(r.hand_approved) === 1 || Number(r.bypass_count) > 0);
 
           // Filter by course dropdown selection
           if (filterVal !== 'all') {
@@ -2405,7 +2405,7 @@
 
           const countSpan = document.getElementById('super-handraise-count');
           if (countSpan) {
-            const activeRequestsCount = logs.filter(l => l.hand_raised === 1).length;
+            const activeRequestsCount = logs.filter(l => Number(l.hand_raised) === 1).length;
             countSpan.textContent = `${activeRequestsCount} طلبات استئذان نشطة (${logs.length} إجمالي السجل)`;
           }
 
@@ -2431,17 +2431,17 @@
               : '<span style="font-size:0.68rem; opacity:0.35;">غير مسجل</span>';
 
             let handBadge = '';
-            if (r.hand_raised === 1) {
+            if (Number(r.hand_raised) === 1) {
               handBadge = `<span class="status-badge-el pending pulse-yellow" style="background: rgba(241, 196, 15, 0.2); border-color: #f1c40f; color: #f1c40f; font-weight: 800;"><i class="fa-solid fa-hand"></i> طالب استئذان (رفع يد)</span>`;
-            } else if (r.hand_approved === 1) {
-              const remaining = 2 - r.bypass_count;
+            } else if (Number(r.hand_approved) === 1) {
+              const remaining = 2 - Number(r.bypass_count);
               handBadge = `<span class="status-badge-el pass" style="background: rgba(46, 204, 113, 0.15); border-color: #2ecc71; color: #2ecc71; font-weight: 800;"><i class="fa-solid fa-circle-check"></i> مسموح بالخروج (متبقي: ${remaining})</span>`;
             } else {
               handBadge = `<span class="status-badge-el fail" style="background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.15); color: rgba(255,255,255,0.4); font-weight: 800;"><i class="fa-solid fa-ban"></i> انتهى الاستئذان (خروج: ${r.bypass_count})</span>`;
             }
 
             let handRaiseBtns = '';
-            if (r.hand_raised === 1) {
+            if (Number(r.hand_raised) === 1) {
               handRaiseBtns = `
                 <button class="action-btn-el approve" style="background:rgba(46, 204, 113, 0.12); border-color:rgba(46, 204, 113, 0.35); color:#2ecc71;" onclick="approveHandRaise('${r.id}')"><i class="fa-solid fa-hand"></i> موافقة</button>
                 <button class="action-btn-el reject" style="background:rgba(231, 76, 60, 0.12); border-color:rgba(231, 76, 60, 0.35); color:#e74c3c;" onclick="rejectHandRaise('${r.id}')"><i class="fa-solid fa-ban"></i> رفض</button>
