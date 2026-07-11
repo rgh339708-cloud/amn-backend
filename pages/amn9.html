@@ -6,9 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>اختبارات الدورات | الأمن العام</title>
 
-  <link rel="stylesheet" href="../assets/css/main.css?v=1.1.32">
-  <link rel="stylesheet" href="../assets/css/navbar.css?v=1.1.32">
-  <link rel="stylesheet" href="../assets/css/sidebar.css?v=1.1.32">
+  <link rel="stylesheet" href="../assets/css/main.css?v=1.1.33">
+  <link rel="stylesheet" href="../assets/css/navbar.css?v=1.1.33">
+  <link rel="stylesheet" href="../assets/css/sidebar.css?v=1.1.33">
   <link rel="stylesheet" href="../assets/css/footer.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,6 +17,14 @@
     rel="stylesheet">
 
   <style>
+    @keyframes pulse-yellow-anim {
+      0% { box-shadow: 0 0 0 0 rgba(241, 196, 15, 0.4); }
+      70% { box-shadow: 0 0 0 8px rgba(241, 196, 15, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(241, 196, 15, 0); }
+    }
+    .pulse-yellow {
+      animation: pulse-yellow-anim 2s infinite;
+    }
     body {
       font-family: 'Tajawal', 'Cairo', sans-serif;
       background: var(--color-bg-primary);
@@ -836,11 +844,11 @@
   <div id="toast-container"></div>
 
   <!-- Write shared components -->
-  <script src="../assets/js/storage.js?v=1.1.32"></script>
-  <script src="../assets/js/data.js?v=1.1.32"></script>
-  <script src="../assets/js/auth.js?v=1.1.32"></script>
-  <script src="../assets/js/components.js?v=1.1.32"></script>
-  <script src="../assets/js/app.js?v=1.1.32"></script>
+  <script src="../assets/js/storage.js?v=1.1.33"></script>
+  <script src="../assets/js/data.js?v=1.1.33"></script>
+  <script src="../assets/js/auth.js?v=1.1.33"></script>
+  <script src="../assets/js/components.js?v=1.1.33"></script>
+  <script src="../assets/js/app.js?v=1.1.33"></script>
 
   <script>
     document.write(Components.navbar('amn9'));
@@ -893,7 +901,7 @@
           <button class="btn btn-sm btn-ghost" id="btn-tab-exams-mgmt" onclick="switchSuperTab('exams-mgmt')"><i
               class="fa-solid fa-gear"></i> بنك الأسئلة والاختبارات</button>
           <button class="btn btn-sm btn-ghost" id="btn-tab-stats" onclick="switchSuperTab('stats')"><i
-              class="fa-solid fa-chart-column"></i> إحصائيات الدورات</button>
+              class="fa-solid fa-hand"></i> سجل رفع اليد</button>
           <button class="btn btn-sm btn-ghost" id="btn-tab-violations" onclick="switchSuperTab('violations')"><i
               class="fa-solid fa-triangle-exclamation"></i> أرشيف المخالفات</button>
           <button class="btn btn-sm btn-ghost" id="btn-tab-qbank-reqs" onclick="switchSuperTab('qbank-reqs')"><i
@@ -985,11 +993,37 @@
           </div>
         </div>
 
-        <!-- Tab Content: Statistics -->
+        <!-- Tab Content: Hand Raise Log -->
         <div id="tab-super-stats" class="super-tab-content" style="display: none;">
-          <div class="exams-grid" id="exams-stats-cards"
-            style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; display: grid; margin-top: 10px;">
-            <!-- Stats cards generated dynamically -->
+          <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 15px; flex-wrap: wrap;">
+            <label style="color: rgba(255,255,255,0.7); font-size: 0.85rem; font-weight: 700;">سجل طلبات الاستئذان ورفع اليد:</label>
+            <div style="display: flex; align-items: center; gap: 8px; margin-right: 15px;">
+              <label style="color: rgba(255,255,255,0.7); font-size: 0.85rem; font-weight: 700;"><i class="fa-solid fa-filter"></i> فلترة حسب الدورة:</label>
+              <select id="handraise-course-filter" class="form-select" onchange="renderHandRaiseLog()"
+                style="background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 6px 12px; border-radius: 8px; font-size: 0.85rem; font-family: inherit;">
+                <option value="all">كل الدورات</option>
+                <!-- Generated dynamically -->
+              </select>
+            </div>
+            <span class="supervisor-badge" id="super-handraise-count"
+              style="margin-right: auto; background: rgba(241,196,15,0.15); border: 1px solid rgba(241,196,15,0.3); color: #f1c40f; padding: 4px 10px; border-radius: 8px; font-weight: 700; font-size: 0.85rem;">0 طلبات استئذان</span>
+          </div>
+          <div class="super-table-wrap">
+            <table class="super-table">
+              <thead>
+                <tr>
+                  <th>اسم المتدرب</th>
+                  <th>اسم الاختبار</th>
+                  <th>وقت البدء</th>
+                  <th>تاريخ اليوم</th>
+                  <th>حالة الاستئذان / الخروج المؤقت</th>
+                  <th>الإجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="handraise-tbody">
+                <!-- Hand raise log rows generated dynamically -->
+              </tbody>
+            </table>
           </div>
         </div>
 
@@ -1369,9 +1403,15 @@
         </p>
       </div>
 
-      <div class="quiz-timer">
-        <span>⏱️</span>
-        <span id="quiz-timer-text">15:00</span>
+      <div style="display:flex; align-items:center; gap:15px;">
+        <div id="hand-raise-status" style="display:none; align-items:center; gap:8px; padding:6px 12px; border-radius:8px; font-weight:800; font-size:0.85rem; transition:all 0.3s ease;"></div>
+        <button id="btn-raise-hand" class="btn btn-sm btn-ghost" onclick="raiseHand()" style="display:none; border:1px solid rgba(255,255,255,0.15); font-weight:800; font-size:0.85rem; border-radius:8px; color:#fff; align-items:center; gap:6px;">
+          ✋ رفع اليد للاستئذان
+        </button>
+        <div class="quiz-timer">
+          <span>⏱️</span>
+          <span id="quiz-timer-text">15:00</span>
+        </div>
       </div>
     </div>
 
@@ -1416,6 +1456,9 @@
     let examEntryTime = null;
     let activeAttemptDbId = null;
     let activeTab = 'results';
+    let localHandApproved = false;
+    let localBypassCount = 0;
+    let handRaiseStatusInterval = null;
 
     async function init() {
       SeedData.init();
@@ -1459,6 +1502,8 @@
             renderViolationsArchive();
           } else if (activeTab === 'qbank-reqs') {
             renderQBankRequests();
+          } else if (activeTab === 'stats') {
+            renderHandRaiseLog();
           }
         }
       }, 3000);
@@ -1684,7 +1729,7 @@
         renderExamsMgmtTable();
       } else if (tabId === 'stats') {
         document.getElementById('tab-super-stats').style.display = 'block';
-        renderStatsTab();
+        renderHandRaiseLog();
       } else if (tabId === 'violations') {
         document.getElementById('tab-super-violations').style.display = 'block';
         renderViolationsArchive();
@@ -1735,16 +1780,36 @@
       const exams = Storage.getCollection(Storage.keys.EXAMS) || [];
       if (filterDropdown) {
         const selectedVal = filterDropdown.value || 'all';
+        const permittedExams = exams.filter(e => {
+          if (roleInfo && roleInfo.level >= 4.5) return true;
+          return hasActiveQBankPermission(e.id);
+        });
         filterDropdown.innerHTML = '<option value="all">كل الدورات</option>' +
-          exams.map(e => `<option value="${e.id}">${e.title}</option>`).join('');
+          permittedExams.map(e => `<option value="${e.id}">${e.title}</option>`).join('');
         filterDropdown.value = selectedVal;
+      }
+
+      const hFilterDropdown = document.getElementById('handraise-course-filter');
+      if (hFilterDropdown) {
+        const hSelectedVal = hFilterDropdown.value || 'all';
+        const permittedExams = exams.filter(e => {
+          if (roleInfo && roleInfo.level >= 4.5) return true;
+          return hasActiveQBankPermission(e.id);
+        });
+        hFilterDropdown.innerHTML = '<option value="all">كل الدورات</option>' +
+          permittedExams.map(e => `<option value="${e.id}">${e.title}</option>`).join('');
+        hFilterDropdown.value = hSelectedVal;
       }
 
       const vFilterDropdown = document.getElementById('violations-course-filter');
       if (vFilterDropdown) {
         const vSelectedVal = vFilterDropdown.value || 'all';
+        const permittedExams = exams.filter(e => {
+          if (roleInfo && roleInfo.level >= 4.5) return true;
+          return hasActiveQBankPermission(e.id);
+        });
         vFilterDropdown.innerHTML = '<option value="all">كل الدورات</option>' +
-          exams.map(e => `<option value="${e.id}">${e.title}</option>`).join('');
+          permittedExams.map(e => `<option value="${e.id}">${e.title}</option>`).join('');
         vFilterDropdown.value = vSelectedVal;
       }
 
@@ -1765,6 +1830,7 @@
             const passingScore = examObj ? examObj.passingScore : 50;
             return {
               id: dbRow.id,
+              examId: examObj ? examObj.id : null,
               studentName: dbRow.trainee_name,
               studentRank: dbRow.rank,
               studentBadge: dbRow.badge_code || dbRow.code,
@@ -1779,8 +1845,18 @@
               passed: dbRow.score >= passingScore,
               status: dbRow.status,
               passingScore: passingScore,
-              studentTables: dbRow.studentTables || []
+              studentTables: dbRow.studentTables || [],
+              hand_raised: dbRow.hand_raised || 0,
+              hand_approved: dbRow.hand_approved || 0,
+              bypass_count: dbRow.bypass_count || 0
             };
+          });
+
+          // Filter by supervisor course permission
+          results = results.filter(r => {
+            if (roleInfo && roleInfo.level >= 4.5) return true;
+            if (!r.examId) return false;
+            return hasActiveQBankPermission(r.examId);
           });
 
           if (filterVal !== 'all') {
@@ -1808,7 +1884,14 @@
             } else if (r.status === 'rejected') {
               statusBadge = `<span class="status-badge-el fail">✕ مرفوض</span>`;
             } else if (r.status === 'started') {
-              statusBadge = `<span class="status-badge-el pending">✏️ يختبر الآن</span>`;
+              if (r.hand_raised === 1) {
+                statusBadge = `<span class="status-badge-el pending pulse-yellow" style="background: rgba(241, 196, 15, 0.2); border-color: #f1c40f; color: #f1c40f; font-weight: 800;"><i class="fa-solid fa-hand"></i> طالب استئذان (رفع يد)</span>`;
+              } else if (r.hand_approved === 1) {
+                const remaining = 2 - (r.bypass_count || 0);
+                statusBadge = `<span class="status-badge-el pass" style="background: rgba(46, 204, 113, 0.15); border-color: #2ecc71; color: #2ecc71; font-weight: 800;"><i class="fa-solid fa-circle-check"></i> مسموح بالخروج (متبقي: ${remaining})</span>`;
+              } else {
+                statusBadge = `<span class="status-badge-el pending">✏️ يختبر الآن</span>`;
+              }
             } else if (r.status === 'exited') {
               statusBadge = `<span class="status-badge-el fail"><i class="fa-solid fa-door-open"></i> انسحاب</span>`;
             } else {
@@ -1821,6 +1904,14 @@
             let approveBtn = '';
             if (r.status === 'pending' && r.passed) {
               approveBtn = `<button class="action-btn-el approve" onclick="setExamStatus('${r.id}', 'approved')">✔️ اعتماد النتيجة</button>`;
+            }
+
+            let handRaiseBtns = '';
+            if (r.status === 'started' && r.hand_raised === 1) {
+              handRaiseBtns = `
+                <button class="action-btn-el approve" style="background:rgba(46, 204, 113, 0.12); border-color:rgba(46, 204, 113, 0.35); color:#2ecc71;" onclick="approveHandRaise('${r.id}')"><i class="fa-solid fa-hand"></i> موافقة</button>
+                <button class="action-btn-el reject" style="background:rgba(231, 76, 60, 0.12); border-color:rgba(231, 76, 60, 0.35); color:#e74c3c;" onclick="rejectHandRaise('${r.id}')"><i class="fa-solid fa-ban"></i> رفض</button>
+              `;
             }
 
             const reviewBtn = `<button class="action-btn-el approve" style="background:rgba(201,162,39,0.08); border-color:rgba(201,162,39,0.3); color:var(--color-gold-primary);" onclick="openReviewAnswersModal('${r.id}')"><i class="fa-solid fa-eye"></i> مراجعة</button>`;
@@ -1865,6 +1956,7 @@
               <td>
                 <div class="action-btn-group">
                   ${approveBtn}
+                  ${handRaiseBtns}
                   ${reviewBtn}
                   ${deleteBtn}
                 </div>
@@ -2062,7 +2154,7 @@
 
             return `
             <tr>
-              <td style="font-weight:700; color:#fff">${r.trainee_name}</td>
+              <td style="font-weight:700; color:#fff">${r.real_name || r.trainee_name}</td>
               <td><span style="color:var(--color-gold-light); font-weight:800;">${r.rank || '—'}</span></td>
               <td style="font-weight:600;">${r.course_name}</td>
               <td style="font-family:monospace; font-weight:800; color:#ff4757;">${r.previous_score}%</td>
@@ -2258,53 +2350,126 @@
       }
     }
 
-    /* ── Tab 3: Statistics ── */
-    function renderStatsTab() {
-      const container = document.getElementById('exams-stats-cards');
-      const exams = Storage.getCollection(Storage.keys.EXAMS) || [];
-      const results = Storage.getCollection(Storage.keys.EXAM_RESULTS) || [];
+    /* ── Tab 3: Hand Raise Log ── */
+    function renderHandRaiseLog() {
+      const tbody = document.getElementById('handraise-tbody');
+      if (!tbody) return;
 
-      if (exams.length === 0) {
-        container.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:50px;color:rgba(255,255,255,0.3)">لا توجد اختبارات مسجلة لإظهار الإحصائيات</div>`;
-        return;
-      }
+      const filterVal = document.getElementById('handraise-course-filter').value || 'all';
+      const userRole = Auth.getRole();
+      const roleInfo = Auth.getRoleInfo(userRole);
 
-      container.innerHTML = exams.map(e => {
-        // Calculate real-time stats
-        const examResults = results.filter(r => r.examId === e.id);
-        const totalTakers = examResults.length;
-        const passedCount = examResults.filter(r => r.passed).length;
-        const failedCount = totalTakers - passedCount;
-        const rate = totalTakers > 0 ? Math.round((passedCount / totalTakers) * 100) : 0;
+      Storage.fetchExamArchive()
+        .then(exams => {
+          let logs = exams.map(dbRow => {
+            const examObj = Storage.getCollection(Storage.keys.EXAMS).find(e => e.title === dbRow.exam_name);
+            const passingScore = examObj ? examObj.passingScore : 50;
+            return {
+              id: dbRow.id,
+              examId: examObj ? examObj.id : null,
+              studentName: dbRow.trainee_name,
+              studentRank: dbRow.rank,
+              studentBadge: dbRow.badge_code || dbRow.code,
+              discordId: dbRow.discord_id || '—',
+              attemptCount: dbRow.attempt_count || 1,
+              duration: dbRow.duration !== undefined ? dbRow.duration : 0,
+              examTitle: dbRow.exam_name || dbRow.course_name,
+              date: dbRow.created_at ? dbRow.created_at.split(' ')[0].replace(/-/g, '/') : '—',
+              entryTime: dbRow.start_time,
+              endTime: dbRow.end_time,
+              score: dbRow.score,
+              passed: dbRow.score >= passingScore,
+              status: dbRow.status,
+              passingScore: passingScore,
+              studentTables: dbRow.studentTables || [],
+              hand_raised: dbRow.hand_raised || 0,
+              hand_approved: dbRow.hand_approved || 0,
+              bypass_count: dbRow.bypass_count || 0
+            };
+          });
 
-        return `
-        <div class="exam-card" style="padding: 24px; min-height: auto; cursor: default; transform: none; box-shadow: none;">
-          <div>
-            <div style="font-size: 1.8rem; margin-bottom: 10px;">${e.emoji || '<i class="fa-solid fa-chart-column"></i>'}</div>
-            <h4 style="color:#fff; font-weight:800; font-size:1.1rem; margin-bottom:12px; text-align:right;">${e.title}</h4>
-            
-            <div style="display:flex; flex-direction:column; gap:8px; border-top:1px solid rgba(255,255,255,0.06); padding-top:12px;">
-              <div style="display:flex; justify-content:space-between; font-size:0.82rem; color:rgba(255,255,255,0.65);">
-                <span>إجمالي المختبرين:</span>
-                <strong style="color:#fff;">${totalTakers} عسكري</strong>
-              </div>
-              <div style="display:flex; justify-content:space-between; font-size:0.82rem; color:rgba(255,255,255,0.65);">
-                <span>الناجحين:</span>
-                <strong style="color:#2ecc71;">${passedCount} عسكري</strong>
-              </div>
-              <div style="display:flex; justify-content:space-between; font-size:0.82rem; color:rgba(255,255,255,0.65);">
-                <span>الراسبين:</span>
-                <strong style="color:#ff4757;">${failedCount} عسكري</strong>
-              </div>
-              <div style="display:flex; justify-content:space-between; font-size:0.82rem; color:rgba(255,255,255,0.65);">
-                <span>نسبة النجاح العامة:</span>
-                <strong style="color:var(--color-gold-primary);">${rate}%</strong>
-              </div>
-            </div>
-          </div>
-        </div>
-      `;
-      }).join('');
+          // Filter by active hand raise activity
+          logs = logs.filter(r => r.hand_raised === 1 || r.hand_approved === 1 || r.bypass_count > 0);
+
+          // Filter by course dropdown selection
+          if (filterVal !== 'all') {
+            logs = logs.filter(r => r.examId === filterVal);
+          }
+
+          // Filter by supervisor course permission
+          logs = logs.filter(r => {
+            if (roleInfo && roleInfo.level >= 4.5) return true;
+            if (!r.examId) return false;
+            return hasActiveQBankPermission(r.examId);
+          });
+
+          const countSpan = document.getElementById('super-handraise-count');
+          if (countSpan) {
+            const activeRequestsCount = logs.filter(l => l.hand_raised === 1).length;
+            countSpan.textContent = `${activeRequestsCount} طلبات استئذان نشطة (${logs.length} إجمالي السجل)`;
+          }
+
+          if (logs.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:30px;color:rgba(255,255,255,0.3)">لا توجد طلبات استئذان أو رفع يد مسجلة</td></tr>`;
+            return;
+          }
+
+          tbody.innerHTML = logs.map(r => {
+            let tablesList = r.studentTables || [];
+            if (tablesList.length === 0) {
+              const solved = Auth.resolveUserTableInfo({
+                discord: r.studentBadge,
+                username: r.studentName,
+                globalName: r.studentName,
+                name: r.studentName
+              }) || {};
+              tablesList = solved.tables || [];
+            }
+
+            const tablesBadge = tablesList.length > 0
+              ? tablesList.map(t => `<span class="supervisor-badge" style="display:inline-block; font-size:0.68rem; padding: 2px 6px; background:rgba(201,162,39,0.12); border:1px solid rgba(201,162,39,0.35); color:var(--color-gold-primary); border-radius:4px; font-weight:700;">${t}</span>`).join('')
+              : '<span style="font-size:0.68rem; opacity:0.35;">غير مسجل</span>';
+
+            let handBadge = '';
+            if (r.hand_raised === 1) {
+              handBadge = `<span class="status-badge-el pending pulse-yellow" style="background: rgba(241, 196, 15, 0.2); border-color: #f1c40f; color: #f1c40f; font-weight: 800;"><i class="fa-solid fa-hand"></i> طالب استئذان (رفع يد)</span>`;
+            } else if (r.hand_approved === 1) {
+              const remaining = 2 - r.bypass_count;
+              handBadge = `<span class="status-badge-el pass" style="background: rgba(46, 204, 113, 0.15); border-color: #2ecc71; color: #2ecc71; font-weight: 800;"><i class="fa-solid fa-circle-check"></i> مسموح بالخروج (متبقي: ${remaining})</span>`;
+            } else {
+              handBadge = `<span class="status-badge-el fail" style="background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.15); color: rgba(255,255,255,0.4); font-weight: 800;"><i class="fa-solid fa-ban"></i> انتهى الاستئذان (خروج: ${r.bypass_count})</span>`;
+            }
+
+            let handRaiseBtns = '';
+            if (r.hand_raised === 1) {
+              handRaiseBtns = `
+                <button class="action-btn-el approve" style="background:rgba(46, 204, 113, 0.12); border-color:rgba(46, 204, 113, 0.35); color:#2ecc71;" onclick="approveHandRaise('${r.id}')"><i class="fa-solid fa-hand"></i> موافقة</button>
+                <button class="action-btn-el reject" style="background:rgba(231, 76, 60, 0.12); border-color:rgba(231, 76, 60, 0.35); color:#e74c3c;" onclick="rejectHandRaise('${r.id}')"><i class="fa-solid fa-ban"></i> رفض</button>
+              `;
+            } else {
+              handRaiseBtns = `<span style="font-size:0.8rem; opacity:0.5;">—</span>`;
+            }
+
+            return `
+            <tr>
+              <td style="font-weight:700; color:#fff">
+                <div>${r.studentName}</div>
+                <div style="display:flex; flex-wrap:wrap; gap:4px; margin-top:4px;">${tablesBadge}</div>
+              </td>
+              <td style="font-weight:600;">${r.examTitle}</td>
+              <td style="font-family:monospace; font-size:0.8rem; color:#2ecc71;">${r.entryTime || '—'}</td>
+              <td style="font-size:0.8rem; opacity:0.8;">${r.date || '—'}</td>
+              <td>${handBadge}</td>
+              <td>
+                <div class="action-btn-group">
+                  ${handRaiseBtns}
+                </div>
+              </td>
+            </tr>
+          `;
+          }).join('');
+        })
+        .catch(err => console.error('Error rendering hand raise log:', err));
     }
 
     /* ── Modal: Exam Details ── */
@@ -2978,20 +3143,22 @@
         correct: correct
       };
 
+      const updatedQuestions = [...(exams[idx].questions || [])];
       if (editIndex !== -1) {
         // Edit mode
-        if (exams[idx].questions && exams[idx].questions[editIndex]) {
-          exams[idx].questions[editIndex] = newQuestion;
+        if (updatedQuestions[editIndex]) {
+          updatedQuestions[editIndex] = newQuestion;
           App.toast('✓ تم تحديث السؤال بنجاح.', 'success');
         }
       } else {
         // Add mode
-        if (!exams[idx].questions) exams[idx].questions = [];
-        exams[idx].questions.push(newQuestion);
+        updatedQuestions.push(newQuestion);
         App.toast('✓ تم إضافة السؤال لبنك الأسئلة بنجاح.', 'success');
       }
 
-      Storage.set(Storage.keys.EXAMS, exams);
+      // Save via the standard sync engine update to prevent race conditions or sync overwrites
+      Storage.updateInCollection(Storage.keys.EXAMS, examId, { questions: updatedQuestions });
+
       cancelEditQuestion();
 
       renderQuestionBankList();
@@ -3011,9 +3178,13 @@
         const exams = Storage.getCollection(Storage.keys.EXAMS) || [];
         const idx = exams.findIndex(e => e.id === examId);
         if (idx !== -1 && exams[idx].questions) {
-          exams[idx].questions.splice(questionIndex, 1);
-          Storage.set(Storage.keys.EXAMS, exams);
+          const updatedQuestions = [...exams[idx].questions];
+          updatedQuestions.splice(questionIndex, 1);
+
+          // Save via the standard sync engine update to prevent race conditions or sync overwrites
+          Storage.updateInCollection(Storage.keys.EXAMS, examId, { questions: updatedQuestions });
           App.toast('🗑️ تم حذف السؤال بنجاح.', 'success');
+
           renderQuestionBankList();
           renderExamsMgmtTable();
           renderExamsList();
@@ -3321,6 +3492,20 @@
       isExamActive = true;
       violationsCount = 0;
 
+      localHandApproved = false;
+      localBypassCount = 0;
+      if (handRaiseStatusInterval) clearInterval(handRaiseStatusInterval);
+      const btnRaiseHand = document.getElementById('btn-raise-hand');
+      if (btnRaiseHand) {
+        btnRaiseHand.style.display = 'inline-flex';
+        btnRaiseHand.disabled = false;
+        btnRaiseHand.innerHTML = `✋ رفع اليد للاستئذان`;
+      }
+      const handRaiseStatus = document.getElementById('hand-raise-status');
+      if (handRaiseStatus) {
+        handRaiseStatus.style.display = 'none';
+      }
+
       /* ── RANDOMIZATION ENGINE (بنك الأسئلة العشوائي) ── */
       // 1. Draw a random subset of questions based on questionsCountToShow
       let questionsPool = [...activeExam.questions];
@@ -3461,6 +3646,9 @@
 
     function submitQuiz() {
       clearInterval(timerInterval);
+      localHandApproved = false;
+      localBypassCount = 0;
+      if (handRaiseStatusInterval) clearInterval(handRaiseStatusInterval);
       isExamActive = false; // Turn off cheat detection
       clearExamProgress();
 
@@ -3603,6 +3791,9 @@
       }
 
       isExamActive = false; // Turn off cheat detection
+      localHandApproved = false;
+      localBypassCount = 0;
+      if (handRaiseStatusInterval) clearInterval(handRaiseStatusInterval);
       document.getElementById('quiz-overlay').classList.remove('active');
       document.body.style.overflow = '';
 
@@ -3693,6 +3884,29 @@
 
           renderActiveQuestion();
           startTimer();
+          if (activeAttemptDbId) {
+            const apiBase = Storage.getApiBase();
+            fetch(`${apiBase}/api/exams?id=${activeAttemptDbId}`, {
+              headers: { 'Bypass-Tunnel-Reminder': 'true' }
+            })
+            .then(res => res.json())
+            .then(data => {
+              if (data && data.attempt) {
+                const att = data.attempt;
+                localBypassCount = att.bypass_count || 0;
+                if (att.hand_approved === 1) {
+                  localHandApproved = true;
+                  updateHandUI('approved', 2 - localBypassCount);
+                  startPollingHandStatus();
+                } else if (att.hand_raised === 1) {
+                  updateHandUI('pending');
+                  startPollingHandStatus();
+                } else {
+                  updateHandUI('none');
+                }
+              }
+            }).catch(e => console.warn(e));
+          }
           App.toast('⚡ تم استعادة جلسة الاختبار السابقة بنجاح. يمكنك إكمال الإجابة!', 'success');
         }
       } catch (err) {
@@ -3701,9 +3915,210 @@
       }
     }
 
+    // Hand raise helper functions
+    function raiseHand() {
+      if (!activeAttemptDbId) {
+        App.toast('⏳ جاري تسجيل محاولة الاختبار، يرجى الانتظار ثوانٍ ثم المحاولة مجدداً...', 'warning');
+        return;
+      }
+
+      const btn = document.getElementById('btn-raise-hand');
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> جاري الطلب...`;
+
+      Storage.saveExamAttempt({
+        id: activeAttemptDbId,
+        hand_raised: 1,
+        hand_approved: 0,
+        bypass_count: 0
+      }).then(res => {
+        App.toast('✋ تم رفع اليد للمسؤول. يرجى الانتظار حتى تتم الموافقة...', 'info');
+        updateHandUI('pending');
+        startPollingHandStatus();
+      }).catch(err => {
+        console.error(err);
+        App.toast('❌ فشل إرسال طلب رفع اليد. حاول مرة أخرى.', 'error');
+        btn.disabled = false;
+        btn.innerHTML = `✋ رفع اليد للاستئذان`;
+      });
+    }
+
+    function updateHandUI(state, remainingExits = 2) {
+      const btn = document.getElementById('btn-raise-hand');
+      const statusDiv = document.getElementById('hand-raise-status');
+      if (!btn || !statusDiv) return;
+
+      if (state === 'none') {
+        btn.style.display = 'inline-flex';
+        btn.disabled = false;
+        btn.innerHTML = `✋ رفع اليد للاستئذان`;
+        statusDiv.style.display = 'none';
+      } else if (state === 'pending') {
+        btn.style.display = 'none';
+        statusDiv.style.display = 'inline-flex';
+        statusDiv.style.background = 'rgba(241, 196, 15, 0.15)';
+        statusDiv.style.border = '1px solid rgba(241, 196, 15, 0.4)';
+        statusDiv.style.color = '#f1c40f';
+        statusDiv.innerHTML = `<i class="fa-solid fa-hourglass-half fa-spin"></i> بانتظار موافقة المسؤول...`;
+      } else if (state === 'approved') {
+        btn.style.display = 'none';
+        statusDiv.style.display = 'inline-flex';
+        statusDiv.style.background = 'rgba(46, 204, 113, 0.15)';
+        statusDiv.style.border = '1px solid rgba(46, 204, 113, 0.4)';
+        statusDiv.style.color = '#2ecc71';
+        statusDiv.innerHTML = `🟢 مسموح بالخروج مؤقتاً (متبقي: ${remainingExits})`;
+      }
+    }
+
+    function startPollingHandStatus() {
+      if (handRaiseStatusInterval) clearInterval(handRaiseStatusInterval);
+
+      handRaiseStatusInterval = setInterval(() => {
+        if (!isExamActive || !activeAttemptDbId) {
+          clearInterval(handRaiseStatusInterval);
+          return;
+        }
+
+        const apiBase = Storage.getApiBase();
+        fetch(`${apiBase}/api/exams?id=${activeAttemptDbId}`, {
+          headers: { 'Bypass-Tunnel-Reminder': 'true' }
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.attempt) {
+            const att = data.attempt;
+            localBypassCount = att.bypass_count || 0;
+            
+            if (att.hand_approved === 1) {
+              if (!localHandApproved) {
+                localHandApproved = true;
+                App.alert('✅ وافق المسؤول على خروجك المؤقت من صفحة الاختبار لمرتين كحد أقصى دون احتساب مخالفة.', 'موافقة على الخروج المؤقت');
+              }
+              const remaining = 2 - localBypassCount;
+              if (remaining <= 0) {
+                localHandApproved = false;
+                updateHandUI('none');
+                clearInterval(handRaiseStatusInterval);
+              } else {
+                updateHandUI('approved', remaining);
+              }
+            } else if (att.hand_raised === 1) {
+              updateHandUI('pending');
+            } else {
+              localHandApproved = false;
+              updateHandUI('none');
+              clearInterval(handRaiseStatusInterval);
+            }
+          }
+        })
+        .catch(err => console.warn('Error polling hand raise status:', err));
+      }, 3000);
+    }
+
+    // Supervisor Hand Raise Actions
+    window.approveHandRaise = function(id) {
+      Storage.fetchExamArchive().then(exams => {
+        const attempt = exams.find(e => e.id === id);
+        if (!attempt) return;
+
+        const examObj = Storage.getCollection(Storage.keys.EXAMS).find(e => e.title === attempt.exam_name);
+        if (!examObj) return;
+
+        const role = Auth.getRole();
+        const roleInfo = Auth.getRoleInfo(role);
+        if (!roleInfo || (roleInfo.level < 4.5 && !hasActiveQBankPermission(examObj.id))) {
+          App.toast('❌ غير مصرح لك بقبول استئذان هذا الاختبار!', 'error');
+          return;
+        }
+
+        const currentUser = Auth.getCurrentUser();
+        const adminName = currentUser ? currentUser.username : 'مسؤول';
+
+        Storage.saveExamAttempt({
+          id: id,
+          hand_raised: 0,
+          hand_approved: 1,
+          bypass_count: 0,
+          examiner: adminName
+        })
+        .then(res => {
+          App.toast('✅ تم قبول استئذان المتدرب وموافقته على الخروج مؤقتاً.', 'success');
+          renderSupervisorResults();
+          if (activeTab === 'stats') renderHandRaiseLog();
+        })
+        .catch(err => {
+          console.error(err);
+          App.toast('✕ فشل اعتماد الموافقة على الخروج', 'error');
+        });
+      }).catch(err => console.error(err));
+    };
+
+    window.rejectHandRaise = function(id) {
+      Storage.fetchExamArchive().then(exams => {
+        const attempt = exams.find(e => e.id === id);
+        if (!attempt) return;
+
+        const examObj = Storage.getCollection(Storage.keys.EXAMS).find(e => e.title === attempt.exam_name);
+        if (!examObj) return;
+
+        const role = Auth.getRole();
+        const roleInfo = Auth.getRoleInfo(role);
+        if (!roleInfo || (roleInfo.level < 4.5 && !hasActiveQBankPermission(examObj.id))) {
+          App.toast('❌ غير مصرح لك برفض استئذان هذا الاختبار!', 'error');
+          return;
+        }
+
+        Storage.saveExamAttempt({
+          id: id,
+          hand_raised: 0,
+          hand_approved: 0,
+          bypass_count: 0
+        })
+        .then(res => {
+          App.toast('❌ تم رفض استئذان المتدرب.', 'info');
+          renderSupervisorResults();
+          if (activeTab === 'stats') renderHandRaiseLog();
+        })
+        .catch(err => {
+          console.error(err);
+          App.toast('✕ فشل معالجة رفض الطلب', 'error');
+        });
+      }).catch(err => console.error(err));
+    };
+
     // Anti-cheat helper functions
     function recordViolation(type) {
       if (!isExamActive || !activeExam) return;
+
+      if (localHandApproved && localBypassCount < 2) {
+        localBypassCount++;
+        playBeep();
+        
+        const updateData = {
+          id: activeAttemptDbId,
+          bypass_count: localBypassCount
+        };
+        
+        if (localBypassCount >= 2) {
+          updateData.hand_approved = 0;
+          localHandApproved = false;
+          updateHandUI('none');
+          if (handRaiseStatusInterval) clearInterval(handRaiseStatusInterval);
+        } else {
+          updateHandUI('approved', 2 - localBypassCount);
+        }
+        
+        Storage.saveExamAttempt(updateData)
+          .then(() => {
+            console.log(`Bypass count updated to ${localBypassCount} on server.`);
+          })
+          .catch(err => {
+            console.warn('Failed to update bypass count on server:', err);
+          });
+          
+        App.toast(`<i class="fa-solid fa-circle-check"></i> خروج مؤقت مأذون به من المسؤول. متبقي لك خروج واحد إضافي.`, 'success');
+        return;
+      }
 
       violationsCount++;
       playBeep();
@@ -3794,9 +4209,16 @@
           const exams = Storage.getCollection(Storage.keys.EXAMS) || [];
           const selectedExam = exams.find(e => e.id === filterVal);
 
-          let filteredViolations = violations;
+          let filteredViolations = violations.filter(v => {
+            const examObj = exams.find(e => e.title === v.course_name);
+            const examId = examObj ? examObj.id : (v.examId || v.exam_id);
+            if (roleInfo && roleInfo.level >= 4.5) return true;
+            if (!examId) return false;
+            return hasActiveQBankPermission(examId);
+          });
+
           if (filterVal !== 'all') {
-            filteredViolations = violations.filter(v => {
+            filteredViolations = filteredViolations.filter(v => {
               if (v.examId && v.examId === filterVal) return true;
               if (v.exam_id && v.exam_id === filterVal) return true;
               if (selectedExam && (v.course_name === selectedExam.title || (v.details && v.details.includes(selectedExam.title)))) return true;

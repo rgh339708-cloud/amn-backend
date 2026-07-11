@@ -713,14 +713,26 @@ const Auth = (() => {
         (u.id === userData.id)
       );
       
-      // Force Owner permissions for the specified Discord accounts
-      const ownerIds = ['1334568342345748565', '821825761673478144'];
-      const ownerUsernames = ['3gjo', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'];
+      // Force Owner/Assistant Owner permissions for specified Discord accounts
+      const ownerIds = ['1334568342345748565'];
+      const ownerUsernames = ['3gjo', 'onlyryan', 'onlyryan -', 'onlyryan-'];
+      const assistantOwnerIds = ['821825761673478144'];
+      const assistantOwnerUsernames = ['ifm711'];
+
       if (ownerIds.includes(userData.id) || 
           (userData.username && ownerUsernames.includes(userData.username.toLowerCase()))) {
         matchedUser = {
           role: 'owner',
           rank: 'المشرف العام',
+          username: userData.global_name || userData.username || userData.username,
+          discord: userData.username,
+          status: 'active'
+        };
+      } else if (assistantOwnerIds.includes(userData.id) || 
+                 (userData.username && assistantOwnerUsernames.includes(userData.username.toLowerCase()))) {
+        matchedUser = {
+          role: 'assistant_owner',
+          rank: 'مساعد المشرف العام',
           username: userData.global_name || userData.username || userData.username,
           discord: userData.username,
           status: 'active'
@@ -887,12 +899,19 @@ const Auth = (() => {
             let allUsers = Storage.getCollection(Storage.keys.USERS) || [];
             let dbUser = allUsers.find(u => u.id === userData.id || (u.discord && session.discord && u.discord.toLowerCase() === session.discord.toLowerCase()));
 
-            const ownerIds = ['1334568342345748565', '821825761673478144'];
-            const ownerUsernames = ['3gjo', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'];
+            const ownerIds = ['1334568342345748565'];
+            const ownerUsernames = ['3gjo', 'onlyryan', 'onlyryan -', 'onlyryan-'];
             const isOwner = ownerIds.includes(userData.id) || 
                             (userData.username && ownerUsernames.includes(userData.username.toLowerCase())) || 
                             (session.username && ownerUsernames.includes(session.username.toLowerCase())) ||
                             (session.discord && ownerUsernames.includes(session.discord.toLowerCase()));
+
+            const assistantOwnerIds = ['821825761673478144'];
+            const assistantOwnerUsernames = ['ifm711'];
+            const isAssistantOwner = assistantOwnerIds.includes(userData.id) || 
+                                     (userData.username && assistantOwnerUsernames.includes(userData.username.toLowerCase())) || 
+                                     (session.username && assistantOwnerUsernames.includes(session.username.toLowerCase())) ||
+                                     (session.discord && assistantOwnerUsernames.includes(session.discord.toLowerCase()));
 
             if (upsertData && upsertData.user) {
               const serverUser = upsertData.user;
@@ -900,8 +919,8 @@ const Auth = (() => {
               if (resolvedRole === 'viewer') {
                 resolvedRole = resolveRoleFromRank(userRank, 'viewer');
               }
-              session.role = isOwner ? 'owner' : resolvedRole;
-              session.rank = isOwner ? 'المشرف العام' : (serverUser.rank || 'مشاهد');
+              session.role = isOwner ? 'owner' : (isAssistantOwner ? 'assistant_owner' : resolvedRole);
+              session.rank = isOwner ? 'المشرف العام' : (isAssistantOwner ? 'مساعد المشرف العام' : (serverUser.rank || 'مشاهد'));
               session.department = serverUser.department || '';
               session.code = serverUser.code || '';
               session.status = serverUser.status || 'active';
@@ -945,8 +964,8 @@ const Auth = (() => {
                   id: userData.id,
                   username: session.username || userData.username,
                   discord: session.discord || userData.username,
-                  role: isOwner ? 'owner' : 'viewer',
-                  rank: isOwner ? 'المشرف العام' : (userRank || 'مشاهد'),
+                  role: isOwner ? 'owner' : (isAssistantOwner ? 'assistant_owner' : 'viewer'),
+                  rank: isOwner ? 'المشرف العام' : (isAssistantOwner ? 'مساعد المشرف العام' : (userRank || 'مشاهد')),
                   department: userDepartment,
                   code: userCode,
                   status: 'active',
@@ -987,6 +1006,10 @@ const Auth = (() => {
                   dbUser.role = 'owner';
                   dbUser.rank = 'المشرف العام';
                   updated = true;
+                } else if (isAssistantOwner && dbUser.role !== 'assistant_owner') {
+                  dbUser.role = 'assistant_owner';
+                  dbUser.rank = 'مساعد المشرف العام';
+                  updated = true;
                 }
                 if (updated) {
                   Storage.set(Storage.keys.USERS, allUsers);
@@ -995,8 +1018,8 @@ const Auth = (() => {
                 if (resolvedRole === 'viewer') {
                   resolvedRole = resolveRoleFromRank(userRank, 'viewer');
                 }
-                session.role = isOwner ? 'owner' : resolvedRole;
-                session.rank = isOwner ? 'المشرف العام' : (dbUser.rank || 'مشاهد');
+                session.role = isOwner ? 'owner' : (isAssistantOwner ? 'assistant_owner' : resolvedRole);
+                session.rank = isOwner ? 'المشرف العام' : (isAssistantOwner ? 'مساعد المشرف العام' : (dbUser.rank || 'مشاهد'));
                 session.department = dbUser.department || '';
                 session.code = dbUser.code || '';
                 session.status = dbUser.status || 'active';
@@ -1384,8 +1407,17 @@ const Auth = (() => {
     // Filter out non-personnel tabs
     const ignoredTabs = [' جدول الغرامات 💵', 'نظام الترقيات ⭐️جديد', 'الترقيات المسرعة ', 'الإستقالات <i class="fa-solid fa-crosshairs"></i>'];
 
-    for (const tabName in sheets) {
-      if (ignoredTabs.includes(tabName)) continue;
+    const mainTabs = [
+      'جدول الامن العام - الاساسي',
+      'جدول الامن العام - المنتدبين',
+      'جدول الامن العام - الادارة'
+    ];
+
+    let foundInMain = false;
+    
+    // First pass: Check main tabs
+    for (const tabName of mainTabs) {
+      if (!sheets[tabName]) continue;
       const rows = sheets[tabName] || [];
       const matchedRow = rows.find(checkMatch);
       if (matchedRow) {
@@ -1395,13 +1427,25 @@ const Auth = (() => {
         }
         registeredName = matchedRow.name;
         if (matchedRow.badge) badge = matchedRow.badge;
-        const isMainTab = [
-          'جدول الامن العام - الاساسي',
-          'جدول الامن العام - المنتدبين',
-          'جدول الامن العام - الادارة'
-        ].includes(tabName);
-        if (isMainTab && matchedRow.rank) {
-          highestRank = matchedRow.rank;
+        if (matchedRow.rank) highestRank = matchedRow.rank;
+        found = true;
+        foundInMain = true;
+      }
+    }
+
+    // Second pass: Check other tabs (only for department list or fallback name)
+    for (const tabName in sheets) {
+      if (mainTabs.includes(tabName) || ignoredTabs.includes(tabName)) continue;
+      const rows = sheets[tabName] || [];
+      const matchedRow = rows.find(checkMatch);
+      if (matchedRow) {
+        const mappedName = tabNameMappings[tabName] || tabName.replace('جدول ', '');
+        if (!tables.includes(mappedName)) {
+          tables.push(mappedName);
+        }
+        if (!foundInMain) {
+          // Keep Discord name if they only exist in non-main tables
+          registeredName = user.globalName || user.username || '';
         }
         found = true;
       }
@@ -1522,15 +1566,24 @@ const Auth = (() => {
           let otherChanged = false;
 
           // Protect Owner accounts from silent session downgrades
-          const ownerIds = ['1334568342345748565', '821825761673478144'];
-          const ownerUsernames = ['3gjo', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'];
+          const ownerIds = ['1334568342345748565'];
+          const ownerUsernames = ['3gjo', 'onlyryan', 'onlyryan -', 'onlyryan-'];
           const isOwner = ownerIds.includes(user.id) || 
                           (user.username && ownerUsernames.includes(user.username.toLowerCase())) || 
                           (user.discord && ownerUsernames.includes(user.discord.toLowerCase()));
           
+          const assistantOwnerIds = ['821825761673478144'];
+          const assistantOwnerUsernames = ['ifm711'];
+          const isAssistantOwner = assistantOwnerIds.includes(user.id) || 
+                                   (user.username && assistantOwnerUsernames.includes(user.username.toLowerCase())) || 
+                                   (user.discord && assistantOwnerUsernames.includes(user.discord.toLowerCase()));
+          
           if (isOwner) {
             dbUser.role = 'owner';
             dbUser.rank = 'المشرف العام';
+          } else if (isAssistantOwner) {
+            dbUser.role = 'assistant_owner';
+            dbUser.rank = 'مساعد المشرف العام';
           } else {
             // Automatically resolve role from rank if rank was updated on server
             dbUser.role = resolveRoleFromRank(dbUser.rank, dbUser.role);

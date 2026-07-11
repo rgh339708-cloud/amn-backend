@@ -285,6 +285,14 @@ const Components = (() => {
     // Profile widget
     let profileWidgetHTML = '';
     if (currentUser) {
+      let dispName = currentUser.display_name || currentUser.username || '';
+      if (typeof Auth !== 'undefined' && typeof Auth.resolveUserTableInfo === 'function') {
+        const info = Auth.resolveUserTableInfo(currentUser);
+        if (info && info.found && info.name) {
+          dispName = info.name;
+        }
+      }
+
       profileWidgetHTML = `
       <div class="sidebar-profile-widget">
         <div class="profile-header-info">
@@ -293,7 +301,7 @@ const Components = (() => {
             <div class="profile-avatar-border"></div>
           </div>
           <div class="profile-text">
-            <span class="profile-name">${currentUser.display_name || currentUser.username}</span>
+            <span class="profile-name">${dispName}</span>
             <span class="profile-rank"><i class="fa-solid fa-medal"></i> ${currentUser.rank || 'عسكري'}</span>
           </div>
         </div>

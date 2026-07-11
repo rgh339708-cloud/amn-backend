@@ -33,9 +33,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>قاعدة البيانات | الأمن العام</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=1.1.32">
-  <link rel="stylesheet" href="../assets/css/navbar.css?v=1.1.32">
-  <link rel="stylesheet" href="../assets/css/sidebar.css?v=1.1.32">
+  <link rel="stylesheet" href="../assets/css/main.css?v=1.1.33">
+  <link rel="stylesheet" href="../assets/css/navbar.css?v=1.1.33">
+  <link rel="stylesheet" href="../assets/css/sidebar.css?v=1.1.33">
   <link rel="stylesheet" href="../assets/css/footer.css">
   <style>
     /* ── Premium Tabs Styling ── */
@@ -940,11 +940,11 @@
 <body>
   <div id="toast-container"></div>
 
-  <script src="../assets/js/storage.js?v=1.1.32"></script>
-  <script src="../assets/js/data.js?v=1.1.32"></script>
-  <script src="../assets/js/auth.js?v=1.1.32"></script>
-  <script src="../assets/js/components.js?v=1.1.32"></script>
-  <script src="../assets/js/app.js?v=1.1.32"></script>
+  <script src="../assets/js/storage.js?v=1.1.33"></script>
+  <script src="../assets/js/data.js?v=1.1.33"></script>
+  <script src="../assets/js/auth.js?v=1.1.33"></script>
+  <script src="../assets/js/components.js?v=1.1.33"></script>
+  <script src="../assets/js/app.js?v=1.1.33"></script>
 
   <script>
     document.write(Components.navbar('amn13'));
@@ -958,7 +958,7 @@
         <div class="page-header-badge animate-fade-in"><i class="fa-solid fa-lock"></i> وصول مقيّد</div>
         <h1 class="page-header-title animate-fade-up"><span class="gradient-text"><i class="fa-solid fa-lock"></i> قاعدة
             البيانات</span></h1>
-        <p class="page-header-desc animate-fade-up delay-1">السجلات الرسمية الشاملة لجميع منسوبي الجهاز</p>
+        <p class="page-header-desc animate-fade-up delay-1">الجداول الرسمية لجميع شؤون القطاع</p>
       </div>
     </div>
 
@@ -1358,6 +1358,19 @@
     let cachedSheets = {}; // tabName -> members list
     let _clickedTab = ''; // tracks which tab the last row click came from
 
+    function logDiag(msg) {
+      console.log('[Diag]', msg);
+      fetch('/api/logs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'diag_log',
+          username: 'SystemDiag',
+          details: msg
+        })
+      }).catch(() => {});
+    }
+
     // ── Tabs that show promotion requirements ──
     const MAIN_TABS = [
       'جدول الامن العام - الاساسي',
@@ -1416,7 +1429,7 @@
           discordUsersCache = await res.json();
           console.log('[Discord Cache] Loaded Discord profiles cache from API successfully!');
         } else {
-          const fallbackRes = await fetch(`../assets/data/discord_users.json?t=${Date.now()}`);
+          const fallbackRes = await fetch(`/assets/data/discord_users.json?t=${Date.now()}`);
           if (fallbackRes.ok) {
             discordUsersCache = await fallbackRes.json();
             console.log('[Discord Cache] Loaded Discord profiles cache from static fallback successfully!');
@@ -1569,7 +1582,39 @@
       ];
 
       const table = gvizData.table;
-      const cols = table.cols.map(c => (c ? (c.label || "").trim().replace(/\s+/g, ' ') : ""));
+      let cols = table.cols.map(c => (c ? (c.label || "").trim().replace(/\s+/g, ' ') : ""));
+
+      let headerRowIndex = -1;
+      const rawRows = [];
+      if (table.rows) {
+        table.rows.forEach(r => {
+          if (!r || !r.c) return;
+          const cells = r.c.map(cell => {
+            if (!cell) return '';
+            if (cell.f !== undefined) return String(cell.f).trim();
+            if (cell.v !== undefined) return String(cell.v).trim();
+            return '';
+          });
+          rawRows.push(cells);
+        });
+      }
+
+      // Check if we need to resolve headers from rows (e.g. if table.cols contains empty labels)
+      const hasNameHeader = cols.some(c => c.includes("الاسم") || c.includes("اسم"));
+      if (!hasNameHeader && rawRows.length > 0) {
+        for (let i = 0; i < Math.min(rawRows.length, 5); i++) {
+          const row = rawRows[i];
+          if (row.some(cell => cell.includes("الاسم") || cell.includes("id discord") || cell.includes("الكود"))) {
+            cols = row.map(h => (h || '').trim().replace(/\s+/g, ' '));
+            headerRowIndex = i;
+            break;
+          }
+        }
+      }
+
+      if (headerRowIndex !== -1 && table.rows) {
+        table.rows = table.rows.slice(headerRowIndex + 1);
+      }
 
       // Special Fines Parsing matching live sheet schema
       if (tabName === ' جدول الغرامات 💵') {
@@ -1643,7 +1688,7 @@
       }
 
       // Custom Military Administration Parsing
-      if (tabName === 'الادارة العامة لشؤون العسكرية') {
+      if (tabName === 'الادارة العامة لشؤون العسكرية' || tabName === 'الإدارة العامة لشؤون العسكرية') {
         const list = [];
         table.rows.forEach(row => {
           if (!row || !row.c) return;
@@ -1656,35 +1701,51 @@
           };
 
           const name = valOf(1);
-          if (!name || name === "الاسم" || name.includes("الاسم") || name.includes("مهند الساعدي")) return;
+          if (!name || name === "الاسم" || name.includes("الاسم")) return;
 
-          const warnings = [];
-          const isTrue = (val) => val === "true" || val === true || String(val).toLowerCase() === "true" || String(val).includes("✔");
-          if (isTrue(valOf(6))) warnings.push("انذار قضائي");
-          if (isTrue(valOf(7))) warnings.push("انذار اول");
-          if (isTrue(valOf(8))) warnings.push("انذار ثاني");
-          if (isTrue(valOf(9))) warnings.push("انذار ثالث");
-          if (isTrue(valOf(10))) warnings.push("انذار وظيفي");
-          if (isTrue(valOf(11))) warnings.push("انذار قسم");
-          const warningStr = warnings.length > 0 ? warnings.join(" | ") : "لا يوجد انذارات";
+          if (tabName === 'الادارة العامة لشؤون العسكرية') {
+            // Mapping for 'الادارة العامة لشؤون العسكرية' (without hamza)
+            list.push({
+              name: name,
+              discord: valOf(0),
+              badge: valOf(2).replace(/[\[\]]/g, '').trim() || "—",
+              rank: valOf(3) || "عضو",
+              joinDate: "—",
+              status: valOf(4) || "بالخدمة",
+              position: cleanPositionValue(valOf(5)) || "عضو",
+              courses: [],
+              regularCourses: [],
+              notes: valOf(6) || "—",
+              badgeDegree: valOf(7) || "لا يوجد انذارات"
+            });
+          } else {
+            // Mapping for 'الإدارة العامة لشؤون العسكرية' (with hamza)
+            const warnings = [];
+            const isTrue = (val) => val === "true" || val === true || String(val).toLowerCase() === "true" || String(val).includes("✔");
+            if (isTrue(valOf(6))) warnings.push("انذار قضائي");
+            if (isTrue(valOf(7))) warnings.push("انذار اول");
+            if (isTrue(valOf(8))) warnings.push("انذار ثاني");
+            if (isTrue(valOf(9))) warnings.push("انذار ثالث");
+            if (isTrue(valOf(10))) warnings.push("انذار وظيفي");
+            if (isTrue(valOf(11))) warnings.push("انذار قسم");
+            const warningStr = warnings.length > 0 ? warnings.join(" | ") : "لا يوجد انذارات";
 
-          list.push({
-            name: name,
-            discord: valOf(0),
-            badge: valOf(2).replace(/[\[\]]/g, '').trim() || "—",
-            rank: valOf(3) || "عضو",
-            joinDate: "—",
-            status: "بالخدمة",
-            position: cleanPositionValue(valOf(4)) || "عضو المجلس",
-            courses: [],
-            regularCourses: [],
-            notes: valOf(5) || "—",
-            badgeDegree: warningStr
-          });
+            list.push({
+              name: name,
+              discord: valOf(0),
+              badge: valOf(2).replace(/[\[\]]/g, '').trim() || "—",
+              rank: valOf(3) || "عضو",
+              joinDate: "—",
+              status: "بالخدمة",
+              position: cleanPositionValue(valOf(4)) || "عضو المجلس",
+              courses: [],
+              regularCourses: [],
+              notes: valOf(5) || "—",
+              badgeDegree: warningStr
+            });
+          }
         });
-        const targetNames = ["مهند الساعدي", "ناصر الحربي", "بتال العنزي", "بجاد العتيبي"];
-        const filteredList = list.filter(item => !targetNames.some(tn => item.name.includes(tn)));
-        return [...LEADERSHIP_MEMBERS, ...filteredList];
+        return list;
       }
 
       // Custom Resignations Parsing
@@ -1895,7 +1956,20 @@
       const idxName = cols.findIndex(c => c.includes("الاسم") || c === "الاسم" || c.includes("اسم العسكري") || c.includes("اسم"));
       const idxCode = cols.findIndex(c => c.includes("الكود") || c.includes("كود") || c === "الكود");
       const idxRank = cols.findIndex(c => c.includes("الرتبة") || c.includes("رتبة") || c === "الرتبة");
-      const idxPromo = cols.findIndex(c => c.includes("تاريخ الترقية") || c.includes("الترقية") || c.includes("تاريخ"));
+      let idxPromo = -1;
+      const cleanTabName = String(tabName || '').trim();
+      if (cleanTabName === 'جدول الامن العام - الاساسي') {
+        idxPromo = 6; // Column G
+      } else if (cleanTabName === 'جدول الامن العام - المنتدبين') {
+        idxPromo = 6; // Column G
+      } else if (cleanTabName === 'جدول الامن العام - الادارة') {
+        idxPromo = 5; // Column F
+      } else {
+        idxPromo = cols.findIndex(c => c.includes("تاريخ الترقية") || c.includes("الترقية"));
+        if (idxPromo === -1) {
+          idxPromo = cols.findIndex(c => c.includes("تاريخ"));
+        }
+      }
       const idxStatus = cols.findIndex(c => c.includes("الحالة") || c === "الحالة" || c.includes("حالة الموظف"));
       const idxPosition = cols.findIndex(c => c.includes("المهام القياديه") || c.includes("المسؤوليات") || c.includes("المســــــؤوليات") || c.includes("مسؤولية") || c.includes("المسؤولية"));
       const idxNotes = cols.findIndex(c => c.includes("الملاحظات") || c.includes("ملاحظات") || c.includes("الـــمـــلاحــــظــــــات") || c.includes("الملاحظه") || c.includes("الملاحضه") || c.includes("الانذارات") || c.includes("انذار") || c.includes("الملاحضات"));
@@ -2140,11 +2214,10 @@
           <th>الاسم</th>
           <th>الكود</th>
           <th>الرتبة</th>
+          <th>حالة الموظف</th>
           <th>المنصب</th>
-          <th>الحالة</th>
-          <th>تاريخ اليوم</th>
-          <th>الإنذارات العسكرية</th>
-          <th>الملاحظات</th>
+          <th>المسؤوليات</th>
+          <th>الانذارات</th>
         </tr>
       `;
       } else if (currentTab === 'جدول الإدارة العامه لشؤون تدريب الامن العام') {
@@ -2234,18 +2307,27 @@
     }
 
     async function loadStaticCacheFromServer() {
+      logDiag('بدء جلب كاش السيرفر الثابت (/assets/data/members_google_sheets_cache.json)...');
       try {
-        const res = await fetch(`../assets/data/members_google_sheets_cache.json?t=${Date.now()}`);
+        const url = `/assets/data/members_google_sheets_cache.json?t=${Date.now()}`;
+        const res = await fetch(url);
+        logDiag(`استجابة السيرفر لطلب الكاش: ${res.status} ${res.statusText}`);
         if (res.ok) {
           const data = await res.json();
+          logDiag(`تحليل JSON الكاش ناجح. عدد الأقسام المسترجعة: ${Object.keys(data).length}`);
           if (data && typeof data === 'object' && Object.keys(data).length > 0) {
             cachedSheets = data;
             localStorage.setItem('members_google_sheets_cache', JSON.stringify(data));
-            console.log('[Database] Loaded static sheets cache from server successfully.');
+            logDiag('تم حفظ بيانات الكاش بنجاح في localStorage.');
             return true;
+          } else {
+            logDiag('بيانات الكاش فارغة أو ليست كائن صالح.');
           }
+        } else {
+          logDiag('استجابة طلب الكاش غير سليمة (ليس 200/ok).');
         }
       } catch (err) {
+        logDiag(`فشل طلب كاش السيرفر بسبب خطأ: ${err.message}`);
         console.warn('[Database] Failed to load static sheets cache from server:', err);
       }
       return false;
@@ -2257,7 +2339,7 @@
       if (tab === ' جدول الغرامات 💵') cols = 11;
       else if (tab === 'نظام الترقيات ⭐️جديد' || tab === 'الترقيات المسرعة ') cols = 4;
       else if (tab === 'الإستقالات 🎯') cols = 9;
-      else if (tab === 'الادارة العامة لشؤون العسكرية') cols = 9;
+      else if (tab === 'الادارة العامة لشؤون العسكرية') cols = 8;
       else if (tab === 'جدول الإدارة العامه لشؤون تدريب الامن العام') cols = 10;
       else if (tab === 'جدول الادارة العامة لشؤون الادارية والمالية') cols = 8;
       else if (tab === ' جدول الادارة العامه لشؤون التجنيد') cols = 8;
@@ -2299,28 +2381,50 @@
 
       // Check local storage cache first
       if (!forceRefresh) {
+        logDiag('محاولة تحميل البيانات من الكاش المحلي...');
         let cachedData = localStorage.getItem('members_google_sheets_cache');
-        if (!cachedData) {
-          // Show skeleton table while loading cache from server for the first time
+        let parsed = null;
+        if (cachedData) {
+          try {
+            parsed = JSON.parse(cachedData);
+            logDiag(`تم قراءة كاش localStorage بنجاح. يحتوي على ${Object.keys(parsed).length} أقسام.`);
+          } catch (e) {
+            logDiag('فشل تحليل كاش localStorage كـ JSON.');
+          }
+        } else {
+          logDiag('لم يتم العثور على كاش في localStorage.');
+        }
+
+        // تحقق من وجود بيانات للأمن العام الأساسي في الكاش
+        const hasMainMembers = parsed && Array.isArray(parsed['جدول الامن العام - الاساسي']) && parsed['جدول الامن العام - الاساسي'].length > 0;
+        logDiag(`حالة وجود بيانات للأمن العام الأساسي في الكاش: ${hasMainMembers ? 'متوفرة ✓' : 'غير متوفرة ✕'}`);
+
+        if (!hasMainMembers) {
+          logDiag('سحب كاش السيرفر كخطوة أولى...');
           const tbody = document.getElementById('db-tbody');
           if (tbody) {
             tbody.innerHTML = getTableSkeletonHTML(currentTab);
           }
-          await loadStaticCacheFromServer();
+          const loaded = await loadStaticCacheFromServer();
+          logDiag(`نتيجة سحب كاش السيرفر: ${loaded ? 'ناجح ✓' : 'فشل ✕'}`);
           cachedData = localStorage.getItem('members_google_sheets_cache');
         }
+
         if (cachedData) {
           try {
             cachedSheets = JSON.parse(cachedData);
             if (cachedSheets[currentTab]) {
               allMembers = cachedSheets[currentTab];
+              logDiag(`عرض بيانات القسم الحالي (${currentTab}) - عدد الأعضاء: ${allMembers.length}`);
               updateStatsAndTable();
-              // Trigger a silent background update on load to get the freshest data immediately
+              logDiag('جاري تشغيل مزامنة خلفية حية مع Google Sheets...');
               fetchSpreadsheetData(true, true);
               return;
+            } else {
+              logDiag(`لم يتم العثور على القسم الحالي (${currentTab}) في الكاش.`);
             }
           } catch (err) {
-            console.error('Failed to parse cache:', err);
+            logDiag(`خطأ أثناء معالجة وعرض بيانات الكاش: ${err.message}`);
           }
         }
       }
@@ -2338,13 +2442,16 @@
         }
       }
 
+      let failedTabsCount = 0;
       // Background silent update or initial fetch
       try {
         const fetchedCache = {};
-        let failedTabsCount = 0;
         const fetchPromises = SHEET_TABS.map(async (tab) => {
           try {
             const jsonpData = await fetchTabJSONP(tab);
+            if (!jsonpData || jsonpData.status === 'error' || !jsonpData.table) {
+              throw new Error(jsonpData && jsonpData.errors ? jsonpData.errors[0].message : 'Invalid table data or rate limited');
+            }
             fetchedCache[tab] = mapJSONPToMembers(jsonpData, tab);
           } catch (tabErr) {
             console.warn(`Failed to fetch sheet tab "${tab}":`, tabErr);
@@ -2404,32 +2511,35 @@
           }
         }
       } catch (err) {
+        logDiag(`خطأ في طلب المزامنة مع Google Sheets: ${err.message}`);
         console.error('Failed to fetch spreadsheet data:', err);
 
-        // If the user is online and all tabs failed, the Google Sheet is closed/locked
-        if (navigator.onLine) {
-          console.warn('[Database] Google Sheet is inaccessible while online. Locking database.');
-          localStorage.removeItem('members_google_sheets_cache');
-          cachedSheets = {};
+        const isDbClosed = (failedTabsCount === SHEET_TABS.length || err.message.includes('failed to load') || err.message.includes('Timeout') || err.message.includes('All sheet tabs failed'));
+
+        if (isDbClosed) {
+          logDiag('قاعدة البيانات مغلقة. عرض شاشة القفل للجميع.');
           showDatabaseClosedMessage();
-          return;
-        }
+        } else {
+          logDiag('فشل المزامنة الجزئي. عرض البيانات المخزنة مؤقتاً.');
+          const hasMainMembers = cachedSheets && Array.isArray(cachedSheets['جدول الامن العام - الاساسي']) && cachedSheets['جدول الامن العام - الاساسي'].length > 0;
+          if (!hasMainMembers) {
+            logDiag('محاولة إعادة تحميل من كاش السيرفر بعد فشل المزامنة...');
+            await loadStaticCacheFromServer();
+          }
+          if (Object.keys(cachedSheets).length === 0) {
+            logDiag('تحذير: لا توجد بيانات كاش نهائياً. استخدام بيانات محلية فارغة.');
+            const localData = Storage.getCollection(Storage.keys.DATABASE_ROWS) || [];
+            cachedSheets = {
+              'جدول الامن العام - الاساسي': localData
+            };
+          }
+          allMembers = cachedSheets[currentTab] || [];
+          logDiag(`عرض المنسوبين بعد الفشل - عدد الأعضاء: ${allMembers.length}`);
+          updateStatsAndTable();
 
-        // Fallback only if offline (no network)
-        if (Object.keys(cachedSheets).length === 0) {
-          await loadStaticCacheFromServer();
-        }
-        if (Object.keys(cachedSheets).length === 0) {
-          const localData = Storage.getCollection(Storage.keys.DATABASE_ROWS) || [];
-          cachedSheets = {
-            'جدول الامن العام - الاساسي': localData
-          };
-        }
-        allMembers = cachedSheets[currentTab] || [];
-        updateStatsAndTable();
-
-        if (!isSilent) {
-          App.toast('✕ فشل تحديث البيانات! يتم عرض البيانات المخزنة مؤقتاً.', 'error');
+          if (!isSilent) {
+            App.toast('⚠️ فشل الاتصال المباشر بـ Google Sheets. تم عرض البيانات المخزنة مؤقتاً.', 'warning');
+          }
         }
       } finally {
         if (refreshBtn && !isSilent) {
@@ -2454,9 +2564,9 @@
           <div style="width: 80px; height: 80px; background: rgba(231, 76, 60, 0.1); border: 2px solid rgba(231, 76, 60, 0.35); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; box-shadow: 0 0 20px rgba(231, 76, 60, 0.15);">
             <i class="fa-solid fa-lock" style="font-size: 2.2rem; color: #e74c3c;"></i>
           </div>
-          <h2 style="color: #fff; font-weight: 900; font-size: 1.8rem; margin-bottom: 12px; font-family: 'Cairo', sans-serif;">جدول البيانات مغلق حالياً</h2>
+          <h2 style="color: #fff; font-weight: 900; font-size: 1.8rem; margin-bottom: 12px; font-family: 'Cairo', sans-serif;">جدول قاعدة البيانات مغلق حالياً</h2>
           <p style="color: var(--color-text-secondary); font-size: 0.95rem; line-height: 1.8; max-width: 460px; margin: 0 auto 30px; font-family: 'Cairo', sans-serif;">
-            تم إغلاق جدول البيانات الرئيسي من قبل الإدارة العامة لشؤون الأمن العام. سيتم إعادة تفعيل تصفح السجلات تلقائياً بمجرد فتح الجدول.
+            تم إغلاق الجدول. سيتم إعادة تفعيل تصفح السجلات تلقائياً بمجرد فتح الجدول.
           </p>
           <button id="btn-retry-db" onclick="retryFetchSpreadsheet()" class="btn btn-gold" style="display: inline-flex; width: auto; padding: 12px 30px; font-weight: 700; border-radius: 8px; justify-content: center; align-items: center; gap: 8px; font-family: 'Cairo', sans-serif; transition: all 0.3s ease;">
             <i class="fa-solid fa-arrows-rotate"></i> إعادة المحاولة والتحقق
@@ -2598,7 +2708,12 @@
     }
 
     function filterDB() {
-      const q = document.getElementById('db-search-input').value.toLowerCase();
+      const searchEl = document.getElementById('db-search-input');
+      if (!searchEl) {
+        logDiag('[filterDB] search input element not found, skipping filtering.');
+        return;
+      }
+      const q = searchEl.value.toLowerCase();
       let filtered = allMembers.filter(r =>
         (r.name || "").toLowerCase().includes(q) ||
         (r.rank || "").toLowerCase().includes(q) ||
@@ -2608,6 +2723,8 @@
       if (promoFilterOnly) {
         filtered = filtered.filter(r => isEligibleForPromotion(r));
       }
+
+      logDiag(`[filterDB] allMembers: ${allMembers.length}, query: "${q}", filtered: ${filtered.length}, promoFilter: ${promoFilterOnly}, currentTab: "${currentTab}"`);
 
       updateStatsFromList(filtered);
       renderDB(filtered);
@@ -2656,6 +2773,9 @@
     function renderDB(list) {
       const tbody = document.getElementById('db-tbody');
       if (!tbody) return;
+
+      logDiag(`[renderDB] list length: ${list.length}, currentTab: "${currentTab}"`);
+
       if (!list.length) {
         tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:40px;color:rgba(255,255,255,0.3)">لا توجد سجلات مطابقة</td></tr>`;
         return;
@@ -2771,8 +2891,11 @@
         tbody.innerHTML = list.map(r => {
           const cleanRank = cleanArabicString(r.rank || '');
           const cleanTitle = cleanArabicString(r.title || '');
-          const isHeader = cleanRank.includes('شروط') || cleanRank.includes('ترقيات') ||
-            cleanTitle.includes('شروط') || cleanTitle.includes('ترقيات') ||
+          const cleanCondition = cleanArabicString(r.condition || '');
+
+          const isHeader = cleanRank.includes('شروط') || cleanRank.includes('ترقيات') || cleanRank.includes('ترقية') ||
+            cleanTitle.includes('شروط') || cleanTitle.includes('ترقيات') || cleanTitle.includes('ترقية') ||
+            cleanCondition.includes('شروط ترقية') || cleanCondition.includes('شروط ترقيات') ||
             ((!r.condition || r.condition === '—' || r.condition === '-') &&
               (!r.courses || r.courses === '—' || r.courses === '-'));
 
@@ -2781,8 +2904,14 @@
             if (r.title && r.title !== '—' && r.title !== '-') headerText = r.title;
             else if (r.rank && r.rank !== '—' && r.rank !== '-') headerText = r.rank;
             else if (r.duration && r.duration !== '—' && r.duration !== '-') headerText = r.duration;
+            else if (r.condition && r.condition !== '—' && r.condition !== '-') headerText = r.condition;
 
             if (!headerText) headerText = 'مسار جديد';
+
+            // Normalise/fix spelling "ترقيات المعتمدين" to "ترقية المعتمدين"
+            if (headerText.includes('ترقيات المعتمدين')) {
+              headerText = headerText.replace('ترقيات المعتمدين', 'ترقية المعتمدين');
+            }
 
             if (!headerText.includes('⭐') && !headerText.includes('<i class="fa-solid fa-star"></i>')) {
               headerText = '⭐ ' + headerText;
@@ -2811,10 +2940,10 @@
       if (currentTab === 'الادارة العامة لشؤون العسكرية') {
         tbody.innerHTML = list.map(r => {
           const statusHTML = getStatusHTML(r.status, true);
-          const warningBadge = r.badgeDegree && r.badgeDegree !== 'لا يوجد انذارات' && r.badgeDegree !== '—'
+          const warningBadge = r.badgeDegree && r.badgeDegree !== 'لا يوجد انذارات' && r.badgeDegree !== '—' && r.badgeDegree !== '-'
             ? `<span class="status-pill on_leave" style="background: rgba(231,76,60,0.12); color: #ff4757; border: 1px solid rgba(231,76,60,0.25); padding: 3px 9px; border-radius: 20px; font-size: 0.7rem; font-weight: 700;"><i class="fa-solid fa-triangle-exclamation"></i> ${r.badgeDegree}</span>`
             : `<span class="status-pill active" style="background: rgba(39,174,96,0.12); color: #2ecc71; border: 1px solid rgba(39,174,96,0.25); padding: 3px 9px; border-radius: 20px; font-size: 0.7rem; font-weight: 700;"><i class="fa-solid fa-circle-check" style="color: #2ecc71;"></i> سليم</span>`;
-          const notesHTML = r.notes && r.notes !== '—' && r.notes !== '-' ? `<span class="note-text" title="${r.notes}">${r.notes}</span>` : `<span style="color: rgba(255,255,255,0.2)">—</span>`;
+          const responsibilitiesHTML = r.notes && r.notes !== '—' && r.notes !== '-' ? `<span class="note-text" title="${r.notes}">${r.notes}</span>` : `<span style="color: rgba(255,255,255,0.2)">—</span>`;
 
           return `
           <tr>
@@ -2822,11 +2951,10 @@
             <td onclick="_clickedTab=currentTab; showPersonModal('${r.name}')" style="font-weight: 800; color: #fff; cursor: pointer;" onmouseover="this.style.color='var(--color-gold-primary)'; this.style.textDecoration='underline';" onmouseout="this.style.color='#fff'; this.style.textDecoration='none';">${renderMemberAvatarCell(r)}</td>
             <td><span class="badge-code-left" style="position:static; margin:0; display:inline-block;">${r.badge || '—'}</span></td>
             <td style="color:var(--color-gold-primary);font-weight:700">${r.rank || '—'}</td>
-            <td>${renderPositionCell(r.position)}</td>
             <td>${statusHTML}</td>
-            <td>${getFormattedLastActive(r)}</td>
+            <td>${renderPositionCell(r.position)}</td>
+            <td>${responsibilitiesHTML}</td>
             <td>${warningBadge}</td>
-            <td>${notesHTML}</td>
           </tr>
         `;
         }).join('');
@@ -3013,18 +3141,22 @@
       // Normalize and search for the person record in cache
       const cleanName = cleanArabicString(name);
       let person = null;
+      let foundInTabKey = '';
       const mainTabKeys = ['جدول الامن العام - الاساسي', 'جدول الامن العام - المنتدبين', 'جدول الامن العام - الادارة'];
+
+      // ── البحث دائماً في جداول الأمن الأساسية أولاً لضمان بيانات الترقية الصحيحة ──
       for (const tk of mainTabKeys) {
         if (cachedSheets[tk]) {
-          person = cachedSheets[tk].find(m => cleanArabicString(m.name) === cleanName);
-          if (person) break;
+          const found = cachedSheets[tk].find(m => cleanArabicString(m.name) === cleanName);
+          if (found) { person = found; foundInTabKey = tk; break; }
         }
       }
+      // إذا لم يوجد في الجداول الأساسية → ابحث في بقية الجداول (باستثناء الغرامات)
       if (!person) {
         for (const tab in cachedSheets) {
           if (tab === ' جدول الغرامات 💵') continue;
-          person = cachedSheets[tab].find(m => cleanArabicString(m.name) === cleanName);
-          if (person) break;
+          const found = cachedSheets[tab].find(m => cleanArabicString(m.name) === cleanName);
+          if (found) { person = found; foundInTabKey = tab; break; }
         }
       }
       if (!person) {
@@ -3038,33 +3170,47 @@
       const cleanTabStr = (s) => String(s || '').trim().replace(/\s+/g, ' ');
       const clickedStr = cleanTabStr(_clickedTab);
 
-      const isMainTabClick = MAIN_TABS.map(cleanTabStr).includes(clickedStr);
+      const isMainTabClick = MAIN_TABS.map(cleanTabStr).includes(clickedStr) ||
+                             MAIN_TABS.map(cleanTabStr).includes(cleanTabStr(foundInTabKey));
       const isFinesTableClick = clickedStr.includes('الغرامات') || clickedStr.includes('غرامات');
       const showFinesTab = isMainTabClick || isFinesTableClick;
 
-      const isMutandib = clickedStr.includes('المنتدبين');
+      // isMutandib يُحدد من الجدول الذي وُجد فيه الشخص (وليس من الجدول الذي نُقر منه)
+      const isMutandib = foundInTabKey.includes('المنتدبين') || clickedStr.includes('المنتدبين');
       activeModalPerson = person;
       activeModalIsMutandib = isMutandib;
       currentModalPromoType = 'regular';
 
-      // Profile (Discord) tab: always visible for ALL tables
-      document.getElementById('modal-tab-content-discord').style.display = 'block';
-      document.getElementById('btn-tab-discord').style.display = '';
+      // Toggle tab buttons and contents visibility based on isMainSecurityTab check
+      const isMainSecurityTab = ['جدول الامن العام - الاساسي', 'جدول الامن العام - المنتدبين', 'جدول الامن العام - الادارة'].includes(currentTab);
 
-      // Promo tab: only for main security tables (الأساسي / المعتمدين / الإدارة / المنتدبين)
-      document.getElementById('modal-tab-content-promo').style.display = isMainTabClick ? 'block' : 'none';
-      document.getElementById('btn-tab-promo').style.display = isMainTabClick ? '' : 'none';
+      if (isMainSecurityTab) {
+        // Show ALL tabs: Discord info at top, then Promo and Fines
+        document.getElementById('btn-tab-discord').style.display = '';
+        document.getElementById('modal-tab-content-discord').style.display = 'block';
 
-      // Fines tab: only for main tables OR the fines table itself
-      document.getElementById('modal-tab-content-fines').style.display = showFinesTab ? 'block' : 'none';
-      document.getElementById('btn-tab-fines').style.display = showFinesTab ? '' : 'none';
+        document.getElementById('btn-tab-promo').style.display = '';
+        document.getElementById('modal-tab-content-promo').style.display = 'block';
 
-      // Profile view button: always visible
-      const profileBtn = document.getElementById('modal-view-profile-btn');
-      if (profileBtn) profileBtn.style.display = '';
+        document.getElementById('btn-tab-fines').style.display = '';
+        document.getElementById('modal-tab-content-fines').style.display = 'block';
 
-      // Always default to discord (profile) tab when opening
-      switchModalTab('discord');
+        // Default to discord tab (personal info first)
+        switchModalTab('discord');
+      } else {
+        // Show only discord tab, hide promo and fines tabs
+        document.getElementById('btn-tab-discord').style.display = '';
+        document.getElementById('modal-tab-content-discord').style.display = 'block';
+
+        document.getElementById('btn-tab-promo').style.display = 'none';
+        document.getElementById('modal-tab-content-promo').style.display = 'none';
+
+        document.getElementById('btn-tab-fines').style.display = 'none';
+        document.getElementById('modal-tab-content-fines').style.display = 'none';
+
+        // Default to discord tab
+        switchModalTab('discord');
+      }
 
       // ── Consolidate dynamic values for the default Discord tab ──
       const finesTab = cachedSheets[' جدول الغرامات 💵'] || [];

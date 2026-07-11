@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>الملف الشخصي الموحد | الأمن العام</title>
   
-  <link rel="stylesheet" href="../assets/css/main.css?v=1.1.32">
-  <link rel="stylesheet" href="../assets/css/navbar.css?v=1.1.32">
-  <link rel="stylesheet" href="../assets/css/sidebar.css?v=1.1.32">
+  <link rel="stylesheet" href="../assets/css/main.css?v=1.1.33">
+  <link rel="stylesheet" href="../assets/css/navbar.css?v=1.1.33">
+  <link rel="stylesheet" href="../assets/css/sidebar.css?v=1.1.33">
   <link rel="stylesheet" href="../assets/css/footer.css">
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -412,11 +412,11 @@
 </div>
 
 
-<script src="../assets/js/storage.js?v=1.1.32"></script>
-<script src="../assets/js/data.js?v=1.1.32"></script>
-<script src="../assets/js/auth.js?v=1.1.32"></script>
-<script src="../assets/js/components.js?v=1.1.32"></script>
-<script src="../assets/js/app.js?v=1.1.32"></script>
+<script src="../assets/js/storage.js?v=1.1.33"></script>
+<script src="../assets/js/data.js?v=1.1.33"></script>
+<script src="../assets/js/auth.js?v=1.1.33"></script>
+<script src="../assets/js/components.js?v=1.1.33"></script>
+<script src="../assets/js/app.js?v=1.1.33"></script>
 
 <script>
   function resolveImageUrl(url) {
@@ -598,10 +598,17 @@
       const cleanStr = (s) => String(s || '').trim().toLowerCase();
       const qClean = cleanStr(query).replace('@', '');
       
-      for (const tabName in sheets) {
-        if (tabName === ' جدول الغرامات 💵') continue;
+      const mainTabs = [
+        'جدول الامن العام - الاساسي',
+        'جدول الامن العام - المنتدبين',
+        'جدول الامن العام - الادارة'
+      ];
+
+      // First pass: Check main tabs
+      for (const tabName of mainTabs) {
+        if (!sheets[tabName]) continue;
         const rows = sheets[tabName] || [];
-        const found = rows.find(r => {
+        const matched = rows.find(r => {
           if (type === 'name' && cleanStr(r.name) === cleanStr(query)) return true;
           if (type === 'badge' && r.badge && cleanStr(r.badge) === cleanStr(query)) return true;
           if (type === 'discord') {
@@ -613,10 +620,34 @@
           }
           return false;
         });
-        if (found) {
-          // Add unit based on tab name
+        if (matched) {
           return {
-            ...found,
+            ...matched,
+            unit: tabName.replace('جدول الامن العام - ', '')
+          };
+        }
+      }
+
+      // Second pass: Check other tabs
+      const ignoredTabs = [' جدول الغرامات 💵', 'الإستقالات <i class="fa-solid fa-crosshairs"></i>', 'الإستقالات 🎯'];
+      for (const tabName in sheets) {
+        if (mainTabs.includes(tabName) || ignoredTabs.includes(tabName)) continue;
+        const rows = sheets[tabName] || [];
+        const matched = rows.find(r => {
+          if (type === 'name' && cleanStr(r.name) === cleanStr(query)) return true;
+          if (type === 'badge' && r.badge && cleanStr(r.badge) === cleanStr(query)) return true;
+          if (type === 'discord') {
+            const getDigits = (s) => String(s || '').replace(/\D/g, '');
+            const rowDigits = getDigits(r.discord);
+            const qDigits = getDigits(query);
+            if (rowDigits && qDigits && rowDigits === qDigits) return true;
+            if (r.discord && (cleanStr(r.discord).replace('@', '') === qClean || cleanStr(r.name) === qClean)) return true;
+          }
+          return false;
+        });
+        if (matched) {
+          return {
+            ...matched,
             unit: tabName.replace('جدول الامن العام - ', '')
           };
         }
@@ -758,7 +789,7 @@
     // Standardize user properties
     const user = {
       name: targetUser.name || targetUser.username || 'عضو الأمن العام',
-      badge: dbUser ? (dbUser.code || targetUser.badge || '—') : (targetUser.badge || '—'),
+      badge: targetUser.badge || targetUser.code || (dbUser ? dbUser.code : '') || '—',
       discord: targetUser.discord || 'unknown',
       avatar: targetUser.avatar || '../assets/img/emblem.png',
       banner: targetUser.banner || null,

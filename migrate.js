@@ -126,6 +126,9 @@ async function initializePostgresSchema(pool) {
     duration INTEGER,
     status VARCHAR,
     examiner VARCHAR,
+    hand_raised INTEGER DEFAULT 0,
+    hand_approved INTEGER DEFAULT 0,
+    bypass_count INTEGER DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   )`);
   await pool.query(`CREATE TABLE IF NOT EXISTS retake_requests (
@@ -185,6 +188,9 @@ async function initializePostgresSchema(pool) {
     pass_status VARCHAR,
     duration INTEGER,
     examiner VARCHAR,
+    hand_raised INTEGER DEFAULT 0,
+    hand_approved INTEGER DEFAULT 0,
+    bypass_count INTEGER DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   )`);
   console.log('✅ Schema initialization completed.');

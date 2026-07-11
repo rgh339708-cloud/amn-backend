@@ -12,19 +12,19 @@
     "id": "1147607776319778916",
     "username": "mod14",
     "globalName": "[CC | P-02] يزيد السلمي",
-    "avatar": "assets/img/avatars/1147607776319778916_a0e5dc7e75bfadae9b3734347b4bd495.png",
-    "banner": "assets/img/banners/1147607776319778916_a_4221e943bad8002198ab8f340bb50136.gif",
+    "avatar": "assets/img/avatars/1147607776319778916_fd393e566d724e9764978f0772dbbc1e.png",
+    "banner": "assets/img/banners/1147607776319778916_7e4411a6bb7f1955baec2c624aeff913.png",
     "bannerColor": "#d4ddd2",
-    "lastFetched": 1783200990599
+    "lastFetched": 1783713361546
   },
   "446347062980771872": {
     "id": "446347062980771872",
     "username": "maxfkdon",
-    "globalName": "[CC | P-03] مهند الساعدي",
+    "globalName": "[CC | P-08] مهند الساعدي",
     "avatar": "assets/img/avatars/446347062980771872_916393e07d80d8f89beec842cb388823.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668276871
+    "lastFetched": 1783718841740
   },
   "1120142432554713261": {
     "id": "1120142432554713261",
@@ -33,7 +33,7 @@
     "avatar": "assets/img/avatars/1120142432554713261_a_65592f53553fbd8ea6c2f685c727cc42.gif",
     "banner": "assets/img/banners/1120142432554713261_40bf0654aa856043b842111296f9bef8.png",
     "bannerColor": "#000000",
-    "lastFetched": 1783200981530
+    "lastFetched": 1783718673039
   },
   "999381691208577114": {
     "id": "999381691208577114",
@@ -42,7 +42,7 @@
     "avatar": "assets/img/avatars/999381691208577114_ff6d4ded117cd889b89b5a1ed4fea462.png",
     "banner": "assets/img/banners/999381691208577114_0810c400cd68183e1d72091115182dc6.png",
     "bannerColor": "#000000",
-    "lastFetched": 1782643115126
+    "lastFetched": 1783713719739
   },
   "719364021186461736": {
     "id": "719364021186461736",
@@ -51,7 +51,7 @@
     "avatar": "assets/img/avatars/719364021186461736_901b0f959d484fcbebfa0c24dfedab3f.png",
     "banner": "assets/img/banners/719364021186461736_8b2be5e1ab48b2a7f0473e6f56b84fde.png",
     "bannerColor": "#000000",
-    "lastFetched": 1782642995263
+    "lastFetched": 1783713573926
   },
   "1024189778859671562": {
     "id": "1024189778859671562",
@@ -60,7 +60,7 @@
     "avatar": "assets/img/avatars/1024189778859671562_41ac654af6f9647e6c9a1e14a5507bc7.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1783200922179
+    "lastFetched": 1783749974958
   },
   "1214615342538690675": {
     "id": "1214615342538690675",
@@ -69,7 +69,7 @@
     "avatar": "assets/img/avatars/1214615342538690675_68c240f341ecfaecf0bae8913d9a5aec.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1783201024718
+    "lastFetched": 1783718715105
   },
   "997195682358243398": {
     "id": "997195682358243398",
@@ -87,16 +87,16 @@
     "avatar": "assets/img/avatars/1088642768781463583_a1e05ab51004d1323f39ddb3dc3f502b.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1783200959099
+    "lastFetched": 1783718651979
   },
   "1045733221893148793": {
     "id": "1045733221893148793",
     "username": "1moh2",
     "globalName": "[CC | P-12] محمد بن جاسم",
     "avatar": "assets/img/avatars/1045733221893148793_0e5233a9f175dd66fb1f0785e0cc8ee3.png",
-    "banner": "assets/img/banners/1045733221893148793_a_a9d6573fc3d591e5e0b98b8e8ef1ae3f.gif",
+    "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1783200930851
+    "lastFetched": 1783749983070
   },
   "1000904596329353288": {
     "id": "1000904596329353288",
@@ -105,16 +105,16 @@
     "avatar": "assets/img/avatars/1000904596329353288_4b9932e98597dfb08fdbe45cd249c5ff.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1783200914030
+    "lastFetched": 1783749966875
   },
   "888623768069619752": {
     "id": "888623768069619752",
     "username": ".90a",
-    "globalName": "[CC | P-16] تركي الفضلي",
+    "globalName": "[CA | P-16] تركي الفضلي",
     "avatar": "assets/img/avatars/888623768069619752_c73f0adc0d4dfb6800cc2d65abd7fefc.png",
     "banner": "",
     "bannerColor": "#292827",
-    "lastFetched": 1782668378910
+    "lastFetched": 1783718952160
   },
   "1267242474032594965": {
     "id": "1267242474032594965",
@@ -132,7 +132,7 @@
     "avatar": "assets/img/avatars/1109190457126305923_665c3786fcb0dc5d348e42098c1cd806.png",
     "banner": "assets/img/banners/1109190457126305923_a_f98f86cb683f22f7e3723dc5106f92f7.gif",
     "bannerColor": "#ffffff",
-    "lastFetched": 1783200970510
+    "lastFetched": 1783713338514
   },
   "868320761490862131": {
     "id": "868320761490862131",
@@ -141,16 +141,16 @@
     "avatar": "assets/img/avatars/868320761490862131_86d3d2dd2946948f0427fb04b615345c.png",
     "banner": "assets/img/banners/868320761490862131_a_fea71072bc6ee72f751bc4f377e5bc66.gif",
     "bannerColor": "#000000",
-    "lastFetched": 1782643050728
+    "lastFetched": 1783713642818
   },
   "1334568342345748565": {
     "id": "1334568342345748565",
     "username": "3gjo",
-    "globalName": "[CC | P-19] ريان بن محمد",
-    "avatar": "assets/img/avatars/1334568342345748565_e2dcb67601cdaefd19b887ad9c1105a9.png",
-    "banner": "assets/img/banners/1334568342345748565_79efd028b6c2d3f2455973e82a2b9169.png",
+    "globalName": "[CC | P-19] ريــان بــن مـحــمـد",
+    "avatar": "assets/img/avatars/1334568342345748565_849f01485420e8d8a13e002e0dad60b8.png",
+    "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668224982
+    "lastFetched": 1783718784081
   },
   "1009544040594800650": {
     "id": "1009544040594800650",
@@ -159,7 +159,7 @@
     "avatar": "assets/img/avatars/1009544040594800650_c1f853befadb6e340a79dd99eac0678b.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1783200917589
+    "lastFetched": 1783749970307
   },
   "1310623198366138400": {
     "id": "1310623198366138400",
@@ -168,25 +168,25 @@
     "avatar": "assets/img/avatars/1310623198366138400_b266c8b50b1953b99510120e2eb81203.png",
     "banner": "",
     "bannerColor": "#202d27",
-    "lastFetched": 1782668210318
+    "lastFetched": 1783718768992
   },
   "994679064872894465": {
     "id": "994679064872894465",
     "username": "d7m3571",
-    "globalName": "[P-26] عبد الرحمن الجميلي",
-    "avatar": "assets/img/avatars/994679064872894465_3c26f3941a9b37aa883bde5d34016e26.png",
+    "globalName": "[CC | P-26] عبد الرحمن الجميلي",
+    "avatar": "assets/img/avatars/994679064872894465_33f4387c6566436a0027719fa9fa7a02.png",
     "banner": "",
-    "bannerColor": "#0a0a0a",
-    "lastFetched": 1782668423435
+    "bannerColor": "#000000",
+    "lastFetched": 1783718997949
   },
   "874740171818561616": {
     "id": "874740171818561616",
     "username": "ie_v",
-    "globalName": "[CC | P-31] شرار العنزي",
-    "avatar": "assets/img/avatars/874740171818561616_5f7fcca4671cfbe360fa06dc7dd615c8.png",
+    "globalName": "[CC l P-31] شرار العنزي",
+    "avatar": "assets/img/avatars/874740171818561616_5791a550c7793057bd861e014c621bb0.png",
     "banner": "",
     "bannerColor": "#191919",
-    "lastFetched": 1782668368482
+    "lastFetched": 1783718941432
   },
   "1052607850754621611": {
     "id": "1052607850754621611",
@@ -200,29 +200,29 @@
   "821825761673478144": {
     "id": "821825761673478144",
     "username": "ifm711",
-    "globalName": "[CD | P-32] عمر المالكي",
+    "globalName": "[CD l P-32] عمر المالكي",
     "avatar": "assets/img/avatars/821825761673478144_b3b693f252bec5acb1ba12fdfbf5bf75.png",
     "banner": "assets/img/banners/821825761673478144_638f9701dbe34548a490a6fdaea35bc6.png",
     "bannerColor": "#000000",
-    "lastFetched": 1782668343161
+    "lastFetched": 1783713616250
   },
   "1365838780115718277": {
     "id": "1365838780115718277",
     "username": "mkb_52",
-    "globalName": "[CC l  P-40] ملك العنزي",
+    "globalName": "[CC | P-39] ملك العنزي",
     "avatar": "assets/img/avatars/1365838780115718277_5177d17ecb61b629819a41d2795111c7.png",
-    "banner": "assets/img/banners/1365838780115718277_0045e2d85ab5a05b2657408a9da90f28.png",
+    "banner": "",
     "bannerColor": "#470303",
-    "lastFetched": 1782642915543
+    "lastFetched": 1783718791167
   },
   "1284560094708891730": {
     "id": "1284560094708891730",
     "username": "35_j",
-    "globalName": "[CC | P-33] عصام العنزي",
-    "avatar": "assets/img/avatars/1284560094708891730_c6dfa68a2f2976c1535555adb96c355a.png",
+    "globalName": "[CC l  P-33] عصام العنزي",
+    "avatar": "assets/img/avatars/1284560094708891730_8a20e8e0ced6a351d5d87b9fbd53f919.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668196449
+    "lastFetched": 1783718753763
   },
   "1015504893294948403": {
     "id": "1015504893294948403",
@@ -236,20 +236,20 @@
   "418810473102966794": {
     "id": "418810473102966794",
     "username": "mo7b1",
-    "globalName": "[CC | P-42] محمد بن لبدة",
+    "globalName": "[CC | P-40] محمد بن لبدة",
     "avatar": "assets/img/avatars/418810473102966794_d119bf14d178ed8e231b83860eb7e4fa.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668275825
+    "lastFetched": 1783718840646
   },
   "833776062948966461": {
     "id": "833776062948966461",
     "username": "tn.91",
-    "globalName": "[CC | P-43] ماجد محمد",
+    "globalName": "[CC | P-41] ماجد محمد",
     "avatar": "assets/img/avatars/833776062948966461_eacf11ae27c4bd4b23aae70418164096.png",
     "banner": "assets/img/banners/833776062948966461_a_465774fa1da206dec49ebd7a61ab10a2.gif",
     "bannerColor": "#605e59",
-    "lastFetched": 1782643037645
+    "lastFetched": 1783713625305
   },
   "787985331034390538": {
     "id": "787985331034390538",
@@ -258,7 +258,7 @@
     "avatar": "assets/img/avatars/787985331034390538_d1b161cc7a6f33360e41aa460317cb22.png",
     "banner": "",
     "bannerColor": "#630074",
-    "lastFetched": 1782668335255
+    "lastFetched": 1783718900324
   },
   "768176906993664060": {
     "id": "768176906993664060",
@@ -276,16 +276,16 @@
     "avatar": "assets/img/avatars/1203270421357535255_e32501854f4d21a4def237d58b841e4d.png",
     "banner": "assets/img/banners/1203270421357535255_26377488cdc921d6d1cbe7312b1dae2e.png",
     "bannerColor": "#0d0c0c",
-    "lastFetched": 1783201018436
+    "lastFetched": 1783713389532
   },
   "1235712646259675238": {
     "id": "1235712646259675238",
     "username": "0nvj",
-    "globalName": "[CC | P-52] خيال العتيبي",
-    "avatar": "assets/img/avatars/1235712646259675238_8636133a9826b72df0a68e9bc932ce54.png",
-    "banner": "",
+    "globalName": "[CC l P-52] خيال العتيبي",
+    "avatar": "assets/img/avatars/1235712646259675238_6a0baca88a4b4fd32230b82e28999c01.png",
+    "banner": "assets/img/banners/1235712646259675238_e0d86a78b6f51f859357f2dfbdfc3695.png",
     "bannerColor": "#000000",
-    "lastFetched": 1782668174793
+    "lastFetched": 1783713413402
   },
   "728597592753045574": {
     "id": "728597592753045574",
@@ -294,52 +294,52 @@
     "avatar": "assets/img/avatars/728597592753045574_67e758c9bb79f77bccb533aaf676183d.png",
     "banner": "assets/img/banners/728597592753045574_a_c008d601f13fe88684dede8f3f69a525.gif",
     "bannerColor": "#000000",
-    "lastFetched": 1782643001594
+    "lastFetched": 1783713578931
   },
   "731208498343575674": {
     "id": "731208498343575674",
     "username": "almakry",
-    "globalName": "[CC l  P-54] عز بن سعود",
+    "globalName": "[CC l P-54] عز بن سعود",
     "avatar": "assets/img/avatars/731208498343575674_c9da6ba7899f487d4afbd5d48d07eb24.png",
     "banner": "assets/img/banners/731208498343575674_0538ec18138afe93b4a365626bc19017.png",
     "bannerColor": "#111011",
-    "lastFetched": 1782643004812
+    "lastFetched": 1783713583161
   },
   "949732599947984916": {
     "id": "949732599947984916",
     "username": "h1_2j",
-    "globalName": "[CC | P-55] محمد عاتي",
+    "globalName": "[CC l P-55] محمد عاتي",
     "avatar": "assets/img/avatars/949732599947984916_99a32a5d047a40a9fb67283d0937fd67.png",
     "banner": "assets/img/banners/949732599947984916_a_88689280205914cc5c1a6a84f6a4e392.gif",
     "bannerColor": "#000000",
-    "lastFetched": 1782643098167
+    "lastFetched": 1783713699178
   },
   "880214822036320257": {
     "id": "880214822036320257",
     "username": "0eyj",
-    "globalName": "[CC | P-59] سلطان بن صقر",
-    "avatar": "assets/img/avatars/880214822036320257_165508d331dfe3c1e17468d51b195c71.png",
+    "globalName": "[CC | P-56] سلطان بن صقر",
+    "avatar": "assets/img/avatars/880214822036320257_94564f3727296428d031b6661bc77b99.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668374492
+    "lastFetched": 1783718947432
   },
   "1056587747743244418": {
     "id": "1056587747743244418",
     "username": "1_av",
-    "globalName": "[CC | P-61] علي الشيخ",
+    "globalName": "[CC | P-62] علي الشيخ",
     "avatar": "assets/img/avatars/1056587747743244418_a_5edf73dd3981c209c3b3b3347b901d62.gif",
     "banner": "assets/img/banners/1056587747743244418_a_b4efa2014d61e4842fb911435b24ac4d.gif",
     "bannerColor": "#e4dad9",
-    "lastFetched": 1783200936905
+    "lastFetched": 1783713301894
   },
   "1184831297219215371": {
     "id": "1184831297219215371",
     "username": "x_mil30",
-    "globalName": "[CC | P-62] تالا الحارثي",
+    "globalName": "[CC | P-58] تالا الحارثي",
     "avatar": "assets/img/avatars/1184831297219215371_1cf95e10e81cee7b2a023033df8fbf92.png",
     "banner": "",
     "bannerColor": "#ffffff",
-    "lastFetched": 1783201010154
+    "lastFetched": 1783718701836
   },
   "639854267280392212": {
     "id": "639854267280392212",
@@ -348,16 +348,16 @@
     "avatar": "assets/img/avatars/639854267280392212_b98bf48ebfbb271eb1289e46d30a482a.png",
     "banner": "",
     "bannerColor": "#09100b",
-    "lastFetched": 1782668293797
+    "lastFetched": 1783718858642
   },
   "1203078334309863525": {
     "id": "1203078334309863525",
     "username": "ccrq_",
-    "globalName": "[CC | P-63] مشعل الرويلي",
+    "globalName": "[CC | P-57] مشعل الرويلي",
     "avatar": "assets/img/avatars/1203078334309863525_9ad133f7b4f79c565f6dae8b7fc47466.png",
     "banner": "assets/img/banners/1203078334309863525_e8ddcf3d16eeb376b2eb11db9a2867a5.png",
     "bannerColor": "#000000",
-    "lastFetched": 1783201017169
+    "lastFetched": 1783713388391
   },
   "808823137629110302": {
     "id": "808823137629110302",
@@ -366,52 +366,52 @@
     "avatar": "assets/img/avatars/808823137629110302_14acd3e6d716f4d0605a213d3632ccae.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668338561
+    "lastFetched": 1783718906255
   },
   "783409498231799818": {
     "id": "783409498231799818",
     "username": ".0k4",
-    "globalName": "[CC | P-60] قناص بن سعود",
+    "globalName": "[CC | P-61] قناص بن سعود",
     "avatar": "assets/img/avatars/783409498231799818_a037b3afe0b3cc3eb7d562b7c07633cc.png",
     "banner": "",
     "bannerColor": "#070303",
-    "lastFetched": 1782668330614
+    "lastFetched": 1783718895731
   },
   "1425555992543891496": {
     "id": "1425555992543891496",
     "username": "fun_1997",
-    "globalName": "[CC | P-64] يحيى بن محمد",
+    "globalName": "[CC | P-63] يحيى بن محمد",
     "avatar": "assets/img/avatars/1425555992543891496_cfac1ddd57d55d34b419a9ca8b8170e1.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668252843
+    "lastFetched": 1783718812867
   },
   "948016784387244063": {
     "id": "948016784387244063",
     "username": "a.m6",
-    "globalName": "[P-66] عراق احمد",
+    "globalName": "[CC I P-65] عراق احمد",
     "avatar": "assets/img/avatars/948016784387244063_8c0cd1f2bc122f589694be7e2c1f6fc9.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668406658
+    "lastFetched": 1783718980629
   },
   "616788732229582893": {
     "id": "616788732229582893",
     "username": "47.t",
-    "globalName": "[CC | P-65] طلال التميمي",
-    "avatar": "assets/img/avatars/616788732229582893_1ca2a924c1460892b01c6daca2c99325.png",
+    "globalName": "[CC | P-64] طلال التميمي",
+    "avatar": "assets/img/avatars/616788732229582893_284be8e05461be61194ac62ecf340edd.png",
     "banner": "assets/img/banners/616788732229582893_a_61b4690e7638f42d7a73d1f5e692306d.gif",
     "bannerColor": "#000000",
-    "lastFetched": 1782642978012
+    "lastFetched": 1783713556643
   },
   "1209057311142846494": {
     "id": "1209057311142846494",
     "username": "u2eh",
-    "globalName": "[CC | P-70] قناص الشمري",
+    "globalName": "[CC | P-69] قناص الشمري",
     "avatar": "assets/img/avatars/1209057311142846494_802abc0df7de4dd03972acfe7d8b1c6e.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1783201023606
+    "lastFetched": 1783718713916
   },
   "1151232395417239693": {
     "id": "1151232395417239693",
@@ -420,52 +420,52 @@
     "avatar": "assets/img/avatars/1151232395417239693_5c0467d9c17cb0805ea4cbdee7c3cfa5.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1783200997892
+    "lastFetched": 1783718690143
   },
   "1252373303578984565": {
     "id": "1252373303578984565",
     "username": "s6.56",
-    "globalName": "[CC | P-67] صـالـح الشـمـري",
+    "globalName": "[CC | P-66] صالح الشمري",
     "avatar": "assets/img/avatars/1252373303578984565_bb5f28e077b3516b2db83356c13a793c.png",
     "banner": "assets/img/banners/1252373303578984565_a_38ade22554117301b40bbdc6ee0868cd.gif",
     "bannerColor": "#131313",
-    "lastFetched": 1782642863791
+    "lastFetched": 1783713420491
   },
   "939222096029036604": {
     "id": "939222096029036604",
     "username": "29py",
-    "globalName": "[CC | P-68] مــاجــد المهندس",
+    "globalName": "[CC | P-67] مــاجــد المهندس",
     "avatar": "assets/img/avatars/939222096029036604_66a8f5a6489a85158b4ada249d27fab3.png",
     "banner": "assets/img/banners/939222096029036604_a_e291c2e9640a54f812fb5c9b48839bc5.gif",
     "bannerColor": "#5f5f5a",
-    "lastFetched": 1782643094795
+    "lastFetched": 1783713695544
   },
   "718327496151662652": {
     "id": "718327496151662652",
     "username": "vt_ps",
-    "globalName": "[CC | P-71] محمد العمودي",
+    "globalName": "[CC | P-70] محمد العمودي",
     "avatar": "assets/img/avatars/718327496151662652_9a80331270630e7ad28aff1d33f57f95.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668307234
+    "lastFetched": 1783718873161
   },
   "1468333926966886628": {
     "id": "1468333926966886628",
     "username": "f7zf_",
-    "globalName": "[CC | P-72] حسان بن عبدالعزيز",
-    "avatar": "assets/img/avatars/1468333926966886628_68ed434a590123c9abcf8b9a70bf5606.png",
-    "banner": "assets/img/banners/1468333926966886628_113f26e4b689b9aa3fd3ddc891cdff84.png",
-    "bannerColor": "#4b4949",
-    "lastFetched": 1782642947422
+    "globalName": "[CC | P-71] حسان بن عبدالعزيز",
+    "avatar": "assets/img/avatars/1468333926966886628_9bf419f434fd8ee01d865f1ca6caaa60.png",
+    "banner": "",
+    "bannerColor": "#686868",
+    "lastFetched": 1783718824388
   },
   "1169281148808089641": {
     "id": "1169281148808089641",
     "username": "3vwj",
-    "globalName": "[CC | P-73] محمد حكمي",
+    "globalName": "[CC | P-72] محمد حكمي",
     "avatar": "assets/img/avatars/1169281148808089641_c9fdc0b329a4b1e98fcd58b881538fe2.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1783201004295
+    "lastFetched": 1783718696065
   },
   "1136600253521465416": {
     "id": "1136600253521465416",
@@ -479,11 +479,11 @@
   "1282157140773175296": {
     "id": "1282157140773175296",
     "username": "iihmh",
-    "globalName": "[P-76] عاهد بن غازي",
+    "globalName": "[P-74] عاهد بن غازي",
     "avatar": "assets/img/avatars/1282157140773175296_09e70b94d500d146557e2fecb0c16d5c.png",
     "banner": "https://cdn.discordapp.com/banners/1282157140773175296/a_5f93d96364a8b4222d6e11c8d97e81bd.gif",
     "bannerColor": "#48a43c",
-    "lastFetched": 1782642875760
+    "lastFetched": 1783713435625
   },
   "1221787632674279445": {
     "id": "1221787632674279445",
@@ -492,34 +492,34 @@
     "avatar": "assets/img/avatars/1221787632674279445_a8b71cad41ed269db3bece027b2c0f7c.png",
     "banner": "assets/img/banners/1221787632674279445_19b36df8f0f930b13f01a5192e13dab0.png",
     "bannerColor": "#000000",
-    "lastFetched": 1783201031926
+    "lastFetched": 1783713404077
   },
   "1319615271429734400": {
     "id": "1319615271429734400",
-    "username": "4t7u.",
-    "globalName": "[P-77] مصطفى البستاني",
-    "avatar": "assets/img/avatars/1319615271429734400_12d23a70ec0324b3777c68fbbf5ab8a9.png",
+    "username": "0hxx",
+    "globalName": "[P-75] مصطفى البستاني",
+    "avatar": "assets/img/avatars/1319615271429734400_bd75a5d105d13a2c0e66985c12064812.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668218681
+    "lastFetched": 1783718777216
   },
   "903302400364916747": {
     "id": "903302400364916747",
     "username": "f6zf",
-    "globalName": "[P-78] صقر بن رعد",
-    "avatar": "assets/img/avatars/903302400364916747_55de41c5e8d885f761037c4c62dd8ce7.png",
-    "banner": "assets/img/banners/903302400364916747_fa5186deee046d82991c025a9b00782a.png",
+    "globalName": "[P-76] صقر بن رعد",
+    "avatar": "assets/img/avatars/903302400364916747_12facde341440b63f519463b28e52366.png",
+    "banner": "assets/img/banners/903302400364916747_2df226bbdec5dce2de9c7db25e2af080.png",
     "bannerColor": "#000000",
-    "lastFetched": 1782643079562
+    "lastFetched": 1783713677930
   },
   "750581378168389632": {
     "id": "750581378168389632",
     "username": "ii7zn",
-    "globalName": "[ P - 7 5 ] مـحـمـد الـنـهـدي",
+    "globalName": "[ P - 7 3 ] مـحـمـد الـنـهـدي",
     "avatar": "assets/img/avatars/750581378168389632_cc9c5f1d02dc7febe7ce7ae36a8b6746.png",
     "banner": "assets/img/banners/750581378168389632_9c837fd84ba76e163f08bc93256dcd93.png",
     "bannerColor": "#000000",
-    "lastFetched": 1782668324967
+    "lastFetched": 1783713590395
   },
   "1055874131083673640": {
     "id": "1055874131083673640",
@@ -528,16 +528,16 @@
     "avatar": "assets/img/avatars/1055874131083673640_eaef50d6ff655d2bf92b14a45c908aaa.png",
     "banner": "",
     "bannerColor": "#fffcf7",
-    "lastFetched": 1783200934556
+    "lastFetched": 1783749987986
   },
   "1116431226929164368": {
     "id": "1116431226929164368",
     "username": "slo_307",
-    "globalName": "[P-88] سلمان غزواني",
+    "globalName": "[P-77] سلمان غزواني",
     "avatar": "assets/img/avatars/1116431226929164368_91de21d1eb44b2429c04f9ef259c8e99.png",
     "banner": "",
     "bannerColor": "#323637",
-    "lastFetched": 1783200974090
+    "lastFetched": 1783718665303
   },
   "780508951594532905": {
     "id": "780508951594532905",
@@ -546,7 +546,7 @@
     "avatar": "assets/img/avatars/780508951594532905_60963981d0ced0ea8574c34a2cb1fce0.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668329529
+    "lastFetched": 1783718894626
   },
   "1125770588963733544": {
     "id": "1125770588963733544",
@@ -564,7 +564,7 @@
     "avatar": "assets/img/avatars/1430258683316666553_6934b10a00caec52b691f17083c02e15.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668255047
+    "lastFetched": 1783718815231
   },
   "1292985673862615121": {
     "id": "1292985673862615121",
@@ -582,34 +582,34 @@
     "avatar": "assets/img/avatars/1455182297803522253_a9f4ad9aa8b94b3869cbb385115e909a.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668260779
+    "lastFetched": 1783718822127
   },
   "1440740745387446425": {
     "id": "1440740745387446425",
     "username": "l_km8",
-    "globalName": "[P-91] عبدالعزيز القحطاني",
-    "avatar": "assets/img/avatars/1440740745387446425_202a7d18d41b15a6cdefa054335a9b18.png",
+    "globalName": "[P-90] عبدالعزيز القحطاني",
+    "avatar": "assets/img/avatars/1440740745387446425_129bf4ea498ee892170e0dd631ddc8fb.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668257342
+    "lastFetched": 1783718817528
   },
   "951189712134098964": {
     "id": "951189712134098964",
     "username": "5.03",
     "globalName": "[S-04] عساف السبيعي",
-    "avatar": "assets/img/avatars/951189712134098964_165b228633098b7b3961abf0aa386d4b.png",
-    "banner": "assets/img/banners/951189712134098964_654fea9c5fdd7eec747c9d4ca39d5111.png",
+    "avatar": "assets/img/avatars/951189712134098964_fd69fbe18ae4a7193d092f83f8c7c8e8.png",
+    "banner": "assets/img/banners/951189712134098964_fc6350efea02c1bd603d780038d98486.png",
     "bannerColor": "#000000",
-    "lastFetched": 1782643099277
+    "lastFetched": 1783713700874
   },
   "1069967170227949628": {
     "id": "1069967170227949628",
     "username": "y7r.77",
-    "globalName": "[P-90] يزيد بن ناصر",
+    "globalName": "[P-89] يزيد بن ناصر",
     "avatar": "assets/img/avatars/1069967170227949628_6258f4ca041338f779569690b4fe1ee4.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1783200942404
+    "lastFetched": 1783749995352
   },
   "801358335211208715": {
     "id": "801358335211208715",
@@ -624,10 +624,10 @@
     "id": "582142742310944779",
     "username": "pb7a",
     "globalName": "Eng.Faisal",
-    "avatar": "assets/img/avatars/582142742310944779_b73b4c959abe67ccfd72ff52b7b1afed.png",
+    "avatar": "assets/img/avatars/582142742310944779_a461cdaf42895c506433925bf1b7d571.png",
     "banner": "",
     "bannerColor": "#5c5454",
-    "lastFetched": 1782668288040
+    "lastFetched": 1783718851967
   },
   "692452507875672186": {
     "id": "692452507875672186",
@@ -636,7 +636,7 @@
     "avatar": "assets/img/avatars/692452507875672186_80d71aaac5e639e611ae139df7b5d883.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668301613
+    "lastFetched": 1783718867480
   },
   "685605076919779328": {
     "id": "685605076919779328",
@@ -645,7 +645,7 @@
     "avatar": "assets/img/avatars/685605076919779328_9f2a41e48340345f6c07f9e2e8911209.png",
     "banner": "assets/img/banners/685605076919779328_a_8c3adebad730676c35062544358ea020.gif",
     "bannerColor": "#000000",
-    "lastFetched": 1782642986406
+    "lastFetched": 1783713564644
   },
   "1471178113529544899": {
     "id": "1471178113529544899",
@@ -672,7 +672,7 @@
     "avatar": "assets/img/avatars/1422563653152014448_97d3eb3e4038303228cca5bdbbd1b3e8.png",
     "banner": "",
     "bannerColor": "#ffffff",
-    "lastFetched": 1782668251735
+    "lastFetched": 1783718811798
   },
   "1452325470661120165": {
     "id": "1452325470661120165",
@@ -681,7 +681,7 @@
     "avatar": "assets/img/avatars/1452325470661120165_958e5d7abca0d631f57ef7469e46735b.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668259616
+    "lastFetched": 1783718820942
   },
   "1359321028723085527": {
     "id": "1359321028723085527",
@@ -695,20 +695,20 @@
   "1129813072836575313": {
     "id": "1129813072836575313",
     "username": "trkialsubaie",
-    "globalName": "[P-110] تركي السبيعي",
+    "globalName": "[P-108] تركي السبيعي",
     "avatar": "assets/img/avatars/1129813072836575313_dc600471a843e9dabeeb0e7e58cf4268.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1783200985932
+    "lastFetched": 1783718677639
   },
   "643539886711767040": {
     "id": "643539886711767040",
     "username": "l_jmn8945",
-    "globalName": "[P-118] زياد الشمري",
+    "globalName": "زياد الشمري",
     "avatar": "assets/img/avatars/643539886711767040_a3fc96b9faba726cf19dc326a5b561fd.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668296001
+    "lastFetched": 1783718860891
   },
   "1173735612763881504": {
     "id": "1173735612763881504",
@@ -717,7 +717,7 @@
     "avatar": "assets/img/avatars/1173735612763881504_6ea94a2710baf159a994e8c911899448.png",
     "banner": "",
     "bannerColor": "#494545",
-    "lastFetched": 1783201005489
+    "lastFetched": 1783718697159
   },
   "897202207043256340": {
     "id": "897202207043256340",
@@ -726,7 +726,7 @@
     "avatar": "assets/img/avatars/897202207043256340_dfd631292928f6a74f2fac30de39668c.png",
     "banner": "",
     "bannerColor": "#5c64a7",
-    "lastFetched": 1782668386678
+    "lastFetched": 1783718960061
   },
   "611789028228071443": {
     "id": "611789028228071443",
@@ -753,25 +753,25 @@
     "avatar": "assets/img/avatars/1226677757002645637_034c693a493c57cf2060d643a260adbb.png",
     "banner": "",
     "bannerColor": "#ffefef",
-    "lastFetched": 1783201035687
+    "lastFetched": 1783718725708
   },
   "890646773947850853": {
     "id": "890646773947850853",
     "username": "az.k5",
-    "globalName": "𝟑𝐳 𝐤𝐡𝐚𝐥𝐢𝐝",
-    "avatar": "assets/img/avatars/890646773947850853_d76c4027929a3cfb57ccfc29b0e71248.png",
-    "banner": "",
+    "globalName": "3z Bin Khalid",
+    "avatar": "assets/img/avatars/890646773947850853_a9e661c11837129c078e2de391657336.png",
+    "banner": "assets/img/banners/890646773947850853_a_6926a3c21ab7fab8c315b281e5dbfd4a.gif",
     "bannerColor": "#00c8ff",
-    "lastFetched": 1782668381058
+    "lastFetched": 1783713666932
   },
   "1029756141539950623": {
     "id": "1029756141539950623",
     "username": "n7_i",
-    "globalName": "[P-120] نواف بن فهد",
+    "globalName": "[P-118] نواف بن فهد",
     "avatar": "assets/img/avatars/1029756141539950623_9f3badf1f7dc40315a0910bd96998317.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1783200924607
+    "lastFetched": 1783749977250
   },
   "860265294688419870": {
     "id": "860265294688419870",
@@ -785,11 +785,11 @@
   "1229793123144564756": {
     "id": "1229793123144564756",
     "username": "modh4",
-    "globalName": "[P-122] محمد عيسى",
+    "globalName": "[P-120] محمد عيسى",
     "avatar": "assets/img/avatars/1229793123144564756_f7bcd170be516187ed9629b05aaa5ac1.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1783201037172
+    "lastFetched": 1783718726853
   },
   "1002396902844801024": {
     "id": "1002396902844801024",
@@ -798,7 +798,7 @@
     "avatar": "assets/img/avatars/1002396902844801024_8e79d00ff98485048328f5a0c0198a80.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1783200915154
+    "lastFetched": 1783749968043
   },
   "788428465061494814": {
     "id": "788428465061494814",
@@ -812,29 +812,29 @@
   "1422275569063690372": {
     "id": "1422275569063690372",
     "username": "s_sn7",
-    "globalName": "[P-136] سعود نواف",
+    "globalName": "S",
     "avatar": "assets/img/avatars/1422275569063690372_ac035a9f47050c032a903a8d1ee9263e.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668250598
+    "lastFetched": 1783718810557
   },
   "1208208186457460859": {
     "id": "1208208186457460859",
     "username": "i111f",
-    "globalName": "[P-137] سهم الحربي",
+    "globalName": "trshould",
     "avatar": "assets/img/avatars/1208208186457460859_4ebc41bd0c3483088def1ffc56ec42d8.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1783201022472
+    "lastFetched": 1783718712791
   },
   "1498865323120525313": {
     "id": "1498865323120525313",
     "username": "u74a.",
-    "globalName": "[P-125] خالد بن محمد",
+    "globalName": "[P-149] خالد بن محمد",
     "avatar": "assets/img/avatars/1498865323120525313_a36a761798d2b443e083b1e2be6eee10.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668267667
+    "lastFetched": 1783718831147
   },
   "742314324974108732": {
     "id": "742314324974108732",
@@ -852,7 +852,7 @@
     "avatar": "assets/img/avatars/1478799418923946114_b5235f4db9a42951beef729ec4bb7a14.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668265142
+    "lastFetched": 1783718827767
   },
   "1276189008950591571": {
     "id": "1276189008950591571",
@@ -861,16 +861,16 @@
     "avatar": "assets/img/avatars/1276189008950591571_e1b619460229240930df412be1da87f7.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668190939
+    "lastFetched": 1783718748938
   },
   "776924615418970142": {
     "id": "776924615418970142",
     "username": "uq32",
-    "globalName": "[P-139] مشاري بن خالد",
+    "globalName": "[P-136] مشاري بن خالد",
     "avatar": "assets/img/avatars/776924615418970142_bc9c101245f80080ca01a41bba31be45.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668328344
+    "lastFetched": 1783718893382
   },
   "862853791086411797": {
     "id": "862853791086411797",
@@ -893,20 +893,20 @@
   "1298586771507908661": {
     "id": "1298586771507908661",
     "username": "t5_z.",
-    "globalName": "[P-114] عسكر المطيري",
-    "avatar": "assets/img/avatars/1298586771507908661_615f191e25a8cb31a4e38e2ed1f61ebc.png",
+    "globalName": "!",
+    "avatar": "assets/img/avatars/1298586771507908661_9bfa497f026a15592fb23c8c9ca0af0b.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668206520
+    "lastFetched": 1783718764110
   },
   "986913539031703572": {
     "id": "986913539031703572",
     "username": "cnsc",
-    "globalName": "[P-112] عمر محمد",
+    "globalName": "Abu Mohammed",
     "avatar": "assets/img/avatars/986913539031703572_00d75415cf97395355669f189dd962b5.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668421848
+    "lastFetched": 1783718996849
   },
   "1117155305881616488": {
     "id": "1117155305881616488",
@@ -915,7 +915,7 @@
     "avatar": "assets/img/avatars/1117155305881616488_aa350837d37884fdd45398bbca9e0ef8.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1783200979135
+    "lastFetched": 1783718669627
   },
   "1393727528967077891": {
     "id": "1393727528967077891",
@@ -929,11 +929,11 @@
   "1214991809705418752": {
     "id": "1214991809705418752",
     "username": "ali_164",
-    "globalName": "[P-98] عراق العزاوي",
+    "globalName": "[P-91] عراق العزاوي",
     "avatar": "assets/img/avatars/1214991809705418752_2343549a064c26d88322799cb1f424b9.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1783201026157
+    "lastFetched": 1783718716263
   },
   "599587286920724480": {
     "id": "599587286920724480",
@@ -947,47 +947,47 @@
   "811336812345163786": {
     "id": "811336812345163786",
     "username": "9.er",
-    "globalName": "[P-80] طلال المالكي",
+    "globalName": "[P-68] طلال المالكي",
     "avatar": "assets/img/avatars/811336812345163786_6c5332831bc096ec680eb71c1733e7c7.png",
     "banner": "",
     "bannerColor": "#e9e5e5",
-    "lastFetched": 1782668339629
+    "lastFetched": 1783718907379
   },
   "1314895363219390527": {
     "id": "1314895363219390527",
     "username": "u0_i",
-    "globalName": "[P-113] رماد بن فهد",
-    "avatar": "assets/img/avatars/1314895363219390527_ea070a5036437a5e76e6d6060271d85c.png",
-    "banner": "",
+    "globalName": "[P-97] رماد بن فهد",
+    "avatar": "assets/img/avatars/1314895363219390527_f1eae85d0f43269bfdaf8a19f72cda5d.png",
+    "banner": "assets/img/banners/1314895363219390527_a_f2717ae427a4b7b2efe158251d17992b.gif",
     "bannerColor": "#000000",
-    "lastFetched": 1782668212719
+    "lastFetched": 1783713458396
   },
   "911114121485893684": {
     "id": "911114121485893684",
     "username": "m7hmdf16",
     "globalName": "محمد الغفيلي",
-    "avatar": "assets/img/avatars/911114121485893684_a02cf0f85a7f995662c74bed00c5292e.png",
+    "avatar": "",
     "banner": "",
-    "bannerColor": "#000000",
-    "lastFetched": 1782668391618
+    "bannerColor": "#ffffff",
+    "lastFetched": 1783718965934
   },
   "1079058094677569547": {
     "id": "1079058094677569547",
     "username": "5.cm",
-    "globalName": "ShadowAcheOnly !",
-    "avatar": "assets/img/avatars/1079058094677569547_044c73f0f9026ff1d9420134b8044619.png",
-    "banner": null,
+    "globalName": "[P-143] ماهر اليامي",
+    "avatar": "assets/img/avatars/1079058094677569547_b4b4679280cf8fbbca3dc85f3a2175d6.png",
+    "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1781294642859
+    "lastFetched": 1783750005427
   },
   "1205016417804750988": {
     "id": "1205016417804750988",
     "username": "u2z_",
-    "globalName": "[P-111] نواف بن تركي",
-    "avatar": "assets/img/avatars/1205016417804750988_694e5ca577d7ed6d9b0ae56e69e5ba13.png",
-    "banner": "",
+    "globalName": "[P-92] نواف بن تركي",
+    "avatar": "assets/img/avatars/1205016417804750988_7476a0694f81a30dac0d5dc9b0179150.png",
+    "banner": "assets/img/banners/1205016417804750988_88b85ab7996ddd41dfa68395506002ea.png",
     "bannerColor": "#000000",
-    "lastFetched": 1783201019551
+    "lastFetched": 1783713391309
   },
   "445035131833417738": {
     "id": "445035131833417738",
@@ -1005,7 +1005,7 @@
     "avatar": "assets/img/avatars/1316740330074279999_f84a37e1f456190732d4e8f13b22db70.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668214912
+    "lastFetched": 1783718773657
   },
   "976666543125594112": {
     "id": "976666543125594112",
@@ -1014,16 +1014,16 @@
     "avatar": "assets/img/avatars/976666543125594112_f847117fc22b26f6b19f38d9f3ae8998.png",
     "banner": "",
     "bannerColor": "#2c4d8f",
-    "lastFetched": 1782668418245
+    "lastFetched": 1783718993265
   },
   "1312811279986982973": {
     "id": "1312811279986982973",
     "username": "m7h111",
-    "globalName": "[P-173] محمد بن علي",
+    "globalName": "[P-138] محمد بن علي",
     "avatar": "assets/img/avatars/1312811279986982973_e06e35da7bfb59568f5f9160644c2aca.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668211462
+    "lastFetched": 1783718770216
   },
   "1367749901403951144": {
     "id": "1367749901403951144",
@@ -1041,16 +1041,16 @@
     "avatar": "assets/img/avatars/1246437557810499595_a7d9fde7f79e9be520b3f546bd88826d.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668179364
+    "lastFetched": 1783718735723
   },
   "831053507964567594": {
     "id": "831053507964567594",
-    "username": "3o5ii",
+    "username": "n105",
     "globalName": "[P-181] ادحام المطيري",
-    "avatar": "assets/img/avatars/831053507964567594_84eb510f14636137f09dac704fe567d6.png",
+    "avatar": "assets/img/avatars/831053507964567594_7c31a56b1295dea2bb020c0e7bbba1db.png",
     "banner": "assets/img/banners/831053507964567594_0a4f88163d85f19e3498343a1da25e2d.png",
     "bannerColor": "#000000",
-    "lastFetched": 1782643036508
+    "lastFetched": 1783713624156
   },
   "912682679978295297": {
     "id": "912682679978295297",
@@ -1082,29 +1082,29 @@
   "1093945061349273640": {
     "id": "1093945061349273640",
     "username": "5o03",
-    "globalName": "[P-174] غالب بن علي",
+    "globalName": "!♕",
     "avatar": "assets/img/avatars/1093945061349273640_98b42416b12ba90612e55bc7e9bdf46d.png",
     "banner": "",
     "bannerColor": "#202020",
-    "lastFetched": 1783200965186
+    "lastFetched": 1783718657377
   },
   "1255798300041547790": {
     "id": "1255798300041547790",
     "username": "t_1p22",
-    "globalName": "[P-175] طلال العطوي",
+    "globalName": "الشرعرع",
     "avatar": "assets/img/avatars/1255798300041547790_e1184d6d1b8d40a5fa425f4b3dbc1653.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668184923
+    "lastFetched": 1783718741509
   },
   "944147387004379236": {
     "id": "944147387004379236",
     "username": ".702.",
-    "globalName": "[P-176] عبدالله الزهراني",
+    "globalName": "عبد الله الزهراني",
     "avatar": "assets/img/avatars/944147387004379236_21d1ffd3509fbffeaf8f0135d10d2bb1.png",
     "banner": "",
     "bannerColor": "#808080",
-    "lastFetched": 1782668405555
+    "lastFetched": 1783718979542
   },
   "682174852068933652": {
     "id": "682174852068933652",
@@ -1118,29 +1118,29 @@
   "890959620242305124": {
     "id": "890959620242305124",
     "username": ".08f",
-    "globalName": "[P-177] مسفهل الشريف",
-    "avatar": "assets/img/avatars/890959620242305124_62d6f5b3ec1fe438522a150deb0bb956.png",
-    "banner": "assets/img/banners/890959620242305124_8e57b4a40f1ec2b1470a0adad87e6b96.png",
+    "globalName": "Y7",
+    "avatar": "assets/img/avatars/890959620242305124_ae892a9d79a64a083d01a16ffd383d9f.png",
+    "banner": "",
     "bannerColor": "#161616",
-    "lastFetched": 1782643072109
+    "lastFetched": 1783718955415
   },
   "1268032060023636049": {
     "id": "1268032060023636049",
     "username": "lj.9yy_97915",
-    "globalName": "[P-142] احمد الغفيلي",
+    "globalName": "احمد الغفيلي",
     "avatar": "assets/img/avatars/1268032060023636049_5f57fbae7dd8ce11a8ef6317310395d0.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668188637
+    "lastFetched": 1783718746649
   },
   "1501014135280894032": {
     "id": "1501014135280894032",
     "username": "meesh955",
-    "globalName": "[P-178] مشاري بن محمد",
+    "globalName": "مشاري بن محمد",
     "avatar": "assets/img/avatars/1501014135280894032_eb1022f99d9fd13fc215e37e7fef61b7.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668268837
+    "lastFetched": 1783718832318
   },
   "1238202082927050796": {
     "id": "1238202082927050796",
@@ -1167,7 +1167,7 @@
     "avatar": "assets/img/avatars/721450068049133579_570858e0e96986d8ea03b8987318a316.png",
     "banner": "",
     "bannerColor": "#111214",
-    "lastFetched": 1782668309609
+    "lastFetched": 1783718875451
   },
   "1239496106585624670": {
     "id": "1239496106585624670",
@@ -1194,52 +1194,52 @@
     "avatar": "assets/img/avatars/1030964545214226443_89e714086f1aae0a1caa29a82cc43855.png",
     "banner": "",
     "bannerColor": "#514f40",
-    "lastFetched": 1783200926264
+    "lastFetched": 1783749978438
   },
   "1088003898305937408": {
     "id": "1088003898305937408",
     "username": "ms.6300",
-    "globalName": "[P-128] عبدالله البناقي",
+    "globalName": "[P-98] عبدالله البناقي",
     "avatar": "assets/img/avatars/1088003898305937408_1fa16bcfd12471c6b164ac4ff207ea07.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1783200957939
+    "lastFetched": 1783718650495
   },
   "1350292660451283095": {
     "id": "1350292660451283095",
     "username": "qz.555",
-    "globalName": "[P-181] فارس سطام",
-    "avatar": "assets/img/avatars/1350292660451283095_22f01195d0f67d2fe18b53c93eca1633.png",
+    "globalName": "Twelf !  💤",
+    "avatar": "assets/img/avatars/1350292660451283095_010e013efb237dfa347b53352c53c73a.png",
     "banner": "",
     "bannerColor": "#0c0606",
-    "lastFetched": 1782668229545
+    "lastFetched": 1783718788869
   },
   "1253204251266650114": {
     "id": "1253204251266650114",
     "username": "llffi1",
     "globalName": "FAJR",
-    "avatar": "assets/img/avatars/1253204251266650114_f2753ff6cb622efa5caade0dfd8e73b4.png",
-    "banner": "assets/img/banners/1253204251266650114_6569416eee34350318d6286a48816355.png",
+    "avatar": "assets/img/avatars/1253204251266650114_112ffad718bed463dfc867613db2467e.png",
+    "banner": "assets/img/banners/1253204251266650114_a_ae4c9cf66594372dfd11f5f854dbd146.gif",
     "bannerColor": "#ffffff",
-    "lastFetched": 1782642866094
+    "lastFetched": 1783713423880
   },
   "1180728569027100802": {
     "id": "1180728569027100802",
     "username": "9urx1",
-    "globalName": "[P-130] ريما عبدالله",
-    "avatar": "assets/img/avatars/1180728569027100802_f0473d008d23989a7220d2843c4acc05.png",
+    "globalName": "13",
+    "avatar": "assets/img/avatars/1180728569027100802_85de5f1afbd2848712aa0ca74c79dbb9.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1783201007780
+    "lastFetched": 1783718699487
   },
   "1027234449538158642": {
     "id": "1027234449538158642",
     "username": "abunasr07",
     "globalName": "Abu Nasser",
     "avatar": "assets/img/avatars/1027234449538158642_618389e3faed2b1f32994b98cfd12fff.png",
-    "banner": "assets/img/banners/1027234449538158642_a_c18c71ccce09a5b1382fddcac0d78987.gif",
+    "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782642738621
+    "lastFetched": 1783749976112
   },
   "1098175372325048380": {
     "id": "1098175372325048380",
@@ -1253,20 +1253,20 @@
   "1090123145874255944": {
     "id": "1090123145874255944",
     "username": "u7r6",
-    "globalName": "[P-89] احمد بن خالد",
+    "globalName": "[P-88] احمد بن خالد",
     "avatar": "assets/img/avatars/1090123145874255944_7f2939525a99cac3bf8537e42fc4ebf7.png",
-    "banner": "assets/img/banners/1090123145874255944_20e5bfd68e2fee3c3288da1e42a145f2.png",
+    "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1783200960319
+    "lastFetched": 1783718653150
   },
   "1206543760113008640": {
     "id": "1206543760113008640",
     "username": "p39p",
-    "globalName": "[P-126] محمد السلمي",
-    "avatar": "assets/img/avatars/1206543760113008640_9b51d7214ec10c54188c87220ffcdbbe.png",
-    "banner": "assets/img/banners/1206543760113008640_5261f4bf9af30a8f2288d7dc71528767.png",
+    "globalName": "[P-122] محمد السلمي",
+    "avatar": "assets/img/avatars/1206543760113008640_695249930d02c63740720a2b05fd6d50.png",
+    "banner": "assets/img/banners/1206543760113008640_dbc705c2b73f4ddf81c429612df28331.png",
     "bannerColor": "#0e0e0e",
-    "lastFetched": 1783201020748
+    "lastFetched": 1783713393592
   },
   "1151850893310971934": {
     "id": "1151850893310971934",
@@ -1275,25 +1275,25 @@
     "avatar": "assets/img/avatars/1151850893310971934_d46c17d985c9026b5078ae75f6744873.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1783200999113
+    "lastFetched": 1783718691282
   },
   "1187909417358872640": {
     "id": "1187909417358872640",
     "username": "w6z4",
-    "globalName": "[P-163] عتقان خضري",
-    "avatar": "assets/img/avatars/1187909417358872640_cf5df0aace1860f02980fe4a7cde8206.png",
-    "banner": "assets/img/banners/1187909417358872640_fddf975bfb8b9b252747521e5232119b.png",
-    "bannerColor": "#171c3a",
-    "lastFetched": 1783201012095
+    "globalName": "[P-125] عتقان خضري",
+    "avatar": "assets/img/avatars/1187909417358872640_61785b7685b291f3b9477159fc1f9ba7.png",
+    "banner": "assets/img/banners/1187909417358872640_a_17e30a0cb12eaeab976e6e7a86d97d03.gif",
+    "bannerColor": "#12141c",
+    "lastFetched": 1783713383240
   },
   "1331686180227518558": {
     "id": "1331686180227518558",
     "username": "g9qa702",
     "globalName": "AT702",
-    "avatar": "assets/img/avatars/1331686180227518558_125b5694a01849f72dee1c122a386d94.png",
-    "banner": "assets/img/banners/1331686180227518558_0861bb768021672e277af86f898de4f5.png",
+    "avatar": "assets/img/avatars/1331686180227518558_93a2ec3d1ec875c79747cbb810c69e34.png",
+    "banner": "assets/img/banners/1331686180227518558_41baf45a8fa22fdc09bad7005e2ea45c.png",
     "bannerColor": "#000000",
-    "lastFetched": 1782642905528
+    "lastFetched": 1783713469809
   },
   "1117189689334575145": {
     "id": "1117189689334575145",
@@ -1316,11 +1316,11 @@
   "726347579935424533": {
     "id": "726347579935424533",
     "username": "williem.",
-    "globalName": "[P-184]مالك بن سعد",
-    "avatar": "assets/img/avatars/726347579935424533_eaa505fef195676014aed396e3f958b6.png",
+    "globalName": "! Williem .",
+    "avatar": "assets/img/avatars/726347579935424533_50c6007431e6813b3312034d337b1e51.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668310747
+    "lastFetched": 1783718876619
   },
   "565042478558740491": {
     "id": "565042478558740491",
@@ -1352,11 +1352,11 @@
   "1164907935659475068": {
     "id": "1164907935659475068",
     "username": "502xxz_31594",
-    "globalName": "[P-186] فهد الدوسري",
+    "globalName": "[P-173] فهد الدوسري",
     "avatar": "assets/img/avatars/1164907935659475068_54846bc33a76704d5ecd454ec1008d55.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1783201002032
+    "lastFetched": 1783718693643
   },
   "656046012871475201": {
     "id": "656046012871475201",
@@ -1365,7 +1365,7 @@
     "avatar": "assets/img/avatars/656046012871475201_99579567d9d35ddf35c320540c20d2fb.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668298218
+    "lastFetched": 1783718864051
   },
   "741686169158287370": {
     "id": "741686169158287370",
@@ -1388,20 +1388,20 @@
   "1115952203576918071": {
     "id": "1115952203576918071",
     "username": "fn6727",
-    "globalName": "[P-187] مساعد الشمري",
+    "globalName": "[P-164] مساعد الشمري",
     "avatar": "assets/img/avatars/1115952203576918071_297058e97d939937842aeee016dedd22.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1783200972949
+    "lastFetched": 1783718664191
   },
   "956940655169515520": {
     "id": "956940655169515520",
     "username": "p._93",
-    "globalName": "! Gojō Satoru",
-    "avatar": "assets/img/avatars/956940655169515520_a1a77fac406d533cfe8e16a5ebf4c162.png",
+    "globalName": "moh",
+    "avatar": "assets/img/avatars/956940655169515520_2200d16d6251f7c37b5f683b76090a75.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668411127
+    "lastFetched": 1783718985109
   },
   "1176534516001677392": {
     "id": "1176534516001677392",
@@ -1410,7 +1410,7 @@
     "avatar": "assets/img/avatars/1176534516001677392_292f4a1606613d052733f3d522e218e0.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1783201006614
+    "lastFetched": 1783718698354
   },
   "1176973661740212329": {
     "id": "1176973661740212329",
@@ -1424,47 +1424,47 @@
   "1472776470639284275": {
     "id": "1472776470639284275",
     "username": "alshaep19",
-    "globalName": "[P-92] حمد الشايب",
+    "globalName": "[P-78] حمد الشايب",
     "avatar": "assets/img/avatars/1472776470639284275_1dbab796dad215f9bb3bb2e054a87699.png",
     "banner": "assets/img/banners/1472776470639284275_e84d4637c4bf2fcc57075b6c4ea8d1ae.png",
     "bannerColor": "#000000",
-    "lastFetched": 1782642948534
+    "lastFetched": 1783713518127
   },
   "1109024593399787540": {
     "id": "1109024593399787540",
     "username": "4nbw",
-    "globalName": "[P-79] يسار بن علي",
-    "avatar": "assets/img/avatars/1109024593399787540_b9b71c7f0b348bd9d30c166c30b99a0d.png",
-    "banner": "assets/img/banners/1109024593399787540_33f9daaa851ffb2d356f7e810b480c66.png",
+    "globalName": "[P-60] يسار بن علي",
+    "avatar": "assets/img/avatars/1109024593399787540_3c897c5f6fb9a5d0089af15895ce9eec.png",
+    "banner": "assets/img/banners/1109024593399787540_0679d1ddc03bc49bcdf8575f9f1745b8.png",
     "bannerColor": "#131312",
-    "lastFetched": 1783200969276
+    "lastFetched": 1783713337273
   },
   "1242944012051288156": {
     "id": "1242944012051288156",
     "username": "wq_4",
-    "globalName": "[P-93] عبدالله التميمي",
+    "globalName": "[P-79] عبدالله التميمي",
     "avatar": "assets/img/avatars/1242944012051288156_35eefccd6b23a80b961296e0eb08031e.png",
     "banner": "",
     "bannerColor": "#343331",
-    "lastFetched": 1782668176897
+    "lastFetched": 1783718733326
   },
   "1231005460946223124": {
     "id": "1231005460946223124",
     "username": "brho_503",
-    "globalName": "[P-124] ساطي السبيعي",
+    "globalName": "[P-121] ساطي السبيعي",
     "avatar": "assets/img/avatars/1231005460946223124_4927b27bc7327f8bd140da449b23cab4.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1783201038385
+    "lastFetched": 1783718728039
   },
   "1151181237726232587": {
     "id": "1151181237726232587",
     "username": "04y5",
-    "globalName": "[P-74] نواف المطيري",
+    "globalName": "[P-59] نواف المطيري",
     "avatar": "assets/img/avatars/1151181237726232587_26eaf1f84bfc1e6a19bab89a115949a3.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1783200996648
+    "lastFetched": 1783718689062
   },
   "1252798678666711051": {
     "id": "1252798678666711051",
@@ -1473,16 +1473,16 @@
     "avatar": "assets/img/avatars/1252798678666711051_d783d54209fe1766d4f60d660525aead.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668182660
+    "lastFetched": 1783718739188
   },
   "1265816819894063104": {
     "id": "1265816819894063104",
     "username": "r.10a",
-    "globalName": "[P-100] يزن الشمري",
+    "globalName": "[P-93] يزن الشمري",
     "avatar": "assets/img/avatars/1265816819894063104_f3653c52be75617828cf106f75cb8b5e.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668187529
+    "lastFetched": 1783718745450
   },
   "1098580060228829225": {
     "id": "1098580060228829225",
@@ -1491,34 +1491,34 @@
     "avatar": "assets/img/avatars/1098580060228829225_391aee58f1f436a0f4301214406a62c4.png",
     "banner": "assets/img/banners/1098580060228829225_d75f343df23367454f01c5320e9be102.png",
     "bannerColor": "#080808",
-    "lastFetched": 1783200966372
+    "lastFetched": 1783713334413
   },
   "827255542329770044": {
     "id": "827255542329770044",
     "username": "5mmw",
-    "globalName": "[P-127] عطية الزهراني",
-    "avatar": "assets/img/avatars/827255542329770044_ffa82cf42681bdc6d64b63d2bbeac160.png",
-    "banner": "assets/img/banners/827255542329770044_c0963b4bc7bba6f7d8bc702eca5da2e7.png",
+    "globalName": "[P-123] عطية الزهراني",
+    "avatar": "assets/img/avatars/827255542329770044_14cf1b5031bc2e101aaf6b039604bb31.png",
+    "banner": "assets/img/banners/827255542329770044_0b6a8602651a6618b399ce6807104d0b.png",
     "bannerColor": "#222222",
-    "lastFetched": 1782643032804
+    "lastFetched": 1783713620204
   },
   "934024112089747467": {
     "id": "934024112089747467",
     "username": "hell.8",
-    "globalName": "كـلاشـنـكـوف",
+    "globalName": "يـامـاش كـوشـوفـالـي",
     "avatar": "assets/img/avatars/934024112089747467_66177a50e0099cec03cd572576767059.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668401071
+    "lastFetched": 1783718975099
   },
   "717920945846878286": {
     "id": "717920945846878286",
     "username": "u5i_",
-    "globalName": "[P-69] معاذ بن محمد",
-    "avatar": "assets/img/avatars/717920945846878286_9bfbc134b770f016e304d903e0a78b79.png",
-    "banner": "assets/img/banners/717920945846878286_17694b44d14b495c1041251d8c5c507a.png",
+    "globalName": "[P-42] معاذ بن محمد",
+    "avatar": "assets/img/avatars/717920945846878286_9b810355691bfe24e07f41907bb8dccb.png",
+    "banner": "assets/img/banners/717920945846878286_a_598f3f78e09e368cdecf4b86cfd4a9e6.gif",
     "bannerColor": "#000000",
-    "lastFetched": 1782642992309
+    "lastFetched": 1783713571470
   },
   "1310918279069564948": {
     "id": "1310918279069564948",
@@ -1541,11 +1541,11 @@
   "1491791329603358812": {
     "id": "1491791329603358812",
     "username": "6oohh",
-    "globalName": "[P-189] سعيد القحطاني",
-    "avatar": "assets/img/avatars/1491791329603358812_f9d2671f7c71bc0aeec8c5c533e2a67b.png",
+    "globalName": "Abo Saad",
+    "avatar": "assets/img/avatars/1491791329603358812_2b9e142fde2a7831b8d8629decde2a5e.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668266271
+    "lastFetched": 1783718830043
   },
   "1399681710127448134": {
     "id": "1399681710127448134",
@@ -1563,7 +1563,7 @@
     "avatar": "assets/img/avatars/787019998840619058_d5b50ab0944dc5597123e0bfc9be87a3.png",
     "banner": "assets/img/banners/787019998840619058_cfdddd8558b149ee88fed0c1e9ff0cef.png",
     "bannerColor": "#000000",
-    "lastFetched": 1782643019567
+    "lastFetched": 1783713603143
   },
   "852676143839969341": {
     "id": "852676143839969341",
@@ -1572,7 +1572,7 @@
     "avatar": "assets/img/avatars/852676143839969341_0b0b69e4b5e8704e9cbb8a455afcee11.png",
     "banner": "",
     "bannerColor": "#302c2c",
-    "lastFetched": 1782668358097
+    "lastFetched": 1783718929466
   },
   "974314221900804126": {
     "id": "974314221900804126",
@@ -1581,7 +1581,7 @@
     "avatar": "assets/img/avatars/974314221900804126_ac15f05d33198d9b2fdc76cb42a71375.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668415834
+    "lastFetched": 1783718990932
   },
   "1217198704407085190": {
     "id": "1217198704407085190",
@@ -1590,7 +1590,7 @@
     "avatar": "assets/img/avatars/1217198704407085190_16ad09f297d0741b380d0fb1532a5932.png",
     "banner": "",
     "bannerColor": "#72706a",
-    "lastFetched": 1783201027277
+    "lastFetched": 1783718717485
   },
   "1317931210718052373": {
     "id": "1317931210718052373",
@@ -1599,16 +1599,16 @@
     "avatar": "assets/img/avatars/1317931210718052373_e6b5d6413a9628b1ea3eb48a569149a2.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668217237
+    "lastFetched": 1783718776017
   },
   "893017471727075340": {
     "id": "893017471727075340",
     "username": "bn.3",
-    "globalName": "مـيمً 🫯",
-    "avatar": "assets/img/avatars/893017471727075340_80457d9a4de981fc080effacb955d4c9.png",
+    "globalName": "ABOMOHSAN",
+    "avatar": "assets/img/avatars/893017471727075340_324eb1fc5940541527205d948854c0f4.png",
     "banner": "",
     "bannerColor": "#262727",
-    "lastFetched": 1782668385522
+    "lastFetched": 1783718958884
   },
   "1037696442829127842": {
     "id": "1037696442829127842",
@@ -1617,7 +1617,7 @@
     "avatar": "assets/img/avatars/1037696442829127842_06a8c4dfcf02ed45cf356b30df389bab.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1783200927408
+    "lastFetched": 1783749979609
   },
   "768787313290379266": {
     "id": "768787313290379266",
@@ -1631,11 +1631,11 @@
   "1430914285537722408": {
     "id": "1430914285537722408",
     "username": "mm.87.zg",
-    "globalName": "𝘖𝘮𝘢𝘳",
-    "avatar": "assets/img/avatars/1430914285537722408_cd677c1c54b323f59e4974d1ee98eeee.png",
+    "globalName": "Scar",
+    "avatar": "assets/img/avatars/1430914285537722408_98684ed9a6c92fd8d86fb8e67ff76699.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668256174
+    "lastFetched": 1783718816333
   },
   "962916778974019675": {
     "id": "962916778974019675",
@@ -1649,11 +1649,11 @@
   "1294928898597064736": {
     "id": "1294928898597064736",
     "username": "gp8p",
-    "globalName": "[P-188]علي بن محمد",
+    "globalName": "[P-147] علي بن محمد",
     "avatar": "assets/img/avatars/1294928898597064736_e40c87cfd4d6591f663b0c0508f9b257.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668204288
+    "lastFetched": 1783718761791
   },
   "890029556587724860": {
     "id": "890029556587724860",
@@ -1689,7 +1689,7 @@
     "avatar": "assets/img/avatars/846040481070317598_621ef55d908319bb35dab9baaf5bff29.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668355831
+    "lastFetched": 1783718926247
   },
   "491559628556075010": {
     "id": "491559628556075010",
@@ -1698,16 +1698,16 @@
     "avatar": "assets/img/avatars/491559628556075010_30d66791a2fb0a6f1c2120dae5540342.png",
     "banner": "assets/img/banners/491559628556075010_a_523e4f89e54ec657213b2dc41f7360fa.gif",
     "bannerColor": "#000000",
-    "lastFetched": 1782642966168
+    "lastFetched": 1783713541828
   },
   "361606834219515905": {
     "id": "361606834219515905",
     "username": "_32.",
     "globalName": "[A-15] مشاري بن فهد",
-    "avatar": "assets/img/avatars/361606834219515905_8d68b368ce933bbed856f03479a7b1b4.png",
-    "banner": "",
+    "avatar": "assets/img/avatars/361606834219515905_a_8d68b368ce933bbed856f03479a7b1b4.gif",
+    "banner": "assets/img/banners/361606834219515905_a_a745b4734b20a97b85944e32aa8d1e82.gif",
     "bannerColor": "#000000",
-    "lastFetched": 1782668272307
+    "lastFetched": 1783713531519
   },
   "1181404722335330418": {
     "id": "1181404722335330418",
@@ -1716,25 +1716,25 @@
     "avatar": "assets/img/avatars/1181404722335330418_53a55d13783b31e1c7db5a95452441d4.png",
     "banner": "assets/img/banners/1181404722335330418_a_f990b8b6a8a57931490624aacf9be78f.gif",
     "bannerColor": "#000000",
-    "lastFetched": 1783201008981
+    "lastFetched": 1783713380384
   },
   "1082964767838310431": {
     "id": "1082964767838310431",
     "username": "xtwd",
     "globalName": "Dayvon",
-    "avatar": "assets/img/avatars/1082964767838310431_1fb53f327936d87287c3f19d4c8b7d4f.png",
-    "banner": "",
+    "avatar": "assets/img/avatars/1082964767838310431_24337b8e4295bd7ea7e1bcc32643d564.png",
+    "banner": "assets/img/banners/1082964767838310431_bfaaa9c6fec7e1a217e31bef02e3819f.png",
     "bannerColor": "#000000",
-    "lastFetched": 1782668091791
+    "lastFetched": 1783713320199
   },
   "1069082708883558531": {
     "id": "1069082708883558531",
     "username": "q_90",
     "globalName": "ابو سيف",
-    "avatar": "assets/img/avatars/1069082708883558531_a_09887a4242fe613d42a7cf4140acf23b.gif",
-    "banner": "assets/img/banners/1069082708883558531_a_18ecdfa0207a68e7d00f181426397439.gif",
+    "avatar": "assets/img/avatars/1069082708883558531_09887a4242fe613d42a7cf4140acf23b.png",
+    "banner": "",
     "bannerColor": "#252525",
-    "lastFetched": 1782642754931
+    "lastFetched": 1783749994200
   },
   "887021023516565545": {
     "id": "887021023516565545",
@@ -1743,7 +1743,7 @@
     "avatar": "assets/img/avatars/887021023516565545_335a35dc734633fa0ed43c2aa8814611.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668377817
+    "lastFetched": 1783718951035
   },
   "1310247888625995786": {
     "id": "1310247888625995786",
@@ -1752,7 +1752,7 @@
     "avatar": "assets/img/avatars/1310247888625995786_a_2713b34c477e81836714efda5cdb3e44.gif",
     "banner": "assets/img/banners/1310247888625995786_a_f4543f548aaf30fad2db8830b134a842.gif",
     "bannerColor": "#141313",
-    "lastFetched": 1782642891362
+    "lastFetched": 1783713453893
   },
   "1084509508820279359": {
     "id": "1084509508820279359",
@@ -1761,7 +1761,7 @@
     "avatar": "assets/img/avatars/1084509508820279359_8d19ae17f4ca08f3afc278b258c79429.png",
     "banner": "assets/img/banners/1084509508820279359_ddc77979fc1395c3e4f4ad097d3ad4b4.png",
     "bannerColor": "#000000",
-    "lastFetched": 1783200953277
+    "lastFetched": 1783713322622
   },
   "875422869922914375": {
     "id": "875422869922914375",
@@ -1775,11 +1775,11 @@
   "1070521836816846939": {
     "id": "1070521836816846939",
     "username": "haytham1338",
-    "globalName": "[D-06] هيثم بن علي",
+    "globalName": "[D-02] هيثم بن علي",
     "avatar": "assets/img/avatars/1070521836816846939_898b8b038a5edcbf523d7563a7ce1645.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1783200943580
+    "lastFetched": 1783749996902
   },
   "892092790572458044": {
     "id": "892092790572458044",
@@ -1797,7 +1797,7 @@
     "avatar": "assets/img/avatars/1222946051766489111_a9906390192d7fd0fd9808b1dc2c95e8.png",
     "banner": "",
     "bannerColor": "#262626",
-    "lastFetched": 1783201034298
+    "lastFetched": 1783718724615
   },
   "1393285050312950032": {
     "id": "1393285050312950032",
@@ -1806,7 +1806,7 @@
     "avatar": "assets/img/avatars/1393285050312950032_464da928319dfef96158ab17cd020336.png",
     "banner": "assets/img/banners/1393285050312950032_a_75fa3e58172bae7cd531d05ce96ee27f.gif",
     "bannerColor": "#000000",
-    "lastFetched": 1782642922559
+    "lastFetched": 1783713487472
   },
   "577367581498015744": {
     "id": "577367581498015744",
@@ -1815,7 +1815,7 @@
     "avatar": "assets/img/avatars/577367581498015744_2ddab9e624f9fb572c11ec9610f390ec.png",
     "banner": "assets/img/banners/577367581498015744_a_40e4f1c507da5384366ae2df7a62716a.gif",
     "bannerColor": "#000000",
-    "lastFetched": 1782642970749
+    "lastFetched": 1783713546598
   },
   "1296804349044854796": {
     "id": "1296804349044854796",
@@ -1824,16 +1824,16 @@
     "avatar": "assets/img/avatars/1296804349044854796_dd50923b6637c4b8cc925458b82eb31e.png",
     "banner": "assets/img/banners/1296804349044854796_a_109f54a27db74d10b125c7afe7e616da.gif",
     "bannerColor": "#000000",
-    "lastFetched": 1782642887887
+    "lastFetched": 1783713448217
   },
   "891019134500999220": {
     "id": "891019134500999220",
     "username": "avl02",
     "globalName": "[D-07] مــحــمــد الــتــومـي",
-    "avatar": "assets/img/avatars/891019134500999220_1b1a807080e6ed10cb4db02b4d0f7a25.png",
-    "banner": "assets/img/banners/891019134500999220_a_b9c654a95b08ccda7f60bffb61dde44c.gif",
+    "avatar": "assets/img/avatars/891019134500999220_a7b9a6bf70f5419642f176df1fa6c963.png",
+    "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782643073242
+    "lastFetched": 1783718956669
   },
   "954588127283011604": {
     "id": "954588127283011604",
@@ -1842,16 +1842,16 @@
     "avatar": "assets/img/avatars/954588127283011604_a_72cfb107d7d9e08e240c79083995279f.gif",
     "banner": "assets/img/banners/954588127283011604_a_9bce4699af26eb22b6d4c50f679b3ee9.gif",
     "bannerColor": "#000000",
-    "lastFetched": 1782643100347
+    "lastFetched": 1783713701963
   },
   "795966756794794014": {
     "id": "795966756794794014",
     "username": "rjf_27",
     "globalName": "[D-04] رائد الشمري",
-    "avatar": "assets/img/avatars/795966756794794014_5550a87717d56edc308d6ce75d0afa40.png",
+    "avatar": "assets/img/avatars/795966756794794014_d7294785c9ae22a2a0708011e2a1ce99.png",
     "banner": "assets/img/banners/795966756794794014_a_3f9bc2438ad49017251d80d1d8ec3c5c.gif",
     "bannerColor": "#000000",
-    "lastFetched": 1782643022391
+    "lastFetched": 1783713605977
   },
   "1294685521204744234": {
     "id": "1294685521204744234",
@@ -1860,7 +1860,7 @@
     "avatar": "assets/img/avatars/1294685521204744234_d7e962bf510dd2b4865d960811f49c47.png",
     "banner": "assets/img/banners/1294685521204744234_a_2c40882e4e8b886886f23b828f15ed8f.gif",
     "bannerColor": "#000000",
-    "lastFetched": 1782642885729
+    "lastFetched": 1783713446005
   },
   "1085204096925048914": {
     "id": "1085204096925048914",
@@ -1869,7 +1869,7 @@
     "avatar": "assets/img/avatars/1085204096925048914_0d367de5a89aca2db29c023f02cef7b8.png",
     "banner": "assets/img/banners/1085204096925048914_d5aea9854e0f28b110c0686e08cdbea5.png",
     "bannerColor": "#000000",
-    "lastFetched": 1783200955562
+    "lastFetched": 1783713324909
   },
   "1217478479872921643": {
     "id": "1217478479872921643",
@@ -1878,16 +1878,16 @@
     "avatar": "assets/img/avatars/1217478479872921643_953f743664d77984e7e8dd2b194582fb.png",
     "banner": "assets/img/banners/1217478479872921643_3c58054a363f9f7089d422dccefb90c1.png",
     "bannerColor": "#000000",
-    "lastFetched": 1783201028451
+    "lastFetched": 1783713400581
   },
   "736504958785945640": {
     "id": "736504958785945640",
     "username": "skra0001",
-    "globalName": "[CA | E-14] ابو تميم",
+    "globalName": "[CA | E-15] ابو تميم",
     "avatar": "assets/img/avatars/736504958785945640_697f0254790c3dcf5c78d0ec01cdf271.png",
     "banner": "assets/img/banners/736504958785945640_1836c84478f4386bb0c5e5ef139aea62.png",
     "bannerColor": "#905ca2",
-    "lastFetched": 1782643007421
+    "lastFetched": 1783713585821
   },
   "1038758241376665610": {
     "id": "1038758241376665610",
@@ -1896,7 +1896,7 @@
     "avatar": "assets/img/avatars/1038758241376665610_a96c28ff33a4215d58e4d239a7d3b489.png",
     "banner": "",
     "bannerColor": "#810e0e",
-    "lastFetched": 1783200928499
+    "lastFetched": 1783749980810
   },
   "882236616515649546": {
     "id": "882236616515649546",
@@ -1905,7 +1905,7 @@
     "avatar": "assets/img/avatars/882236616515649546_c48752c4abd49ffe2e2a6847823ddb61.png",
     "banner": "",
     "bannerColor": "#252121",
-    "lastFetched": 1782668376694
+    "lastFetched": 1783718949857
   },
   "1219336054528675913": {
     "id": "1219336054528675913",
@@ -1914,16 +1914,16 @@
     "avatar": "assets/img/avatars/1219336054528675913_f4120ad41407ebc4d1a40f821f2532c4.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1783201029553
+    "lastFetched": 1783718719769
   },
   "465355224404590613": {
     "id": "465355224404590613",
     "username": "aziiz0s",
-    "globalName": "[CC | J-14] عزيز الشهراني",
+    "globalName": "[CC | J-13] عزيز الشهراني",
     "avatar": "assets/img/avatars/465355224404590613_f5a1f9a4e4e808ca42e96cda114224f7.png",
     "banner": "assets/img/banners/465355224404590613_a_367cb1c6e79fc7762eb70e1764030dab.gif",
     "bannerColor": "#000000",
-    "lastFetched": 1782642963761
+    "lastFetched": 1783713539310
   },
   "651621390507573278": {
     "id": "651621390507573278",
@@ -1941,16 +1941,16 @@
     "avatar": "assets/img/avatars/1272455431750549526_cea59749f514b13684e4d79301833fa1.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668189825
+    "lastFetched": 1783718747810
   },
   "985593061042176040": {
     "id": "985593061042176040",
     "username": "nader0782",
-    "globalName": "[CD I J-24] نادر العمدة",
+    "globalName": "[CD I J-22] نادر العمدة",
     "avatar": "assets/img/avatars/985593061042176040_da9ac482b18e504a3c4cc3fff4441197.png",
     "banner": "assets/img/banners/985593061042176040_4ed43289c02131fd992fbadddd72222d.png",
     "bannerColor": "#6777cf",
-    "lastFetched": 1782643111186
+    "lastFetched": 1783713715867
   },
   "483688622613200906": {
     "id": "483688622613200906",
@@ -1959,7 +1959,7 @@
     "avatar": "assets/img/avatars/483688622613200906_a_e6c29647650bc95f400efe2efd85daba.gif",
     "banner": "assets/img/banners/483688622613200906_a_b839bd288e20865f7fc4dcdd9547fc65.gif",
     "bannerColor": "#000000",
-    "lastFetched": 1782642965043
+    "lastFetched": 1783713540595
   },
   "1149485059737391214": {
     "id": "1149485059737391214",
@@ -1968,7 +1968,7 @@
     "avatar": "assets/img/avatars/1149485059737391214_b2ad3a024dccd79cd8885daf85d24503.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1783200994111
+    "lastFetched": 1783718686640
   },
   "1122836825380245626": {
     "id": "1122836825380245626",
@@ -1977,7 +1977,7 @@
     "avatar": "assets/img/avatars/1122836825380245626_625c9102285427bc4e69804e4fdae7c0.png",
     "banner": "assets/img/banners/1122836825380245626_85c80230b4e94ab415d48bb6bf1fb962.png",
     "bannerColor": "#410a0a",
-    "lastFetched": 1783200983750
+    "lastFetched": 1783713352476
   },
   "985105656728129576": {
     "id": "985105656728129576",
@@ -1995,7 +1995,7 @@
     "avatar": "assets/img/avatars/1019434375500271647_12421fcb44f064cb9bdfccfc6081376c.png",
     "banner": "",
     "bannerColor": "#ffffff",
-    "lastFetched": 1783200918740
+    "lastFetched": 1783749971534
   },
   "551386039961255956": {
     "id": "551386039961255956",
@@ -2004,16 +2004,16 @@
     "avatar": "assets/img/avatars/551386039961255956_d808ced90322679fadbec318e4b13688.png",
     "banner": "",
     "bannerColor": "#0e0404",
-    "lastFetched": 1782668281645
+    "lastFetched": 1783718846364
   },
   "817803008461111316": {
     "id": "817803008461111316",
     "username": "ab7z.",
-    "globalName": "[CC | H-02] وحـيـد الدوســري",
+    "globalName": "[CC | H-01] وحـيـد الدوســري",
     "avatar": "assets/img/avatars/817803008461111316_8d3e307b29fb5a465652d0de0c8dad8c.png",
-    "banner": "assets/img/banners/817803008461111316_afc492eedd183433bcebb484ffb178cd.png",
+    "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782643027988
+    "lastFetched": 1783718911238
   },
   "926118949106638879": {
     "id": "926118949106638879",
@@ -2022,25 +2022,25 @@
     "avatar": "assets/img/avatars/926118949106638879_ba1a93064380803c896c660b863c724c.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668396217
+    "lastFetched": 1783718970398
   },
   "1201178220603637814": {
     "id": "1201178220603637814",
     "username": "r65jr",
     "globalName": "[CC | J-41] ادم بن صلاح",
-    "avatar": "assets/img/avatars/1201178220603637814_370e231d4e85ef3a839ac57c52bf3f01.png",
-    "banner": "assets/img/banners/1201178220603637814_a75ee8f68fddb86b83ca7aca1554e03e.png",
+    "avatar": "assets/img/avatars/1201178220603637814_09f3be4573913dafe6d0b23a38181b0e.png",
+    "banner": "assets/img/banners/1201178220603637814_91d6099954bd52afef3dda824013c708.png",
     "bannerColor": "#160202",
-    "lastFetched": 1783201015576
+    "lastFetched": 1783713387190
   },
   "1149452557245235200": {
     "id": "1149452557245235200",
     "username": "r7py",
     "globalName": "[CC | J-21] عبدالله المطيري",
     "avatar": "assets/img/avatars/1149452557245235200_877b4b19611aaf1d75a6c0b8089f808a.png",
-    "banner": "",
+    "banner": "assets/img/banners/1149452557245235200_717ed1b2793c4f4c7335758d31072e97.png",
     "bannerColor": "#ede7d8",
-    "lastFetched": 1783200992941
+    "lastFetched": 1783713364437
   },
   "1413289706380202084": {
     "id": "1413289706380202084",
@@ -2049,16 +2049,16 @@
     "avatar": "assets/img/avatars/1413289706380202084_dc5390273b0b4abc12223665e394ff1a.png",
     "banner": "",
     "bannerColor": "#33004e",
-    "lastFetched": 1782668246223
+    "lastFetched": 1783718806051
   },
   "1121589202660888738": {
     "id": "1121589202660888738",
     "username": "ss5i",
     "globalName": "[CC | E-29] عقاب البلوي",
-    "avatar": "assets/img/avatars/1121589202660888738_1da0cbe7e37f72a8719e2775750c2f4e.png",
+    "avatar": "assets/img/avatars/1121589202660888738_f7b94894e37e8cd71fdb09914d9fd7e0.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1783200982646
+    "lastFetched": 1783718674165
   },
   "1061147782997606410": {
     "id": "1061147782997606410",
@@ -2067,25 +2067,25 @@
     "avatar": "assets/img/avatars/1061147782997606410_c74d81ee8f4779f325d881a4f996d199.png",
     "banner": "assets/img/banners/1061147782997606410_93b9231c76f8d83d1252f07fde98278c.png",
     "bannerColor": "#ffffff",
-    "lastFetched": 1783200938222
+    "lastFetched": 1783713303136
   },
   "1285627129085825084": {
     "id": "1285627129085825084",
     "username": "abunour6",
     "globalName": "[CC | J-03] برجس عسيري",
     "avatar": "assets/img/avatars/1285627129085825084_f66952aecdb4a72770c78575eb71f060.png",
-    "banner": "",
+    "banner": "assets/img/banners/1285627129085825084_51a67a69625ef800333f1936ee71349b.png",
     "bannerColor": "#000000",
-    "lastFetched": 1782668198691
+    "lastFetched": 1783713441004
   },
   "693104384485097492": {
     "id": "693104384485097492",
     "username": "4.qz1",
-    "globalName": "[CC | G-33] عبدالله باعبيد",
-    "avatar": "assets/img/avatars/693104384485097492_9ca4322c1c675ab967fc239bfa40ce7c.png",
-    "banner": "assets/img/banners/693104384485097492_a_cb8ed2d2e8e9033b1aca7b9155debb98.gif",
+    "globalName": "|| عبدالله باعبيد ||",
+    "avatar": "assets/img/avatars/693104384485097492_76cae762f33eae60274ac4d0b4e4b02d.png",
+    "banner": "",
     "bannerColor": "#7c7c7c",
-    "lastFetched": 1782642988663
+    "lastFetched": 1783718868570
   },
   "935520902223904850": {
     "id": "935520902223904850",
@@ -2103,7 +2103,7 @@
     "avatar": "assets/img/avatars/1109617879562854500_a_df2b1a5dfc29bfcfae364f957e327355.gif",
     "banner": "assets/img/banners/1109617879562854500_2efea060e65eb233093ee67841aef5ca.png",
     "bannerColor": "#000000",
-    "lastFetched": 1783200971766
+    "lastFetched": 1783713339766
   },
   "1149285693764411502": {
     "id": "1149285693764411502",
@@ -2112,7 +2112,7 @@
     "avatar": "assets/img/avatars/1149285693764411502_5142866830f4b48cafcd89fd4844d2a8.png",
     "banner": "",
     "bannerColor": "#c739a3",
-    "lastFetched": 1783200991736
+    "lastFetched": 1783718684481
   },
   "1287043475468062824": {
     "id": "1287043475468062824",
@@ -2126,11 +2126,11 @@
   "406682823609548800": {
     "id": "406682823609548800",
     "username": "yya_s",
-    "globalName": "[CC | H-27] ياسر الزهراني",
+    "globalName": "[CC | H-26] ياسر الزهراني",
     "avatar": "assets/img/avatars/406682823609548800_7dc128487cbee43b544bc8ad3b0c77f8.png",
-    "banner": "",
+    "banner": "assets/img/banners/406682823609548800_a_8e4a1b1c223df2cf8cebdf163b2cdbf6.gif",
     "bannerColor": "#000000",
-    "lastFetched": 1782668274668
+    "lastFetched": 1783713535737
   },
   "1317894146974814240": {
     "id": "1317894146974814240",
@@ -2139,7 +2139,7 @@
     "avatar": "assets/img/avatars/1317894146974814240_6e1529fa7b9951991988ff0aa46a0b9c.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668215991
+    "lastFetched": 1783718774835
   },
   "870924957306200075": {
     "id": "870924957306200075",
@@ -2148,7 +2148,7 @@
     "avatar": "assets/img/avatars/870924957306200075_a_0d0e44e8f1efb0d30c3e127e273386b5.gif",
     "banner": "assets/img/banners/870924957306200075_a_a7402658f6ee4de3656fd3181d71822a.gif",
     "bannerColor": "#000000",
-    "lastFetched": 1782643053021
+    "lastFetched": 1783713648333
   },
   "654829541721636885": {
     "id": "654829541721636885",
@@ -2157,7 +2157,7 @@
     "avatar": "assets/img/avatars/654829541721636885_293da1f1a45a1410d3ebfed2d3bf416c.png",
     "banner": "",
     "bannerColor": "#555352",
-    "lastFetched": 1782668297056
+    "lastFetched": 1783718862861
   },
   "971236977796059176": {
     "id": "971236977796059176",
@@ -2166,16 +2166,16 @@
     "avatar": "assets/img/avatars/971236977796059176_313102c58db2bfc83c72508a753240fb.png",
     "banner": "",
     "bannerColor": "#353635",
-    "lastFetched": 1782668414685
+    "lastFetched": 1783718989838
   },
   "1074026200999145502": {
     "id": "1074026200999145502",
     "username": "eslamsalah",
     "globalName": "[CC | E-05] اسلام صلاح",
     "avatar": "assets/img/avatars/1074026200999145502_f81e0a46365f4eb3ff25ecf58fe6e261.png",
-    "banner": "assets/img/banners/1074026200999145502_c1aff885a1a5543dc12d0ac3dec01ab9.png",
+    "banner": "",
     "bannerColor": "#08040c",
-    "lastFetched": 1783200944813
+    "lastFetched": 1783749999172
   },
   "1403002656481476638": {
     "id": "1403002656481476638",
@@ -2184,7 +2184,7 @@
     "avatar": "assets/img/avatars/1403002656481476638_9698e3503ca9d19f8eabfb4c4b9f2628.png",
     "banner": "assets/img/banners/1403002656481476638_c21f104ca4ff68f8e303c4407174d470.png",
     "bannerColor": "#000000",
-    "lastFetched": 1782642928317
+    "lastFetched": 1783713493758
   },
   "829032963056205915": {
     "id": "829032963056205915",
@@ -2198,29 +2198,29 @@
   "706303209907552368": {
     "id": "706303209907552368",
     "username": "badrgames",
-    "globalName": "[CC | E-70] بدر صالح",
+    "globalName": "[CC | E-53] بدر صالح",
     "avatar": "assets/img/avatars/706303209907552368_a_45b1e0b1541251cd55ae84901418cf0f.gif",
     "banner": "assets/img/banners/706303209907552368_a_0ffa7e9177183c4c4f8b19de702b19d6.gif",
     "bannerColor": "#000000",
-    "lastFetched": 1782642991201
+    "lastFetched": 1783713569983
   },
   "1020746085678985377": {
     "id": "1020746085678985377",
     "username": "_9il",
     "globalName": "[CC | J-04] اصيل وحيد",
-    "avatar": "assets/img/avatars/1020746085678985377_bad23b5e8abf0aef925d0a81a78d2b67.png",
-    "banner": "assets/img/banners/1020746085678985377_a_fc3e858e2cd79d2b42df573838a503ca.gif",
+    "avatar": "assets/img/avatars/1020746085678985377_a_438e019908038b90118c07e3815b460a.gif",
+    "banner": "assets/img/banners/1020746085678985377_a_cd47d6df2dcdd4926aed52c49b0ba592.gif",
     "bannerColor": "#100224",
-    "lastFetched": 1783200919881
+    "lastFetched": 1783713283234
   },
   "1282023513234083892": {
     "id": "1282023513234083892",
     "username": "uo15",
-    "globalName": "[CD | J-16] نواف بن سلطان",
-    "avatar": "assets/img/avatars/1282023513234083892_1c318930bcb7e3928a53c7f7dde2d71a.png",
+    "globalName": "[CD | J-15] نواف بن سلطان",
+    "avatar": "assets/img/avatars/1282023513234083892_83367ea084126f8f6fd72c8f9761c54e.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668192121
+    "lastFetched": 1783718750078
   },
   "575864344085004308": {
     "id": "575864344085004308",
@@ -2229,34 +2229,34 @@
     "avatar": "assets/img/avatars/575864344085004308_a0d4481946c7f063ee01d527c37612ab.png",
     "banner": "assets/img/banners/575864344085004308_684f76e06f0c7909442a1563ecc9e218.png",
     "bannerColor": "#242529",
-    "lastFetched": 1782642969607
+    "lastFetched": 1783713545497
   },
   "1044385086306525267": {
     "id": "1044385086306525267",
     "username": "nawaf1369",
     "globalName": "[CC | E-28] نواف عبد العزيز",
     "avatar": "assets/img/avatars/1044385086306525267_0201a3f562404b2a4d6533f246f24fdf.png",
-    "banner": "",
+    "banner": "assets/img/banners/1044385086306525267_447dc68d1f194284563b54b858f22b71.png",
     "bannerColor": "#000000",
-    "lastFetched": 1783200929648
+    "lastFetched": 1783713211781
   },
   "912242464843239514": {
     "id": "912242464843239514",
     "username": "gmr.h",
-    "globalName": "[CC | H-42] محمد بن صالح",
+    "globalName": "[CC | H-39] محمد بن صالح",
     "avatar": "assets/img/avatars/912242464843239514_362eda6066a89afe8631cc08caae991e.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668392767
+    "lastFetched": 1783718967049
   },
   "732891799680581733": {
     "id": "732891799680581733",
     "username": "vsqv",
     "globalName": "[CC | E-09] تركي العتيبي",
-    "avatar": "assets/img/avatars/732891799680581733_bde78b494d7e7e1308968b5b2ad1ef11.png",
-    "banner": "assets/img/banners/732891799680581733_0d24b5f2d2268624cc7205b91a608d5b.png",
+    "avatar": "assets/img/avatars/732891799680581733_3132e7a257910265c989153b00d7f649.png",
+    "banner": "",
     "bannerColor": "#030303",
-    "lastFetched": 1782643006278
+    "lastFetched": 1783718883586
   },
   "610720650268639243": {
     "id": "610720650268639243",
@@ -2272,36 +2272,36 @@
     "username": "_alrshydy",
     "globalName": "[CC | J-11] سعود الرشيدي",
     "avatar": "assets/img/avatars/815586864416686092_aa491fc2136e37a2af5cb8ac48279c74.png",
-    "banner": "assets/img/banners/815586864416686092_e4385d81a8f43cc82da3e69d18a45d07.png",
+    "banner": "",
     "bannerColor": "#a4a7a4",
-    "lastFetched": 1782643026818
+    "lastFetched": 1783718910093
   },
   "880466246020268052": {
     "id": "880466246020268052",
     "username": "m_mm501",
-    "globalName": "[CC | H-16] محمد الحارثي",
+    "globalName": "[CC | H-13] محمد الحارثي",
     "avatar": "assets/img/avatars/880466246020268052_edfb4165553a1f1b09b7d4fb6b0587da.png",
-    "banner": "",
+    "banner": "assets/img/banners/880466246020268052_a_90bb956aa0d44d1b27a24b17729ec5af.gif",
     "bannerColor": "#ffffff",
-    "lastFetched": 1782668375596
+    "lastFetched": 1783713660066
   },
   "875534842526318603": {
     "id": "875534842526318603",
     "username": "b5l1",
-    "globalName": "[CC | H-21] بتال العتيبي",
+    "globalName": "[CC | H-20] بتال العتيبي",
     "avatar": "assets/img/avatars/875534842526318603_cdf5ca423f03a7264b0d313a568395bb.png",
-    "banner": "",
+    "banner": "assets/img/banners/875534842526318603_a_8902edbbf7f6f4e85ef1e8e2d31dbe03.gif",
     "bannerColor": "#a39d9d",
-    "lastFetched": 1782668372096
+    "lastFetched": 1783713655840
   },
   "1248411041269022761": {
     "id": "1248411041269022761",
     "username": "sd073213",
-    "globalName": "[CC | H-40] سعد السلمي",
+    "globalName": "[CC | H-30] سعد السلمي",
     "avatar": "assets/img/avatars/1248411041269022761_0154f232b80fa34ad51a3a85dc920136.png",
-    "banner": "assets/img/banners/1248411041269022761_4c0ccbcbe7e8d4874472f356e28b639c.png",
+    "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782642862701
+    "lastFetched": 1783718736863
   },
   "1050415368411295816": {
     "id": "1050415368411295816",
@@ -2310,25 +2310,25 @@
     "avatar": "assets/img/avatars/1050415368411295816_9ebe79307f82c40bdbec24e5b51bddc1.png",
     "banner": "assets/img/banners/1050415368411295816_a_4eebca4e5488bc9c1f29439b48d45a62.gif",
     "bannerColor": "#000000",
-    "lastFetched": 1783200932070
+    "lastFetched": 1783713296891
   },
   "823670155849629697": {
     "id": "823670155849629697",
     "username": "1.x5",
-    "globalName": "[CC | H-03] تركي العنزي",
+    "globalName": "[CC | H-02] تركي العنزي",
     "avatar": "assets/img/avatars/823670155849629697_48d909c35e5049ce519b136832be7373.png",
     "banner": "",
     "bannerColor": "#373833",
-    "lastFetched": 1782668345386
+    "lastFetched": 1783718915136
   },
   "968016821875785740": {
     "id": "968016821875785740",
     "username": "ls.g",
-    "globalName": "[CC | H-04] نواف صالح",
+    "globalName": "[CC | H-03] نواف صالح",
     "avatar": "assets/img/avatars/968016821875785740_29d917020a6e5af1edd732cb551d5f07.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668413410
+    "lastFetched": 1783718988674
   },
   "1284563094403682336": {
     "id": "1284563094403682336",
@@ -2337,7 +2337,7 @@
     "avatar": "assets/img/avatars/1284563094403682336_70e51096b86e646e77de82d27485abb8.png",
     "banner": "assets/img/banners/1284563094403682336_6e978ce44d4b0a8d593b83d4972cde34.png",
     "bannerColor": "#000000",
-    "lastFetched": 1782642880062
+    "lastFetched": 1783713439399
   },
   "827300903241252874": {
     "id": "827300903241252874",
@@ -2931,7 +2931,7 @@
     "avatar": "assets/img/avatars/1134424158785257664_92f7e05b321187abb3dc22f52668a9b6.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1783200988659
+    "lastFetched": 1783718681031
   },
   "1023204891994361916": {
     "id": "1023204891994361916",
@@ -4862,11 +4862,11 @@
   "908130922921099264": {
     "id": "908130922921099264",
     "username": "iwl_",
-    "globalName": "[CC | J-17] مشعل العنزي",
+    "globalName": "[CC | J-16] مشعل العنزي",
     "avatar": "assets/img/avatars/908130922921099264_f91c24f37923bbd8ef173e5678b9cea9.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668390360
+    "lastFetched": 1783718964807
   },
   "865372954282688546": {
     "id": "865372954282688546",
@@ -5951,11 +5951,11 @@
   "609911925928755203": {
     "id": "609911925928755203",
     "username": "baderalrajhi",
-    "globalName": "baderalrajhi",
+    "globalName": "[P-198] بدر الشريف",
     "avatar": "assets/img/avatars/609911925928755203_bcef13167a45dfec6f918c0686559f45.png",
-    "banner": null,
+    "banner": "",
     "bannerColor": "#040404",
-    "lastFetched": 1781294642859
+    "lastFetched": 1783718855291
   },
   "1303515598268923957": {
     "id": "1303515598268923957",
@@ -6518,11 +6518,11 @@
   "1196158160487055393": {
     "id": "1196158160487055393",
     "username": "i_x77",
-    "globalName": "Abu Fahad👑",
+    "globalName": "[CC | G-46] خلف العجمي",
     "avatar": "assets/img/avatars/1196158160487055393_2dc988a31fc9b4ae35fa2ddc9d9fe23a.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1783201014425
+    "lastFetched": 1783718705634
   },
   "1238661158962204775": {
     "id": "1238661158962204775",
@@ -6815,11 +6815,11 @@
   "1262355385701109788": {
     "id": "1262355385701109788",
     "username": "mn.s1",
-    "globalName": "[P-207] منصور الرويلي",
+    "globalName": "[P-141] منصور الرويلي",
     "avatar": "https://cdn.discordapp.com/avatars/1262355385701109788/8e213cd6481b44a2fe62f49e8722d208.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668186313
+    "lastFetched": 1783718744300
   },
   "293213227616305172": {
     "id": "293213227616305172",
@@ -6909,7 +6909,7 @@
     "avatar": "assets/img/avatars/1092614260896567338_736f446e8882853998d964112342e9b4.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1783200964052
+    "lastFetched": 1783718655464
   },
   "1296508680891531407": {
     "id": "1296508680891531407",
@@ -7440,16 +7440,16 @@
     "avatar": "assets/img/avatars/1062339096850223114_eefd7b9f16cb0ea7608068a1d0df8f3d.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1783200939879
+    "lastFetched": 1783749992519
   },
   "1316501991236567160": {
     "id": "1316501991236567160",
     "username": "wesam03868_63269",
-    "globalName": "[CC | E-51] مشعل بن محمد",
+    "globalName": "[CC | E-49] مشعل بن محمد",
     "avatar": "assets/img/avatars/1316501991236567160_595d5d2856d6d0521e26d47f03e279dc.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668213863
+    "lastFetched": 1783718772573
   },
   "1414728284004028533": {
     "id": "1414728284004028533",
@@ -7463,20 +7463,20 @@
   "1294657984907051079": {
     "id": "1294657984907051079",
     "username": "mshl.1",
-    "globalName": "[S-14] مشعل الشريف",
+    "globalName": "[CC | E-77] مشعل الشريف",
     "avatar": "assets/img/avatars/1294657984907051079_39d6a9ceb66915bf8a3ef5f01ea4bef8.png",
     "banner": "assets/img/banners/1294657984907051079_a_5b56c6ae4c5111833d02cfd05043b71d.gif",
     "bannerColor": "#1b1c1b",
-    "lastFetched": 1782642884570
+    "lastFetched": 1783713444732
   },
   "1363820578301284382": {
     "id": "1363820578301284382",
     "username": "9njn",
-    "globalName": "[S-02] غالب الحربي",
+    "globalName": "[D-09] غالب الحربي",
     "avatar": "assets/img/avatars/1363820578301284382_2e016cabf8d25f418f4b5332787df1e0.png",
     "banner": "assets/img/banners/1363820578301284382_c1c7119df0a755dd324ae94ecc62a24f.png",
     "bannerColor": "#000000",
-    "lastFetched": 1782642914383
+    "lastFetched": 1783713479079
   },
   "1085164103410131025": {
     "id": "1085164103410131025",
@@ -7485,7 +7485,7 @@
     "avatar": "assets/img/avatars/1085164103410131025_f42a932c1f22c02b643d592f4550acfd.png",
     "banner": "",
     "bannerColor": "#d0c6c6",
-    "lastFetched": 1783200954402
+    "lastFetched": 1783718647246
   },
   "1323765765215617096": {
     "id": "1323765765215617096",
@@ -7494,34 +7494,34 @@
     "avatar": "assets/img/avatars/1323765765215617096_3052148c90b1eee7b8088a37fb3d047f.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668221165
+    "lastFetched": 1783718779514
   },
   "1478240188164608153": {
     "id": "1478240188164608153",
     "username": "a1.1aa",
-    "globalName": "[CC | G-34]  عبدالرحمن ال عليان",
-    "avatar": "assets/img/avatars/1478240188164608153_733be92c2baa80668b9bdb564704a3fd.png",
-    "banner": "assets/img/banners/1478240188164608153_54af1358a6dddcb3e067ebb3567dd7ed.png",
+    "globalName": "[CC | G-30] عبدالرحمن ال عليان",
+    "avatar": "assets/img/avatars/1478240188164608153_a_bc47bf93d0a4618efdb4248598024714.gif",
+    "banner": "assets/img/banners/1478240188164608153_a_3a9aaa9df8bf8504c40451b2096695a5.gif",
     "bannerColor": "#000000",
-    "lastFetched": 1782642949734
+    "lastFetched": 1783713520214
   },
   "1076425128981827584": {
     "id": "1076425128981827584",
     "username": "_he_mo_",
     "globalName": "[CC | J-35] محمد الشمري",
-    "avatar": "assets/img/avatars/1076425128981827584_3978eaf794604d95e9c2243f332360fc.png",
-    "banner": "assets/img/banners/1076425128981827584_ffe3265aec57780a335e9a930545eceb.png",
+    "avatar": "assets/img/avatars/1076425128981827584_25983aae04e97e031c352594dc015c69.png",
+    "banner": "assets/img/banners/1076425128981827584_738dac7c84286c5c7fbad22abe1a25b4.png",
     "bannerColor": "#000000",
-    "lastFetched": 1783200946017
+    "lastFetched": 1783713313376
   },
   "1413548395079008377": {
     "id": "1413548395079008377",
     "username": "evs1x",
-    "globalName": "[CC | J-47] عطيه الزهراني",
+    "globalName": "[CC | J-44] عطيه الزهراني",
     "avatar": "assets/img/avatars/1413548395079008377_a00552ec19b0c0002d6a1a4d934de707.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668247320
+    "lastFetched": 1783718807190
   },
   "867497813209514065": {
     "id": "867497813209514065",
@@ -7535,11 +7535,11 @@
   "737813403527020618": {
     "id": "737813403527020618",
     "username": "j.loshi",
-    "globalName": "[CD | J-23] علي الزامل",
+    "globalName": "[CC | J-36] علي الزامل",
     "avatar": "assets/img/avatars/737813403527020618_d6c3843ee925c46dbdee3d9efd447240.png",
     "banner": "assets/img/banners/737813403527020618_bf2ba31f8cc561eb0f74bac3b788daf1.png",
     "bannerColor": "#000000",
-    "lastFetched": 1782643008858
+    "lastFetched": 1783713586967
   },
   "390652673960968194": {
     "id": "390652673960968194",
@@ -7562,47 +7562,47 @@
   "1388207730384306397": {
     "id": "1388207730384306397",
     "username": "i8oj",
-    "globalName": "Dark",
-    "avatar": "assets/img/avatars/1388207730384306397_6d834b3516b0520a3504fbcf60860553.png",
+    "globalName": "8",
+    "avatar": "assets/img/avatars/1388207730384306397_aaccba2ca4ffd032c261b2542c965b66.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668237337
+    "lastFetched": 1783718797011
   },
   "663684948909359104": {
     "id": "663684948909359104",
     "username": "hsoni.",
-    "globalName": "[P-190] مقرن الدوسري",
+    "globalName": "[P-175] مقرن الدوسري",
     "avatar": "assets/img/avatars/663684948909359104_97b3917c0626610d03f1550fa7dec091.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668299340
+    "lastFetched": 1783718865193
   },
   "1413919557940285550": {
     "id": "1413919557940285550",
     "username": "l770.",
-    "globalName": "[P-131] فراس بن عبدالله",
-    "avatar": "assets/img/avatars/1413919557940285550_2a4f0b9369ca53572eb26fa22d404206.png",
+    "globalName": "𝘈𝘉𝘖 7𝘕𝘖",
+    "avatar": "assets/img/avatars/1413919557940285550_7175f775d0b862f5fc3b45d73393c453.png",
     "banner": "",
     "bannerColor": "#090909",
-    "lastFetched": 1782668248410
+    "lastFetched": 1783718808315
   },
   "1373600241382719508": {
     "id": "1373600241382719508",
     "username": "q_qqm",
-    "globalName": "[P-191]  حمد البذالي",
+    "globalName": "[P-176] حمد البذالي",
     "avatar": "assets/img/avatars/1373600241382719508_c7d6a97252a2e4137d01638c11734aef.png",
     "banner": "",
     "bannerColor": "#141210",
-    "lastFetched": 1782668234099
+    "lastFetched": 1783718793522
   },
   "1400989891462037597": {
     "id": "1400989891462037597",
     "username": "mmss0706",
-    "globalName": "[P-192] مشاري بن احمد",
+    "globalName": "[P-177] مشاري بن احمد",
     "avatar": "assets/img/avatars/1400989891462037597_a017deac29514f7873bcdc60bec2e375.png",
     "banner": "",
     "bannerColor": "#070000",
-    "lastFetched": 1782668242932
+    "lastFetched": 1783718802759
   },
   "1091463850555097219": {
     "id": "1091463850555097219",
@@ -7611,52 +7611,52 @@
     "avatar": "assets/img/avatars/1091463850555097219_bb79645802f59af6f890e1d4fed96948.png",
     "banner": "",
     "bannerColor": "#161c27",
-    "lastFetched": 1783200961502
+    "lastFetched": 1783718654302
   },
   "1231059128437182525": {
     "id": "1231059128437182525",
     "username": "x0.y0",
     "globalName": "YOUSEF",
-    "avatar": "assets/img/avatars/1231059128437182525_616c6b6d5a4592367c8c8aab08c95347.png",
-    "banner": "assets/img/banners/1231059128437182525_a_137fa7bf5cd4637c8b5aff8813ff5b0b.gif",
+    "avatar": "assets/img/avatars/1231059128437182525_bf773182f00fd13dc928a40925133523.png",
+    "banner": "",
     "bannerColor": "#ffffff",
-    "lastFetched": 1782642854479
+    "lastFetched": 1783718729361
   },
   "1349690528932823111": {
     "id": "1349690528932823111",
     "username": "xlxl_1",
-    "globalName": "[P-193] سعود المطيري",
+    "globalName": "[P-178] سعود المطيري",
     "avatar": "assets/img/avatars/1349690528932823111_8ee299449c33c9dceeda09d95eca7bd2.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668228338
+    "lastFetched": 1783718787672
   },
   "933841592291323954": {
     "id": "933841592291323954",
     "username": "llvrnl",
     "globalName": "Hisham Abdullah",
-    "avatar": "assets/img/avatars/933841592291323954_9d589488f126978671de95f8fb11bfe0.png",
+    "avatar": "assets/img/avatars/933841592291323954_dfeb1157d573a66ffd6c70be88336f51.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668399932
+    "lastFetched": 1783718973908
   },
   "1237824195715403810": {
     "id": "1237824195715403810",
     "username": "ewwwwwwwwwwwwwwwwwwwe",
-    "globalName": "[P-195] سعود بن فيصل",
-    "avatar": "assets/img/avatars/1237824195715403810_46c8394ef3630dcb538ed3e1eb26bf08.png",
+    "globalName": "[P-179] سعود بن فيصل",
+    "avatar": "assets/img/avatars/1237824195715403810_e47ba1fd5fbcdf6dffce081c0bf0827c.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668175864
+    "lastFetched": 1783718732150
   },
   "1153731265636335715": {
     "id": "1153731265636335715",
     "username": "cr70094",
-    "globalName": "[P-196] مشاري المطيري",
+    "globalName": "[P-180] مشاري المطيري",
     "avatar": "assets/img/avatars/1153731265636335715_17ee18b458e72e0f1cc296bf5b35e4b1.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1783201000522
+    "lastFetched": 1783718692484
   },
   "1103815650100641802": {
     "id": "1103815650100641802",
@@ -7665,7 +7665,7 @@
     "avatar": "assets/img/avatars/1103815650100641802_361e2ac164f73feeabdc85e1fe06db20.png",
     "banner": "",
     "bannerColor": "#252122",
-    "lastFetched": 1783200968092
+    "lastFetched": 1783718659657
   },
   "1378375163435024486": {
     "id": "1378375163435024486",
@@ -7679,29 +7679,29 @@
   "936619174216728587": {
     "id": "936619174216728587",
     "username": "fkxi",
-    "globalName": "[P-144] مازن الشهري",
+    "globalName": "[P-99] مازن الشهري",
     "avatar": "assets/img/avatars/936619174216728587_62aa802727efd59a91b0273f2dfe9d65.png",
     "banner": "assets/img/banners/936619174216728587_7749bb7d75a815585c2c151b91d56b86.png",
     "bannerColor": "#61a9d5",
-    "lastFetched": 1782643092553
+    "lastFetched": 1783713693272
   },
   "845641242917863425": {
     "id": "845641242917863425",
     "username": "ob4w_",
-    "globalName": "[P-198] عبدالعزيز البذالي",
+    "globalName": "[P-181] عبدالعزيز البذالي",
     "avatar": "assets/img/avatars/845641242917863425_f23651a2d8732158fe32acc910a63fe9.png",
     "banner": "",
     "bannerColor": "#050403",
-    "lastFetched": 1782668354369
+    "lastFetched": 1783718925101
   },
   "1190012684679262288": {
     "id": "1190012684679262288",
     "username": "qy_909",
-    "globalName": "[P-199] محمد الاحمري",
+    "globalName": "dexstr909",
     "avatar": "assets/img/avatars/1190012684679262288_ad32812b6bfcf3855d32f7d727f2f36b.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1783201013235
+    "lastFetched": 1783718704473
   },
   "862497724254781440": {
     "id": "862497724254781440",
@@ -7710,7 +7710,7 @@
     "avatar": "assets/img/avatars/862497724254781440_c226b11f3be6ab374e299a3a3978565c.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668361518
+    "lastFetched": 1783718933327
   },
   "869799896339857448": {
     "id": "869799896339857448",
@@ -7742,20 +7742,20 @@
   "1166777439737888840": {
     "id": "1166777439737888840",
     "username": "saleeh121",
-    "globalName": "[P-141] صالح الحربي",
+    "globalName": "saleh",
     "avatar": "assets/img/avatars/1166777439737888840_897fb6a8b259cc68c12d2e16585213ac.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1783201003162
+    "lastFetched": 1783718694954
   },
   "1382895172760899717": {
     "id": "1382895172760899717",
     "username": "xz6vq_777",
-    "globalName": "[P-200] مسلم المسماري",
+    "globalName": "[P-182] مسلم المسماري",
     "avatar": "assets/img/avatars/1382895172760899717_5ee85fce712b708a264fbeaf0e994c7d.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668236235
+    "lastFetched": 1783718795835
   },
   "1117108856502362193": {
     "id": "1117108856502362193",
@@ -7764,7 +7764,7 @@
     "avatar": "assets/img/avatars/1117108856502362193_0609d259e65d6ad3214dc3941e24cbe8.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1783200977926
+    "lastFetched": 1783718668457
   },
   "1511478821495505112": {
     "id": "1511478821495505112",
@@ -7778,11 +7778,11 @@
   "1222313757762523270": {
     "id": "1222313757762523270",
     "username": "iuo.r7",
-    "globalName": "[P-201] عقله الدهيمان",
-    "avatar": "assets/img/avatars/1222313757762523270_f79a1162bb1657f35f3ba8c2d969f235.png",
+    "globalName": "[P-183] عقله الدهيمان",
+    "avatar": "assets/img/avatars/1222313757762523270_27c0483283eeb0932e2e7e7cb7b40b97.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1783201033014
+    "lastFetched": 1783718723247
   },
   "608224368429891584": {
     "id": "608224368429891584",
@@ -7791,34 +7791,34 @@
     "avatar": "assets/img/avatars/608224368429891584_eb2b98aecd2cfb46d66922074c1470d9.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668290416
+    "lastFetched": 1783718854165
   },
   "1404520712223330335": {
     "id": "1404520712223330335",
     "username": "l901_",
-    "globalName": "[P-133] محمد بن عبدالله",
+    "globalName": "ابــو بــلــش",
     "avatar": "assets/img/avatars/1404520712223330335_e0f2cddc9d55257ce3e426d154550c6f.png",
     "banner": "",
     "bannerColor": "#050202",
-    "lastFetched": 1782668245113
+    "lastFetched": 1783718804969
   },
   "919223589138464789": {
     "id": "919223589138464789",
     "username": "lr14",
     "globalName": "ahmed",
-    "avatar": "assets/img/avatars/919223589138464789_5cd37978d3fcef28bce30f03fb025fc1.png",
+    "avatar": "assets/img/avatars/919223589138464789_6b2b0c41b6f015bf104eebc0ac455429.png",
     "banner": "",
-    "bannerColor": "#0d0655",
-    "lastFetched": 1782668393967
+    "bannerColor": "#471c00",
+    "lastFetched": 1783718968242
   },
   "578790199140679705": {
     "id": "578790199140679705",
     "username": "w.z5ol",
     "globalName": "Abo Dosr .",
-    "avatar": "assets/img/avatars/578790199140679705_a_04710cb746508d0b75e47c60fc62aee6.gif",
-    "banner": "assets/img/banners/578790199140679705_a_5c59160f22a97752b4ea1c75e4e63d20.gif",
+    "avatar": "assets/img/avatars/578790199140679705_a_80206e46b6954c3a41537fd950078e09.gif",
+    "banner": "assets/img/banners/578790199140679705_a_5c60195ac97987f06ed9f3a3822a1e1e.gif",
     "bannerColor": "#000000",
-    "lastFetched": 1782642972071
+    "lastFetched": 1783713548900
   },
   "1511157633514737727": {
     "id": "1511157633514737727",
@@ -7827,7 +7827,7 @@
     "avatar": "assets/img/avatars/1511157633514737727_38e28554b79179f3996aa2b65a92833b.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668269896
+    "lastFetched": 1783718833512
   },
   "872696184983138374": {
     "id": "872696184983138374",
@@ -7869,10 +7869,10 @@
     "id": "1333781071749189733",
     "username": "nrl8",
     "globalName": "! ABO DAHM",
-    "avatar": "assets/img/avatars/1333781071749189733_9c925deebc06a0ea6b5204b2bbcade8f.png",
-    "banner": "assets/img/banners/1333781071749189733_ffc24baacf89f5cce9e22940ca0691d8.png",
+    "avatar": "assets/img/avatars/1333781071749189733_dfad0a5ffa0287c2a80079c21577482f.png",
+    "banner": "assets/img/banners/1333781071749189733_db3ced3e8f7a1b44994591144af4e75c.png",
     "bannerColor": "#1b1b1b",
-    "lastFetched": 1782642907088
+    "lastFetched": 1783713471447
   },
   "890647907986997359": {
     "id": "890647907986997359",
@@ -8003,11 +8003,11 @@
   "1339710212571140228": {
     "id": "1339710212571140228",
     "username": "bdr0352",
-    "globalName": "[P-203] جلعود الحويطي",
+    "globalName": "جلعود الحويطي",
     "avatar": "assets/img/avatars/1339710212571140228_0dbe339ce5430056cf226b1b93b94a05.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668226081
+    "lastFetched": 1783718785242
   },
   "982571832249028668": {
     "id": "982571832249028668",
@@ -9128,11 +9128,11 @@
   "729800900977360927": {
     "id": "729800900977360927",
     "username": "hr_gs",
-    "globalName": "[P-221] محمد عبدالله",
+    "globalName": "[P-191] محمد عبدالله",
     "avatar": "assets/img/avatars/729800900977360927_d301a547bdb115254897ae9e951a8829.png",
     "banner": "",
     "bannerColor": "#353231",
-    "lastFetched": 1782668317023
+    "lastFetched": 1783718880064
   },
   "758004459614765096": {
     "id": "758004459614765096",
@@ -10460,11 +10460,11 @@
   "1144617345353007214": {
     "id": "1144617345353007214",
     "username": "ghalib.90",
-    "globalName": "90",
-    "avatar": "assets/img/avatars/1144617345353007214_a6c3933700b5390a1cb7ef43c805328b.png",
-    "banner": "assets/img/banners/1144617345353007214_a_febe9cc427ef30a2dafeb691f4989d6d.gif",
-    "bannerColor": null,
-    "lastFetched": 1781294642859
+    "globalName": "[P-197] غالب بن سعود",
+    "avatar": "assets/img/avatars/1144617345353007214_a35d681d66a379352dc92200419c076f.png",
+    "banner": "",
+    "bannerColor": "#000000",
+    "lastFetched": 1783718682182
   },
   "1337444722469507148": {
     "id": "1337444722469507148",
@@ -11468,11 +11468,11 @@
   "763740109697712168": {
     "id": "763740109697712168",
     "username": "qlw_",
-    "globalName": "[P-166] خالد المالكي",
+    "globalName": "[P-124] خالد المالكي",
     "avatar": "assets/img/avatars/763740109697712168_168fe7ce6fee6db5550942744db89335.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668327195
+    "lastFetched": 1783718892236
   },
   "1059191132589936650": {
     "id": "1059191132589936650",
@@ -12287,11 +12287,11 @@
   "1299884914250092594": {
     "id": "1299884914250092594",
     "username": "yb2l",
-    "globalName": "[S-03] حجرف العتيبي",
-    "avatar": "assets/img/avatars/1299884914250092594_0913d258e69b5072024524ebb5b379d7.png",
-    "banner": "assets/img/banners/1299884914250092594_a_cf5502196ccbf450213f86880a007bb8.gif",
+    "globalName": "[D-10] حجرف العتيبي",
+    "avatar": "assets/img/avatars/1299884914250092594_98aec2605102b37f71ce28b04f8b964d.png",
+    "banner": "assets/img/banners/1299884914250092594_145e605c7fcd6414081f1caf24c29669.png",
     "bannerColor": "#000000",
-    "lastFetched": 1782642890312
+    "lastFetched": 1783713451473
   },
   "1298412389758271591": {
     "id": "1298412389758271591",
@@ -13916,11 +13916,11 @@
   "1119257009053761556": {
     "id": "1119257009053761556",
     "username": "_953",
-    "globalName": "Cxx",
-    "avatar": "assets/img/avatars/1119257009053761556_08e7bda31df617623a536d1ede38de30.png",
-    "banner": "",
+    "globalName": "Us ?",
+    "avatar": "assets/img/avatars/1119257009053761556_4bc2c5af4f280905e0c156455978f774.png",
+    "banner": "assets/img/banners/1119257009053761556_d8afbe8cd51ca3fe282bec59bb0d3121.png",
     "bannerColor": "#000000",
-    "lastFetched": 1783200980251
+    "lastFetched": 1783713348908
   },
   "1368640538760446087": {
     "id": "1368640538760446087",
@@ -14114,11 +14114,11 @@
   "1324999795290411020": {
     "id": "1324999795290411020",
     "username": "dazzling_capybara_29326",
-    "globalName": "ابو مشعمل",
-    "avatar": "https://cdn.discordapp.com/embed/avatars/0.png",
-    "banner": null,
-    "bannerColor": null,
-    "lastFetched": 1781376780735
+    "globalName": "[P-145] مراد بن مشعمل",
+    "avatar": "",
+    "banner": "",
+    "bannerColor": "#000000",
+    "lastFetched": 1783718780626
   },
   "962693872541130752": {
     "id": "962693872541130752",
@@ -14366,74 +14366,74 @@
   "834202810714292255": {
     "id": "834202810714292255",
     "username": "turki2452",
-    "globalName": "[P-202] تركي العتيق",
+    "globalName": "[P-184] تركي العتيق",
     "avatar": "assets/img/avatars/834202810714292255_3739e96407fb298260783c8d71368746.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668352156
+    "lastFetched": 1783718922800
   },
   "1076915883861086228": {
     "id": "1076915883861086228",
     "username": "fi_fifi905",
-    "globalName": "[P-204] احمد الفيفي",
+    "globalName": "احمد الفيفي",
     "avatar": "assets/img/avatars/1076915883861086228_d28cd5ce46f623d2e0befec56389873a.png",
     "banner": "",
     "bannerColor": "#0c00ec",
-    "lastFetched": 1783200948383
+    "lastFetched": 1783750002560
   },
   "932365854895661067": {
     "id": "932365854895661067",
     "username": "2_m6",
-    "globalName": "[P-205] حاتم المطيري",
+    "globalName": "[P-165] حاتم المطيري",
     "avatar": "assets/img/avatars/932365854895661067_f96f22b751ada3ecd8a265b0450ddd2d.png",
     "banner": "",
     "bannerColor": "#b3b3b3",
-    "lastFetched": 1782668398798
+    "lastFetched": 1783718972806
   },
   "1149679101339258950": {
     "id": "1149679101339258950",
     "username": "qb_2",
     "globalName": "𝓓𝓪𝓻𝓴 𝓗𝓸𝓻𝓼𝓮.",
-    "avatar": "assets/img/avatars/1149679101339258950_b1ca604960720294118ed6c37d0aa651.png",
+    "avatar": "assets/img/avatars/1149679101339258950_0d4b8533fa39cb117a22bad03fcc13cc.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1783200995456
+    "lastFetched": 1783718687769
   },
   "871886990734417920": {
     "id": "871886990734417920",
     "username": "nazi._",
-    "globalName": "[P-164] راكان الهلالي",
+    "globalName": "NAZI",
     "avatar": "assets/img/avatars/871886990734417920_026b93d1d7a50465176f896de794f230.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668367237
+    "lastFetched": 1783718940230
   },
   "960631409431674901": {
     "id": "960631409431674901",
     "username": "3b91",
-    "globalName": "[P-165] عبدالله اليامي",
+    "globalName": "[P-137] عبدالله اليامي",
     "avatar": "assets/img/avatars/960631409431674901_38cc419e6b0ffb8b201f2d6be90b98f6.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668412269
+    "lastFetched": 1783718986382
   },
   "730554404612210770": {
     "id": "730554404612210770",
     "username": "kxpq1",
-    "globalName": "[P-206] خالد الراجحي",
+    "globalName": "[P-139] خالد الراجحي",
     "avatar": "assets/img/avatars/730554404612210770_2ccc589761a80a25c4df6ec456915c90.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668318175
+    "lastFetched": 1783718881280
   },
   "1399464419125104721": {
     "id": "1399464419125104721",
     "username": "kareem_tahhan",
-    "globalName": "[P-208] احمد الشافعي",
+    "globalName": "kareem_tahhan",
     "avatar": "",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668241801
+    "lastFetched": 1783718801651
   },
   "898537473951547433": {
     "id": "898537473951547433",
@@ -14442,16 +14442,16 @@
     "avatar": "assets/img/avatars/898537473951547433_86c509199edeb9572f4e83f3043d74b2.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668387898
+    "lastFetched": 1783718961237
   },
   "1021851870987309156": {
     "id": "1021851870987309156",
     "username": "xya4",
-    "globalName": "[P-210] فهد السبيعي",
-    "avatar": "assets/img/avatars/1021851870987309156_9bf2dcd409740485935974ed1bfbda1c.png",
+    "globalName": "[P-140] فهد السبيعي",
+    "avatar": "assets/img/avatars/1021851870987309156_7607661ca3059c6c6845487e95ef45f9.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1783200921038
+    "lastFetched": 1783749973844
   },
   "1395900671747952660": {
     "id": "1395900671747952660",
@@ -14469,34 +14469,34 @@
     "avatar": "assets/img/avatars/1009033114493911050_1420338f742f5eb36b12160cf8c3e89c.png",
     "banner": "assets/img/banners/1009033114493911050_a_0e082d07190e13fcf537738ee5cbf275.gif",
     "bannerColor": "#000000",
-    "lastFetched": 1783200916456
+    "lastFetched": 1783713197282
   },
   "694137627183415336": {
     "id": "694137627183415336",
     "username": "im6yr",
     "globalName": "Boyka",
-    "avatar": "assets/img/avatars/694137627183415336_7d11dbcd361f9da93c50861ac3394b9c.png",
+    "avatar": "assets/img/avatars/694137627183415336_08baefad31b776decd4e7e4e3a9f8d1e.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668303890
+    "lastFetched": 1783718869764
   },
   "850491907045064704": {
     "id": "850491907045064704",
     "username": "rnl2",
     "globalName": "[S-01] احمد الشمري",
     "avatar": "assets/img/avatars/850491907045064704_bfd16bbb439e554dd5648ab1ecc18e85.png",
-    "banner": "assets/img/banners/850491907045064704_a_2627f34ec50ec965689657b73a5f1cc2.gif",
+    "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782643043762
+    "lastFetched": 1783718927426
   },
   "838453285262065732": {
     "id": "838453285262065732",
     "username": "ccgsk1",
-    "globalName": "[S-02] نايف الجهني",
+    "globalName": "[D-06] نايف الجهني",
     "avatar": "assets/img/avatars/838453285262065732_3cb826b0b60b3dbd7c7241f2a7540087.png",
-    "banner": "assets/img/banners/838453285262065732_459d9f6b441cc11234ba84ea26990bc9.png",
+    "banner": "assets/img/banners/838453285262065732_9ff3710b8d1c07531b75c59276477c32.png",
     "bannerColor": "#000000",
-    "lastFetched": 1782643040079
+    "lastFetched": 1783713628472
   },
   "1133936614788300832": {
     "id": "1133936614788300832",
@@ -14505,16 +14505,16 @@
     "avatar": "assets/img/avatars/1133936614788300832_df006ddc4b28f6e006c198e99cf25153.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1783200987270
+    "lastFetched": 1783718679961
   },
   "875107931580924015": {
     "id": "875107931580924015",
     "username": "opxf",
-    "globalName": "[CC | E-45] سلطان الخالدي",
-    "avatar": "assets/img/avatars/875107931580924015_100e104c9f1954d5770bb0d060a5ea66.png",
-    "banner": "assets/img/banners/875107931580924015_b7d5edf0ef1a4eeeafb3542d266c9f1c.png",
+    "globalName": "[CC | E-30] سلطان الخالدي",
+    "avatar": "assets/img/avatars/875107931580924015_a714b5eada0f7b572a44dfa07ab3dceb.png",
+    "banner": "assets/img/banners/875107931580924015_a_e15576fe5b092d1206ffabc4f2da8799.gif",
     "bannerColor": "#000000",
-    "lastFetched": 1782643056831
+    "lastFetched": 1783713652887
   },
   "1083788431559249930": {
     "id": "1083788431559249930",
@@ -14523,7 +14523,7 @@
     "avatar": "assets/img/avatars/1083788431559249930_41e52203dfcbd30bf72af0d59038b9b1.png",
     "banner": "assets/img/banners/1083788431559249930_713bbb7b1cc78e03e66fd7a0e941de44.png",
     "bannerColor": "#8f7522",
-    "lastFetched": 1783200951939
+    "lastFetched": 1783713321343
   },
   "929323362336014366": {
     "id": "929323362336014366",
@@ -14532,34 +14532,34 @@
     "avatar": "assets/img/avatars/929323362336014366_2801b9582e69f770c4afb12134d24b4c.png",
     "banner": "assets/img/banners/929323362336014366_0b17cb01601102b23421e17206f8f63e.png",
     "bannerColor": "#000000",
-    "lastFetched": 1782643087687
+    "lastFetched": 1783713688127
   },
   "1076638235771539487": {
     "id": "1076638235771539487",
     "username": "fisal6622",
-    "globalName": "[P-212] فيصل الحميدي",
+    "globalName": "[P-188] فيصل الحميدي",
     "avatar": "assets/img/avatars/1076638235771539487_4d82206d38049657d9d26a06e1038521.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1783200947160
+    "lastFetched": 1783750001412
   },
   "1220071576972689581": {
     "id": "1220071576972689581",
     "username": "tq1t",
-    "globalName": "[P-213] عبدالاله الحربي",
+    "globalName": "[P-189] عبدالاله الحربي",
     "avatar": "assets/img/avatars/1220071576972689581_f1d90001c07b6c68c7a70715be8f9b1c.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1783201030825
+    "lastFetched": 1783718720924
   },
   "750569223415398482": {
     "id": "750569223415398482",
     "username": "811m",
     "globalName": "! BuNahdi",
-    "avatar": "assets/img/avatars/750569223415398482_d85de6197dcc508845d55b1c1944ceaa.png",
-    "banner": "",
+    "avatar": "assets/img/avatars/750569223415398482_a_d85de6197dcc508845d55b1c1944ceaa.gif",
+    "banner": "assets/img/banners/750569223415398482_a_4eba4bb7840387235c2e81a7eefba472.gif",
     "bannerColor": "#ffffff",
-    "lastFetched": 1782668323852
+    "lastFetched": 1783713589137
   },
   "1517941824545755246": {
     "id": "1517941824545755246",
@@ -14582,11 +14582,11 @@
   "924272272515149825": {
     "id": "924272272515149825",
     "username": "qusai06300",
-    "globalName": "[P-211] قصي بن عبدالإله",
+    "globalName": "[P-187] قصي بن عبدالإله",
     "avatar": "assets/img/avatars/924272272515149825_658b79e9c03609fe0a7c11c8c79442cd.png",
     "banner": "",
     "bannerColor": "#686868",
-    "lastFetched": 1782668395064
+    "lastFetched": 1783718969304
   },
   "1347830738317217843": {
     "id": "1347830738317217843",
@@ -14600,20 +14600,20 @@
   "1056232484234330203": {
     "id": "1056232484234330203",
     "username": "qahm70",
-    "globalName": "[P-216] عبده درويش",
+    "globalName": "[P-190] عبده درويش",
     "avatar": "assets/img/avatars/1056232484234330203_6b95eaee3084e1670ad232551fe1d5ca.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1783200935712
+    "lastFetched": 1783749989143
   },
   "1372621550511194212": {
     "id": "1372621550511194212",
     "username": "slf.99",
-    "globalName": "[P-217] سيف الهاشمي",
+    "globalName": "[P-142] سيف الهاشمي",
     "avatar": "assets/img/avatars/1372621550511194212_0e46b25d74a730d60676136f5f9f3d0a.png",
     "banner": "",
     "bannerColor": "#e9e7eb",
-    "lastFetched": 1782668233008
+    "lastFetched": 1783718792350
   },
   "1430046917957652481": {
     "id": "1430046917957652481",
@@ -14631,52 +14631,52 @@
     "avatar": "assets/img/avatars/1442823265394622557_c5b2fc868ae068de7a4cb403a12d155d.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668258464
+    "lastFetched": 1783718818639
   },
   "979068926757597224": {
     "id": "979068926757597224",
     "username": "u4sg",
     "globalName": "[P-220] سالم الحربي",
-    "avatar": "assets/img/avatars/979068926757597224_352d9733f630829a6a9e1c57724f60d7.png",
+    "avatar": "assets/img/avatars/979068926757597224_c4864c4cc47e073528cb6996c1f581a7.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668419289
+    "lastFetched": 1783718994368
   },
   "975834083085156372": {
     "id": "975834083085156372",
     "username": "5uo_",
-    "globalName": "[P-222] سعود الشمري",
-    "avatar": "assets/img/avatars/975834083085156372_d540ad4b129ea41c8d097b924b7a48c2.png",
+    "globalName": "[P-192] سعود الشمري",
+    "avatar": "assets/img/avatars/975834083085156372_1988c9ff7eb27365e7133b3c8501f312.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668417019
+    "lastFetched": 1783718992111
   },
   "1129567970608300133": {
     "id": "1129567970608300133",
     "username": "7as0ralda7ie",
-    "globalName": "[P-223] علي محسن",
+    "globalName": "[P-193] علي محسن",
     "avatar": "assets/img/avatars/1129567970608300133_3bd7c76d85e8131343ab04a8ebbe6843.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1783200984840
+    "lastFetched": 1783718676425
   },
   "806916736628686880": {
     "id": "806916736628686880",
     "username": "a.c.pony",
-    "globalName": "[P-224] سالم الحويطي",
+    "globalName": "AAA",
     "avatar": "assets/img/avatars/806916736628686880_fb1e52f00eeaf3fe90316fa7d20a0b51.png",
     "banner": "",
     "bannerColor": "#36393f",
-    "lastFetched": 1782668337462
+    "lastFetched": 1783718903919
   },
   "1116877097290453002": {
     "id": "1116877097290453002",
     "username": "marjouj111",
-    "globalName": "[P-225] بدران العميري",
+    "globalName": "Marjouj-111",
     "avatar": "assets/img/avatars/1116877097290453002_f2097a42b1c99c81fa010a820032aeda.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1783200976790
+    "lastFetched": 1783718666565
   },
   "762284901088362556": {
     "id": "762284901088362556",
@@ -14685,34 +14685,34 @@
     "avatar": "assets/img/avatars/762284901088362556_537f7c6ec089930bd7fbf066ab5cea15.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668326088
+    "lastFetched": 1783718891057
   },
   "1243746093406093372": {
     "id": "1243746093406093372",
     "username": "fzvz",
-    "globalName": "[P-227] عمار بن عبدالله",
+    "globalName": "[P-194] عمار بن عبدالله",
     "avatar": "assets/img/avatars/1243746093406093372_dbd7eb3836b011e5b2174a85ff10d465.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668178249
+    "lastFetched": 1783718734453
   },
   "784077770288136244": {
     "id": "784077770288136244",
     "username": "7k_9",
-    "globalName": "[P-228] شرار العمري",
-    "avatar": "assets/img/avatars/784077770288136244_36279bcad4617528c31498efd61b1467.png",
-    "banner": "",
+    "globalName": "W E X R",
+    "avatar": "assets/img/avatars/784077770288136244_fa4feac1cdca8208b16d82af958d7cf8.png",
+    "banner": "assets/img/banners/784077770288136244_b6bec020544c2c71a1c8f64351c082d8.png",
     "bannerColor": "#949090",
-    "lastFetched": 1782668331940
+    "lastFetched": 1783713599831
   },
   "1292522593395540038": {
     "id": "1292522593395540038",
     "username": "k95s",
-    "globalName": "[P-229] شرار الظفيري",
+    "globalName": "! 𝚃𝚆𝙾 𝙳𝙰𝚈",
     "avatar": "assets/img/avatars/1292522593395540038_109bb7124bf34226b7979c6770380e77.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668201016
+    "lastFetched": 1783718758355
   },
   "1284201868133793804": {
     "id": "1284201868133793804",
@@ -14726,11 +14726,11 @@
   "1320162884021649541": {
     "id": "1320162884021649541",
     "username": "7l2a1",
-    "globalName": "[CC | J-57] زياد محمود",
+    "globalName": "Abu Nouf",
     "avatar": "",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668219993
+    "lastFetched": 1783718778320
   },
   "861185822250106930": {
     "id": "861185822250106930",
@@ -14739,7 +14739,7 @@
     "avatar": "assets/img/avatars/861185822250106930_9616418602c63a26a767e1fd944e539a.png",
     "banner": "",
     "bannerColor": "#000000",
-    "lastFetched": 1782668360354
+    "lastFetched": 1783718932188
   },
   "558683385858490368": {
     "id": "558683385858490368",
@@ -14748,6 +14748,132 @@
     "avatar": "assets/img/avatars/558683385858490368_70650dc3763f4d94e9473f217df4d2a8.png",
     "banner": "assets/img/banners/558683385858490368_45459c7a1836e5034eca8171b3c7b293.png",
     "bannerColor": "#000000",
-    "lastFetched": 1782642968405
+    "lastFetched": 1783713544303
+  },
+  "1049735371400945754": {
+    "id": "1049735371400945754",
+    "username": "dutch_77",
+    "globalName": "[P-148] عبدالجبار الشريف",
+    "avatar": "assets/img/avatars/1049735371400945754_67f5be2324c623ce3bbbac56939d6dca.png",
+    "banner": "",
+    "bannerColor": "#494253",
+    "lastFetched": 1783749984214
+  },
+  "1072273795970252800": {
+    "id": "1072273795970252800",
+    "username": "3m7870",
+    "globalName": "3mad",
+    "avatar": "assets/img/avatars/1072273795970252800_ab054f126c3e08f2f0fd6ecb4180f212.png",
+    "banner": "",
+    "bannerColor": "#6e6c66",
+    "lastFetched": 1783749998029
+  },
+  "1117379660674777090": {
+    "id": "1117379660674777090",
+    "username": "9d3e",
+    "globalName": "[P-196] عبدالعزيز الرشيدي",
+    "avatar": "assets/img/avatars/1117379660674777090_9de110dbaa44d150313cdb367b747109.png",
+    "banner": "",
+    "bannerColor": "#4a7ea2",
+    "lastFetched": 1783718670734
+  },
+  "1130684424749580418": {
+    "id": "1130684424749580418",
+    "username": "ez.90",
+    "globalName": "[CC | H-57] عبدالله الدعجاني",
+    "avatar": "assets/img/avatars/1130684424749580418_bc1c31e616728c43d4c2d1dd7d57c8b7.png",
+    "banner": "",
+    "bannerColor": "#000000",
+    "lastFetched": 1783718678885
+  },
+  "1260259073991905363": {
+    "id": "1260259073991905363",
+    "username": "ksa507j",
+    "globalName": "507",
+    "avatar": "assets/img/avatars/1260259073991905363_b1d66389d26ecd2165ce51bbfce03617.png",
+    "banner": "",
+    "bannerColor": "#000000",
+    "lastFetched": 1783718742959
+  },
+  "1305855877714022410": {
+    "id": "1305855877714022410",
+    "username": "n_fgn",
+    "globalName": "N",
+    "avatar": "assets/img/avatars/1305855877714022410_8988a0098953f85efb2d2da4306cb272.png",
+    "banner": "",
+    "bannerColor": "#000000",
+    "lastFetched": 1783718766736
+  },
+  "1448315557547086063": {
+    "id": "1448315557547086063",
+    "username": "mkl.507_46903",
+    "globalName": "[P-247] شايق شهري",
+    "avatar": "assets/img/avatars/1448315557547086063_e6bdf7d536e02e811e17f67f38417a5b.png",
+    "banner": "",
+    "bannerColor": "#000000",
+    "lastFetched": 1783718819771
+  },
+  "1463890452783693956": {
+    "id": "1463890452783693956",
+    "username": "gzdcfse",
+    "globalName": "ewfegrf",
+    "avatar": "",
+    "banner": "",
+    "bannerColor": "#000000",
+    "lastFetched": 1783718823254
+  },
+  "1480997950950871232": {
+    "id": "1480997950950871232",
+    "username": "i5aqqq",
+    "globalName": "[P-146] سلطان بن نايف",
+    "avatar": "assets/img/avatars/1480997950950871232_7aa1e7894499094017e91127fa9a7032.png",
+    "banner": "",
+    "bannerColor": "#000000",
+    "lastFetched": 1783718828889
+  },
+  "233086380639518720": {
+    "id": "233086380639518720",
+    "username": "ibrhom",
+    "globalName": "[P-144] ابراهيم بن موسى",
+    "avatar": "assets/img/avatars/233086380639518720_5d5a429916fe9e23cada70d653093041.png",
+    "banner": "",
+    "bannerColor": "#232428",
+    "lastFetched": 1783718835892
+  },
+  "760419517116842054": {
+    "id": "760419517116842054",
+    "username": "abo_tariq4",
+    "globalName": "[P-202] عبدالله بن طارق",
+    "avatar": "assets/img/avatars/760419517116842054_66a90b93ee1535ea4bd255d387941a2b.png",
+    "banner": "assets/img/banners/760419517116842054_7a999c55ffc5fef27cb113ab36b3e683.png",
+    "bannerColor": "#000000",
+    "lastFetched": 1783713591930
+  },
+  "807175997001695252": {
+    "id": "807175997001695252",
+    "username": "m1.aw",
+    "globalName": "mr7om",
+    "avatar": "",
+    "banner": "",
+    "bannerColor": "#000000",
+    "lastFetched": 1783718905150
+  },
+  "815546374991904769": {
+    "id": "815546374991904769",
+    "username": "ay9t",
+    "globalName": "[S-11] عايش السور",
+    "avatar": "assets/img/avatars/815546374991904769_54180749daf4f361aeb5f0c6c5d8fdb3.png",
+    "banner": "assets/img/banners/815546374991904769_3cb0ce830ed601f16476a430a5546609.png",
+    "bannerColor": "#ffffff",
+    "lastFetched": 1783713612659
+  },
+  "966878540937199666": {
+    "id": "966878540937199666",
+    "username": "iwarlockz",
+    "globalName": "WaRlocKz",
+    "avatar": "assets/img/avatars/966878540937199666_fcdce34704980cd94c5c0f646b3db9a4.png",
+    "banner": "",
+    "bannerColor": "#000000",
+    "lastFetched": 1783718987544
   }
 }

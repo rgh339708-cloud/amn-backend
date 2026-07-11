@@ -219,6 +219,9 @@ async function initializeMysqlSchema(pool) {
   try {
     await queryAsync(`ALTER TABLE users ADD COLUMN is_manual_role INTEGER DEFAULT 0`);
   } catch(e) {}
+  try {
+    await queryAsync(`ALTER TABLE users ADD COLUMN real_name VARCHAR(255)`);
+  } catch(e) {}
 
   await queryAsync(`CREATE TABLE IF NOT EXISTS login_logs (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -298,6 +301,9 @@ async function initializeMysqlSchema(pool) {
     passing_score INTEGER DEFAULT 80,
     questions_json LONGTEXT,
     user_answers_json LONGTEXT,
+    hand_raised INT DEFAULT 0,
+    hand_approved INT DEFAULT 0,
+    bypass_count INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   )`);
 
@@ -365,6 +371,9 @@ async function initializeMysqlSchema(pool) {
     passing_score INTEGER DEFAULT 80,
     questions_json LONGTEXT,
     user_answers_json LONGTEXT,
+    hand_raised INT DEFAULT 0,
+    hand_approved INT DEFAULT 0,
+    bypass_count INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   )`);
 
@@ -437,9 +446,19 @@ async function initializeMysqlSchema(pool) {
     await queryAsync(`ALTER TABLE exam_results ADD COLUMN passing_score INTEGER DEFAULT 80`);
   } catch(e) {}
   try {
+    await queryAsync(`ALTER TABLE exam_results ADD COLUMN hand_raised INT DEFAULT 0`);
+    await queryAsync(`ALTER TABLE exam_results ADD COLUMN hand_approved INT DEFAULT 0`);
+    await queryAsync(`ALTER TABLE exam_results ADD COLUMN bypass_count INT DEFAULT 0`);
+  } catch(e) {}
+  try {
     await queryAsync(`ALTER TABLE exam_attempts ADD COLUMN questions_json LONGTEXT`);
     await queryAsync(`ALTER TABLE exam_attempts ADD COLUMN user_answers_json LONGTEXT`);
     await queryAsync(`ALTER TABLE exam_attempts ADD COLUMN passing_score INTEGER DEFAULT 80`);
+  } catch(e) {}
+  try {
+    await queryAsync(`ALTER TABLE exam_attempts ADD COLUMN hand_raised INT DEFAULT 0`);
+    await queryAsync(`ALTER TABLE exam_attempts ADD COLUMN hand_approved INT DEFAULT 0`);
+    await queryAsync(`ALTER TABLE exam_attempts ADD COLUMN bypass_count INT DEFAULT 0`);
   } catch(e) {}
   try {
     await queryAsync(`ALTER TABLE attendance_records ADD COLUMN room_image TEXT`);
@@ -479,6 +498,7 @@ function initializeSqliteSchema(sqliteDb) {
     sqliteDb.run("ALTER TABLE users ADD COLUMN last_sync TEXT", () => {});
     sqliteDb.run("ALTER TABLE users ADD COLUMN global_name TEXT", () => {});
     sqliteDb.run("ALTER TABLE users ADD COLUMN is_manual_role INTEGER DEFAULT 0", () => {});
+    sqliteDb.run("ALTER TABLE users ADD COLUMN real_name TEXT", () => {});
   });
 
   // 2. login_logs table
@@ -568,6 +588,9 @@ function initializeSqliteSchema(sqliteDb) {
     passing_score INTEGER DEFAULT 80,
     questions_json TEXT,
     user_answers_json TEXT,
+    hand_raised INTEGER DEFAULT 0,
+    hand_approved INTEGER DEFAULT 0,
+    bypass_count INTEGER DEFAULT 0,
     created_at TEXT DEFAULT (datetime('now'))
   )`, () => {
     // Add columns if they do not exist
@@ -577,6 +600,9 @@ function initializeSqliteSchema(sqliteDb) {
     sqliteDb.run("ALTER TABLE exam_results ADD COLUMN questions_json TEXT", () => {});
     sqliteDb.run("ALTER TABLE exam_results ADD COLUMN user_answers_json TEXT", () => {});
     sqliteDb.run("ALTER TABLE exam_results ADD COLUMN passing_score INTEGER DEFAULT 80", () => {});
+    sqliteDb.run("ALTER TABLE exam_results ADD COLUMN hand_raised INTEGER DEFAULT 0", () => {});
+    sqliteDb.run("ALTER TABLE exam_results ADD COLUMN hand_approved INTEGER DEFAULT 0", () => {});
+    sqliteDb.run("ALTER TABLE exam_results ADD COLUMN bypass_count INTEGER DEFAULT 0", () => {});
 
     // Migrate existing exam_attempts data to exam_results if any
     sqliteDb.get("SELECT COUNT(*) as cnt FROM exam_results", (err, row) => {
@@ -661,6 +687,9 @@ function initializeSqliteSchema(sqliteDb) {
     passing_score INTEGER DEFAULT 80,
     questions_json TEXT,
     user_answers_json TEXT,
+    hand_raised INTEGER DEFAULT 0,
+    hand_approved INTEGER DEFAULT 0,
+    bypass_count INTEGER DEFAULT 0,
     created_at TEXT DEFAULT (datetime('now'))
   )`, () => {
     sqliteDb.run("ALTER TABLE exam_attempts ADD COLUMN discord_id TEXT", () => {});
@@ -669,6 +698,9 @@ function initializeSqliteSchema(sqliteDb) {
     sqliteDb.run("ALTER TABLE exam_attempts ADD COLUMN questions_json TEXT", () => {});
     sqliteDb.run("ALTER TABLE exam_attempts ADD COLUMN user_answers_json TEXT", () => {});
     sqliteDb.run("ALTER TABLE exam_attempts ADD COLUMN passing_score INTEGER DEFAULT 80", () => {});
+    sqliteDb.run("ALTER TABLE exam_attempts ADD COLUMN hand_raised INTEGER DEFAULT 0", () => {});
+    sqliteDb.run("ALTER TABLE exam_attempts ADD COLUMN hand_approved INTEGER DEFAULT 0", () => {});
+    sqliteDb.run("ALTER TABLE exam_attempts ADD COLUMN bypass_count INTEGER DEFAULT 0", () => {});
   });
 
   // 11. exam_errors table
@@ -1966,7 +1998,7 @@ function syncSaveAttempt(data, callback) {
     // 1. Update exam_attempts
     const updatesAttempts = [];
     const paramsAttempts = [];
-    const validAttemptsCols = ['trainee_name', 'rank', 'code', 'discord_id', 'badge_code', 'attempt_count', 'course_name', 'exam_name', 'score', 'pass_status', 'start_time', 'end_time', 'duration', 'status', 'examiner', 'questions_json', 'user_answers_json', 'passing_score'];
+    const validAttemptsCols = ['trainee_name', 'rank', 'code', 'discord_id', 'badge_code', 'attempt_count', 'course_name', 'exam_name', 'score', 'pass_status', 'start_time', 'end_time', 'duration', 'status', 'examiner', 'questions_json', 'user_answers_json', 'passing_score', 'hand_raised', 'hand_approved', 'bypass_count'];
     
     Object.keys(data).forEach(key => {
       let fieldName = key;
@@ -1994,7 +2026,7 @@ function syncSaveAttempt(data, callback) {
         // 2. Update exam_results
         const updatesResults = [];
         const paramsResults = [];
-        const validResultsCols = ['user_id', 'trainee_name', 'rank', 'code', 'discord_id', 'badge_code', 'attempt_count', 'course_name', 'exam_name', 'score', 'pass_status', 'start_time', 'end_time', 'duration', 'status', 'examiner', 'questions_json', 'user_answers_json', 'passing_score'];
+        const validResultsCols = ['user_id', 'trainee_name', 'rank', 'code', 'discord_id', 'badge_code', 'attempt_count', 'course_name', 'exam_name', 'score', 'pass_status', 'start_time', 'end_time', 'duration', 'status', 'examiner', 'questions_json', 'user_answers_json', 'passing_score', 'hand_raised', 'hand_approved', 'bypass_count'];
         
         Object.keys(data).forEach(key => {
           let fieldName = key;
@@ -2066,7 +2098,10 @@ function syncSaveAttempt(data, callback) {
         examiner: data.examiner || '—',
         passing_score: data.passingScore !== undefined ? data.passingScore : (data.passing_score !== undefined ? data.passing_score : 80),
         questions_json: Array.isArray(data.questions) ? JSON.stringify(data.questions) : (typeof data.questions_json === 'string' ? data.questions_json : '[]'),
-        user_answers_json: Array.isArray(data.userAnswers) ? JSON.stringify(data.userAnswers) : (typeof data.user_answers_json === 'string' ? data.user_answers_json : '[]')
+        user_answers_json: Array.isArray(data.userAnswers) ? JSON.stringify(data.userAnswers) : (typeof data.user_answers_json === 'string' ? data.user_answers_json : '[]'),
+        hand_raised: data.hand_raised !== undefined ? data.hand_raised : 0,
+        hand_approved: data.hand_approved !== undefined ? data.hand_approved : 0,
+        bypass_count: data.bypass_count !== undefined ? data.bypass_count : 0
       };
       
       dbInsertOrReplace('exam_attempts', 'id', itemAttempts, function(err) {
@@ -2097,7 +2132,10 @@ function syncSaveAttempt(data, callback) {
           examiner: data.examiner || '—',
           passing_score: data.passingScore !== undefined ? data.passingScore : (data.passing_score !== undefined ? data.passing_score : 80),
           questions_json: Array.isArray(data.questions) ? JSON.stringify(data.questions) : (typeof data.questions_json === 'string' ? data.questions_json : '[]'),
-          user_answers_json: Array.isArray(data.userAnswers) ? JSON.stringify(data.userAnswers) : (typeof data.user_answers_json === 'string' ? data.user_answers_json : '[]')
+          user_answers_json: Array.isArray(data.userAnswers) ? JSON.stringify(data.userAnswers) : (typeof data.user_answers_json === 'string' ? data.user_answers_json : '[]'),
+          hand_raised: data.hand_raised !== undefined ? data.hand_raised : 0,
+          hand_approved: data.hand_approved !== undefined ? data.hand_approved : 0,
+          bypass_count: data.bypass_count !== undefined ? data.bypass_count : 0
         };
         
         dbInsertOrReplace('exam_results', 'id', itemResults, function(resErr) {
@@ -2140,8 +2178,9 @@ function fetchPublicSheetRows(spreadsheetId, tabName) {
             return reject(new Error('Parsed table schema is invalid.'));
           }
 
-          const headers = table.cols.map(col => col ? (col.label || '').trim() : '');
-          const rows = [];
+          let headers = table.cols.map(col => col ? (col.label || '').trim() : '');
+          let headerRowIndex = -1;
+          const rawRows = [];
           
           if (table.rows) {
             table.rows.forEach(r => {
@@ -2152,8 +2191,27 @@ function fetchPublicSheetRows(spreadsheetId, tabName) {
                 if (cell.v !== undefined) return String(cell.v).trim();
                 return '';
               });
-              rows.push(cells);
+              rawRows.push(cells);
             });
+          }
+
+          // Fallback to searching first few rows for header names if table.cols is empty or lacks "الاسم"
+          const hasNameHeader = headers.some(h => h.includes("الاسم") || h.includes("اسم"));
+          if (!hasNameHeader && rawRows.length > 0) {
+            for (let i = 0; i < Math.min(rawRows.length, 5); i++) {
+              const row = rawRows[i];
+              if (row.some(cell => cell.includes("الاسم") || cell.includes("id discord") || cell.includes("الكود"))) {
+                headers = row;
+                headerRowIndex = i;
+                break;
+              }
+            }
+          }
+
+          const rows = [];
+          for (let i = 0; i < rawRows.length; i++) {
+            if (i <= headerRowIndex) continue;
+            rows.push(rawRows[i]);
           }
 
           resolve({ headers, rows });
@@ -2405,9 +2463,9 @@ function syncGoogleSheetsToDb(forceId = null, loginUser = null) {
               if (discordId === '750581378168389632' && finalRole === 'owner') {
                 finalRole = 'viewer';
               }
-              db.run(`INSERT INTO users (id, discord_id, username, display_name, avatar, banner, role, rank, department, code, status) 
-                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active')`,
-                [targetDbId, discordId, m.nickname, m.nickname, avatarUrl, bannerUrl, finalRole, m.rank || 'مشاهد', dept, m.code],
+              db.run(`INSERT INTO users (id, discord_id, username, display_name, avatar, banner, role, rank, department, code, status, real_name) 
+                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', ?)`,
+                [targetDbId, discordId, m.nickname, m.nickname, avatarUrl, bannerUrl, finalRole, m.rank || 'مشاهد', dept, m.code, m.nickname],
                 function(insErr) {
                   if (!insErr) {
                     const details = `مزامنة تلقائية: إضافة مستخدم جديد من Google Sheets: ${m.nickname} (الدور: ${finalRole}، الرتبة: ${m.rank || '—'}، الكود: ${m.code || '—'})`;
@@ -2425,6 +2483,7 @@ function syncGoogleSheetsToDb(forceId = null, loginUser = null) {
                 finalRole = 'viewer';
               }
               const finalRank = isManual ? dbUser.rank : (m.rank || 'مشاهد');
+              const isRealNameDiff = dbUser.real_name !== m.nickname;
               const isRoleDiff = dbUser.role !== finalRole;
               const isRankDiff = dbUser.rank !== finalRank;
               const isCodeDiff = dbUser.code !== m.code;
@@ -2432,9 +2491,10 @@ function syncGoogleSheetsToDb(forceId = null, loginUser = null) {
               const isStatusDiff = dbUser.status !== 'active';
               const isAvatarDiff = avatarUrl && dbUser.avatar !== avatarUrl;
               const isBannerDiff = bannerUrl && dbUser.banner !== bannerUrl;
-
-              if (isRoleDiff || isRankDiff || isCodeDiff || isDeptDiff || isStatusDiff || isAvatarDiff || isBannerDiff) {
+ 
+              if (isRoleDiff || isRankDiff || isCodeDiff || isDeptDiff || isStatusDiff || isAvatarDiff || isBannerDiff || isRealNameDiff) {
                 const logs = [];
+                if (isRealNameDiff) logs.push(`تحديث الاسم الحقيقي إلى "${m.nickname}"`);
                 if (isRoleDiff) logs.push(`تغيير الدور من "${dbUser.role || '—'}" إلى "${finalRole}"`);
                 if (isRankDiff) logs.push(`تغيير الرتبة من "${dbUser.rank || '—'}" إلى "${finalRank}"`);
                 if (isCodeDiff) logs.push(`تغيير الكود من "${dbUser.code || '—'}" إلى "${m.code}"`);
@@ -2442,9 +2502,9 @@ function syncGoogleSheetsToDb(forceId = null, loginUser = null) {
                 if (isStatusDiff) logs.push(`تنشيط الحساب (تغيير الحالة من "${dbUser.status}" إلى "active")`);
                 if (isAvatarDiff) logs.push(`تحديث الصورة الشخصية من الديسكورد`);
                 if (isBannerDiff) logs.push(`تحديث غلاف الحساب من الديسكورد`);
-
-                db.run(`UPDATE users SET role = ?, rank = ?, department = ?, code = ?, status = 'active', avatar = ?, banner = ?, updated_at = datetime('now') WHERE id = ?`,
-                  [finalRole, m.rank || 'مشاهد', dept, m.code, avatarUrl || dbUser.avatar, bannerUrl || dbUser.banner, targetDbId],
+ 
+                db.run(`UPDATE users SET role = ?, rank = ?, department = ?, code = ?, status = 'active', avatar = ?, banner = ?, real_name = ?, updated_at = datetime('now') WHERE id = ?`,
+                  [finalRole, finalRank, dept, m.code, avatarUrl || dbUser.avatar, bannerUrl || dbUser.banner, m.nickname, targetDbId],
                   function(updErr) {
                     if (!updErr) {
                       const details = `مزامنة تلقائية: تحديث بيانات العضو "${dbUser.display_name || dbUser.username || m.nickname}": ${logs.join('، ')}`;
@@ -2480,8 +2540,9 @@ function syncGoogleSheetsToDb(forceId = null, loginUser = null) {
                                        (user.display_name && ['3gjo', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(user.display_name.toLowerCase())) ||
                                        (user.role === 'owner' || user.role === 'assistant_owner');
             const isGuest = user.role === 'viewer' && (!user.rank || user.rank === 'مشاهد' || user.rank === 'غير معروف');
-            const isManual = user.is_manual_role === 1 || user.is_manual_role === true;
-            if (isOwnerOrAssistant || isGuest || isManual) {
+            const isStaff = ['owner', 'assistant_owner', 'academy_affairs', 'admin', 'recruitment_affairs', 'course_admin'].includes(user.role);
+            const isManual = user.is_manual_role === 1 || user.is_manual_role === true || user.is_manual_role === '1';
+            if (isOwnerOrAssistant || isStaff || isGuest || isManual) {
               return Promise.resolve();
             }
 
@@ -2984,9 +3045,12 @@ async function syncAllUsersFromDiscord() {
         let finalRole = isManual ? u.role : (matchedRole || u.role || 'viewer');
         let finalRank = isManual ? u.rank : (u.rank || matchedRank || 'مشاهد');
 
-        if (['1334568342345748565', '821825761673478144'].includes(discordId)) {
+        if (['1334568342345748565'].includes(discordId)) {
           finalRole = 'owner';
           finalRank = 'المشرف العام';
+        } else if (['821825761673478144'].includes(discordId)) {
+          finalRole = 'assistant_owner';
+          finalRank = 'مساعد المشرف العام';
         }
 
         const hasChanges = u.avatar !== avatarLocalPath ||
@@ -3719,18 +3783,32 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // GET /api/exams – return all exam attempts
+  // GET /api/exams – return all exam attempts or a specific attempt by id
   if (pathname === '/api/exams' && req.method === 'GET') {
-    db.all('SELECT * FROM exam_attempts ORDER BY id DESC', [], (err, rows) => {
-      if (err) {
-        console.error('❌ DB select error:', err);
-        res.writeHead(500, {'Content-Type':'application/json'});
-        res.end(JSON.stringify({error:'DB fetch failed'}));
-      } else {
-        res.writeHead(200, {'Content-Type':'application/json'});
-        res.end(JSON.stringify({exams: rows}));
-      }
-    });
+    const examId = reqUrl.query.id;
+    if (examId) {
+      db.get('SELECT * FROM exam_attempts WHERE id = ?', [examId], (err, row) => {
+        if (err) {
+          console.error('❌ DB select error:', err);
+          res.writeHead(500, {'Content-Type':'application/json'});
+          res.end(JSON.stringify({error:'DB fetch failed'}));
+        } else {
+          res.writeHead(200, {'Content-Type':'application/json'});
+          res.end(JSON.stringify({attempt: row}));
+        }
+      });
+    } else {
+      db.all('SELECT * FROM exam_attempts ORDER BY id DESC', [], (err, rows) => {
+        if (err) {
+          console.error('❌ DB select error:', err);
+          res.writeHead(500, {'Content-Type':'application/json'});
+          res.end(JSON.stringify({error:'DB fetch failed'}));
+        } else {
+          res.writeHead(200, {'Content-Type':'application/json'});
+          res.end(JSON.stringify({exams: rows}));
+        }
+      });
+    }
     return;
   }
 
@@ -3824,7 +3902,7 @@ const server = http.createServer((req, res) => {
 
   // GET /api/retakes - return all retake requests
   if (pathname === '/api/retakes' && req.method === 'GET') {
-    db.all('SELECT * FROM retake_requests ORDER BY id DESC', [], (err, rows) => {
+    db.all('SELECT r.*, u.real_name FROM retake_requests r LEFT JOIN users u ON r.user_id = u.id ORDER BY r.id DESC', [], (err, rows) => {
       if (err) {
         console.error('❌ DB retakes select error:', err);
         res.writeHead(500, {'Content-Type':'application/json'});
@@ -4138,7 +4216,7 @@ const server = http.createServer((req, res) => {
       dbAll('SELECT * FROM users'),
       dbAll('SELECT * FROM exams'),
       dbAll('SELECT * FROM exam_results'),
-      dbAll('SELECT * FROM retake_requests'),
+      dbAll('SELECT r.*, u.real_name FROM retake_requests r LEFT JOIN users u ON r.user_id = u.id'),
       dbAll('SELECT * FROM exam_violations'),
       dbAll('SELECT * FROM audit_logs ORDER BY id DESC LIMIT 500'),
       dbAll('SELECT * FROM general_collections'),
@@ -4182,12 +4260,16 @@ const server = http.createServer((req, res) => {
         duration: r.duration,
         passingScore: r.passing_score || 80,
         questions: (() => { try { return r.questions_json ? JSON.parse(r.questions_json) : []; } catch(e) { return []; } })(),
-        userAnswers: (() => { try { return r.user_answers_json ? JSON.parse(r.user_answers_json) : []; } catch(e) { return []; } })()
+        userAnswers: (() => { try { return r.user_answers_json ? JSON.parse(r.user_answers_json) : []; } catch(e) { return []; } })(),
+        hand_raised: r.hand_raised || 0,
+        hand_approved: r.hand_approved || 0,
+        bypass_count: r.bypass_count || 0
       }));
       collections['ps_retake_requests'] = retakeRequests.map(r => ({
         id: r.id,
         user_id: r.user_id,
         trainee_name: r.trainee_name,
+        real_name: r.real_name,
         rank: r.rank,
         code: r.code,
         course_name: r.course_name,
@@ -4397,6 +4479,9 @@ const server = http.createServer((req, res) => {
               delete details.id;
               delete details.title;
               delete details.category;
+              delete details.questionsCountToShow;
+              delete details.passingScore;
+              delete details.isOpen;
               const detJson = JSON.stringify(details);
  
               return {
@@ -5261,9 +5346,13 @@ const server = http.createServer((req, res) => {
             return;
           }
 
-          const isOwner = ['1334568342345748565', '821825761673478144'].includes(id) || 
-                          (username && ['3gjo', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(username.toLowerCase())) ||
-                          (display_name && ['3gjo', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(display_name.toLowerCase()));
+          const isOwner = ['1334568342345748565'].includes(id) || 
+                          (username && ['3gjo', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(username.toLowerCase())) ||
+                          (display_name && ['3gjo', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(display_name.toLowerCase()));
+
+          const isAssistantOwner = ['821825761673478144'].includes(id) || 
+                                   (username && ['ifm711'].includes(username.toLowerCase())) ||
+                                   (display_name && ['ifm711'].includes(display_name.toLowerCase()));
 
           // If user exists but status is disabled or banned, reject
           if (existingUser && (existingUser.status === 'disabled' || existingUser.status === 'banned') && !isOwner) {
@@ -5310,14 +5399,22 @@ const server = http.createServer((req, res) => {
             finalStatus = 'active';
           }
 
+          if (isAssistantOwner) {
+            finalRole = 'assistant_owner';
+            finalRank = 'مساعد المشرف العام';
+            finalStatus = 'active';
+          }
+
           // Safety override for Mohammad Alnahdi (ii7zn)
           if ((id === '750581378168389632' || discord_id === '750581378168389632') && finalRole === 'owner') {
             finalRole = 'viewer';
           }
 
-          db.run(`INSERT OR REPLACE INTO users (id, discord_id, username, display_name, avatar, banner, avatar_url, banner_url, last_sync, role, rank, department, code, status, updated_at)
-                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), ?, ?, ?, ?, ?, datetime('now'))`,
-            [id, discord_id || id, username, display_name || username, avatar, banner, avatarUrl, bannerUrl, finalRole, finalRank, finalDept, finalCode, finalStatus],
+          const finalIsManual = existingUser ? (existingUser.is_manual_role === 1 || existingUser.is_manual_role === true ? 1 : 0) : 0;
+          const finalRealName = existingUser ? existingUser.real_name : '';
+          db.run(`INSERT OR REPLACE INTO users (id, discord_id, username, display_name, avatar, banner, avatar_url, banner_url, last_sync, role, rank, department, code, status, is_manual_role, real_name, updated_at)
+                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), ?, ?, ?, ?, ?, ?, ?, datetime('now'))`,
+            [id, discord_id || id, username, display_name || username, avatar, banner, avatarUrl, bannerUrl, finalRole, finalRank, finalDept, finalCode, finalStatus, finalIsManual, finalRealName],
             function(insErr) {
               if (insErr) {
                 console.error('❌ Failed to upsert user:', insErr);
@@ -5423,15 +5520,15 @@ const server = http.createServer((req, res) => {
             return;
           }
           
-          const opIds = ['1334568342345748565', '821825761673478144'];
-          const opUsernames = ['3gjo', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'];
-          
           const isOwner = opUser && (opUser.role === 'owner' || 
-                            opIds.includes(operator_id) ||
-                            (opUser.username && opUsernames.includes(opUser.username.toLowerCase())) ||
-                            (opUser.display_name && opUsernames.includes(opUser.display_name.toLowerCase())));
+                            ['1334568342345748565'].includes(operator_id) ||
+                            (opUser.username && ['3gjo', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(opUser.username.toLowerCase())) ||
+                            (opUser.display_name && ['3gjo', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(opUser.display_name.toLowerCase())));
                             
-          const isAssistantOwner = opUser && opUser.role === 'assistant_owner';
+          const isAssistantOwner = opUser && (opUser.role === 'assistant_owner' ||
+                                   ['821825761673478144'].includes(operator_id) ||
+                                   (opUser.username && ['ifm711'].includes(opUser.username.toLowerCase())) ||
+                                   (opUser.display_name && ['ifm711'].includes(opUser.display_name.toLowerCase())));
           
           if (!isOwner && !isAssistantOwner) {
             res.writeHead(403, { 'Content-Type': 'application/json; charset=utf-8' });
@@ -5475,6 +5572,14 @@ const server = http.createServer((req, res) => {
             const oldRole = targetUser ? (targetUser.role || 'viewer') : 'viewer';
 
             const oldRoleLevel = ROLE_LEVELS[oldRole] || 0;
+            
+            // Only Rayan Bin Mohammad (1334568342345748565) can grant, edit, or remove the owner (المشرف العام) role
+            if ((role === 'owner' || oldRole === 'owner') && operator_id !== '1334568342345748565') {
+              res.writeHead(403, { 'Content-Type': 'application/json; charset=utf-8' });
+              res.end(JSON.stringify({ error: 'غير مصرح لك بمنح أو تعديل أو إزالة رتبة المشرف العام. هذه الصلاحية لريان بن محمد فقط.' }));
+              return;
+            }
+
             if (!isOwner && oldRoleLevel >= opLevel) {
               res.writeHead(403, { 'Content-Type': 'application/json; charset=utf-8' });
               res.end(JSON.stringify({ error: 'غير مصرح لك بتعديل أو إزالة رتبة مساوية أو أعلى من رتبتك.' }));
