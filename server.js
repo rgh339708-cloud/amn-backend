@@ -1983,8 +1983,13 @@ if (isPostgresUrl) {
   const mysql = require('mysql2');
   const dns = require('dns');
   
+  let mysqlHost = MYSQL_HOST;
+  if (mysqlHost === 'srv1812.hstgr.io') {
+    mysqlHost = '92.113.22.70';
+  }
+  
   mysqlPool = mysql.createPool({
-    host: MYSQL_HOST,
+    host: mysqlHost,
     user: MYSQL_USER,
     password: MYSQL_PASSWORD,
     database: MYSQL_DATABASE,
