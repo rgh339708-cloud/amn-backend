@@ -6,9 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>اختبارات الدورات | الأمن العام</title>
 
-  <link rel="stylesheet" href="../assets/css/main.css?v=1.1.33">
-  <link rel="stylesheet" href="../assets/css/navbar.css?v=1.1.33">
-  <link rel="stylesheet" href="../assets/css/sidebar.css?v=1.1.33">
+  <link rel="stylesheet" href="../assets/css/main.css?v=1.3.0">
+  <link rel="stylesheet" href="../assets/css/navbar.css?v=1.3.0">
+  <link rel="stylesheet" href="../assets/css/sidebar.css?v=1.3.0">
   <link rel="stylesheet" href="../assets/css/footer.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -844,11 +844,11 @@
   <div id="toast-container"></div>
 
   <!-- Write shared components -->
-  <script src="../assets/js/storage.js?v=1.1.33"></script>
-  <script src="../assets/js/data.js?v=1.1.33"></script>
-  <script src="../assets/js/auth.js?v=1.1.33"></script>
-  <script src="../assets/js/components.js?v=1.1.33"></script>
-  <script src="../assets/js/app.js?v=1.1.33"></script>
+  <script src="../assets/js/storage.js?v=1.3.0"></script>
+  <script src="../assets/js/data.js?v=1.3.0"></script>
+  <script src="../assets/js/auth.js?v=1.3.0"></script>
+  <script src="../assets/js/components.js?v=1.3.0"></script>
+  <script src="../assets/js/app.js?v=1.3.0"></script>
 
   <script>
     document.write(Components.navbar('amn9'));
@@ -1472,6 +1472,21 @@
       } catch (e) {
         console.warn('[Sync] Initial settings/database sync failed:', e);
       }
+
+      // Listen for background sync updates to dynamically update UI without page refreshes
+      window.addEventListener('storage_sync', () => {
+        console.log('[Sync] Storage synchronized from server, updating UI...');
+        renderExamsMgmtTable();
+        renderExamsList();
+        const panel = document.getElementById('supervisor-panel');
+        if (panel && panel.style.display !== 'none') {
+          if (activeTab === 'results') renderSupervisorResults();
+          else if (activeTab === 'retakes') renderRetakeRequests();
+          else if (activeTab === 'violations') renderViolationsArchive();
+          else if (activeTab === 'qbank-reqs') renderQBankRequests();
+          else if (activeTab === 'stats') renderHandRaiseLog();
+        }
+      });
 
       // Periodic sync every 3 seconds for supervisor data if active
       setInterval(() => {
@@ -2990,10 +3005,23 @@
       if (roleInfo.level >= 4.5) return true; // High authority (academy_affairs, owner, etc.)
 
       const currentUser = Auth.getCurrentUser();
-      const username = currentUser ? currentUser.username : '';
-      const userId = currentUser ? currentUser.id : '';
+      if (!currentUser) return false;
+
+      const username = (currentUser.username || '').toLowerCase().trim();
+      const userId = String(currentUser.id || '').trim();
+      const discord = (currentUser.discord || '').toLowerCase().trim();
+
       const requests = Storage.getCollection(Storage.keys.QBANK_REQUESTS) || [];
-      return !!requests.find(r => (r.requester_username === username || (r.requester_id && r.requester_id === userId)) && r.exam_id === examId && r.status === 'approved');
+      return !!requests.find(r => {
+        if (r.exam_id !== examId || r.status !== 'approved') return false;
+
+        const reqUser = (r.requester_username || '').toLowerCase().trim();
+        const reqId = String(r.requester_id || '').trim();
+
+        return (reqUser === username || 
+                (reqId && reqId === userId) || 
+                (discord && reqUser === discord));
+      });
     };
 
     /* ── Modal: Question Bank ── */
@@ -3987,19 +4015,23 @@
         .then(data => {
           if (data && data.attempt) {
             const att = data.attempt;
-            localBypassCount = att.bypass_count || 0;
+            
+            // Only update local bypass count if the server has a larger value (prevents race condition overwrites)
+            if (att.bypass_count !== undefined && att.bypass_count > localBypassCount) {
+              localBypassCount = att.bypass_count;
+            }
             
             if (att.hand_approved === 1) {
-              if (!localHandApproved) {
-                localHandApproved = true;
-                App.alert('✅ وافق المسؤول على خروجك المؤقت من صفحة الاختبار لمرتين كحد أقصى دون احتساب مخالفة.', 'موافقة على الخروج المؤقت');
-              }
               const remaining = 2 - localBypassCount;
               if (remaining <= 0) {
                 localHandApproved = false;
                 updateHandUI('none');
                 clearInterval(handRaiseStatusInterval);
               } else {
+                if (!localHandApproved) {
+                  localHandApproved = true;
+                  App.alert('✅ وافق المسؤول على خروجك المؤقت من صفحة الاختبار لمرتين كحد أقصى دون احتساب مخالفة.', 'موافقة على الخروج المؤقت');
+                }
                 updateHandUI('approved', remaining);
               }
             } else if (att.hand_raised === 1) {
@@ -4087,8 +4119,17 @@
     };
 
     // Anti-cheat helper functions
+    let lastViolationTime = 0;
     function recordViolation(type) {
       if (!isExamActive || !activeExam) return;
+
+      // Debounce duplicate triggers (e.g. concurrent tab switch and window blur)
+      const now = Date.now();
+      if (now - lastViolationTime < 1000) {
+        console.log('Debouncing duplicate violation trigger:', type);
+        return;
+      }
+      lastViolationTime = now;
 
       if (localHandApproved && localBypassCount < 2) {
         localBypassCount++;
@@ -4099,13 +4140,17 @@
           bypass_count: localBypassCount
         };
         
-        if (localBypassCount >= 2) {
+        const remaining = 2 - localBypassCount;
+        
+        if (remaining <= 0) {
           updateData.hand_approved = 0;
           localHandApproved = false;
           updateHandUI('none');
           if (handRaiseStatusInterval) clearInterval(handRaiseStatusInterval);
+          App.toast(`<i class="fa-solid fa-circle-check"></i> خروج مؤقت مأذون به من المسؤول. انتهت فرص الاستئذان المتاحة لك.`, 'warning');
         } else {
-          updateHandUI('approved', 2 - localBypassCount);
+          updateHandUI('approved', remaining);
+          App.toast(`<i class="fa-solid fa-circle-check"></i> خروج مؤقت مأذون به من المسؤول. متبقي لك خروج واحد إضافي.`, 'success');
         }
         
         Storage.saveExamAttempt(updateData)
@@ -4116,7 +4161,6 @@
             console.warn('Failed to update bypass count on server:', err);
           });
           
-        App.toast(`<i class="fa-solid fa-circle-check"></i> خروج مؤقت مأذون به من المسؤول. متبقي لك خروج واحد إضافي.`, 'success');
         return;
       }
 
@@ -4202,6 +4246,10 @@
       const tbody = document.getElementById('violations-tbody');
       if (!tbody) return;
 
+      const userRole = Auth.getRole();
+      const roleInfo = Auth.getRoleInfo(userRole);
+      const isAuthorizedToClear = roleInfo && roleInfo.level >= 4.5;
+
       Storage.fetchViolations()
         .then(violations => {
           const filterDropdown = document.getElementById('violations-course-filter');
@@ -4229,9 +4277,6 @@
           const countSpan = document.getElementById('super-violations-count');
           if (countSpan) countSpan.textContent = `${filteredViolations.length} مخالفات`;
 
-          const userRole = Auth.getRole();
-          const roleInfo = Auth.getRoleInfo(userRole);
-          const isAuthorizedToClear = roleInfo && roleInfo.level >= 4.5;
           const clearBtn = document.getElementById('btn-clear-violations');
           if (clearBtn) clearBtn.style.display = isAuthorizedToClear ? 'inline-block' : 'none';
 

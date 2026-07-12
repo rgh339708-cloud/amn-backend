@@ -158,6 +158,10 @@ const MYSQL_DATABASE = config.mysqlDatabase || 'u978543219_amn3';
 const MYSQL_PORT = parseInt(config.mysqlPort || '3306', 10);
 
 let isMysql = !!MYSQL_HOST;
+let isPostgres = false;
+let pgPool = null;
+let dbInitError = null;
+
 
 // Helper to convert sqlite SQL syntax to MySQL syntax
 function convertSqlToMysql(sql) {
@@ -182,6 +186,357 @@ function convertSqlToMysql(sql) {
   mySql = mySql.replace(/\bREAL\b/g, "DOUBLE");
 
   return mySql;
+}
+
+// Helper to convert sqlite SQL syntax to PostgreSQL syntax
+function convertSqlToPostgres(sql) {
+  let pgSql = sql;
+  
+  // Replace SQLite datetimes
+  pgSql = pgSql.replace(/datetime\('now'\)/gi, "CURRENT_TIMESTAMP");
+  pgSql = pgSql.replace(/datetime\('now',\s*'localtime'\)/gi, "CURRENT_TIMESTAMP");
+  pgSql = pgSql.replace(/datetime\('now',\s*'\+2 hours'\)/gi, "CURRENT_TIMESTAMP + interval '2 hours'");
+  
+  // Convert SQLite INSERT OR REPLACE INTO to Postgres ON CONFLICT
+  const matchRegex = /insert\s+or\s+replace\s+into\s+["`]?(\w+)["`]?\s*\(([^)]+)\)\s*values\s*\((.*)\)/is;
+  if (matchRegex.test(pgSql)) {
+    pgSql = pgSql.replace(matchRegex, (match, tableName, columnsStr, valuesStr) => {
+      const cols = columnsStr.split(',').map(c => c.trim().replace(/[\[\]"`]/g, ''));
+      let primaryKey = 'id';
+      const lowerTable = tableName.toLowerCase();
+      if (lowerTable === 'general_collections') {
+        primaryKey = 'collection_key';
+      } else if (lowerTable === 'attendance_books') {
+        primaryKey = 'book_id';
+      } else if (lowerTable === 'discord_links') {
+        primaryKey = 'id';
+      }
+      
+      const updateCols = cols.filter(c => c.toLowerCase() !== primaryKey.toLowerCase());
+      const updateClause = updateCols.map(c => `"${c}" = EXCLUDED."${c}"`).join(', ');
+      
+      return `INSERT INTO "${tableName}" (${columnsStr}) VALUES (${valuesStr}) ON CONFLICT ("${primaryKey}") DO UPDATE SET ${updateClause}`;
+    });
+  }
+  
+  // Replace ? with $1, $2, etc.
+  let index = 1;
+  pgSql = pgSql.replace(/\?/g, () => `$${index++}`);
+  
+  return pgSql;
+}
+
+async function initializePostgresSchema(pool) {
+  console.log('[Schema] Initializing database schema on PostgreSQL...');
+  const queryAsync = (sql, params = []) => new Promise((resolve, reject) => {
+    pool.query(sql, params, (err) => {
+      if (err) reject(err); else resolve();
+    });
+  });
+
+  await queryAsync(`CREATE TABLE IF NOT EXISTS users (
+    id VARCHAR PRIMARY KEY,
+    discord_id VARCHAR,
+    username VARCHAR,
+    display_name VARCHAR,
+    global_name VARCHAR,
+    avatar VARCHAR,
+    banner VARCHAR,
+    avatar_url VARCHAR,
+    banner_url VARCHAR,
+    last_sync TIMESTAMP,
+    role VARCHAR,
+    rank VARCHAR,
+    department VARCHAR,
+    code VARCHAR,
+    status VARCHAR DEFAULT 'active',
+    is_manual_role INTEGER DEFAULT 0,
+    real_name VARCHAR,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )`);
+
+  try {
+    await queryAsync(`ALTER TABLE users ADD COLUMN global_name VARCHAR`);
+  } catch(e) {}
+  try {
+    await queryAsync(`ALTER TABLE users ADD COLUMN is_manual_role INTEGER DEFAULT 0`);
+  } catch(e) {}
+  try {
+    await queryAsync(`ALTER TABLE users ADD COLUMN real_name VARCHAR`);
+  } catch(e) {}
+
+  await queryAsync(`CREATE TABLE IF NOT EXISTS login_logs (
+    id SERIAL PRIMARY KEY,
+    user_id VARCHAR,
+    discord_id VARCHAR,
+    ip_address VARCHAR,
+    device VARCHAR,
+    browser VARCHAR,
+    status VARCHAR,
+    avatar_url VARCHAR,
+    last_sync TIMESTAMP,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )`);
+
+  try {
+    await queryAsync(`ALTER TABLE login_logs ADD COLUMN avatar_url VARCHAR`);
+  } catch(e) {}
+  try {
+    await queryAsync(`ALTER TABLE login_logs ADD COLUMN last_sync TIMESTAMP`);
+  } catch(e) {}
+
+  await queryAsync(`CREATE TABLE IF NOT EXISTS discord_links (
+    id SERIAL PRIMARY KEY,
+    user_id VARCHAR,
+    discord_id VARCHAR,
+    username VARCHAR,
+    avatar VARCHAR,
+    banner VARCHAR,
+    badges TEXT,
+    linked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )`);
+
+  await queryAsync(`CREATE TABLE IF NOT EXISTS discord_accounts (
+    id SERIAL PRIMARY KEY,
+    user_id VARCHAR UNIQUE,
+    discord_id VARCHAR UNIQUE,
+    username VARCHAR,
+    avatar VARCHAR,
+    banner VARCHAR,
+    badges TEXT,
+    linked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )`);
+
+  await queryAsync(`CREATE TABLE IF NOT EXISTS courses (
+    id VARCHAR PRIMARY KEY,
+    course_name VARCHAR,
+    description TEXT,
+    instructors VARCHAR,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status VARCHAR DEFAULT 'active'
+  )`);
+
+  await queryAsync(`CREATE TABLE IF NOT EXISTS exams (
+    id VARCHAR PRIMARY KEY,
+    exam_name VARCHAR,
+    course_name VARCHAR,
+    questions_count INTEGER,
+    passing_score INTEGER,
+    status VARCHAR DEFAULT 'closed',
+    questions_json TEXT,
+    details_json TEXT
+  )`);
+
+  await queryAsync(`CREATE TABLE IF NOT EXISTS exam_results (
+    id SERIAL PRIMARY KEY,
+    user_id VARCHAR,
+    trainee_name VARCHAR,
+    rank VARCHAR,
+    code VARCHAR,
+    discord_id VARCHAR,
+    badge_code VARCHAR,
+    attempt_count INTEGER DEFAULT 1,
+    course_name VARCHAR,
+    exam_name VARCHAR,
+    score REAL,
+    pass_status VARCHAR,
+    start_time VARCHAR,
+    end_time VARCHAR,
+    duration INTEGER,
+    status VARCHAR,
+    examiner VARCHAR,
+    passing_score INTEGER DEFAULT 80,
+    questions_json TEXT,
+    user_answers_json TEXT,
+    hand_raised INTEGER DEFAULT 0,
+    hand_approved INTEGER DEFAULT 0,
+    bypass_count INTEGER DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )`);
+
+  try {
+    await queryAsync(`ALTER TABLE exam_results ADD COLUMN discord_id VARCHAR`);
+  } catch(e) {}
+  try {
+    await queryAsync(`ALTER TABLE exam_results ADD COLUMN badge_code VARCHAR`);
+  } catch(e) {}
+  try {
+    await queryAsync(`ALTER TABLE exam_results ADD COLUMN attempt_count INTEGER DEFAULT 1`);
+  } catch(e) {}
+  try {
+    await queryAsync(`ALTER TABLE exam_results ADD COLUMN questions_json TEXT`);
+  } catch(e) {}
+  try {
+    await queryAsync(`ALTER TABLE exam_results ADD COLUMN user_answers_json TEXT`);
+  } catch(e) {}
+  try {
+    await queryAsync(`ALTER TABLE exam_results ADD COLUMN passing_score INTEGER DEFAULT 80`);
+  } catch(e) {}
+  try {
+    await queryAsync(`ALTER TABLE exam_results ADD COLUMN hand_raised INTEGER DEFAULT 0`);
+  } catch(e) {}
+  try {
+    await queryAsync(`ALTER TABLE exam_results ADD COLUMN hand_approved INTEGER DEFAULT 0`);
+  } catch(e) {}
+  try {
+    await queryAsync(`ALTER TABLE exam_results ADD COLUMN bypass_count INTEGER DEFAULT 0`);
+  } catch(e) {}
+
+  await queryAsync(`CREATE TABLE IF NOT EXISTS retake_requests (
+    id SERIAL PRIMARY KEY,
+    user_id VARCHAR,
+    trainee_name VARCHAR,
+    rank VARCHAR,
+    code VARCHAR,
+    course_name VARCHAR,
+    exam_name VARCHAR,
+    reason TEXT,
+    status VARCHAR DEFAULT 'pending',
+    request_time VARCHAR,
+    approved_by VARCHAR,
+    previous_score REAL,
+    exam_id VARCHAR
+  )`);
+
+  await queryAsync(`CREATE TABLE IF NOT EXISTS exam_violations (
+    id SERIAL PRIMARY KEY,
+    user_id VARCHAR,
+    trainee_name VARCHAR,
+    rank VARCHAR,
+    code VARCHAR,
+    course_name VARCHAR,
+    violation_type VARCHAR,
+    violation_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    details TEXT,
+    exam_id VARCHAR
+  )`);
+
+  await queryAsync(`CREATE TABLE IF NOT EXISTS audit_logs (
+    id SERIAL PRIMARY KEY,
+    action_name VARCHAR,
+    operator VARCHAR,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    old_data TEXT,
+    new_data TEXT,
+    action_type VARCHAR,
+    username VARCHAR,
+    details TEXT
+  )`);
+
+  await queryAsync(`CREATE TABLE IF NOT EXISTS general_collections (
+    collection_key VARCHAR PRIMARY KEY,
+    data_json TEXT
+  )`);
+
+  await queryAsync(`CREATE TABLE IF NOT EXISTS exam_attempts (
+    id SERIAL PRIMARY KEY,
+    trainee_name VARCHAR,
+    rank VARCHAR,
+    code VARCHAR,
+    discord_id VARCHAR,
+    badge_code VARCHAR,
+    attempt_count INTEGER DEFAULT 1,
+    course_name VARCHAR,
+    exam_name VARCHAR,
+    start_time VARCHAR,
+    end_time VARCHAR,
+    score REAL,
+    status VARCHAR,
+    pass_status VARCHAR,
+    duration INTEGER,
+    examiner VARCHAR,
+    passing_score INTEGER DEFAULT 80,
+    questions_json TEXT,
+    user_answers_json TEXT,
+    hand_raised INTEGER DEFAULT 0,
+    hand_approved INTEGER DEFAULT 0,
+    bypass_count INTEGER DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )`);
+
+  try {
+    await queryAsync(`ALTER TABLE exam_attempts ADD COLUMN discord_id VARCHAR`);
+  } catch(e) {}
+  try {
+    await queryAsync(`ALTER TABLE exam_attempts ADD COLUMN badge_code VARCHAR`);
+  } catch(e) {}
+  try {
+    await queryAsync(`ALTER TABLE exam_attempts ADD COLUMN attempt_count INTEGER DEFAULT 1`);
+  } catch(e) {}
+  try {
+    await queryAsync(`ALTER TABLE exam_attempts ADD COLUMN questions_json TEXT`);
+  } catch(e) {}
+  try {
+    await queryAsync(`ALTER TABLE exam_attempts ADD COLUMN user_answers_json TEXT`);
+  } catch(e) {}
+  try {
+    await queryAsync(`ALTER TABLE exam_attempts ADD COLUMN passing_score INTEGER DEFAULT 80`);
+  } catch(e) {}
+  try {
+    await queryAsync(`ALTER TABLE exam_attempts ADD COLUMN hand_raised INTEGER DEFAULT 0`);
+  } catch(e) {}
+  try {
+    await queryAsync(`ALTER TABLE exam_attempts ADD COLUMN hand_approved INTEGER DEFAULT 0`);
+  } catch(e) {}
+  try {
+    await queryAsync(`ALTER TABLE exam_attempts ADD COLUMN bypass_count INTEGER DEFAULT 0`);
+  } catch(e) {}
+
+  await queryAsync(`CREATE TABLE IF NOT EXISTS exam_errors (
+    id SERIAL PRIMARY KEY,
+    trainee_name VARCHAR,
+    exam_name VARCHAR,
+    error_message TEXT,
+    stack_trace TEXT,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )`);
+
+  await queryAsync(`CREATE TABLE IF NOT EXISTS attendance_books (
+    book_id VARCHAR PRIMARY KEY,
+    book_name VARCHAR,
+    status VARCHAR DEFAULT 'closed',
+    updated_by VARCHAR,
+    room_image TEXT,
+    course_type VARCHAR DEFAULT 'أساسية',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )`);
+
+  try {
+    await queryAsync(`ALTER TABLE attendance_books ADD COLUMN room_image TEXT`);
+  } catch(e) {}
+  try {
+    await queryAsync(`ALTER TABLE attendance_books ADD COLUMN course_type VARCHAR DEFAULT 'أساسية'`);
+  } catch(e) {}
+
+  await queryAsync(`CREATE TABLE IF NOT EXISTS attendance_book_logs (
+    id SERIAL PRIMARY KEY,
+    book_id VARCHAR,
+    book_name VARCHAR,
+    action VARCHAR,
+    operator VARCHAR,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )`);
+
+  await queryAsync(`CREATE TABLE IF NOT EXISTS attendance_records (
+    id SERIAL PRIMARY KEY,
+    book_id VARCHAR,
+    book_name VARCHAR,
+    user_id VARCHAR,
+    username VARCHAR,
+    display_name VARCHAR,
+    rank VARCHAR,
+    code VARCHAR,
+    status VARCHAR DEFAULT 'present',
+    notes TEXT,
+    room_image TEXT,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )`);
+
+  try {
+    await queryAsync(`ALTER TABLE attendance_records ADD COLUMN room_image TEXT`);
+  } catch(e) {}
 }
 
 async function initializeMysqlSchema(pool) {
@@ -465,6 +820,9 @@ async function initializeMysqlSchema(pool) {
   } catch(e) {}
   try {
     await queryAsync(`ALTER TABLE attendance_books ADD COLUMN course_type VARCHAR(255) DEFAULT 'أساسية'`);
+  } catch(e) {}
+  try {
+    await queryAsync(`ALTER TABLE exam_violations MODIFY COLUMN violation_time VARCHAR(255)`);
   } catch(e) {}
 
   console.log('✅ MySQL Schema initialization completed.');
@@ -1485,15 +1843,142 @@ function fallbackToSqlite(next) {
     isMysql = false;
     initializeSqlite();
   }
+  if (isPostgres) {
+    console.warn('⚠️ PostgreSQL query failed or connection lost. Switching to local SQLite database mode (exam_archive.db)...');
+    isPostgres = false;
+    initializeSqlite();
+  }
   if (next) {
     next();
   }
 }
 
+function initializePostgresConnection() {
+  const { Pool } = require('pg');
+  const dbUrl = process.env.DATABASE_URL || config.databaseUrl;
+  
+  console.log('🔌 Cloud database mode: Connecting to PostgreSQL...');
+  pgPool = new Pool({
+    connectionString: dbUrl,
+    ssl: dbUrl.includes('localhost') || dbUrl.includes('127.0.0.1') ? false : { rejectUnauthorized: false }
+  });
+  
+  pgPool.on('error', (err) => {
+    console.error('Unexpected error on PostgreSQL pool:', err);
+    fallbackToSqlite();
+  });
+  
+  isPostgres = true;
+  
+  db = {
+    run(sql, params = [], callback) {
+      if (typeof params === 'function') {
+        callback = params;
+        params = [];
+      }
+      if (!isPostgres) {
+        globalSqliteDb.run(sql, params, callback);
+        return;
+      }
+      const pgSql = convertSqlToPostgres(sql);
+      pgPool.query(pgSql, params, (err, res) => {
+        if (err) {
+          console.error(`PostgreSQL error on run: ${err.message}. Retrying query on SQLite...`);
+          fallbackToSqlite(() => {
+            globalSqliteDb.run(sql, params, callback);
+          });
+        } else {
+          const context = {
+            lastID: res.rows && res.rows[0] ? (res.rows[0].id || Object.values(res.rows[0])[0]) : null,
+            changes: res.rowCount
+          };
+          if (callback) callback.call(context, null);
+        }
+      });
+    },
+    get(sql, params = [], callback) {
+      if (typeof params === 'function') {
+        callback = params;
+        params = [];
+      }
+      if (!isPostgres) {
+        globalSqliteDb.get(sql, params, callback);
+        return;
+      }
+      const pgSql = convertSqlToPostgres(sql);
+      pgPool.query(pgSql, params, (err, res) => {
+        if (err) {
+          console.error(`PostgreSQL error on get: ${err.message}. Retrying query on SQLite...`);
+          fallbackToSqlite(() => {
+            globalSqliteDb.get(sql, params, callback);
+          });
+        } else {
+          const row = res.rows && res.rows.length > 0 ? res.rows[0] : null;
+          if (callback) callback(null, row);
+        }
+      });
+    },
+    all(sql, params = [], callback) {
+      if (typeof params === 'function') {
+        callback = params;
+        params = [];
+      }
+      if (!isPostgres) {
+        globalSqliteDb.all(sql, params, callback);
+        return;
+      }
+      const pgSql = convertSqlToPostgres(sql);
+      pgPool.query(pgSql, params, (err, res) => {
+        if (err) {
+          console.error(`PostgreSQL error on all: ${err.message}. Retrying query on SQLite...`);
+          fallbackToSqlite(() => {
+            globalSqliteDb.all(sql, params, callback);
+          });
+        } else {
+          if (callback) callback(null, res.rows || []);
+        }
+      });
+    },
+    serialize(callback) {
+      if (callback) callback();
+    },
+    prepare(sql) {
+      return {
+        run(params = [], callback) {
+          if (typeof params === 'function') {
+            callback = params;
+            params = [];
+          }
+          db.run(sql, params, callback);
+        },
+        finalize(callback) {
+          if (callback) callback();
+        }
+      };
+    }
+  };
+  
+  initializePostgresSchema(pgPool).then(() => {
+    console.log('✅ PostgreSQL Schema initialized successfully.');
+    initializeAttendanceBooks(db);
+  }).catch(e => {
+    console.error('❌ Failed to initialize PostgreSQL schema:', e.message || e);
+    console.log('⚠️ Falling back to local SQLite database...');
+    dbInitError = e.message || String(e);
+    isPostgres = false;
+    initializeSqlite();
+  });
+}
+
 // Always initialize local SQLite database connection & schema on startup to prevent fallback race conditions
 initializeSqliteConnection();
 
-if (isMysql) {
+const dbUrl = process.env.DATABASE_URL || config.databaseUrl;
+const isPostgresUrl = dbUrl && (dbUrl.startsWith('postgresql://') || dbUrl.startsWith('postgres://'));
+
+if (isPostgresUrl) {
+  initializePostgresConnection();
+} else if (isMysql) {
   console.log('🔌 Cloud database mode: Connecting to MySQL...');
   const mysql = require('mysql2');
   
@@ -1607,6 +2092,7 @@ if (isMysql) {
   }).catch(e => {
     console.error('❌ Failed to initialize MySQL schema:', e.message || e);
     console.log('⚠️ Falling back to local SQLite database...');
+    dbInitError = e.message || String(e);
     isMysql = false;
     initializeSqlite();
   });
@@ -1703,7 +2189,72 @@ function dumpExamsToFile(callback) {
 }
 
 function executeBulkSync(tableName, primaryKey, itemsToSave, callback) {
-  if (isMysql && mysqlPool) {
+  if (isPostgres && pgPool) {
+    pgPool.connect((connectErr, client, release) => {
+      if (connectErr) {
+        console.error(`❌ pgPool connection error for bulk sync transaction on ${tableName}:`, connectErr);
+        console.log('⚠️ Falling back to SQLite bulk sync...');
+        fallbackToSqlite(() => {
+          executeBulkSync(tableName, primaryKey, itemsToSave, callback);
+        });
+        return;
+      }
+      
+      const rollback = (err) => {
+        client.query('ROLLBACK', () => {
+          release();
+          console.error(`❌ PostgreSQL transaction error for bulk sync on ${tableName}:`, err.message);
+          console.log('⚠️ Falling back to SQLite bulk sync...');
+          fallbackToSqlite(() => {
+            executeBulkSync(tableName, primaryKey, itemsToSave, callback);
+          });
+        });
+      };
+      
+      client.query('BEGIN', (beginErr) => {
+        if (beginErr) return rollback(beginErr);
+        
+        client.query(`DELETE FROM "${tableName}"`, (deleteErr) => {
+          if (deleteErr) return rollback(deleteErr);
+          
+          if (!itemsToSave || itemsToSave.length === 0) {
+            client.query('COMMIT', (commitErr) => {
+              if (commitErr) return rollback(commitErr);
+              release();
+              callback(null, 0);
+            });
+            return;
+          }
+          
+          let insertIndex = 0;
+          const insertNext = () => {
+            if (insertIndex >= itemsToSave.length) {
+              client.query('COMMIT', (commitErr) => {
+                if (commitErr) return rollback(commitErr);
+                release();
+                callback(null, itemsToSave.length);
+              });
+              return;
+            }
+            
+            const item = itemsToSave[insertIndex];
+            const { sql, values } = getInsertOrReplaceSqlAndValues(tableName, primaryKey, item);
+            const pgSql = convertSqlToPostgres(sql);
+            client.query(pgSql, values, (insertErr) => {
+              if (insertErr) {
+                console.error(`❌ Error bulk inserting item into ${tableName} on Postgres:`, insertErr);
+                return rollback(insertErr);
+              }
+              insertIndex++;
+              insertNext();
+            });
+          };
+          
+          insertNext();
+        });
+      });
+    });
+  } else if (isMysql && mysqlPool) {
     mysqlPool.getConnection((connectErr, connection) => {
       if (connectErr) {
         console.error(`❌ mysqlPool connection error for bulk sync transaction on ${tableName}:`, connectErr);
@@ -5302,7 +5853,8 @@ const server = http.createServer((req, res) => {
       appId: appId,
       maskedToken: maskedToken,
       isMysql: typeof isMysql !== 'undefined' ? isMysql : false,
-      MYSQL_HOST: typeof MYSQL_HOST !== 'undefined' ? MYSQL_HOST : 'not_set'
+      MYSQL_HOST: typeof MYSQL_HOST !== 'undefined' ? MYSQL_HOST : 'not_set',
+      dbInitError: typeof dbInitError !== 'undefined' ? dbInitError : null
     }));
     return;
   }

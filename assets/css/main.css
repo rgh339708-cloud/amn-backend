@@ -51,7 +51,7 @@
   --shadow-glow-gold:    0 0 40px rgba(201, 162, 39, 0.3);
 
   /* Typography */
-  --font-arabic:         'Cairo', 'Tajawal', sans-serif;
+  --font-arabic:         'Tajawal', 'Cairo', sans-serif;
   --font-display:        'Orbitron', monospace;
   --font-size-xs:        0.75rem;
   --font-size-sm:        0.875rem;

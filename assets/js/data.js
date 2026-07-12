@@ -6,225 +6,247 @@
 const SeedData = (() => {
 
   async function init() {
-    // Only fetch/load static exams.json if we don't have any exams in Storage yet
-    const existingExamsOnLoad = Storage.getCollection(Storage.keys.EXAMS) || [];
-    if (existingExamsOnLoad.length === 0) {
-      try {
-        const ROOT = window.location.pathname.includes('/pages/') ? '../' : './';
-        const examsRes = await fetch(`${ROOT}assets/data/exams.json?t=${Date.now()}`).catch(() => null);
-        if (examsRes && examsRes.ok) {
-          const fileExams = await examsRes.json();
-          if (Array.isArray(fileExams) && fileExams.length > 0) {
-            console.log('[Data] Seeding exams from static exams.json:', fileExams.length);
-            Storage.set(Storage.keys.EXAMS, fileExams, false);
+    try {
+      // Only fetch/load static exams.json if we don't have any exams in Storage yet AND we are in local/development mode
+      const existingExamsOnLoad = Storage.getCollection(Storage.keys.EXAMS) || [];
+      const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
+      if (Array.isArray(existingExamsOnLoad) && existingExamsOnLoad.length === 0 && isLocalhost) {
+        try {
+          const ROOT = window.location.pathname.includes('/pages/') ? '../' : './';
+          const examsRes = await fetch(`${ROOT}assets/data/exams.json?t=${Date.now()}`).catch(() => null);
+          if (examsRes && examsRes.ok) {
+            const fileExams = await examsRes.json();
+            if (Array.isArray(fileExams) && fileExams.length > 0) {
+              console.log('[Data] Seeding exams from static exams.json:', fileExams.length);
+              Storage.set(Storage.keys.EXAMS, fileExams, false);
+            }
+          }
+        } catch (e) {
+          console.warn('[Data] Failed to load static exams.json:', e);
+        }
+      }
+
+      if (!Storage.get(Storage.keys.INITIALIZED)) {
+        console.log('[Data] ps_initialized is missing. Trying to load collections from server first...');
+        try {
+          await Storage.loadAllFromServer();
+        } catch (e) {
+          console.warn('[Data] Failed to load collections from server:', e);
+        }
+        
+        const existingExams = Storage.getCollection(Storage.keys.EXAMS) || [];
+        const existingUsers = Storage.getCollection(Storage.keys.USERS) || [];
+        if ((Array.isArray(existingExams) && existingExams.length > 0) || (Array.isArray(existingUsers) && existingUsers.length > 0)) {
+          console.log('[Data] Failsafe: Collections not empty. Marking ps_initialized as true.');
+          Storage.set(Storage.keys.INITIALIZED, true);
+        }
+      }
+
+      if (Storage.get(Storage.keys.INITIALIZED)) {
+        // Force update of exam_004 if old category/description exists
+        const currentExams = Storage.getCollection(Storage.keys.EXAMS) || [];
+        if (Array.isArray(currentExams)) {
+          const exam004 = currentExams.find(e => e.id === 'exam_004');
+          const newDesc = `تنويه هام:\n\n* في حال الخروج من الموقع أو إغلاق صفحة الاختبار أثناء تأدية الاختبار، سيتم اعتبار المتقدم راسباً.\n* يجب الالتزام بالموعد المحدد للاختبار وإرساله قبل انتهاء الوقت المخصص.\n* يتحمل المتقدم مسؤولية التأكد من استقرار الاتصال بالإنترنت وعدم مغادرة صفحة الاختبار حتى إتمام عملية الإرسال بنجاح.\n\nمع تحيات\nالإدارة العامة لشؤون تدريب الأمن العام`;
+          if (exam004 && (exam004.category !== 'جندي فما فوق' || !exam004.description || !exam004.description.includes('سيتم اعتبار المتقدم راسباً'))) {
+            console.log('[Data] Patching exam_004 (Field Operations Course) description and category in client storage...');
+            exam004.category = 'جندي فما فوق';
+            exam004.description = newDesc;
+            Storage.set(Storage.keys.EXAMS, currentExams, true);
           }
         }
-      } catch (e) {
-        console.warn('[Data] Failed to load static exams.json:', e);
-      }
-    }
 
-    if (!Storage.get(Storage.keys.INITIALIZED)) {
-      console.log('[Data] ps_initialized is missing. Trying to load collections from server first...');
-      try {
-        await Storage.loadAllFromServer();
-      } catch (e) {
-        console.warn('[Data] Failed to load collections from server:', e);
+        // Force update of centers if old ones exist in Storage
+        const currentCenters = Storage.get(Storage.keys.CENTERS);
+        if (Array.isArray(currentCenters)) {
+          const ctr002 = currentCenters.find(c => c.id === 'ctr_002');
+          const ctr003 = currentCenters.find(c => c.id === 'ctr_003');
+          const ctr004 = currentCenters.find(c => c.id === 'ctr_004');
+          const centersOutdated = currentCenters.length < 4
+            || !ctr002
+            || !ctr003
+            || !ctr004
+            || ctr002.name !== 'مركز الأمن العام – شمال لوس'
+            || ctr003.name !== 'مركز الأمن العام – ساندي'
+            || ctr004.name !== 'مركز الأمن العام – بوليتو'
+            || (currentCenters.length === 1 && (currentCenters[0].name === 'المركز الرئيسي' || currentCenters[0].location === 'المنطقة الوسطى' || !currentCenters[0].description));
+          if (centersOutdated) {
+            console.log('[Data] Resetting centers to latest version...');
+            _seedCenters(false);
+          }
+        } else {
+          console.log('[Data] Centers cache invalid or empty, resetting to default...');
+          _seedCenters(false);
+        }
+
+        // Clean up default mock users if they exist
+        const currentUsers = Storage.getCollection(Storage.keys.USERS) || [];
+        if (Array.isArray(currentUsers)) {
+          const hasMockUsers = currentUsers.some(u => u && (u.id === 'user_owner_001' || u.id === 'user_super_001' || u.id === 'user_admin_001' || u.id === 'user_editor_001' || u.id === 'user_viewer_001'));
+          if (hasMockUsers) {
+            console.log('[Data] Filtering out default mock users from users collection...');
+            const filteredUsers = currentUsers.filter(u => u && u.id !== 'user_owner_001' && u.id !== 'user_super_001' && u.id !== 'user_admin_001' && u.id !== 'user_editor_001' && u.id !== 'user_viewer_001');
+            Storage.set(Storage.keys.USERS, filteredUsers, false);
+          }
+        }
+
+        const settings = Storage.get(Storage.keys.SETTINGS) || {};
+        let updated = false;
+        if (!settings.discordLink || settings.discordLink === '#' || settings.discordLink.includes('publicsecurity')) {
+          settings.discordLink = 'https://discord.gg/UpAUaRcqe';
+          updated = true;
+        }
+        if (!settings.officialSiteLink || settings.officialSiteLink === '#' || settings.officialSiteLink.includes('publicsecurity90.gov') || settings.officialSiteLink.includes('surge.sh')) {
+          settings.officialSiteLink = 'https://amn-3-90.com/index.html';
+          updated = true;
+        }
+        if (!settings.welcomeTitle || settings.welcomeTitle === '• المنصة الرسمية - إصدار 1.0 •' || settings.welcomeTitle === 'البوابة الرسمية لأدارة الامن العام') {
+          settings.welcomeTitle = 'الموقع الرسمي لإدارة الامن العام';
+          updated = true;
+        }
+        if (!settings.heroDesc || settings.heroDesc.includes('منصة موحدة لجميع شؤون القطاع')) {
+          settings.heroDesc = 'موقع شامل لجميع شؤون إدارة الامن العام';
+          updated = true;
+        }
+        
+        // Inject new updates dynamically if not present
+        const currentAnnouncements = Storage.getCollection(Storage.keys.ANNOUNCEMENTS) || [];
+        if (Array.isArray(currentAnnouncements)) {
+          if (!currentAnnouncements.some(a => a && a.id === 'ann_007')) {
+            console.log('[Data] Seeding Discord login update announcement...');
+            const updateAnn = {
+              id: 'ann_007',
+              title: 'تحديث البوابة الرقمية: إطلاق نظام تسجيل الدخول الموحد Discord OAuth2 والربط الثنائي للمنسوبين',
+              body: `<p>بناءً على التوجيهات لتأمين وحماية البوابة الرقمية للأمن العام بمدينة الـ90، تم إطلاق نظام تسجيل الدخول الموحد عن طريق Discord OAuth2 بالكامل ويشمل:</p><ul><li><b>مصادقة رقمية موحدة:</b> إمكانية تسجيل الدخول المباشر والآمن باستخدام حساب ديسكورد الرسمي الخاص بالمنسوب.</li><li><b>التحقق التلقائي من قواعد البيانات:</b> ربط تسجيل الدخول بوجود العضو في جداول قطاع الأمن العام المعتمدة (الأساسي، المنتدبين، الإدارة). في حال عدم تطابق البيانات، يتم حظر الدخول فوراً لحماية السرية الأمنية.</li><li><b>نظام منع التكرار والربط المتعدد:</b> فرض قيود برمجية صارمة تمنع ربط أكثر من حساب ديسكورد بنفس المستخدم، أو ربط نفس حساب ديسكورد بأكثر من مستخدم.</li><li><b>شارات ديسكورد التفاعلية باللوحة:</b> تظهر شارات ديسكورد الرسمية للمنسوبين وحالة ارتباط حساباتهم (مرتبط / غير مرتبط) في جدول إدارة الصلاحيات للمالك العام.</li></ul>`,
+              priority: 'high',
+              category: 'تحديثات',
+              emoji: '<i class="fa-brands fa-discord"></i>',
+              author: 'المكتب التقني',
+              authorRole: 'التطوير والدعم',
+              pinned: true,
+              views: 150,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            };
+            currentAnnouncements.forEach(a => { if (a && a.pinned) a.pinned = false; });
+            currentAnnouncements.unshift(updateAnn);
+            Storage.set(Storage.keys.ANNOUNCEMENTS, currentAnnouncements, false);
+          }
+
+          if (!currentAnnouncements.some(a => a && a.id === 'ann_006')) {
+            console.log('[Data] Seeding exams update announcement...');
+            const updateAnn = {
+              id: 'ann_006',
+              title: 'تحديث البوابة الرقمية: إطلاق نظام الاختبارات والدورات المطور وقفل المستندات التلقائي',
+              body: `<p>بناءً على التوجيهات الأمنية لتطوير المسار التعليمي والتدريبي للجهاز، تم إطلاق نظام الاختبارات والدورات المطور والذي يشمل:</p><ul><li><b>بنك أسئلة مستقل لكل دورة:</b> إمكانية إدارة الأسئلة بعشوائية تامة للأسئلة والخيارات لكل مختبر.</li><li><b>رتبة مسؤول دورة (<i class="fa-solid fa-graduation-cap"></i>):</b> صلاحيات مخصصة لإدارة الاختبارات وبنك الأسئلة ومتابعة النتائج.</li><li><b>قفل المستندات التلقائي في الوقت الفعلي:</b> عند بدء أي اختبار، يتم قفل مستند الدورة فوراً لمنع تسريب الإجابات، ويعاد فتحه تلقائياً في الوقت الفعلي عند إغلاق الاختبار.</li><li><b>منع التكرار والإعادة:</b> حفظ النتيجة فوراً ومنع الإعادة التلقائية إلا بإذن مسؤول الدورة.</li></ul>`,
+              priority: 'high',
+              category: 'تحديثات',
+              emoji: '<i class="fa-solid fa-graduation-cap"></i>',
+              author: 'المكتب التقني',
+              authorRole: 'التطوير والدعم',
+              pinned: false,
+              views: 120,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            };
+            currentAnnouncements.unshift(updateAnn);
+            Storage.set(Storage.keys.ANNOUNCEMENTS, currentAnnouncements, false);
+          }
+
+          if (!currentAnnouncements.some(a => a && a.id === 'ann_005')) {
+            console.log('[Data] Seeding update announcement...');
+            const updateAnn = {
+              id: 'ann_005',
+              title: 'تحديث البوابة الرقمية: إضافة شاشة الدخول الموحدة وأنظمة التحميل الهيكلية',
+              body: `<p>بناءً على توجيهات الشؤون التقنية بالأمن العام، تم إطلاق تحديث جديد للوزارة شمل:</p><ul><li>شاشة دخول تفاعلية عسكرية تظهر عند تحميل الموقع مصحوبة بشعار الأمن العام والتوهج الذهبي.</li><li>نظام تحميل ذكي (Skeleton Loders) في صفحة قاعدة البيانات وصفحة الملفات الشخصية لتسهيل تصفح البيانات وجعلها أكثر سلاسة وسرعة.</li></ul>`,
+              priority: 'high',
+              category: 'تحديثات',
+              emoji: '<i class="fa-solid fa-gear"></i>',
+              author: 'المكتب التقني',
+              authorRole: 'التطوير والدعم',
+              pinned: false,
+              views: 541,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            };
+            currentAnnouncements.unshift(updateAnn);
+            Storage.set(Storage.keys.ANNOUNCEMENTS, currentAnnouncements, false);
+          }
+        }
+
+        const currentNews = Storage.getCollection(Storage.keys.NEWS) || [];
+        if (Array.isArray(currentNews)) {
+          if (!currentNews.some(n => n && n.id === 'news_007')) {
+            const updateNews = {
+              id: 'news_007',
+              title: 'إطلاق نظام الدخول الموحد والربط الثنائي الآمن Discord OAuth2 للمنسوبين',
+              category: 'تحديث',
+              emoji: '<i class="fa-brands fa-discord"></i>',
+              date: '2026-06-13',
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            };
+            currentNews.unshift(updateNews);
+            Storage.set(Storage.keys.NEWS, currentNews, false);
+          }
+
+          if (!currentNews.some(n => n && n.id === 'news_006')) {
+            const updateNews = {
+              id: 'news_006',
+              title: 'إطلاق نظام الاختبارات المطور ورتبة مسؤول دورة لتأمين المسار التدريبي للضباط والأفراد',
+              category: 'تحديث',
+              emoji: '<i class="fa-solid fa-graduation-cap"></i>',
+              date: '2026-06-08',
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            };
+            currentNews.unshift(updateNews);
+            Storage.set(Storage.keys.NEWS, currentNews, false);
+          }
+
+          if (!currentNews.some(n => n && n.id === 'news_005')) {
+            const updateNews = {
+              id: 'news_005',
+              title: 'إطلاق شاشة الدخول الجديدة وأنظمة شيمر البيانات السلسة',
+              category: 'تحديث',
+              emoji: '🚀',
+              date: '2026-06-08',
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            };
+            currentNews.unshift(updateNews);
+            Storage.set(Storage.keys.NEWS, currentNews, false);
+          }
+        }
+
+        if (updated) {
+          Storage.set(Storage.keys.SETTINGS, settings, false);
+        }
+        return;
       }
       
-      const existingExams = Storage.getCollection(Storage.keys.EXAMS) || [];
-      const existingUsers = Storage.getCollection(Storage.keys.USERS) || [];
-      if (existingExams.length > 0 || existingUsers.length > 0) {
-        console.log('[Data] Failsafe: Collections not empty. Marking ps_initialized as true.');
+      const isLocalhost2 = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
+      if (isLocalhost2) {
+        console.log('[Data] Seeding initial data...');
+        _seedUsers();
+        _seedAnnouncements();
+        _seedNews();
+        _seedPromotions();
+        _seedGuideTopics();
+        _seedArchive();
+        _seedExams();
+        _seedDatabase();
+        _seedMembers();
+        _seedCenters();
+        _seedSettings();
         Storage.set(Storage.keys.INITIALIZED, true);
+        console.log('[Data] Seed complete.');
+      } else {
+        console.log('[Data] Running in production mode. Seeding skipped.');
       }
+    } catch (err) {
+      console.error('[Data Seed] Critical error during initialization:', err);
     }
-
-    if (Storage.get(Storage.keys.INITIALIZED)) {
-      // Force update of exam_004 if old category/description exists
-      const currentExams = Storage.getCollection(Storage.keys.EXAMS) || [];
-      const exam004 = currentExams.find(e => e.id === 'exam_004');
-      const newDesc = `تنويه هام:\n\n* في حال الخروج من الموقع أو إغلاق صفحة الاختبار أثناء تأدية الاختبار، سيتم اعتبار المتقدم راسباً.\n* يجب الالتزام بالموعد المحدد للاختبار وإرساله قبل انتهاء الوقت المخصص.\n* يتحمل المتقدم مسؤولية التأكد من استقرار الاتصال بالإنترنت وعدم مغادرة صفحة الاختبار حتى إتمام عملية الإرسال بنجاح.\n\nمع تحيات\nالإدارة العامة لشؤون تدريب الأمن العام`;
-      if (exam004 && (exam004.category !== 'جندي فما فوق' || !exam004.description || !exam004.description.includes('سيتم اعتبار المتقدم راسباً'))) {
-        console.log('[Data] Patching exam_004 (Field Operations Course) description and category in client storage...');
-        exam004.category = 'جندي فما فوق';
-        exam004.description = newDesc;
-        Storage.set(Storage.keys.EXAMS, currentExams, true);
-      }
-
-      // Force update of centers if old ones exist in Storage
-      const currentCenters = Storage.get(Storage.keys.CENTERS);
-      const ctr002 = currentCenters && currentCenters.find(c => c.id === 'ctr_002');
-      const ctr003 = currentCenters && currentCenters.find(c => c.id === 'ctr_003');
-      const ctr004 = currentCenters && currentCenters.find(c => c.id === 'ctr_004');
-      const centersOutdated = !currentCenters 
-        || currentCenters.length < 4
-        || !ctr002
-        || !ctr003
-        || !ctr004
-        || ctr002.name !== 'مركز الأمن العام – شمال لوس'
-        || ctr003.name !== 'مركز الأمن العام – ساندي'
-        || ctr004.name !== 'مركز الأمن العام – بوليتو'
-        || (currentCenters.length === 1 && (currentCenters[0].name === 'المركز الرئيسي' || currentCenters[0].location === 'المنطقة الوسطى' || !currentCenters[0].description));
-      if (centersOutdated) {
-        console.log('[Data] Resetting centers to latest version...');
-        _seedCenters(false);
-      }
-
-      // Clean up default mock users if they exist
-      const currentUsers = Storage.getCollection(Storage.keys.USERS) || [];
-      const hasMockUsers = currentUsers.some(u => u.id === 'user_owner_001' || u.id === 'user_super_001' || u.id === 'user_admin_001' || u.id === 'user_editor_001' || u.id === 'user_viewer_001');
-      if (hasMockUsers) {
-        console.log('[Data] Filtering out default mock users from users collection...');
-        const filteredUsers = currentUsers.filter(u => u.id !== 'user_owner_001' && u.id !== 'user_super_001' && u.id !== 'user_admin_001' && u.id !== 'user_editor_001' && u.id !== 'user_viewer_001');
-        Storage.set(Storage.keys.USERS, filteredUsers, false);
-      }
-
-      const settings = Storage.get(Storage.keys.SETTINGS) || {};
-      let updated = false;
-      if (!settings.discordLink || settings.discordLink === '#' || settings.discordLink.includes('publicsecurity')) {
-        settings.discordLink = 'https://discord.gg/UpAUaRcqe';
-        updated = true;
-      }
-      if (!settings.officialSiteLink || settings.officialSiteLink === '#' || settings.officialSiteLink.includes('publicsecurity90.gov') || settings.officialSiteLink.includes('surge.sh')) {
-        settings.officialSiteLink = 'https://amn-3-90.com/index.html';
-        updated = true;
-      }
-      if (!settings.welcomeTitle || settings.welcomeTitle === '• المنصة الرسمية - إصدار 1.0 •' || settings.welcomeTitle === 'البوابة الرسمية لأدارة الامن العام') {
-        settings.welcomeTitle = 'الموقع الرسمي لإدارة الامن العام';
-        updated = true;
-      }
-      if (!settings.heroDesc || settings.heroDesc.includes('منصة موحدة لجميع شؤون القطاع')) {
-        settings.heroDesc = 'موقع شامل لجميع شؤون إدارة الامن العام';
-        updated = true;
-      }
-      // Inject new updates dynamically if not present
-      const currentAnnouncements = Storage.getCollection(Storage.keys.ANNOUNCEMENTS) || [];
-      if (!currentAnnouncements.some(a => a.id === 'ann_007')) {
-        console.log('[Data] Seeding Discord login update announcement...');
-        const updateAnn = {
-          id: 'ann_007',
-          title: 'تحديث البوابة الرقمية: إطلاق نظام تسجيل الدخول الموحد Discord OAuth2 والربط الثنائي للمنسوبين',
-          body: `<p>بناءً على التوجيهات لتأمين وحماية البوابة الرقمية للأمن العام بمدينة الـ90، تم إطلاق نظام تسجيل الدخول الموحد عن طريق Discord OAuth2 بالكامل ويشمل:</p><ul><li><b>مصادقة رقمية موحدة:</b> إمكانية تسجيل الدخول المباشر والآمن باستخدام حساب ديسكورد الرسمي الخاص بالمنسوب.</li><li><b>التحقق التلقائي من قواعد البيانات:</b> ربط تسجيل الدخول بوجود العضو في جداول قطاع الأمن العام المعتمدة (الأساسي، المنتدبين، الإدارة). في حال عدم تطابق البيانات، يتم حظر الدخول فوراً لحماية السرية الأمنية.</li><li><b>نظام منع التكرار والربط المتعدد:</b> فرض قيود برمجية صارمة تمنع ربط أكثر من حساب ديسكورد بنفس المستخدم، أو ربط نفس حساب ديسكورد بأكثر من مستخدم.</li><li><b>شارات ديسكورد التفاعلية باللوحة:</b> تظهر شارات ديسكورد الرسمية للمنسوبين وحالة ارتباط حساباتهم (مرتبط / غير مرتبط) في جدول إدارة الصلاحيات للمالك العام.</li></ul>`,
-          priority: 'high',
-          category: 'تحديثات',
-          emoji: '<i class="fa-brands fa-discord"></i>',
-          author: 'المكتب التقني',
-          authorRole: 'التطوير والدعم',
-          pinned: true,
-          views: 150,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-        currentAnnouncements.forEach(a => { if (a.pinned) a.pinned = false; });
-        currentAnnouncements.unshift(updateAnn);
-        Storage.set(Storage.keys.ANNOUNCEMENTS, currentAnnouncements, false);
-      }
-
-      if (!currentAnnouncements.some(a => a.id === 'ann_006')) {
-        console.log('[Data] Seeding exams update announcement...');
-        const updateAnn = {
-          id: 'ann_006',
-          title: 'تحديث البوابة الرقمية: إطلاق نظام الاختبارات والدورات المطور وقفل المستندات التلقائي',
-          body: `<p>بناءً على التوجيهات الأمنية لتطوير المسار التعليمي والتدريبي للجهاز، تم إطلاق نظام الاختبارات والدورات المطور والذي يشمل:</p><ul><li><b>بنك أسئلة مستقل لكل دورة:</b> إمكانية إدارة الأسئلة بعشوائية تامة للأسئلة والخيارات لكل مختبر.</li><li><b>رتبة مسؤول دورة (<i class="fa-solid fa-graduation-cap"></i>):</b> صلاحيات مخصصة لإدارة الاختبارات وبنك الأسئلة ومتابعة النتائج.</li><li><b>قفل المستندات التلقائي في الوقت الفعلي:</b> عند بدء أي اختبار، يتم قفل مستند الدورة فوراً لمنع تسريب الإجابات، ويعاد فتحه تلقائياً في الوقت الفعلي عند إغلاق الاختبار.</li><li><b>منع التكرار والإعادة:</b> حفظ النتيجة فوراً ومنع الإعادة التلقائية إلا بإذن مسؤول الدورة.</li></ul>`,
-          priority: 'high',
-          category: 'تحديثات',
-          emoji: '<i class="fa-solid fa-graduation-cap"></i>',
-          author: 'المكتب التقني',
-          authorRole: 'التطوير والدعم',
-          pinned: false,
-          views: 120,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-        currentAnnouncements.unshift(updateAnn);
-        Storage.set(Storage.keys.ANNOUNCEMENTS, currentAnnouncements, false);
-      }
-
-      if (!currentAnnouncements.some(a => a.id === 'ann_005')) {
-        console.log('[Data] Seeding update announcement...');
-        const updateAnn = {
-          id: 'ann_005',
-          title: 'تحديث البوابة الرقمية: إضافة شاشة الدخول الموحدة وأنظمة التحميل الهيكلية',
-          body: `<p>بناءً على توجيهات الشؤون التقنية بالأمن العام، تم إطلاق تحديث جديد للوزارة شمل:</p><ul><li>شاشة دخول تفاعلية عسكرية تظهر عند تحميل الموقع مصحوبة بشعار الأمن العام والتوهج الذهبي.</li><li>نظام تحميل ذكي (Skeleton Loaders) في صفحة قاعدة البيانات وصفحة الملفات الشخصية لتسهيل تصفح البيانات وجعلها أكثر سلاسة وسرعة.</li></ul>`,
-          priority: 'high',
-          category: 'تحديثات',
-          emoji: '<i class="fa-solid fa-gear"></i>',
-          author: 'المكتب التقني',
-          authorRole: 'التطوير والدعم',
-          pinned: false,
-          views: 541,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-        currentAnnouncements.unshift(updateAnn);
-        Storage.set(Storage.keys.ANNOUNCEMENTS, currentAnnouncements, false);
-      }
-
-      const currentNews = Storage.getCollection(Storage.keys.NEWS) || [];
-      if (!currentNews.some(n => n.id === 'news_007')) {
-        const updateNews = {
-          id: 'news_007',
-          title: 'إطلاق نظام الدخول الموحد والربط الثنائي الآمن Discord OAuth2 للمنسوبين',
-          category: 'تحديث',
-          emoji: '<i class="fa-brands fa-discord"></i>',
-          date: '2026-06-13',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        };
-        currentNews.unshift(updateNews);
-        Storage.set(Storage.keys.NEWS, currentNews, false);
-      }
-
-      if (!currentNews.some(n => n.id === 'news_006')) {
-        const updateNews = {
-          id: 'news_006',
-          title: 'إطلاق نظام الاختبارات المطور ورتبة مسؤول دورة لتأمين المسار التدريبي للضباط والأفراد',
-          category: 'تحديث',
-          emoji: '<i class="fa-solid fa-graduation-cap"></i>',
-          date: '2026-06-08',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        };
-        currentNews.unshift(updateNews);
-        Storage.set(Storage.keys.NEWS, currentNews, false);
-      }
-
-      if (!currentNews.some(n => n.id === 'news_005')) {
-        const updateNews = {
-          id: 'news_005',
-          title: 'إطلاق شاشة الدخول الجديدة وأنظمة شيمر البيانات السلسة',
-          category: 'تحديث',
-          emoji: '🚀',
-          date: '2026-06-08',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        };
-        currentNews.unshift(updateNews);
-        Storage.set(Storage.keys.NEWS, currentNews, false);
-      }
-
-      if (updated) {
-        Storage.set(Storage.keys.SETTINGS, settings, false);
-      }
-      return;
-    }
-    console.log('[Data] Seeding initial data...');
-
-    _seedUsers();
-    _seedAnnouncements();
-    _seedNews();
-    _seedPromotions();
-    _seedGuideTopics();
-    _seedArchive();
-    _seedExams();
-    _seedDatabase();
-    _seedMembers();
-    _seedCenters();
-    _seedSettings();
-
-    Storage.set(Storage.keys.INITIALIZED, true);
-    console.log('[Data] Seed complete.');
   }
 
   /* ── Users ────────────────────────────────────────── */

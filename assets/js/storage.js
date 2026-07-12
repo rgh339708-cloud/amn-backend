@@ -536,10 +536,11 @@ const Storage = (() => {
   async function loadAllFromServer() {
     try {
       const apiBase = getApiBase();
+      const fetchStartTime = Date.now();
 
       const res = await fetchWithTimeout(`${apiBase}/api/db/collections`, {
         headers: { 'Bypass-Tunnel-Reminder': 'true' },
-        timeout: 4000
+        timeout: 15000
       });
       if (res.ok) {
         const json = await res.json();
@@ -568,8 +569,14 @@ const Storage = (() => {
               return;
             }
 
-            // Skip overwriting if there is an active sync request in flight, if it was modified recently (8s), or if it is unsynced (dirty)
+            // Skip overwriting if a local write occurred after this fetch started
             const lastWrite = lastWriteTime[key] || 0;
+            if (lastWrite >= fetchStartTime) {
+              console.log(`[Storage Sync] Skipping overwrite for key ${key} because a local write occurred after the fetch started.`);
+              return;
+            }
+
+            // Skip overwriting if there is an active sync request in flight, if it was modified recently (8s), or if it is unsynced (dirty)
             const hasActiveSync = activeSyncs[key] > 0;
             const isUnsynced = isKeyUnsynced(key);
             if (hasActiveSync || isUnsynced || (Date.now() - lastWrite < 8000)) {

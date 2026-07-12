@@ -1970,7 +1970,15 @@ const App = (() => {
 
   /* ── Initialize App ───────────────────────────────── */
   async function init() {
-    // 1. Central Database: Load all collections from server before starting UI
+    // Initialize UI instantly and synchronously from local cache
+    initTheme();
+    initNavbarScroll();
+    initSidebar();
+    setActiveNav();
+    initUserBadge();
+    injectAttendanceLinkIfNeeded();
+
+    // 1. Central Database: Load all collections from server in background
     try {
       if (typeof Storage !== 'undefined' && Storage.loadAllFromServer) {
         await Storage.loadAllFromServer();
@@ -1980,7 +1988,11 @@ const App = (() => {
       console.warn('[Storage Sync] Failed initial database load:', e);
     }
 
-    SeedData.init();
+    try {
+      SeedData.init();
+    } catch (e) {
+      console.warn('[Seed] SeedData.init() failed:', e);
+    }
     
     // Sync settings with the backend server first to ensure fresh state
     try {
@@ -2011,13 +2023,6 @@ const App = (() => {
 
     // Polling interval every 1.5 seconds to lock/unlock document in real-time
     setInterval(checkActiveExamDocumentLock, 1500);
-    
-    initTheme();
-    initNavbarScroll();
-    initSidebar();
-    setActiveNav();
-    initUserBadge();
-    injectAttendanceLinkIfNeeded();
     window.addEventListener('user_session_updated', (e) => {
       console.log('[App] User session updated event received, re-rendering user badge...');
       if (e.detail && e.detail.roleChanged) {

@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>لوحة التحكم العليا | الأمن العام</title>
   
-  <link rel="stylesheet" href="../../assets/css/main.css?v=1.1.33">
+  <link rel="stylesheet" href="../../assets/css/main.css?v=1.3.0">
   <link rel="stylesheet" href="../../assets/css/admin.css?v=1.1.27">
-  <script src="../../assets/js/storage.js?v=1.1.33"></script>
-  <script src="../../assets/js/data.js?v=1.1.33"></script>
-  <script src="../../assets/js/auth.js?v=1.1.33"></script>
-  <script src="../../assets/js/app.js?v=1.1.33"></script>
+  <script src="../../assets/js/storage.js?v=1.3.0"></script>
+  <script src="../../assets/js/data.js?v=1.3.0"></script>
+  <script src="../../assets/js/auth.js?v=1.3.0"></script>
+  <script src="../../assets/js/app.js?v=1.3.0"></script>
   <script>
     // Synchronous route guard to prevent flashing of admin content
     if (!Auth.isLoggedIn() || !['owner', 'assistant_owner', 'academy_affairs', 'admin'].includes(Auth.getRole())) {
@@ -853,6 +853,14 @@
               <option value="manual">تعيين يدوي (لوحة التحكم)</option>
               <option value="auto">تلقائي (Google Sheets)</option>
             </select>
+            <select class="form-select" id="filter-permissions-sheet" onchange="renderPermissionsTable()" style="max-width:160px; padding:8px 12px; background:#0f1530; border:1px solid rgba(255,255,255,0.08); color:#fff; border-radius:8px;">
+              <option value="">كل الجداول</option>
+              <option value="الأساسي">جدول الأساسي</option>
+              <option value="المعتمدين">جدول المعتمدين</option>
+              <option value="الإدارة">جدول الإدارة</option>
+              <option value="تدريب الأمن العام">جدول تدريب الأمن العام</option>
+              <option value="شؤون التجنيد">جدول شؤون التجنيد</option>
+            </select>
           </div>
           <button class="btn-action secondary" onclick="Storage.loadAllFromServer().then(() => { renderPermissionsTable(); App.toast('تم تحديث البيانات من السيرفر!', 'success'); })" style="padding:8px 16px; border-radius:8px;">
             <i class="fa-solid fa-arrows-rotate"></i> تحديث فوري
@@ -981,6 +989,7 @@
           <!-- Row: dropdown + add button -->
           <div style="display:flex; gap:8px; align-items:center;">
             <select class="form-select" id="perm-rank-select" style="flex:1; padding: 11px 12px; background: #0b1232; border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 8px;">
+              <option value="" selected>-- اختر الرتبة / المنصب --</option>
               <option value="owner" data-rank="المشرف العام">المشرف العام</option>
               <option value="assistant_owner" data-rank="قيادة الأمن العام">قيادة الأمن العام</option>
               <option value="academy_affairs" data-rank="رئاسة تدريب الأمن العام">رئاسة تدريب الأمن العام</option>
@@ -2155,6 +2164,30 @@
     const searchVal = (document.getElementById('search-permissions')?.value || '').trim().toLowerCase();
     const filterRole = document.getElementById('filter-permissions-role')?.value || '';
     const filterType = document.getElementById('filter-permissions-type')?.value || '';
+    const filterSheet = document.getElementById('filter-permissions-sheet')?.value || '';
+
+    // Get Arabic label for the filtered role
+    let filterRoleLabel = '';
+    const selectRank = document.getElementById('perm-rank-select');
+    if (selectRank && filterRole) {
+      const option = Array.from(selectRank.options).find(opt => opt.value === filterRole);
+      if (option) {
+        filterRoleLabel = option.dataset.rank || option.text.replace(/\s*\([^)]+\)\s*$/, '').trim();
+      }
+    }
+    if (!filterRoleLabel && filterRole) {
+      const fallbackMapping = {
+        'owner': 'المشرف العام',
+        'assistant_owner': 'قيادة الأمن العام',
+        'academy_affairs': 'رئاسة تدريب الأمن العام',
+        'admin': 'شؤون أكاديمية التدريب',
+        'recruitment_affairs': 'شؤون التجنيد',
+        'course_admin': 'مسؤول دورة',
+        'college_trainee': 'منسوبي كلية التدريب',
+        'viewer': 'مشاهد'
+      };
+      filterRoleLabel = fallbackMapping[filterRole] || '';
+    }
 
     const users = Storage.get('ps_users', []) || [];
     
@@ -2172,7 +2205,9 @@
     const sheetTabs = [
       { key: 'جدول الامن العام - الاساسي', dept: 'الأساسي' },
       { key: 'جدول الامن العام - المنتدبين', dept: 'المعتمدين' },
-      { key: 'جدول الامن العام - الادارة', dept: 'الإدارة' }
+      { key: 'جدول الامن العام - الادارة', dept: 'الإدارة' },
+      { key: 'جدول الإدارة العامه لشؤون تدريب الامن العام', dept: 'تدريب الأمن العام' },
+      { key: ' جدول الادارة العامه لشؤون التجنيد', dept: 'شؤون التجنيد' }
     ];
 
     // بناء قائمة موحدة
@@ -2207,8 +2242,11 @@
           if (row.badge) {
             existing.code = row.badge;
           }
-          if (row.rank && !existing.is_manual_role) {
-            existing.rank = row.rank;
+          if (row.rank) {
+            existing.military_rank = row.rank;
+            if (!existing.is_manual_role) {
+              existing.rank = row.rank;
+            }
           }
           if (!existing.sheetDepts) {
             existing.sheetDepts = dept;
@@ -2241,6 +2279,7 @@
           discord_id: discordId,
           role: 'viewer',
           rank: row.rank || 'مشاهد',
+          military_rank: row.rank || 'مشاهد',
           status: 'active',
           sheetDepts: dept,
           code: row.badge || '',
@@ -2286,14 +2325,19 @@
       
       const matchesSearch = !searchVal || nameMatch || idMatch;
 
-      const matchesRole = !filterRole || u.role === filterRole;
+      const matchesRole = !filterRole || 
+                          u.role === filterRole || 
+                          (u.rank && filterRoleLabel && u.rank.split('/').map(p => p.trim()).includes(filterRoleLabel));
 
       const isManual = u.is_manual_role === 1 || u.is_manual_role === true;
       const matchesType = !filterType || 
                           (filterType === 'manual' && isManual) || 
                           (filterType === 'auto' && !isManual);
 
-      return matchesSearch && matchesRole && matchesType;
+      const matchesSheet = !filterSheet || 
+                           (u.sheetDepts && u.sheetDepts.includes(filterSheet));
+
+      return matchesSearch && matchesRole && matchesType && matchesSheet;
     });
 
     // Sort: manual first, then registered, then sheet-only, then alphabetical
@@ -2412,8 +2456,31 @@
             ${displayDiscordUsername ? '@' + displayDiscordUsername : '—'}
           </td>
           <td style="font-family:monospace; font-size:0.8rem; color:rgba(255,255,255,0.6);">${u.id || u.discord_id || '—'}</td>
-          <td style="font-weight:800; color:#ffd700;">${u.rank || 'مشاهد'}</td>
-          <td>${roleBadge}</td>
+          <td style="font-weight:800; color:#ffd700;">${u.military_rank || (isManual ? 'مشاهد' : (u.rank || 'مشاهد'))}</td>
+          <td>${isManual ? (() => {
+            const arabicToRoleKey = {
+              'المشرف العام': 'owner',
+              'قيادة الأمن العام': 'assistant_owner',
+              'رئاسة تدريب الأمن العام': 'academy_affairs',
+              'شؤون أكاديمية التدريب': 'admin',
+              'شؤون التجنيد': 'recruitment_affairs',
+              'مسؤول دورة': 'course_admin',
+              'منسوبي كلية التدريب': 'college_trainee',
+              'مشاهد': 'viewer'
+            };
+            const manualParts = (u.rank || '').split('/').map(p => p.trim());
+            let badgesHtml = '';
+            manualParts.forEach(p => {
+              const roleKey = arabicToRoleKey[p];
+              if (roleKey) {
+                const roleColor = Auth.getRoleColor(roleKey);
+                const roleEmoji = Auth.getRoleEmoji(roleKey);
+                const roleLabel = Auth.getRoleLabel(roleKey);
+                badgesHtml += `<span style="display:inline-flex; align-items:center; gap:4px; padding:4px 8px; border-radius:6px; font-size:0.78rem; font-weight:bold; background:${roleColor}20; color:${roleColor}; border:1px solid ${roleColor}35; margin-right:4px; margin-bottom:4px;">${roleEmoji} ${roleLabel}</span>`;
+              }
+            });
+            return badgesHtml || roleBadge;
+          })() : roleBadge}</td>
           <td>${typeBadge}</td>
           <td style="font-size:0.8rem; color:rgba(255,255,255,0.55);">${u.isSheetOnly ? '<span style="color:#3498db; font-size:0.75rem;"><i class="fa-solid fa-table"></i> من الجدول</span>' : formatLogDate(u.updated_at || u.last_sync)}</td>
           <td>${actionsHtml}</td>
@@ -2521,6 +2588,7 @@
       // Hide or disable options with level >= opLevel
       Array.from(selectRank.options).forEach(opt => {
         const optRole = opt.value;
+        if (!optRole) return; // Skip placeholder
         const optLevel = Auth.getRoleInfo(optRole).level || 0;
         
         let shouldHide = false;
@@ -2696,10 +2764,47 @@
     document.getElementById('perm-preview-details').textContent = `@${username} | ID: ${userId}`;
     previewBox.style.display = 'flex';
 
-    // Preselect rank
+    // Prepopulate multi-rank pills from user's current ranks and role
     const selectRank = document.getElementById('perm-rank-select');
     if (selectRank) {
-      // Find matching option
+      _pendingRanks = [];
+
+      // Try to parse from current rank string (e.g. "شؤون أكاديمية التدريب / مسؤول دورة")
+      if (rank) {
+        const parts = rank.split('/').map(p => p.trim());
+        parts.forEach(p => {
+          const option = Array.from(selectRank.options).find(opt => {
+            const optLabel = opt.dataset.rank || opt.text.replace(/\s*\([^)]+\)\s*$/, '').trim();
+            return optLabel === p || opt.value === p;
+          });
+          if (option) {
+            if (!_pendingRanks.some(r => r.value === option.value)) {
+              _pendingRanks.push({
+                value: option.value,
+                label: option.dataset.rank || option.text.replace(/\s*\([^)]+\)\s*$/, '').trim()
+              });
+            }
+          }
+        });
+      }
+
+      // Add current primary role if not already in the list
+      if (role) {
+        const option = Array.from(selectRank.options).find(opt => opt.value === role);
+        if (option) {
+          if (!_pendingRanks.some(r => r.value === role)) {
+            _pendingRanks.push({
+              value: option.value,
+              label: option.dataset.rank || option.text.replace(/\s*\([^)]+\)\s*$/, '').trim()
+            });
+          }
+        }
+      }
+
+      // Render the pills
+      renderRankPills();
+
+      // Find matching option for primary role in dropdown select
       for (let i = 0; i < selectRank.options.length; i++) {
         const option = selectRank.options[i];
         if (option.value === role) {
@@ -2716,6 +2821,10 @@
   window.addRankPill = function() {
     const selectRank = document.getElementById('perm-rank-select');
     const opt = selectRank.options[selectRank.selectedIndex];
+    if (!opt || !opt.value) {
+      App.toast('يرجى اختيار رتبة/منصب أولاً من القائمة.', 'error');
+      return;
+    }
     const val = opt.value;
     const lbl = opt.dataset.rank || opt.text.replace(/\s*\([^)]+\)\s*$/, '').trim();
 
@@ -2793,10 +2902,14 @@
     if (!ranks || ranks.length === 0) {
       const selectRank = document.getElementById('perm-rank-select');
       const opt = selectRank.options[selectRank.selectedIndex];
+      if (!opt || !opt.value) {
+        App.toast('يرجى إضافة رتبة أو منصب واحد على الأقل.', 'error');
+        return;
+      }
       ranks = [{ value: opt.value, label: opt.dataset.rank || opt.text.replace(/\s*\([^)]+\)\s*$/, '').trim() }];
     }
 
-    if (ranks.length === 0) {
+    if (ranks.length === 0 || !ranks[0].value) {
       App.toast('يرجى إضافة رتبة أو منصب واحد على الأقل.', 'error');
       return;
     }
