@@ -1988,6 +1988,7 @@ if (isPostgresUrl) {
     password: MYSQL_PASSWORD,
     database: MYSQL_DATABASE,
     port: MYSQL_PORT,
+    charset: 'utf8mb4',
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0
