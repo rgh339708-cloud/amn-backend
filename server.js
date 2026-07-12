@@ -6209,15 +6209,16 @@ const server = http.createServer((req, res) => {
             return;
           }
           
-          const isOwner = opUser && (opUser.role === 'owner' || 
+          const isOwner = (opUser && opUser.role === 'owner') || 
                             ['1334568342345748565'].includes(operator_id) ||
-                            (opUser.username && ['3gjo', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(opUser.username.toLowerCase())) ||
-                            (opUser.display_name && ['3gjo', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(opUser.display_name.toLowerCase())));
+                            (opUser && opUser.username && ['3gjo', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(opUser.username.toLowerCase())) ||
+                            (opUser && opUser.display_name && ['3gjo', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(opUser.display_name.toLowerCase()));
                             
-          const isAssistantOwner = opUser && (opUser.role === 'assistant_owner' ||
+          const isAssistantOwner = (opUser && opUser.role === 'assistant_owner') ||
                                    ['821825761673478144'].includes(operator_id) ||
-                                   (opUser.username && ['ifm711'].includes(opUser.username.toLowerCase())) ||
-                                   (opUser.display_name && ['ifm711'].includes(opUser.display_name.toLowerCase())));
+                                   (opUser && opUser.username && ['ifm711'].includes(opUser.username.toLowerCase())) ||
+                                   (opUser && opUser.display_name && ['ifm711'].includes(opUser.display_name.toLowerCase()));
+
           
           if (!isOwner && !isAssistantOwner) {
             res.writeHead(403, { 'Content-Type': 'application/json; charset=utf-8' });
