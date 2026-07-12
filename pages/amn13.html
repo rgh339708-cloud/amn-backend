@@ -305,6 +305,12 @@
       white-space: nowrap;
     }
 
+    .col-discord {
+      width: 210px !important;
+      min-width: 210px !important;
+      max-width: 210px !important;
+    }
+
     tr:hover td {
       background: rgba(201, 162, 39, 0.04) !important;
       color: #fff;
@@ -1029,7 +1035,7 @@
           <table id="db-table-el">
             <thead id="db-thead-el">
               <tr>
-                <th rowspan="2">Discord ID</th>
+                <th rowspan="2" class="col-discord">Discord ID</th>
                 <th rowspan="2">الاسم</th>
                 <th rowspan="2">الكود</th>
                 <th rowspan="2">الرتبة</th>
@@ -2171,7 +2177,7 @@
       if (currentTab === ' جدول الغرامات 💵') {
         thead.innerHTML = `
         <tr>
-          <th>Discord ID</th>
+          <th class="col-discord">Discord ID</th>
           <th>الاسم</th>
           <th>الكود</th>
           <th>الرتبة</th>
@@ -2196,7 +2202,7 @@
       } else if (currentTab === 'الإستقالات 🎯') {
         thead.innerHTML = `
         <tr>
-          <th>Discord ID</th>
+          <th class="col-discord">Discord ID</th>
           <th>الاسم</th>
           <th>الكود</th>
           <th>الرتبة السابقة</th>
@@ -2210,7 +2216,7 @@
       } else if (currentTab === 'الادارة العامة لشؤون العسكرية') {
         thead.innerHTML = `
         <tr>
-          <th>Discord ID</th>
+          <th class="col-discord">Discord ID</th>
           <th>الاسم</th>
           <th>الكود</th>
           <th>الرتبة</th>
@@ -2223,7 +2229,7 @@
       } else if (currentTab === 'جدول الإدارة العامه لشؤون تدريب الامن العام') {
         thead.innerHTML = `
         <tr>
-          <th>Discord ID</th>
+          <th class="col-discord">Discord ID</th>
           <th>الاسم</th>
           <th>الكود</th>
           <th>الرتبة</th>
@@ -2238,7 +2244,7 @@
       } else if (currentTab === 'جدول الادارة العامة لشؤون الادارية والمالية') {
         thead.innerHTML = `
         <tr>
-          <th>Discord ID</th>
+          <th class="col-discord">Discord ID</th>
           <th>الاسم</th>
           <th>الكود</th>
           <th>الرتبة</th>
@@ -2251,7 +2257,7 @@
       } else if (currentTab === ' جدول الادارة العامه لشؤون التجنيد') {
         thead.innerHTML = `
         <tr>
-          <th>Discord ID</th>
+          <th class="col-discord">Discord ID</th>
           <th>الاسم</th>
           <th>الكود</th>
           <th>الرتبة</th>
@@ -2265,7 +2271,7 @@
         const headerStyle = promoFilterOnly ? 'color: #f0cb52 !important;' : '';
         thead.innerHTML = `
         <tr>
-          <th rowspan="2">Discord ID</th>
+          <th rowspan="2" class="col-discord" style="${headerStyle}">Discord ID</th>
           <th rowspan="2">الاسم</th>
           <th rowspan="2">الكود</th>
           <th rowspan="2">الرتبة</th>
@@ -2787,9 +2793,9 @@
           const m = r.discord.match(/\d{17,20}/);
           discordId = m ? m[0] : r.discord.trim();
         }
-        if (!discordId) return '<td><span style="color: rgba(255,255,255,0.2)">—</span></td>';
+        if (!discordId) return '<td class="col-discord"><span style="color: rgba(255,255,255,0.2)">—</span></td>';
         return `
-        <td>
+        <td class="col-discord">
           <div style="display: flex; align-items: center; gap: 6px; font-family: monospace; font-size: 0.82rem; color: rgba(255,255,255,0.7);">
             <span>${discordId}</span>
             <button onclick="event.stopPropagation(); navigator.clipboard.writeText('${discordId}'); App.toast('تم نسخ المعرف بنجاح', 'success');" style="background: none; border: none; color: var(--color-gold-primary); cursor: pointer; padding: 2px 4px; font-size: 0.8rem; display: inline-flex; align-items: center; justify-content: center; opacity: 0.6; transition: opacity 0.2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.6" title="نسخ المعرف">
