@@ -768,12 +768,14 @@
                 <th>اسم المتقدم الميداني</th>
                 <th>الديسكورد</th>
                 <th>القطاع المطلوب</th>
+                <th>إثبات الخبرة</th>
                 <th>درجة الاختبار</th>
                 <th>النتيجة</th>
                 <th>حالة الطلب</th>
                 <th>القرار / الإجراءات</th>
               </tr>
             </thead>
+
             <tbody id="table-body-recruitment">
               <!-- Rendered via JS -->
             </tbody>
@@ -2010,6 +2012,16 @@
         </button>
       `;
       
+      // Experience image preview column
+      let expImageHtml = '<span style="color:var(--color-text-muted);">لا توجد</span>';
+      if (item.experienceImage) {
+        expImageHtml = `
+          <button class="btn-action primary" onclick="viewExperienceImage('${item.id}')" style="padding:4px 8px; font-size:0.75rem; border-radius:6px; background:rgba(201,162,39,0.12); border-color:rgba(201,162,39,0.3); color:var(--color-gold-primary);">
+            <i class="fa-solid fa-image"></i> عرض الصورة
+          </button>
+        `;
+      }
+
       const formattedDate = App.formatDate ? App.formatDate(item.createdAt, 'datetime') : item.createdAt.replace('T', ' ').substring(0, 16);
       
       tr.innerHTML = `
@@ -2017,6 +2029,7 @@
         <td><strong>${item.fullName}</strong></td>
         <td><code style="background:rgba(255,255,255,0.05); padding:3px 6px; border-radius:4px;">${item.discordId}</code></td>
         <td>${item.sector}</td>
+        <td>${expImageHtml}</td>
         <td><span style="font-weight:700;">${item.examScore}</span> / ${item.examTotal || 15}</td>
         <td>${resultBadge}</td>
         <td>${statusBadge}</td>
@@ -2025,6 +2038,34 @@
       tbody.appendChild(tr);
     });
   }
+
+  window.viewExperienceImage = function(id) {
+    const list = Storage.getCollection('ps_applications') || [];
+    const item = list.find(x => x.id === id);
+    if (!item || !item.experienceImage) {
+      App.toast('لا توجد صورة خبرة مرفقة لهذا المتقدم', 'warning');
+      return;
+    }
+    
+    // Create dynamically a premium modal overlay
+    const modalHtml = `
+      <div id="exp-img-modal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(5,9,30,0.85); backdrop-filter:blur(15px); z-index:99999; display:flex; align-items:center; justify-content:center; padding:20px; transition:all 0.3s ease;">
+        <div style="background:var(--color-bg-secondary); border:1px solid rgba(255,255,255,0.08); border-radius:18px; max-width:700px; width:100%; padding:20px; position:relative; box-shadow:0 15px 40px rgba(0,0,0,0.5); text-align:right;" dir="rtl">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:10px;">
+            <h3 style="color:#fff; margin:0; font-weight:800; font-size:1.1rem; font-family:'Tajawal',sans-serif;">📷 إثبات الخبرة داخل المدينة للمتقدم: ${item.fullName}</h3>
+            <button onclick="document.getElementById('exp-img-modal').remove()" style="background:none; border:none; color:var(--color-text-secondary); font-size:1.6rem; cursor:pointer; font-weight:bold;">&times;</button>
+          </div>
+          <div style="text-align:center; overflow:auto; max-height:500px;">
+            <img src="${item.experienceImage}" style="max-width:100%; border-radius:8px; border:1px solid rgba(255,255,255,0.15);" alt="صورة الخبرة">
+          </div>
+        </div>
+      </div>
+    `;
+    const div = document.createElement('div');
+    div.innerHTML = modalHtml;
+    document.body.appendChild(div.firstElementChild);
+  };
+
 
   window.grantApplicationRetake = async function(candidateName, discordId, prevScore) {
     const user = Auth.getCurrentUser();

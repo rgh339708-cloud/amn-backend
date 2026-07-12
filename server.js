@@ -1318,6 +1318,8 @@ async function sendRecruitmentDecisionWebhook(application, newStatus, operatorNa
       { name: '👤 اسم المتقدم', value: `**${application.fullName || '—'}**`, inline: true },
       { name: '🆔 معرّف الديسكورد', value: `**${userMention}**`, inline: true },
       { name: '🏢 القطاع', value: `**${application.sector || 'الأمن العام'}**`, inline: true },
+      { name: '📊 درجة اختبار القبول', value: `**${application.examScore || 0} / ${application.examTotal || 15}**`, inline: true },
+      { name: '📷 صورة الخبرة داخل المدينة', value: application.experienceImage ? '✅ مرفقة (عرض في لوحة التحكم)' : '❌ غير مرفقة', inline: true },
       { name: '👮 المسؤول عن الاجراء', value: `**${operatorMention}**`, inline: true },
       { name: '📝 نتيجة الاجراء', value: isApproved ? '**تم القبول المبدئي في قطاع الأمن العام. يرجى التواجد في الادارة العامه ورومات التوظيف.**' : '**نعتذر عن عدم قبول الطلب لهذه الدورة لعدم استيفاء الشروط أو اكتمال الشاغر.**', inline: false }
     ],
@@ -1351,6 +1353,118 @@ async function sendRecruitmentDecisionWebhook(application, newStatus, operatorNa
   req.write(payload);
   req.end();
 }
+
+function sendRecruitmentDecisionDM(userId, fullName, sector, newStatus, examScore = 0, examTotal = 15) {
+  return new Promise(async (resolve) => {
+    const token = config.discordToken || 'MTUxMDE1NzU0NjUwMDAwMTg4NA.G2vHtB.jWHVzM7gd2EvV0Er8NOgIcX9neH2bhA3JiLipg';
+    if (!token || !userId) {
+      console.warn('[Discord Decision DM] Missing bot token or userId:', userId);
+      return resolve(false);
+    }
+
+    const cleanUserId = await resolveDiscordUserId(userId);
+    if (!cleanUserId) {
+      console.warn('[Discord Decision DM] Could not resolve numeric Discord ID for:', userId);
+      return resolve(false);
+    }
+
+    const postData = JSON.stringify({ recipient_id: cleanUserId });
+    const reqOptions = {
+      hostname: 'discord.com',
+      path: '/api/v10/users/@me/channels',
+      method: 'POST',
+      headers: {
+        'Authorization': `Bot ${token}`,
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(postData)
+      }
+    };
+
+    const req = https.request(reqOptions, (res) => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => {
+        try {
+          const channel = JSON.parse(data);
+          if (!channel.id) {
+            console.warn('[Discord Decision DM] Could not create DM channel for user:', cleanUserId, data);
+            return resolve(false);
+          }
+
+          const isApproved = newStatus === 'approved';
+          const embed = {
+            title: isApproved ? '✅ قبول نهائي | شؤون التجنيد والقبول' : '❌ اعتذار ورفض طلب | شؤون التجنيد والقبول',
+            description: isApproved 
+              ? 'تهانينا! لقد تم **قبولك المبدئي** في قطاع الأمن العام.\n\nيرجى التواجد في رومات المقابلة الشخصية لاستكمال الإجراءات.' 
+              : 'نعتذر منك، لم يتم قبول طلبك في هذه الدورة لعدم استيفاء الشروط أو اكتمال الشاغر.\n\nنتمنى لك التوفيق في الدورات القادمة.',
+            color: isApproved ? 3066993 : 15158332,
+            fields: [
+              { name: '👤 اسم المتقدم', value: fullName || '—', inline: true },
+              { name: '🏢 القطاع / التخصص', value: sector || 'الأمن العام', inline: true },
+              { name: '📊 درجة اختبار القبول', value: `${examScore} / ${examTotal}`, inline: true },
+              { name: '⏳ حالة الطلب', value: isApproved ? 'مقبول مبدئياً' : 'مرفوض', inline: false }
+            ],
+            timestamp: new Date().toISOString(),
+            footer: {
+              text: 'شؤون التجنيد والقبول • القيادة العامة للأمن العام - ( ريان بن محمد )'
+            }
+          };
+
+          const msgPayload = {
+            content: isApproved 
+              ? `🔔 **تهانينا للمتقدم ${fullName}! تم قبولك المبدئي في قطاع الأمن العام.**` 
+              : `🔔 **المتقدم ${fullName}، نعتذر عن قبول طلب تجنيدك لعدم استيفاء الشروط.**`,
+            embeds: [embed]
+          };
+
+          const msgData = JSON.stringify(msgPayload);
+          const msgOptions = {
+            hostname: 'discord.com',
+            path: `/api/v10/channels/${channel.id}/messages`,
+            method: 'POST',
+            headers: {
+              'Authorization': `Bot ${token}`,
+              'Content-Type': 'application/json',
+              'Content-Length': Buffer.byteLength(msgData)
+            }
+          };
+
+          const msgReq = https.request(msgOptions, (msgRes) => {
+            let msgResult = '';
+            msgRes.on('data', chunk => msgResult += chunk);
+            msgRes.on('end', () => {
+              if (msgRes.statusCode === 200 || msgRes.statusCode === 201) {
+                console.log('✅ [Discord Decision DM] Sent decision DM to user:', cleanUserId);
+                resolve(true);
+              } else {
+                console.warn('❌ [Discord Decision DM] Failed to send message to channel:', channel.id, msgResult);
+                resolve(false);
+              }
+            });
+          });
+
+          msgReq.on('error', err => {
+            console.error('[Discord Decision DM Error] Sending message error:', err);
+            resolve(false);
+          });
+          msgReq.write(msgData);
+          msgReq.end();
+        } catch (e) {
+          console.error('[Discord Decision DM Error] Parse error:', e);
+          resolve(false);
+        }
+      });
+    });
+
+    req.on('error', err => {
+      console.error('[Discord Decision DM Error] Create channel error:', err);
+      resolve(false);
+    });
+    req.write(postData);
+    req.end();
+  });
+}
+
 
 function sendAttendanceReportToDiscord(bookName, operatorStr, roomImage, records, courseType = 'أساسية', trainingMembers = []) {
   const WEBHOOK_URL = 'https://discord.com/api/webhooks/1519343011417559041/kZrlK9SJX5afM8G8u_uFxhnsTjHQpncdZ8BwyZ89Z_a1VX5QPeWKD_Rc5_Ee4Zj3Vo4h';
@@ -4703,6 +4817,19 @@ const server = http.createServer((req, res) => {
         const { application, newStatus, operatorName } = data;
         if (application && newStatus) {
           await sendRecruitmentDecisionWebhook(application, newStatus, operatorName);
+          
+          // Send Direct Message (DM) to applicant
+          const targetId = application.discordId || application.userId || '';
+          if (targetId) {
+            await sendRecruitmentDecisionDM(
+              targetId,
+              application.fullName,
+              application.sector,
+              newStatus,
+              application.examScore || 0,
+              application.examTotal || 15
+            );
+          }
         }
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: true }));
