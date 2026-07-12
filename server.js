@@ -1981,6 +1981,7 @@ if (isPostgresUrl) {
 } else if (isMysql) {
   console.log('🔌 Cloud database mode: Connecting to MySQL...');
   const mysql = require('mysql2');
+  const dns = require('dns');
   
   mysqlPool = mysql.createPool({
     host: MYSQL_HOST,
@@ -1989,6 +1990,9 @@ if (isPostgresUrl) {
     database: MYSQL_DATABASE,
     port: MYSQL_PORT,
     charset: 'utf8mb4',
+    lookup: (hostname, options, cb) => {
+      dns.lookup(hostname, { family: 4 }, cb);
+    },
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0
