@@ -1027,9 +1027,6 @@
         <button class="btn-refresh" id="btn-refresh-sheets" onclick="fetchSpreadsheetData(true)">
           <span class="icon-spin"><i class="fa-solid fa-arrows-rotate"></i></span> مزامنة قاعدة البيانات الحية
         </button>
-        <button class="btn-refresh" id="btn-clear-cache" onclick="clearAndReloadCache()" style="background: linear-gradient(135deg, rgba(231,76,60,0.18), rgba(192,57,43,0.12)); border-color: rgba(231,76,60,0.4); color: #e74c3c;" title="امسح الكاش القديم وأعد تحميل البيانات من السيرفر">
-          <i class="fa-solid fa-trash-can"></i> مسح الكاش
-        </button>
       </div>
 
       <!-- Table -->
@@ -2401,48 +2398,9 @@
       return rowsHTML;
     }
 
-    // Clears the cached sheets data from localStorage and reloads from backend server
-    async function clearAndReloadCache() {
-      const btn = document.getElementById('btn-clear-cache');
-      if (btn) {
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري المسح...';
-      }
-
-      // Clear all cache keys
-      localStorage.removeItem('members_google_sheets_cache');
-      localStorage.removeItem('members_cache_last_fetch');
-      cachedSheets = {};
-      allMembers = [];
-
-      // Show skeleton while loading
-      const tbody = document.getElementById('db-tbody');
-      if (tbody) tbody.innerHTML = getTableSkeletonHTML(currentTab);
-
-      // Re-fetch from backend
-      const loaded = await loadStaticCacheFromServer();
-
-      if (btn) {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-trash-can"></i> مسح الكاش';
-      }
-
-      if (loaded) {
-        App.toast('✅ تم مسح الكاش وتحميل البيانات الجديدة من السيرفر!', 'success');
-        // Re-render with freshly loaded data
-        if (cachedSheets[currentTab]) {
-          allMembers = cachedSheets[currentTab];
-          updateStatsAndTable();
-        }
-      } else {
-        App.toast('⚠️ لم يتم تحميل بيانات جديدة من السيرفر. تأكد من اتصال الإنترنت.', 'warning');
-      }
-    }
-
     // Fetches Gviz JSONP data from Google Sheets API
     async function fetchSpreadsheetData(forceRefresh = false, isSilent = false) {
       const refreshBtn = document.getElementById('btn-refresh-sheets');
-
 
       // Check local storage cache first
       if (!forceRefresh) {
@@ -2490,6 +2448,22 @@
             }
           } catch (err) {
             logDiag(`خطأ أثناء معالجة وعرض بيانات الكاش: ${err.message}`);
+          }
+        }
+      } else {
+        // Clear cached sheets from localStorage to force-refresh and remove stale "ghost" members
+        logDiag('[fetchSpreadsheetData] Force refresh requested. Clearing local cache first...');
+        localStorage.removeItem('members_google_sheets_cache');
+        localStorage.removeItem('members_cache_last_fetch');
+        cachedSheets = {};
+        allMembers = [];
+
+        if (!isSilent) {
+          logDiag('[fetchSpreadsheetData] Fetching fresh cache file from the backend server...');
+          await loadStaticCacheFromServer();
+          if (cachedSheets[currentTab]) {
+            allMembers = cachedSheets[currentTab];
+            updateStatsAndTable();
           }
         }
       }
@@ -2579,7 +2553,8 @@
         logDiag(`خطأ في طلب المزامنة مع Google Sheets: ${err.message}`);
         console.error('Failed to fetch spreadsheet data:', err);
 
-        const isDbClosed = (failedTabsCount === SHEET_TABS.length || err.message.includes('failed to load') || err.message.includes('Timeout') || err.message.includes('All sheet tabs failed'));
+        const hasCachedData = cachedSheets && Array.isArray(cachedSheets['جدول الامن العام - الاساسي']) && cachedSheets['جدول الامن العام - الاساسي'].length > 0;
+        const isDbClosed = (failedTabsCount === SHEET_TABS.length || err.message.includes('failed to load') || err.message.includes('Timeout') || err.message.includes('All sheet tabs failed')) && !hasCachedData;
 
         if (isDbClosed) {
           logDiag('قاعدة البيانات مغلقة. عرض شاشة القفل للجميع.');
@@ -2614,6 +2589,7 @@
         }
       }
     }
+
 
     function showDatabaseClosedMessage() {
       const wrapper = document.querySelector('.page-wrapper');
