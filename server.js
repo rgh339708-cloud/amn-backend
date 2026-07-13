@@ -6273,8 +6273,8 @@ const server = http.createServer((req, res) => {
         db.get('SELECT role, display_name, username FROM users WHERE id = ?', [operator_id], (err, opUser) => {
           if (err) {
             console.error('❌ Error verifying operator role:', err);
-            res.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8' });
-            res.end(JSON.stringify({ error: 'خطأ في التحقق من صلاحية المسؤول: ' + err.message }));
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'خطأ في التحقق من صلاحية المسؤول.' }));
             return;
           }
           
