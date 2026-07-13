@@ -746,7 +746,7 @@ async function initializeMysqlSchema(pool) {
     book_name VARCHAR(255),
     status VARCHAR(255) DEFAULT 'closed',
     updated_by VARCHAR(255),
-    room_image VARCHAR(255),
+    room_image LONGTEXT,
     course_type VARCHAR(255) DEFAULT 'أساسية',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
   )`);
@@ -820,6 +820,9 @@ async function initializeMysqlSchema(pool) {
   } catch(e) {}
   try {
     await queryAsync(`ALTER TABLE attendance_books ADD COLUMN course_type VARCHAR(255) DEFAULT 'أساسية'`);
+  } catch(e) {}
+  try {
+    await queryAsync(`ALTER TABLE attendance_books MODIFY COLUMN room_image LONGTEXT`);
   } catch(e) {}
   try {
     await queryAsync(`ALTER TABLE exam_violations MODIFY COLUMN violation_time VARCHAR(255)`);
@@ -4147,7 +4150,7 @@ const server = http.createServer((req, res) => {
           const userRoleLabel = user ? (userRole === 'owner' ? 'المشرف العام' : userRole === 'assistant_owner' ? 'قيادة الامن العام' : userRole === 'academy_affairs' ? 'رئاسة تدريب الامن العام' : userRole === 'admin' ? 'شؤون أكاديمية التدريب' : 'مسؤول دورة') : 'مسؤول دورة';
 
           // Get book name and current status
-          db.get('SELECT book_name, status, room_image FROM attendance_books WHERE book_id = ?', [book_id], (errBook, book) => {
+          db.get('SELECT book_name, status, room_image, course_type FROM attendance_books WHERE book_id = ?', [book_id], (errBook, book) => {
             if (errBook || !book) {
               res.writeHead(500, { 'Content-Type': 'application/json' });
               res.end(JSON.stringify({ error: 'Book not found' }));
@@ -4156,10 +4159,38 @@ const server = http.createServer((req, res) => {
 
             const bookName = book.book_name;
             const currentStatus = book.status || 'closed';
-            const bookRoomImage = book.room_image || null;
             const bookCourseType = course_type || book.course_type || 'أساسية';
 
+            let savedRoomImageUrl = room_image || book.room_image || null;
 
+            // Handle base64 image saving in backend if status is open
+            if (status === 'open' && room_image && room_image.startsWith('data:image/')) {
+              try {
+                const matches = room_image.match(/^data:image\/([A-Za-z0-9]+);base64,/);
+                let extension = 'jpg';
+                if (matches && matches[1]) {
+                  extension = matches[1] === 'jpeg' ? 'jpg' : matches[1];
+                }
+                const base64Data = room_image.replace(/^data:image\/[A-Za-z0-9]+;base64,/, "");
+                const buffer = Buffer.from(base64Data, 'base64');
+                const uploadsDir = path.join(PUBLIC_DIR, 'assets', 'img', 'uploads');
+                if (!fs.existsSync(uploadsDir)) {
+                  fs.mkdirSync(uploadsDir, { recursive: true });
+                }
+                const filename = `room_${book_id}_${Date.now()}.${extension}`;
+                const filePath = path.join(uploadsDir, filename);
+                fs.writeFileSync(filePath, buffer);
+
+                const protocol = (req.headers['x-forwarded-proto'] || 'http') + '://';
+                const host = req.headers.host || 'localhost:3000';
+                savedRoomImageUrl = `${protocol}${host}/assets/img/uploads/${filename}`;
+                console.log(`[Upload Success] Saved base64 image locally. URL: ${savedRoomImageUrl}`);
+              } catch (uploadErr) {
+                console.error('[Upload Error] Failed to save base64 image:', uploadErr);
+              }
+            }
+
+            const bookRoomImage = savedRoomImageUrl;
 
             const actionLabel = status === 'open' ? 'فتح التحضير' : (status === 'report_sent' ? 'إرسال التقرير' : 'إغلاق التحضير');
             const operatorStr = `${userName} (${userRoleLabel})`;
@@ -4169,7 +4200,7 @@ const server = http.createServer((req, res) => {
 
             if (status === 'open') {
               query = `UPDATE attendance_books SET status = ?, updated_by = ?, room_image = ?, course_type = ?, updated_at = datetime('now') WHERE book_id = ?`;
-              params = [status, operatorStr, room_image || null, bookCourseType, book_id];
+              params = [status, operatorStr, savedRoomImageUrl, bookCourseType, book_id];
             }
 
             db.run(query, params, (updateErr) => {
