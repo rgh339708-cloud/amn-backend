@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>بوابة التجنيد والقبول | الأمن العام</title>
   
-  <link rel="stylesheet" href="../assets/css/main.css?v=1.3.0">
-  <link rel="stylesheet" href="../assets/css/navbar.css?v=1.3.0">
-  <link rel="stylesheet" href="../assets/css/sidebar.css?v=1.3.0">
+  <link rel="stylesheet" href="../assets/css/main.css?v=1.4.0">
+  <link rel="stylesheet" href="../assets/css/navbar.css?v=1.4.0">
+  <link rel="stylesheet" href="../assets/css/sidebar.css?v=1.4.0">
   <link rel="stylesheet" href="../assets/css/footer.css">
   <link rel="stylesheet" href="../assets/css/forms.css">
   
@@ -561,11 +561,11 @@
   </div>
 </div>
 
-<script src="../assets/js/storage.js?v=1.3.0"></script>
-<script src="../assets/js/data.js?v=1.3.0"></script>
-<script src="../assets/js/auth.js?v=1.3.0"></script>
-<script src="../assets/js/components.js?v=1.3.0"></script>
-<script src="../assets/js/app.js?v=1.3.0"></script>
+<script src="../assets/js/storage.js?v=1.4.0"></script>
+<script src="../assets/js/data.js?v=1.4.0"></script>
+<script src="../assets/js/auth.js?v=1.4.0"></script>
+<script src="../assets/js/components.js?v=1.4.0"></script>
+<script src="../assets/js/app.js?v=1.4.0"></script>
 <script>
   // Write layout elements dynamically
   document.write(Components.navbar('amn12'));
@@ -622,8 +622,12 @@
 
       const tableInfo = Auth.resolveUserTableInfo(currentUser) || {};
       
-      // If found in sheets and NOT owner, block from applying
-      if (tableInfo.found && currentUser.role !== 'owner') {
+      // Only block users found in the main Public Security tables (الأساسي, المعتمدين, الإدارة)
+      const inMainSecurityTables = tableInfo.tables && tableInfo.tables.some(t => 
+        ['الأساسي', 'المعتمدين', 'الإدارة', 'جدول الامن العام - الاساسي', 'جدول الامن العام - المنتدبين', 'جدول الامن العام - الادارة'].includes(t)
+      );
+      
+      if (inMainSecurityTables && currentUser.role !== 'owner') {
         const applyContainer = document.querySelector('.apply-container');
         if (applyContainer) {
           applyContainer.innerHTML = `
