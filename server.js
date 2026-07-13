@@ -2527,7 +2527,6 @@ function executeBulkSync(tableName, primaryKey, itemsToSave, callback) {
   }
 }
 
-}
 
 
 
