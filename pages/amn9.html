@@ -1772,8 +1772,8 @@
 
       panel.style.display = 'block';
 
-      // Hide permissions tab for academy_affairs and course_admin
-      const isRestrictedPermissionRole = roleInfo && (userRole === 'academy_affairs' || userRole === 'course_admin' || (roleInfo.label && (roleInfo.label.includes('شؤون أكاديمية') || roleInfo.label.includes('مسؤول دورة'))));
+      // Hide permissions tab for course_admin only - academy_affairs now has full access
+      const isRestrictedPermissionRole = roleInfo && (userRole === 'course_admin' || (roleInfo.label && roleInfo.label.includes('مسؤول دورة')));
       const qreqsTabBtn = document.getElementById('btn-tab-qbank-reqs');
       if (qreqsTabBtn) {
         if (isRestrictedPermissionRole) {

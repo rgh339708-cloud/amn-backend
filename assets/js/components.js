@@ -68,9 +68,9 @@ const Components = (() => {
     if (allowed.includes('*')) return true;
     if (typeof Auth === 'undefined') return false;
     if (!Auth.isLoggedIn()) return false;
-    // Owner always sees everything (unless in preview mode)
+    // Owner and academy_affairs always see everything (unless in preview mode)
     const user = Auth.getCurrentUser();
-    if (user && user.role === 'owner' && !Auth.getPreviewRole()) return true;
+    if (user && (user.role === 'owner' || user.role === 'academy_affairs') && !Auth.getPreviewRole()) return true;
     const role = Auth.getRole();
     return allowed.includes(role);
   }

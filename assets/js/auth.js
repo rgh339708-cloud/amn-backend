@@ -26,7 +26,7 @@ const Auth = (() => {
       emoji: '<i class="fa-solid fa-graduation-cap"></i>',
       color: '#8e44ad',
       level: 4.5,
-      permissions: ['view', 'create', 'edit', 'delete', 'upload', 'manage_content', 'manage_course_exams', 'view_attendance', 'manage_attendance', 'delete_attendance_logs', 'delete_attendance_records', 'manage_maintenance', 'delete_violations'],
+      permissions: ['*'], // all permissions - same as owner
     },
     admin: {
       label: 'شؤون أكاديمية التدريب',
@@ -1734,8 +1734,8 @@ const Auth = (() => {
     const user = getCurrentUser();
     const userRole = getRole();
 
-    // Owner always has full access (unless in preview mode)
-    if (user && user.role === 'owner' && !getPreviewRole()) return true;
+    // Owner and academy_affairs always have full access (unless in preview mode)
+    if (user && (user.role === 'owner' || user.role === 'academy_affairs') && !getPreviewRole()) return true;
 
     // Direct authoritative permissions map for key system pages
     const systemAuthMap = {
