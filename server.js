@@ -3378,9 +3378,115 @@ function syncGoogleSheetsToDb(forceId = null, loginUser = null) {
     }
 
     console.log('[Sync] Background synchronization successfully completed.');
+    // After syncing users to DB, also update the members_google_sheets_cache.json
+    // so that amn13.html and amn15.html always show fresh data
+    if (!forceId) {
+      syncMembersCacheFile().catch(e => console.warn('[Sync] Cache file update failed:', e.message));
+    }
     resolve({ success: true });
   });
 }
+
+// Fetches all sheet tabs and saves a full structured cache to members_google_sheets_cache.json
+async function syncMembersCacheFile() {
+  const config = loadConfig();
+  if (!config.spreadsheetId) return;
+
+  const ALL_TABS = [
+    "جدول الامن العام - الاساسي",
+    "جدول الامن العام - الادارة",
+    "جدول الامن العام - المنتدبين",
+    "نظام الترقيات ⭐️جديد",
+    "الترقيات المسرعة ",
+    "الإستقالات 🎯",
+    " جدول الغرامات 💵",
+    "جدول الادارة العامة لشؤون الادارية والمالية",
+    "جدول الإدارة العامه لشؤون تدريب الامن العام",
+    " جدول الادارة العامه لشؤون التجنيد",
+    "الادارة العامة لشؤون العسكرية"
+  ];
+
+  const cache = {};
+  let successCount = 0;
+
+  for (const tabName of ALL_TABS) {
+    try {
+      const { headers, rows } = await fetchPublicSheetRows(config.spreadsheetId, tabName);
+      const cleanHeaders = headers.map(h => (h || '').trim().toLowerCase());
+
+      // Build a full-row object for each member
+      const members = [];
+      for (const r of rows) {
+        const entry = {};
+        headers.forEach((h, i) => {
+          entry[h || `col_${i}`] = r[i] || '';
+        });
+
+        // Parse key fields using flexible header matching
+        const getVal = (keywords) => {
+          const idx = cleanHeaders.findIndex(h => keywords.some(k => h.includes(k)));
+          return idx !== -1 ? (r[idx] || '') : '';
+        };
+
+        const name = getVal(['الاسم', 'اسم العسكري']);
+        if (!name || name === 'الاسم' || name.includes('الاسم')) continue;
+
+        const discord = getVal(['id discord', 'ديسكورد', 'دسكورد', 'التعريف']);
+        const badge = getVal(['الكود', 'كود']).replace(/[\[\]]/g, '').trim();
+        const rank = getVal(['الرتبة', 'رتبة']);
+        const status = getVal(['الحالة', 'الوضع', 'حالة الموظف']);
+        const position = getVal(['المنصب', 'المهام القياديه', 'المهام القيادية', 'المسؤولية']);
+        const notes = getVal(['ملاحظات', 'الملاحظات']);
+
+        const member = { name, discord, badge, rank, status: status || 'بالخدمة', position: position || '', notes: notes || '—', courses: [], regularCourses: [] };
+
+        // Extra fields for training tab
+        if (tabName === 'جدول الإدارة العامه لشؤون تدريب الامن العام') {
+          member.salary = getVal(['الراتب الاجمالي', 'الراتب الإجمالي', 'راتب']) || '—';
+          member.deduction = getVal(['الاستقطاع', 'استقطاع']) || '—';
+          member.netSalary = getVal(['الصافي', 'راتب صافي', 'الراتب الصافي']) || '—';
+          member.joinDate = '—';
+          member.badgeDegree = '—';
+        }
+
+        // Extra fields for resignation tab
+        if (tabName === 'الإستقالات 🎯') {
+          member.joinDate = getVal(['تاريخ الاستقالة', 'تاريخ']) || '—';
+          member.badgeDegree = '—';
+        }
+
+        // Extra fields for main tabs
+        if (['جدول الامن العام - الاساسي', 'جدول الامن العام - الادارة', 'جدول الامن العام - المنتدبين'].includes(tabName)) {
+          const courseStr = getVal(['الدورات', 'دورات']);
+          member.courses = courseStr ? courseStr.split(/[\|,،]/).map(c => c.trim()).filter(Boolean) : [];
+          member.joinDate = getVal(['تاريخ الانضمام', 'التاريخ', 'تاريخ']) || '—';
+          member.badgeDegree = getVal(['درجة استحقاق', 'الانواط', 'الأنواط']) || 'لا يوجد انذارات';
+        }
+
+        members.push(member);
+      }
+
+      cache[tabName] = members;
+      successCount++;
+      console.log(`[CacheSync] ✓ ${tabName}: ${members.length} entries`);
+    } catch (err) {
+      console.warn(`[CacheSync] ✗ Failed to fetch tab "${tabName}": ${err.message}`);
+    }
+  }
+
+  if (successCount > 0) {
+    const cacheFilePath = path.join(PUBLIC_DIR, 'assets', 'data', 'members_google_sheets_cache.json');
+    fs.writeFile(cacheFilePath, JSON.stringify(cache, null, 2), 'utf8', (err) => {
+      if (err) {
+        console.error('[CacheSync] Failed to write members_google_sheets_cache.json:', err);
+      } else {
+        console.log(`[CacheSync] ✓ members_google_sheets_cache.json updated successfully (${successCount}/${ALL_TABS.length} tabs).`);
+      }
+    });
+  }
+}
+
+
 
 const MIME_TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -6760,6 +6866,19 @@ server.listen(PORT, '0.0.0.0', () => {
       console.error('[Sync Error] Periodic background sync failed:', err);
     });
   }, 5 * 60 * 1000);
+
+  // Also sync the full sheets cache file directly (independent of syncGoogleSheetsToDb)
+  setTimeout(() => {
+    syncMembersCacheFile().catch(err => {
+      console.error('[CacheSync Error] Initial cache file sync failed:', err);
+    });
+  }, 15000); // 15 seconds after startup
+
+  setInterval(() => {
+    syncMembersCacheFile().catch(err => {
+      console.error('[CacheSync Error] Periodic cache file sync failed:', err);
+    });
+  }, 5 * 60 * 1000); // Every 5 minutes
 
   // Start background Discord User Profile synchronization:
   // First sync after 20 seconds of startup, then every 6 hours.

@@ -1515,14 +1515,27 @@ const Auth = (() => {
   if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
     const cachedData = localStorage.getItem('members_google_sheets_cache');
     if (!cachedData) {
-      let prefix = '';
-      const path = window.location.pathname;
-      if (path.includes('/pages/admin/')) {
-        prefix = '../../';
-      } else if (path.includes('/pages/')) {
-        prefix = '../';
-      }
-      const jsonPath = prefix + 'assets/data/members_google_sheets_cache.json';
+      // Use getBackendUrl() to always point to the Render/Railway server where the cache is fresh
+      const backendUrl = typeof Auth !== 'undefined' && typeof Auth.getBackendUrl === 'function'
+        ? Auth.getBackendUrl()
+        : (() => {
+            try {
+              const settings = JSON.parse(localStorage.getItem('ps_settings') || '{}');
+              return (settings && settings.backendUrl && !settings.backendUrl.includes('localhost'))
+                ? settings.backendUrl
+                : 'https://amn-backend-production.up.railway.app';
+            } catch (e) {
+              return 'https://amn-backend-production.up.railway.app';
+            }
+          })();
+
+      const jsonPath = (backendUrl && !backendUrl.includes('localhost'))
+        ? `${backendUrl}/assets/data/members_google_sheets_cache.json`
+        : (() => {
+            const path = window.location.pathname;
+            const prefix = path.includes('/pages/admin/') ? '../../' : (path.includes('/pages/') ? '../' : '');
+            return prefix + 'assets/data/members_google_sheets_cache.json';
+          })();
       
       fetch(`${jsonPath}?t=${Date.now()}`)
         .then(res => {
@@ -1539,6 +1552,34 @@ const Auth = (() => {
         .catch(err => {
           console.error('[Auth] Failed to pre-load sheets cache from server:', err);
         });
+    }
+
+    // Refresh cache in background if older than 60 minutes (even if it exists)
+    const lastCacheFetch = parseInt(localStorage.getItem('members_cache_last_fetch') || '0');
+    const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
+    if (Date.now() - lastCacheFetch > CACHE_TTL_MS) {
+      localStorage.setItem('members_cache_last_fetch', String(Date.now()));
+      try {
+        const backendUrl = (() => {
+          try {
+            const settings = JSON.parse(localStorage.getItem('ps_settings') || '{}');
+            return (settings && settings.backendUrl && !settings.backendUrl.includes('localhost'))
+              ? settings.backendUrl
+              : 'https://amn-backend-production.up.railway.app';
+          } catch (e) {
+            return 'https://amn-backend-production.up.railway.app';
+          }
+        })();
+        fetch(`${backendUrl}/assets/data/members_google_sheets_cache.json?t=${Date.now()}`)
+          .then(r => r.ok ? r.json() : null)
+          .then(data => {
+            if (data && typeof data === 'object' && Object.keys(data).length > 0) {
+              localStorage.setItem('members_google_sheets_cache', JSON.stringify(data));
+              console.log('[Auth] Background cache refresh successful.');
+            }
+          })
+          .catch(() => {});
+      } catch (e) {}
     }
   }
 
