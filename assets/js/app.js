@@ -2435,15 +2435,6 @@ const App = (() => {
 
   async function syncSettingsWithServer() {
     try {
-      // Always try backendUrl first for real-time openExams state
-      let backendUrlDirect = '';
-      try {
-        const cachedSettings = Storage.get(Storage.keys.SETTINGS, {});
-        if (cachedSettings && cachedSettings.backendUrl) {
-          backendUrlDirect = cachedSettings.backendUrl;
-        }
-      } catch(e) {}
-
       const apiUrl = getSettingsApiUrl();
       let res;
       let isStaticHosting = false;
@@ -2459,25 +2450,6 @@ const App = (() => {
         const ROOT = getRootPath();
         res = await fetchWithTimeout(`${ROOT}assets/data/settings.json?t=${Date.now()}`);
         isStaticHosting = true;
-
-        // If we fell back to static, also try backendUrl directly for openExams
-        if (backendUrlDirect && res && res.ok) {
-          try {
-            const backendRes = await fetchWithTimeout(`${backendUrlDirect}/api/settings`);
-            if (backendRes && backendRes.ok) {
-              const backendData = await backendRes.json();
-              if (backendData && backendData.openExams) {
-                // Merge openExams from live backend into static result
-                const staticData = await res.clone().json().catch(() => ({}));
-                Object.assign(staticData, { openExams: backendData.openExams });
-                // Override res with merged data
-                res = new Response(JSON.stringify(staticData), { status: 200, headers: { 'Content-Type': 'application/json' } });
-              }
-            }
-          } catch(backendErr) {
-            console.warn('[Sync] Backend direct fetch failed:', backendErr);
-          }
-        }
       }
       if (res.ok) {
         let serverSettings = null;
@@ -2505,27 +2477,6 @@ const App = (() => {
             const role = Auth.getRole();
             if (['owner', 'assistant_owner', 'admin'].includes(role)) {
               shouldMerge = false;
-            }
-          }
-
-          // Apply openExams ONLY from live backend — never from the static settings.json file.
-          // If we fell back to static hosting, the openExams value there is stale and must not
-          // overwrite the real-time state managed by the backend.
-          if (!isStaticHosting && serverSettings.openExams && typeof serverSettings.openExams === 'object') {
-            const exams = Storage.getCollection(Storage.keys.EXAMS) || [];
-            let examsUpdated = false;
-            exams.forEach(e => {
-              const serverState = serverSettings.openExams[e.id];
-              if (serverState !== undefined && e.isOpen !== serverState) {
-                e.isOpen = serverState;
-                examsUpdated = true;
-              }
-            });
-            if (examsUpdated) {
-              Storage.set(Storage.keys.EXAMS, exams);
-              if (typeof checkActiveExamDocumentLock === 'function') {
-                checkActiveExamDocumentLock();
-              }
             }
           }
 

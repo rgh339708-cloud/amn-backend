@@ -1542,38 +1542,13 @@
       // Check if current document is locked due to active exam
       checkActiveExamDocumentLock();
 
-      // Listen to storage changes for exams and settings to sync in real-time across tabs
+      // Listen to storage changes for exams to sync in real-time across tabs
       window.addEventListener('storage', (e) => {
         if (e.key === 'ps_exams') {
           checkActiveExamDocumentLock();
           // Also refresh exam UI for all tabs
           renderExamsMgmtTable();
           renderExamsList();
-        }
-        // When settings (including openExams) change, update local state immediately
-        if (e.key === 'ps_settings') {
-          try {
-            const newSettings = JSON.parse(e.newValue || '{}');
-            if (newSettings.openExams) {
-              // Update exams collection based on server openExams flag
-              const exams = Storage.getCollection(Storage.keys.EXAMS) || [];
-              let updated = false;
-              exams.forEach(ex => {
-                const serverState = newSettings.openExams[ex.id];
-                if (serverState !== undefined && ex.isOpen !== serverState) {
-                  ex.isOpen = serverState;
-                  updated = true;
-                }
-              });
-              if (updated) {
-                Storage.set(Storage.keys.EXAMS, exams);
-                renderExamsMgmtTable();
-                renderExamsList();
-              }
-            }
-          } catch (err) {
-            console.warn('Failed to parse ps_settings storage event', err);
-          }
         }
       });
     }
@@ -2332,18 +2307,6 @@
 
       // Trigger a storage event for other tabs (fallback)    
       localStorage.setItem('ps_exams_sync', Date.now().toString());
-
-      // Save open state to settings so it synchronizes globally via settings.json
-      const S = Storage.get(Storage.keys.SETTINGS, {});
-      if (!S.openExams) S.openExams = {};
-      S.openExams[examId] = openIt;
-      Storage.set(Storage.keys.SETTINGS, S);
-
-      fetch(App.getSettingsApiUrl(), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(S)
-      }).catch(err => console.warn('Failed to sync settings with server:', err));
 
       renderExamsMgmtTable();
       renderExamsList();
