@@ -2338,6 +2338,54 @@ function dumpExamsToFile(callback) {
   });
 }
 
+function runSqliteBulkSync(tableName, primaryKey, itemsToSave, callback) {
+  globalSqliteDb.serialize(() => {
+    globalSqliteDb.run('BEGIN TRANSACTION', [], (beginErr) => {
+      if (beginErr) return callback(beginErr);
+      
+      globalSqliteDb.run(`DELETE FROM "${tableName}"`, [], (deleteErr) => {
+        if (deleteErr) {
+          globalSqliteDb.run('ROLLBACK', [], () => {});
+          return callback(deleteErr);
+        }
+        
+        if (!itemsToSave || itemsToSave.length === 0) {
+          globalSqliteDb.run('COMMIT', [], (commitErr) => {
+            if (commitErr) return callback(commitErr);
+            callback(null, 0);
+          });
+          return;
+        }
+        
+        let insertIndex = 0;
+        const insertNext = () => {
+          if (insertIndex >= itemsToSave.length) {
+            globalSqliteDb.run('COMMIT', [], (commitErr) => {
+              if (commitErr) return callback(commitErr);
+              callback(null, itemsToSave.length);
+            });
+            return;
+          }
+          
+          const item = itemsToSave[insertIndex];
+          const { sql, values } = getInsertOrReplaceSqlAndValues(tableName, primaryKey, item);
+          globalSqliteDb.run(sql, values, (insertErr) => {
+            if (insertErr) {
+              console.error(`❌ SQLite bulk insert error for ${tableName}:`, insertErr);
+              globalSqliteDb.run('ROLLBACK', [], () => {});
+              return callback(insertErr);
+            }
+            insertIndex++;
+            insertNext();
+          });
+        };
+        
+        insertNext();
+      });
+    });
+  });
+}
+
 function executeBulkSync(tableName, primaryKey, itemsToSave, callback) {
   if (isPostgres && pgPool) {
     pgPool.connect((connectErr, client, release) => {
@@ -2407,11 +2455,13 @@ function executeBulkSync(tableName, primaryKey, itemsToSave, callback) {
   } else if (isMysql && mysqlPool) {
     mysqlPool.getConnection((connectErr, connection) => {
       if (connectErr) {
-        console.error(`❌ mysqlPool connection error for bulk sync transaction on ${tableName}:`, connectErr);
-        console.log('⚠️ Falling back to SQLite bulk sync...');
-        fallbackToSqlite(() => {
-          executeBulkSync(tableName, primaryKey, itemsToSave, callback);
-        });
+        console.error(`❌ mysqlPool connection error for bulk sync transaction on ${tableName}:`, connectErr.message || connectErr);
+        if (isConnectionError(connectErr)) {
+          console.log('⚠️ MySQL connection lost during bulk sync. Temporarily using SQLite...');
+          runSqliteBulkSync(tableName, primaryKey, itemsToSave, callback);
+        } else {
+          callback(connectErr);
+        }
         return;
       }
       
@@ -2419,10 +2469,12 @@ function executeBulkSync(tableName, primaryKey, itemsToSave, callback) {
         connection.rollback(() => {
           connection.release();
           console.error(`❌ MySQL transaction error for bulk sync on ${tableName}:`, err.message);
-          console.log('⚠️ Falling back to SQLite bulk sync...');
-          fallbackToSqlite(() => {
-            executeBulkSync(tableName, primaryKey, itemsToSave, callback);
-          });
+          if (isConnectionError(err)) {
+            console.log('⚠️ MySQL connection lost during transaction. Temporarily using SQLite...');
+            runSqliteBulkSync(tableName, primaryKey, itemsToSave, callback);
+          } else {
+            callback(err);
+          }
         });
       };
       
@@ -2471,53 +2523,10 @@ function executeBulkSync(tableName, primaryKey, itemsToSave, callback) {
       });
     });
   } else {
-    // SQLite mode
-    db.serialize(() => {
-      db.run('BEGIN TRANSACTION', [], (beginErr) => {
-        if (beginErr) return callback(beginErr);
-        
-        db.run(`DELETE FROM "${tableName}"`, [], (deleteErr) => {
-          if (deleteErr) {
-            db.run('ROLLBACK', [], () => {});
-            return callback(deleteErr);
-          }
-          
-          if (!itemsToSave || itemsToSave.length === 0) {
-            db.run('COMMIT', [], (commitErr) => {
-              if (commitErr) return callback(commitErr);
-              callback(null, 0);
-            });
-            return;
-          }
-          
-          let insertIndex = 0;
-          const insertNext = () => {
-            if (insertIndex >= itemsToSave.length) {
-              db.run('COMMIT', [], (commitErr) => {
-                if (commitErr) return callback(commitErr);
-                callback(null, itemsToSave.length);
-              });
-              return;
-            }
-            
-            const item = itemsToSave[insertIndex];
-            const { sql, values } = getInsertOrReplaceSqlAndValues(tableName, primaryKey, item);
-            db.run(sql, values, (insertErr) => {
-              if (insertErr) {
-                console.error(`❌ SQLite bulk insert error for ${tableName}:`, insertErr);
-                db.run('ROLLBACK', [], () => {});
-                return callback(insertErr);
-              }
-              insertIndex++;
-              insertNext();
-            });
-          };
-          
-          insertNext();
-        });
-      });
-    });
+    runSqliteBulkSync(tableName, primaryKey, itemsToSave, callback);
   }
+}
+
 }
 
 
