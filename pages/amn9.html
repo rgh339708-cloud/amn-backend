@@ -6,9 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>اختبارات الدورات | الأمن العام</title>
 
-  <link rel="stylesheet" href="../assets/css/main.css?v=1.3.0">
-  <link rel="stylesheet" href="../assets/css/navbar.css?v=1.3.0">
-  <link rel="stylesheet" href="../assets/css/sidebar.css?v=1.3.0">
+  <link rel="stylesheet" href="../assets/css/main.css?v=1.4.0">
+  <link rel="stylesheet" href="../assets/css/navbar.css?v=1.4.0">
+  <link rel="stylesheet" href="../assets/css/sidebar.css?v=1.4.0">
   <link rel="stylesheet" href="../assets/css/footer.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -844,11 +844,11 @@
   <div id="toast-container"></div>
 
   <!-- Write shared components -->
-  <script src="../assets/js/storage.js?v=1.3.0"></script>
-  <script src="../assets/js/data.js?v=1.3.0"></script>
-  <script src="../assets/js/auth.js?v=1.3.0"></script>
-  <script src="../assets/js/components.js?v=1.3.0"></script>
-  <script src="../assets/js/app.js?v=1.3.0"></script>
+  <script src="../assets/js/storage.js?v=1.4.0"></script>
+  <script src="../assets/js/data.js?v=1.4.0"></script>
+  <script src="../assets/js/auth.js?v=1.4.0"></script>
+  <script src="../assets/js/components.js?v=1.4.0"></script>
+  <script src="../assets/js/app.js?v=1.4.0"></script>
 
   <script>
     document.write(Components.navbar('amn9'));
@@ -2323,7 +2323,13 @@
         }
       }
 
-      Storage.set(Storage.keys.EXAMS, exams);
+      // Save via the standard sync engine update to prevent race conditions or sync overwrites
+      Storage.updateInCollection(Storage.keys.EXAMS, examId, {
+        isOpen: targetExam.isOpen,
+        openedAt: targetExam.openedAt,
+        closedAt: targetExam.closedAt
+      });
+
       // Trigger a storage event for other tabs (fallback)    
       localStorage.setItem('ps_exams_sync', Date.now().toString());
 
@@ -2575,8 +2581,7 @@
         // Edit mode
         const idx = exams.findIndex(e => e.id === id);
         if (idx !== -1) {
-          exams[idx] = {
-            ...exams[idx],
+          const updates = {
             title: title,
             category: category,
             emoji: emoji,
@@ -2584,9 +2589,9 @@
             passingScore: passing,
             documentUrl: docurl,
             questionsCountToShow: showcount,
-            description: desc,
-            updatedAt: new Date().toISOString()
+            description: desc
           };
+          Storage.updateInCollection(Storage.keys.EXAMS, id, updates);
           App.toast('✓ تم تحديث إعدادات الاختبار بنجاح.', 'success');
         }
       } else {
@@ -2606,15 +2611,12 @@
           closedAt: '',
           questions: [],
           attempts: 0,
-          passRate: 0,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+          passRate: 0
         };
-        exams.push(newExam);
+        Storage.addToCollection(Storage.keys.EXAMS, newExam);
         App.toast('<i class="fa-solid fa-champagne-glasses"></i> تم إنشاء الاختبار الجديد بنجاح! يرجى إضافة الأسئلة الآن.', 'success');
       }
 
-      Storage.set(Storage.keys.EXAMS, exams);
       closeExamDetailsModal();
       renderExamsMgmtTable();
       renderExamsList();
@@ -3765,11 +3767,14 @@
       const exams = Storage.getCollection(Storage.keys.EXAMS);
       const idx = exams.findIndex(e => e.id === activeExam.id);
       if (idx !== -1) {
-        exams[idx].attempts = (exams[idx].attempts || 0) + 1;
+        const attempts = (exams[idx].attempts || 0) + 1;
         const currentRate = exams[idx].passRate || 0;
-        const countAttempts = exams[idx].attempts;
-        exams[idx].passRate = Math.round(((currentRate * (countAttempts - 1)) + (passed ? 100 : 0)) / countAttempts);
-        Storage.set(Storage.keys.EXAMS, exams);
+        const passRate = Math.round(((currentRate * (attempts - 1)) + (passed ? 100 : 0)) / attempts);
+        
+        Storage.updateInCollection(Storage.keys.EXAMS, activeExam.id, {
+          attempts: attempts,
+          passRate: passRate
+        });
         renderExamsList();
       }
 

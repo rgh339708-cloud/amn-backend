@@ -400,6 +400,13 @@ async function initializePostgresSchema(pool) {
     exam_id VARCHAR
   )`);
 
+  try {
+    await queryAsync(`ALTER TABLE retake_requests ADD COLUMN user_id VARCHAR`);
+  } catch(e) {}
+  try {
+    await queryAsync(`ALTER TABLE retake_requests ADD COLUMN exam_name VARCHAR`);
+  } catch(e) {}
+
   await queryAsync(`CREATE TABLE IF NOT EXISTS exam_violations (
     id SERIAL PRIMARY KEY,
     user_id VARCHAR,
@@ -827,6 +834,12 @@ async function initializeMysqlSchema(pool) {
   try {
     await queryAsync(`ALTER TABLE exam_violations MODIFY COLUMN violation_time VARCHAR(255)`);
   } catch(e) {}
+  try {
+    await queryAsync(`ALTER TABLE retake_requests ADD COLUMN user_id VARCHAR(255)`);
+  } catch(e) {}
+  try {
+    await queryAsync(`ALTER TABLE retake_requests ADD COLUMN exam_name VARCHAR(255)`);
+  } catch(e) {}
 
   console.log('✅ MySQL Schema initialization completed.');
 }
@@ -992,7 +1005,10 @@ function initializeSqliteSchema(sqliteDb) {
     approved_by TEXT,
     previous_score REAL,
     exam_id TEXT
-  )`);
+  )`, () => {
+    sqliteDb.run("ALTER TABLE retake_requests ADD COLUMN user_id TEXT", () => {});
+    sqliteDb.run("ALTER TABLE retake_requests ADD COLUMN exam_name TEXT", () => {});
+  });
 
   // 8. exam_violations table
   sqliteDb.run(`CREATE TABLE IF NOT EXISTS exam_violations (
@@ -2315,15 +2331,17 @@ function dumpExamsToFile(callback) {
       try { qs = JSON.parse(e.questions_json || '[]'); } catch (ex) {}
       let details = {};
       try { details = JSON.parse(e.details_json || '{}'); } catch (ex) {}
+      // Spread details FIRST, then override with structured fields so details_json
+      // can never accidentally overwrite questions_json or other canonical columns
       return {
+        ...details,
         id: e.id,
         title: e.exam_name,
         category: e.course_name,
         questionsCountToShow: e.questions_count,
         passingScore: e.passing_score,
         isOpen: e.status === 'open',
-        questions: qs,
-        ...details
+        questions: qs
       };
     });
     fs.writeFile(EXAMS_FILE, JSON.stringify(examsList, null, 2), 'utf8', (writeErr) => {
@@ -4985,15 +5003,17 @@ const server = http.createServer((req, res) => {
         try { qs = JSON.parse(e.questions_json || '[]'); } catch (ex) {}
         let details = {};
         try { details = JSON.parse(e.details_json || '{}'); } catch (ex) {}
+        // Spread details FIRST, then override with structured fields so details_json
+        // can never accidentally overwrite questions_json or other canonical columns
         return {
+          ...details,
           id: e.id,
           title: e.exam_name,
           category: e.course_name,
           questionsCountToShow: e.questions_count,
           passingScore: e.passing_score,
           isOpen: e.status === 'open',
-          questions: qs,
-          ...details
+          questions: qs
         };
       });
       collections['ps_exam_results'] = examResults.map(r => ({
