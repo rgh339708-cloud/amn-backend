@@ -6026,10 +6026,14 @@ const server = http.createServer((req, res) => {
       maskedToken: maskedToken,
       isMysql: typeof isMysql !== 'undefined' ? isMysql : false,
       MYSQL_HOST: typeof MYSQL_HOST !== 'undefined' ? MYSQL_HOST : 'not_set',
-      dbInitError: typeof dbInitError !== 'undefined' ? dbInitError : null
+      dbInitError: typeof dbInitError !== 'undefined' ? dbInitError : null,
+      isPostgres: typeof isPostgres !== 'undefined' ? isPostgres : false,
+      hasDatabaseUrl: !!(process.env.DATABASE_URL || config.databaseUrl),
+      dbUrlType: (process.env.DATABASE_URL || config.databaseUrl || '').substring(0, 15)
     }));
     return;
   }
+
 
   // GET /api/csv-sync/logs - Get the CSV sync bot logs
   if (pathname === '/api/csv-sync/logs' && req.method === 'GET') {
