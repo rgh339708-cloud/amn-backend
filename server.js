@@ -2107,7 +2107,8 @@ function initializePostgresConnection() {
 initializeSqliteConnection();
 
 const dbUrl = process.env.DATABASE_URL || config.databaseUrl;
-const isPostgresUrl = dbUrl && (dbUrl.startsWith('postgresql://') || dbUrl.startsWith('postgres://'));
+const forceMysql = process.env.FORCE_MYSQL === 'true' || process.env.FORCE_MYSQL === '1';
+const isPostgresUrl = !forceMysql && dbUrl && (dbUrl.startsWith('postgresql://') || dbUrl.startsWith('postgres://'));
 
 if (isPostgresUrl) {
   initializePostgresConnection();
