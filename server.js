@@ -2114,12 +2114,28 @@ if (isPostgresUrl) {
     },
     waitForConnections: true,
     connectionLimit: 10,
-    queueLimit: 0
+    queueLimit: 0,
+    enableKeepAlive: true,
+    keepAliveInitialDelay: 10000
   });
 
+  function isConnectionError(err) {
+    if (!err) return false;
+    const code = err.code || '';
+    const msg = String(err.message || '').toUpperCase();
+    return code.startsWith('PROTOCOL_') || 
+           code === 'ECONNRESET' || 
+           code === 'ETIMEDOUT' || 
+           code === 'ECONNREFUSED' || 
+           code === 'ENOTFOUND' || 
+           code === 'EPIPE' || 
+           msg.includes('CONNECTION LOST') || 
+           msg.includes('TIMEOUT') ||
+           msg.includes('CLOSED');
+  }
+
   mysqlPool.on('error', (err) => {
-    console.error('Unexpected error on MySQL pool:', err);
-    fallbackToSqlite();
+    console.error('Unexpected error on MySQL pool:', err.message || err);
   });
 
   db = {
@@ -2129,16 +2145,19 @@ if (isPostgresUrl) {
         params = [];
       }
       if (!isMysql) {
-        db.run(sql, params, callback);
+        globalSqliteDb.run(sql, params, callback);
         return;
       }
       const mySql = convertSqlToMysql(sql);
       mysqlPool.query(mySql, params, (err, res) => {
         if (err) {
-          console.error(`MySQL error on run: ${err.message}. Retrying query on SQLite...`);
-          fallbackToSqlite(() => {
-            db.run(sql, params, callback);
-          });
+          console.error(`MySQL error on run: ${err.message}. SQL: ${mySql}`);
+          if (isConnectionError(err)) {
+            console.warn('⚠️ MySQL connection error. Temporarily falling back to SQLite for this query...');
+            globalSqliteDb.run(sql, params, callback);
+          } else {
+            if (callback) callback(err);
+          }
         } else {
           const context = {
             lastID: res ? res.insertId : null,
@@ -2154,16 +2173,19 @@ if (isPostgresUrl) {
         params = [];
       }
       if (!isMysql) {
-        db.get(sql, params, callback);
+        globalSqliteDb.get(sql, params, callback);
         return;
       }
       const mySql = convertSqlToMysql(sql);
       mysqlPool.query(mySql, params, (err, res) => {
         if (err) {
-          console.error(`MySQL error on get: ${err.message}. Retrying query on SQLite...`);
-          fallbackToSqlite(() => {
-            db.get(sql, params, callback);
-          });
+          console.error(`MySQL error on get: ${err.message}. SQL: ${mySql}`);
+          if (isConnectionError(err)) {
+            console.warn('⚠️ MySQL connection error. Temporarily falling back to SQLite for this query...');
+            globalSqliteDb.get(sql, params, callback);
+          } else {
+            if (callback) callback(err, null);
+          }
         } else {
           const row = res && res.length > 0 ? res[0] : null;
           if (callback) callback(null, row);
@@ -2176,21 +2198,25 @@ if (isPostgresUrl) {
         params = [];
       }
       if (!isMysql) {
-        db.all(sql, params, callback);
+        globalSqliteDb.all(sql, params, callback);
         return;
       }
       const mySql = convertSqlToMysql(sql);
       mysqlPool.query(mySql, params, (err, res) => {
         if (err) {
-          console.error(`MySQL error on all: ${err.message}. Retrying query on SQLite...`);
-          fallbackToSqlite(() => {
-            db.all(sql, params, callback);
-          });
+          console.error(`MySQL error on all: ${err.message}. SQL: ${mySql}`);
+          if (isConnectionError(err)) {
+            console.warn('⚠️ MySQL connection error. Temporarily falling back to SQLite for this query...');
+            globalSqliteDb.all(sql, params, callback);
+          } else {
+            if (callback) callback(err, []);
+          }
         } else {
           if (callback) callback(null, res || []);
         }
       });
     },
+
     serialize(callback) {
       if (callback) callback();
     },
