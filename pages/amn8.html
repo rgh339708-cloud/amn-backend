@@ -1,0 +1,1857 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تقارير الحضور بكلية التدريب | الأمن العام</title>
+  <link rel="stylesheet" href="../assets/css/main.css?v=1.4.0">
+  <link rel="stylesheet" href="../assets/css/navbar.css?v=1.4.0">
+  <link rel="stylesheet" href="../assets/css/sidebar.css?v=1.4.0">
+  <link rel="stylesheet" href="../assets/css/footer.css">
+  <style>
+    /* Premium CSS for Attendance reports Page */
+
+    .attendance-header-card {
+      background: linear-gradient(135deg, rgba(26, 47, 112, 0.25) 0%, rgba(9, 21, 53, 0.4) 100%);
+      border: 1px solid rgba(201, 162, 39, 0.25);
+      border-radius: 24px;
+      padding: var(--space-8);
+      margin-bottom: var(--space-8);
+      box-shadow: 
+        0 15px 35px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(12px);
+      text-align: right;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .attendance-header-card::before {
+      content: '';
+      position: absolute;
+      top: 0; right: 0; left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--color-gold-primary), transparent);
+    }
+
+    .attendance-header-title {
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+
+    .attendance-header-desc {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
+      line-height: 1.8;
+      max-width: 800px;
+    }
+
+    /* Section Divider Bar */
+    .section-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--space-6);
+      padding: 16px 24px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.02) 0%, rgba(255, 255, 255, 0.01) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 18px;
+      position: relative;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .section-bar-right {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+
+    .section-bar-badge {
+      width: 40px;
+      height: 40px;
+      background: rgba(201, 162, 39, 0.1);
+      border: 1px solid rgba(201, 162, 39, 0.25);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+
+    .section-bar-title {
+      font-size: 1.35rem;
+      font-weight: 850;
+      color: #fff;
+    }
+
+    .section-bar-subtitle {
+      font-size: 11px;
+      color: var(--color-text-muted);
+      margin-top: 2px;
+      font-weight: 700;
+    }
+
+    /* Attendance Books Grid */
+    .books-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: var(--space-6);
+      margin-bottom: var(--space-8);
+    }
+
+    /* Premium Book Card */
+    .book-card {
+      background: linear-gradient(155deg, rgba(13, 24, 64, 0.35) 0%, rgba(6, 13, 33, 0.45) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      padding: var(--space-6);
+      position: relative;
+      transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+      backdrop-filter: blur(8px);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .book-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(201, 162, 39, 0.35);
+      box-shadow: 
+        0 15px 30px rgba(0, 0, 0, 0.5),
+        0 0 20px rgba(201, 162, 39, 0.05);
+    }
+
+    .book-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: var(--space-4);
+    }
+
+    .book-card-icon {
+      width: 48px;
+      height: 48px;
+      background: rgba(201, 162, 39, 0.1);
+      border: 1px solid rgba(201, 162, 39, 0.2);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      color: var(--color-gold-primary);
+    }
+
+    .status-badge {
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .status-badge.open {
+      background: rgba(46, 204, 113, 0.12);
+      border: 1px solid rgba(46, 204, 113, 0.3);
+      color: #2ecc71;
+    }
+
+    .status-badge.closed {
+      background: rgba(231, 76, 60, 0.12);
+      border: 1px solid rgba(231, 76, 60, 0.3);
+      color: #e74c3c;
+    }
+
+    /* Pulse dot effect */
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      background-color: #2ecc71;
+      border-radius: 50%;
+      display: inline-block;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7);
+      }
+      70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 6px rgba(46, 204, 113, 0);
+      }
+      100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(46, 204, 113, 0);
+      }
+    }
+
+    .book-card-title {
+      font-size: 1.15rem;
+      font-weight: 850;
+      color: #fff;
+      margin-bottom: 6px;
+      text-align: right;
+    }
+
+    .book-card-subtitle {
+      font-size: 0.82rem;
+      color: var(--color-text-secondary);
+      margin-bottom: var(--space-5);
+      text-align: right;
+      line-height: 1.5;
+    }
+
+    .book-card-info {
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+      margin-bottom: var(--space-6);
+      text-align: right;
+      padding-top: 8px;
+      border-top: 1px dashed rgba(255, 255, 255, 0.04);
+    }
+
+    .book-card-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: auto;
+    }
+
+    .btn-attendance {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.3s;
+      border: 1px solid transparent;
+      font-family: inherit;
+    }
+
+    .btn-attendance.checkin-active {
+      background: linear-gradient(135deg, var(--color-gold-primary), var(--color-gold-dark));
+      color: #05091e;
+      border-color: rgba(255, 255, 255, 0.1);
+      box-shadow: 0 4px 15px rgba(201, 162, 39, 0.25);
+    }
+
+    .btn-attendance.checkin-active:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(201, 162, 39, 0.35);
+    }
+
+    .btn-attendance.checkin-disabled {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--color-text-muted);
+      cursor: not-allowed;
+    }
+
+    .btn-attendance.toggle-open {
+      background: rgba(46, 204, 113, 0.08);
+      border: 1px solid rgba(46, 204, 113, 0.25);
+      color: #2ecc71;
+    }
+
+    .btn-attendance.toggle-open:hover {
+      background: #2ecc71;
+      color: #05091e;
+      transform: translateY(-2px);
+    }
+
+    .btn-attendance.toggle-close {
+      background: rgba(231, 76, 60, 0.08);
+      border: 1px solid rgba(231, 76, 60, 0.25);
+      color: #e74c3c;
+    }
+
+    .btn-attendance.toggle-close:hover {
+      background: #e74c3c;
+      color: #fff;
+      transform: translateY(-2px);
+    }
+
+    /* Reports & Logs Section */
+    .reports-container {
+      background: rgba(10, 18, 50, 0.3);
+      border: 1px solid rgba(201, 162, 39, 0.12);
+      border-radius: 20px;
+      padding: var(--space-6);
+      margin-bottom: 80px;
+      backdrop-filter: blur(8px);
+    }
+
+    /* Tabs Panel */
+    .panel-tabs {
+      display: flex;
+      gap: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: var(--space-4);
+      margin-bottom: var(--space-5);
+    }
+
+    .panel-tab {
+      background: none;
+      border: none;
+      color: var(--color-text-secondary);
+      font-size: 0.95rem;
+      font-weight: 800;
+      cursor: pointer;
+      padding: 10px 18px;
+      border-radius: 10px;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: inherit;
+    }
+
+    .panel-tab:hover {
+      background: rgba(255, 255, 255, 0.04);
+      color: #fff;
+    }
+
+    .panel-tab.active {
+      background: rgba(201, 162, 39, 0.1);
+      border: 1px solid rgba(201, 162, 39, 0.25);
+      color: var(--color-gold-primary);
+    }
+
+    /* Table styles */
+    .table-wrapper {
+      overflow-x: auto;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .premium-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: right;
+      font-size: 0.85rem;
+    }
+
+    .premium-table th {
+      background: rgba(13, 24, 64, 0.6);
+      color: var(--color-gold-primary);
+      padding: 14px 18px;
+      font-weight: 800;
+      border-bottom: 1px solid rgba(201, 162, 39, 0.15);
+      white-space: nowrap;
+    }
+
+    .premium-table td {
+      padding: 12px 18px;
+      color: var(--color-text-secondary);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      white-space: nowrap;
+      font-weight: 600;
+    }
+
+    .premium-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .premium-table tr:hover td {
+      background: rgba(201, 162, 39, 0.03);
+      color: #fff;
+    }
+
+    /* Filter Tools */
+    .filter-tools {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--space-4);
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .filter-label {
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: var(--color-text-muted);
+    }
+
+    .select-premium {
+      background: rgba(10, 18, 50, 0.5);
+      border: 1px solid rgba(201, 162, 39, 0.2);
+      border-radius: 8px;
+      color: #fff;
+      padding: 8px 16px;
+      font-size: 0.82rem;
+      font-weight: 800;
+      font-family: inherit;
+      outline: none;
+      cursor: pointer;
+      min-width: 180px;
+    }
+
+    .select-premium:focus {
+      border-color: var(--color-gold-primary);
+      box-shadow: 0 0 10px rgba(201, 162, 39, 0.15);
+    }
+
+    .search-premium {
+      background: rgba(10, 18, 50, 0.5);
+      border: 1px solid rgba(201, 162, 39, 0.2);
+      border-radius: 8px;
+      color: #fff;
+      padding: 8px 16px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      font-family: inherit;
+      outline: none;
+      width: 240px;
+    }
+
+    .search-premium:focus {
+      border-color: var(--color-gold-primary);
+    }
+
+    .no-records {
+      padding: 40px;
+      text-align: center;
+      color: var(--color-text-muted);
+      font-size: 0.9rem;
+      font-weight: 750;
+    }
+
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      margin-bottom: 16px;
+      color: var(--color-text-muted);
+    }
+    .breadcrumb a {
+      color: var(--color-text-muted);
+      transition: color 0.2s;
+      text-decoration: none;
+    }
+    .breadcrumb a:hover {
+      color: var(--color-gold-primary);
+    }
+
+    .attendance-header-section {
+      padding: 115px 0 40px;
+      position: relative;
+      background: var(--color-bg-primary);
+    }
+
+    @media (max-width: 768px) {
+      .books-grid {
+        grid-template-columns: 1fr;
+      }
+      .filter-tools {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .search-premium {
+        width: 100%;
+      }
+    }
+
+    /* ── Room Image Upload Modal ── */
+    .room-img-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(4, 7, 20, 0.88);
+      backdrop-filter: blur(10px);
+      z-index: 99999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .room-img-overlay.active { display: flex; }
+    .room-img-modal {
+      background: linear-gradient(145deg, #070d24, #0b153a);
+      border: 1px solid rgba(201, 162, 39, 0.3);
+      border-radius: 22px;
+      width: 100%;
+      max-width: 520px;
+      padding: 32px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 30px rgba(201,162,39,0.08);
+      animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    @keyframes slideUp {
+      from { transform: scale(0.88); opacity: 0; }
+      to   { transform: scale(1);    opacity: 1; }
+    }
+    .room-img-modal h3 {
+      color: #fff;
+      font-size: 1.2rem;
+      font-weight: 900;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .room-img-modal p {
+      color: rgba(255,255,255,0.5);
+      font-size: 0.82rem;
+      margin-bottom: 22px;
+      line-height: 1.7;
+    }
+    .room-img-drop-zone {
+      border: 2px dashed rgba(201, 162, 39, 0.35);
+      border-radius: 16px;
+      background: rgba(201, 162, 39, 0.03);
+      padding: 30px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      position: relative;
+      margin-bottom: 20px;
+    }
+    .room-img-drop-zone:hover, .room-img-drop-zone.drag-over {
+      border-color: var(--color-gold-primary);
+      background: rgba(201, 162, 39, 0.07);
+    }
+    .room-img-drop-zone input[type=file] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+    .room-img-drop-icon {
+      font-size: 2.5rem;
+      color: rgba(201, 162, 39, 0.5);
+      margin-bottom: 12px;
+    }
+    .room-img-drop-label {
+      color: rgba(255,255,255,0.5);
+      font-size: 0.85rem;
+    }
+    .room-img-preview {
+      display: none;
+      width: 100%;
+      max-height: 200px;
+      object-fit: cover;
+      border-radius: 12px;
+      border: 1px solid rgba(201,162,39,0.25);
+      margin-bottom: 20px;
+    }
+    .room-img-preview.visible { display: block; }
+    .room-img-modal-actions {
+      display: flex;
+      gap: 12px;
+    }
+    .btn-room-cancel {
+      flex: 1;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.04);
+      color: rgba(255,255,255,0.6);
+      font-weight: 800;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.88rem;
+      transition: all 0.2s;
+    }
+    .btn-room-cancel:hover { background: rgba(255,255,255,0.08); color: #fff; }
+    .btn-room-submit {
+      flex: 2;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      background: linear-gradient(135deg, var(--color-gold-primary), var(--color-gold-dark));
+      color: #05091e;
+      font-weight: 900;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.88rem;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-room-submit:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(201,162,39,0.35); }
+    .btn-room-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* Image thumb in records table */
+    .room-thumb {
+      width: 44px;
+      height: 44px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid rgba(201,162,39,0.3);
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .room-thumb:hover { transform: scale(1.15); }
+
+    /* Lightbox for full-size preview */
+    .lightbox-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.92);
+      z-index: 999999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .lightbox-overlay.active { display: flex; }
+    .lightbox-overlay img {
+      max-width: 90vw;
+      max-height: 85vh;
+      border-radius: 16px;
+      border: 2px solid rgba(201,162,39,0.4);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+    }
+    .lightbox-close {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: rgba(255,255,255,0.1);
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="toast-container"></div>
+
+  <!-- ── Room Image Upload Modal ── -->
+  <div class="room-img-overlay" id="room-img-overlay">
+    <div class="room-img-modal">
+      <h3><i class="fa-solid fa-camera"></i> رفع صورة الروم لفتح التحضير</h3>
+      <p>لتفعيل التحضير في هذه الدورة، يرجى رفع صورة واضحة وموثقة للروم الميداني. ستُعمم هذه الصورة تلقائياً لجميع الحاضرين في الدورة.</p>
+
+      <!-- ── تصنيف الدورة ── -->
+      <div style="margin: 14px 0; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 14px;">
+        <label style="display:block; font-size:0.85rem; color: rgba(255,255,255,0.6); margin-bottom:8px;"><i class="fa-solid fa-tag" style="margin-left:5px;"></i> تصنيف الدورة</label>
+        <div style="display:flex; gap:10px;">
+          <label style="flex:1; cursor:pointer;">
+            <input type="radio" name="course_type" value="أساسية" id="ct-basic" checked onchange="_courseType=this.value" style="display:none;">
+            <div id="ct-basic-btn" onclick="selectCourseType('أساسية')" style="text-align:center; padding:10px; border-radius:8px; border:2px solid #c9a227; background:rgba(201,162,39,0.15); color:#c9a227; font-weight:700; font-size:0.9rem; transition:all 0.2s;">
+              <i class="fa-solid fa-star" style="margin-left:5px;"></i> أساسية
+            </div>
+          </label>
+          <label style="flex:1; cursor:pointer;">
+            <input type="radio" name="course_type" value="استثنائية" id="ct-special" onchange="_courseType=this.value" style="display:none;">
+            <div id="ct-special-btn" onclick="selectCourseType('استثنائية')" style="text-align:center; padding:10px; border-radius:8px; border:2px solid rgba(255,255,255,0.15); background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.5); font-weight:700; font-size:0.9rem; transition:all 0.2s;">
+              <i class="fa-solid fa-bolt" style="margin-left:5px;"></i> استثنائية
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div class="room-img-drop-zone" id="room-img-drop-zone">
+        <input type="file" id="room-img-file" accept="image/*" onchange="handleRoomImageSelect(event)">
+        <div class="room-img-drop-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+        <div class="room-img-drop-label">اضغط لاختيار صورة الروم أو اسحبها هنا<br><span style="font-size:0.75rem;opacity:0.5;">JPG, PNG, WEBP – حجم أقصى 5 ميجابايت</span></div>
+      </div>
+      <img id="room-img-preview" class="room-img-preview" src="" alt="معاينة الصورة">
+      <div class="room-img-modal-actions">
+        <button class="btn-room-cancel" onclick="closeRoomImageModal()">إلغاء</button>
+        <button class="btn-room-submit" id="btn-room-submit" onclick="confirmRoomImageAndSubmit()" disabled>
+          <i class="fa-solid fa-check"></i> تأكيد الصورة وفتح التحضير
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Lightbox for full-size room image ── -->
+  <div class="lightbox-overlay" id="lightbox-overlay" onclick="closeLightbox()">
+    <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+    <img id="lightbox-img" src="" alt="صورة الروم">
+  </div>
+
+  <!-- Header Section -->
+  <div class="attendance-header-section">
+    <div class="container">
+      <div class="breadcrumb">
+        <a href="../index.html">الرئيسية</a>
+        <span class="breadcrumb-separator">/</span>
+        <a href="amn7.html">كلية التدريب</a>
+        <span class="breadcrumb-separator">/</span>
+        <span style="color:var(--color-gold-primary)">تقارير الحضور بكلية التدريب</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="container page-wrapper">
+
+    <!-- Top Banner Card -->
+    <div class="attendance-header-card animate-fade-up">
+      <h2 class="attendance-header-title">نظام تقارير الحضور بكلية التدريب</h2>
+      <p class="attendance-header-desc">
+        تسجيل الحضور الإلكتروني لمدربي الدورات العسكرية بكلية التدريب الأمنية. يتيح النظام لمسؤولي الدورات إدارة الحضور وفتح دفاتر التحضير وإغلاقها، كما يوفر سجلات حضور تفصيلية دقيقة وغير قابلة للتعديل أو الحذف لضمان الموثوقية التامة.
+      </p>
+    </div>
+
+    <!-- Section Divider -->
+    <div class="section-bar animate-fade-up">
+      <div class="section-bar-right">
+        <div class="section-bar-badge">📋</div>
+        <div>
+          <div class="section-bar-title">دفاتر حضور مدربي كلية التدريب</div>
+          <div class="section-bar-subtitle">سجل الحضور الذاتي والتحكم الميداني المباشر</div>
+        </div>
+      </div>
+      <div class="section-bar-left-badge" style="background: rgba(201, 162, 39, 0.1); border-color: rgba(201, 162, 39, 0.25); color: var(--color-gold-primary);">نظام رقمي موثق</div>
+    </div>
+
+    <!-- Attendance Books Cards Grid -->
+    <div class="books-grid animate-fade-up" id="books-container">
+      <!-- Cards seeded via JavaScript -->
+      <div class="no-records" style="grid-column: 1 / -1; width: 100%;">جاري تحميل دفاتر الحضور...</div>
+    </div>
+
+    <!-- Reports & Audit Logs Section -->
+    <div class="reports-container animate-fade-up">
+      <div class="panel-tabs">
+        <button class="panel-tab active" onclick="switchTab('records')">
+          <i class="fa-solid fa-clipboard-user"></i> سجل حضور المدربين
+        </button>
+        <button class="panel-tab" onclick="switchTab('logs')">
+          <i class="fa-solid fa-clock-rotate-left"></i> سجل فتح وإغلاق الدفاتر
+        </button>
+      </div>
+
+      <!-- Tab Content 1: Attendance Records -->
+      <div id="tab-records" class="tab-content">
+        <div class="filter-tools">
+          <div class="filter-group">
+            <span class="filter-label">تصفية حسب الدورة:</span>
+            <select class="select-premium" id="filter-book" onchange="filterRecords()">
+              <option value="all">كافة الدورات</option>
+              <option value="ops">دورة العمليات</option>
+              <option value="traffic">دورة المرور</option>
+              <option value="roads">دورة أمن الطرق</option>
+              <option value="aviation">دورة الطيران الأمني</option>
+              <option value="district_officers">دورة ضباط المناطق</option>
+              <option value="special_tasks">دورة المهمات والواجبات الخاصة</option>
+              <option value="narcotics">دورة مكافحة المخدرات</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <input type="text" class="search-premium" id="search-records" placeholder="بحث باسم المدرب أو الكود..." onkeyup="filterRecords()">
+          </div>
+          <div class="filter-group" id="clear-records-container" style="display: none; margin-right: auto;">
+            <button class="btn-attendance" style="background: rgba(231, 76, 60, 0.12); border: 1px solid rgba(231, 76, 60, 0.25); color: #ff4757; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 6px;" onclick="clearAttendanceRecords()">
+              <i class="fa-solid fa-trash-can"></i> مسح جميع سجلات الحضور
+            </button>
+          </div>
+        </div>
+
+        <div class="table-wrapper">
+          <table class="premium-table">
+            <thead>
+              <tr>
+                <th>اسم المدرب</th>
+                <th>المسؤولية</th>
+                <th>الكود العسكري</th>
+                <th>الدورة العسكرية</th>
+                <th>وقت تسجيل الحضور</th>
+                <th>صورة الروم</th>
+                <th>الحالة</th>
+              </tr>
+            </thead>
+            <tbody id="records-tbody">
+              <!-- Seeded via JS -->
+            </tbody>
+          </table>
+          <div id="no-records-msg" class="no-records" style="display: none;">لا توجد سجلات حضور مسجلة حالياً.</div>
+        </div>
+      </div>
+
+      <!-- Tab Content 2: Open/Close Logs -->
+      <div id="tab-logs" class="tab-content" style="display: none;">
+        <div class="filter-tools" style="justify-content: flex-end; margin-bottom: 12px; display: flex;">
+          <div class="filter-group" id="clear-logs-container" style="display: none;">
+            <button class="btn-attendance" style="background: rgba(231, 76, 60, 0.12); border: 1px solid rgba(231, 76, 60, 0.25); color: #ff4757; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 6px;" onclick="clearAttendanceLogs()">
+              <i class="fa-solid fa-trash-can"></i> مسح سجل العمليات والفتح
+            </button>
+          </div>
+        </div>
+        <div class="table-wrapper">
+          <table class="premium-table">
+            <thead>
+              <tr>
+                <th>دفتر الدورة</th>
+                <th>الإجراء المتخذ</th>
+                <th>المشرف المسؤول</th>
+                <th>التوقيت والتاريخ</th>
+              </tr>
+            </thead>
+            <tbody id="logs-tbody">
+              <!-- Seeded via JS -->
+            </tbody>
+          </table>
+          <div id="no-logs-msg" class="no-records" style="display: none;">لا توجد عمليات فتح أو إغلاق مسجلة.</div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script src="../assets/js/storage.js?v=1.4.0"></script>
+  <script src="../assets/js/data.js?v=1.4.0"></script>
+  <script src="../assets/js/auth.js?v=1.4.0"></script>
+  <script src="../assets/js/components.js?v=1.4.0"></script>
+  <script src="../assets/js/app.js?v=1.4.0"></script>
+  <script>
+    // Inject navbar and sidebar
+    document.write(Components.navbar('amn8'));
+    document.write(Components.sidebar('amn8'));
+
+    const ROLE_LEVELS = {
+      'owner': 6,
+      'assistant_owner': 5,
+      'academy_affairs': 4.5,
+      'admin': 4,
+      'course_admin': 3.5,
+      'college_trainee': 1,
+      'viewer': 0
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Inject Footer
+      const body = document.body;
+      const footerDiv = document.createElement('div');
+      footerDiv.innerHTML = Components.footer();
+      body.appendChild(footerDiv.firstElementChild);
+
+      // Verify Auth Gate
+      if (!Auth.requireDiscordAuth()) {
+        const mainContent = document.querySelector('.page-wrapper');
+        if (mainContent) mainContent.style.display = 'none';
+        return;
+      }
+
+      // Check specific role/rank authorization
+      const user = Auth.getCurrentUser();
+      const userRole = Auth.getRole() || (user ? user.role : 'viewer');
+      const userRank = user ? user.rank : '';
+      const ROLE_LEVELS = {
+        'owner': 6,
+        'assistant_owner': 5,
+        'academy_affairs': 4.5,
+        'admin': 4,
+        'course_admin': 3.5,
+        'college_trainee': 1,
+        'viewer': 0
+      };
+      
+      const isOwnerBackdoor = user && ['1334568342345748565', '821825761673478144'].includes(user.id);
+      const isAuthorizedRole = (ROLE_LEVELS[userRole] >= 3.5) || isOwnerBackdoor;
+      const isCollegeTrainee = userRole === 'college_trainee' || (userRank && (
+        userRank.includes('منسوبي كلية التدريب') ||
+        userRank.includes('كلية التدريب')
+      ));
+      const isAuthorized = userRole !== 'viewer' && (isAuthorizedRole || isCollegeTrainee);
+
+      if (!isAuthorized) {
+        window.location.href = '../index.html';
+        return;
+      }
+
+      // Initialize Page Data
+      initAttendancePage();
+    });
+
+    let detectedBackendUrl = sessionStorage.getItem('detected_backend_url');
+
+    // Auto-detect if Node is running on current server (Hostinger)
+    if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+      fetch(`${window.location.origin}/api/healthz`)
+        .then(r => r.json())
+        .then(data => {
+          if (data && data.status === 'ok') {
+            sessionStorage.setItem('detected_backend_url', window.location.origin);
+            detectedBackendUrl = window.location.origin;
+          }
+        })
+        .catch(() => {});
+    }
+
+    // API helper — always reads fresh settings.json to get the current tunnel URL
+    async function getApiBase() {
+      const host = window.location.hostname;
+      if (host === 'localhost' || host === '127.0.0.1') return 'http://localhost:3000';
+      if (detectedBackendUrl) return detectedBackendUrl;
+
+      let apiBase = '';
+      // Always fetch fresh settings.json first (cloudflare tunnel URL changes on restart)
+      try {
+        const res = await fetch('../assets/data/settings.json?t=' + Date.now());
+        if (res.ok) {
+          const settings = await res.json();
+          if (settings && settings.backendUrl) {
+            localStorage.setItem('ps_settings', JSON.stringify(settings));
+            apiBase = settings.backendUrl;
+          }
+        }
+      } catch (e) {
+        console.warn('Could not fetch fresh settings.json, falling back to localStorage:', e);
+      }
+
+      // Fallback to cached localStorage value
+      if (!apiBase) {
+        try {
+          const settings = JSON.parse(localStorage.getItem('ps_settings') || '{}');
+          if (settings && settings.backendUrl) apiBase = settings.backendUrl;
+        } catch (e) {}
+      }
+
+      if (!apiBase || apiBase.includes('localhost') || apiBase.includes('127.0.0.1') || apiBase.includes('loca.lt')) {
+        apiBase = 'https://amn-backend-production.up.railway.app';
+      }
+
+      return apiBase;
+    }
+
+    let attendanceBooks = [];
+    let attendanceRecords = [];
+    let bookActivityLogs = [];
+    let currentUser = null;
+    let isCourseAdmin = false;
+
+    // Room image state
+    let _pendingBookId = null;
+    let _roomImageBase64 = null;
+    let _courseType = 'أساسية';
+
+    function selectCourseType(type) {
+      _courseType = type;
+      const basicBtn = document.getElementById('ct-basic-btn');
+      const specialBtn = document.getElementById('ct-special-btn');
+      if (!basicBtn || !specialBtn) return;
+      if (type === 'أساسية') {
+        basicBtn.style.border = '2px solid #c9a227';
+        basicBtn.style.background = 'rgba(201,162,39,0.15)';
+        basicBtn.style.color = '#c9a227';
+        specialBtn.style.border = '2px solid rgba(255,255,255,0.15)';
+        specialBtn.style.background = 'rgba(255,255,255,0.05)';
+        specialBtn.style.color = 'rgba(255,255,255,0.5)';
+      } else {
+        specialBtn.style.border = '2px solid #3498db';
+        specialBtn.style.background = 'rgba(52,152,219,0.15)';
+        specialBtn.style.color = '#3498db';
+        basicBtn.style.border = '2px solid rgba(255,255,255,0.15)';
+        basicBtn.style.background = 'rgba(255,255,255,0.05)';
+        basicBtn.style.color = 'rgba(255,255,255,0.5)';
+      }
+    }
+
+    async function initAttendancePage() {
+      currentUser = Auth.getCurrentUser();
+      
+      const ROLE_LEVELS = {
+        'owner': 6,
+        'assistant_owner': 5,
+        'academy_affairs': 4.5,
+        'admin': 4,
+        'course_admin': 3.5,
+        'college_trainee': 1,
+        'viewer': 0
+      };
+
+      // Determine if current user is Course Admin or higher
+      const isOwnerBackdoor = currentUser && ['1334568342345748565', '821825761673478144'].includes(currentUser.id);
+      const userRole = Auth.getRole() || (currentUser ? currentUser.role : 'viewer');
+      const userLevel = ROLE_LEVELS[userRole] || 0;
+      isCourseAdmin = userLevel >= 3.5 || isOwnerBackdoor;
+      // college_trainee: NEVER show management controls
+      const isCollegeTrainee = userRole === 'college_trainee';
+      if (isCollegeTrainee) isCourseAdmin = false;
+
+      // Show/hide clear buttons based on role level >= 4.5
+      if (userLevel >= 4.5 || isOwnerBackdoor) {
+        const clearRecordsCont = document.getElementById('clear-records-container');
+        const clearLogsCont = document.getElementById('clear-logs-container');
+        if (clearRecordsCont) clearRecordsCont.style.display = 'block';
+        if (clearLogsCont) clearLogsCont.style.display = 'block';
+      }
+
+      await loadData();
+    }
+
+    async function loadData() {
+      let apiBase = await getApiBase();
+      let booksRes = null;
+      let maxRetries = 3;
+      let retryDelay = 5000; // 5 seconds
+      
+      const container = document.getElementById('books-container');
+
+      // 1. Try to load cached data first for instant rendering (Stale-While-Revalidate)
+      let hasCache = false;
+      try {
+        const cachedBooks = JSON.parse(localStorage.getItem('ps_attendance_books_cache') || '[]');
+        const cachedRecords = JSON.parse(localStorage.getItem('ps_attendance_records_cache') || '[]');
+        const cachedLogs = JSON.parse(localStorage.getItem('ps_attendance_logs_cache') || '[]');
+        
+        if (cachedBooks && cachedBooks.length > 0) {
+          attendanceBooks = cachedBooks;
+          attendanceRecords = cachedRecords;
+          bookActivityLogs = cachedLogs;
+          
+          // Render cached data immediately
+          renderBooks();
+          renderRecordsTable();
+          renderLogsTable();
+          hasCache = true;
+          console.log('[SWR] Loaded initial data from local cache');
+        }
+      } catch (cacheErr) {
+        console.error('[SWR] Error reading initial cache:', cacheErr);
+      }
+
+      // Check if we should try the primary backend URL (like Cloudflare Tunnel) first
+      let usingTunnel = apiBase.includes('trycloudflare.com') || apiBase.includes('localhost') || apiBase.includes('127.0.0.1');
+
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+          // Only show the blocking loader if we don't have any cached data to display
+          if (!hasCache && container && attempt > 1 && (container.innerHTML.includes('جاري تحميل') || container.children.length === 0)) {
+            container.innerHTML = `
+              <div class="no-records" style="grid-column: 1 / -1; width: 100%; padding: 40px 20px; text-align: center; background: rgba(201, 162, 39, 0.03); border: 1px dashed rgba(201, 162, 39, 0.2); border-radius: 16px;">
+                <div style="width: 44px; height: 44px; border: 3px solid rgba(201, 162, 39, 0.15); border-top-color: var(--color-gold-primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px;"></div>
+                <div style="color: var(--color-gold-primary); font-size: 1.15rem; font-weight: 850; margin-bottom: 8px;">
+                  جاري إيقاظ خادم الحضور الميداني...
+                </div>
+                <p style="color: var(--color-text-secondary); font-size: 0.88rem; max-width: 500px; margin: 0 auto 12px; line-height: 1.6;">
+                  الخادم العسكري في وضع الاستعداد (الاستيقاظ لأول مرة قد يستغرق 30 ثانية). جاري محاولة الاتصال العسكري تلقائياً...
+                </p>
+                <div style="font-size: 0.8rem; color: rgba(255,255,255,0.4); font-family: monospace;">
+                  المحاولة الميدانية ${attempt} من ${maxRetries}
+                </div>
+                <style>
+                  @keyframes spin { 100% { transform: rotate(360deg); } }
+                </style>
+              </div>
+            `;
+          }
+
+          const controller = new AbortController();
+          const timeoutMs = usingTunnel ? 2500 : 25000; // 2.5 seconds timeout for tunnel, 25 seconds for Render (allows it to wake up)
+          const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+          booksRes = await fetch(`${apiBase}/api/attendance/books`, {
+            signal: controller.signal,
+            headers: { 'Bypass-Tunnel-Reminder': 'true' }
+          });
+          clearTimeout(timeoutId);
+
+          if (!booksRes.ok) {
+            if (booksRes.status === 500) {
+              console.error('Server returned 500. breaking retry loop and falling back to cache...');
+              const err = new Error('HTTP 500 Server Error');
+              err.is500 = true;
+              throw err;
+            }
+            throw new Error(`HTTP error status ${booksRes.status}`);
+          }
+          break; // Succeeded!
+        } catch (fetchErr) {
+          console.warn(`Fetch attempt ${attempt} failed on ${apiBase}:`, fetchErr);
+          
+          if (fetchErr.is500) {
+            console.log('Skipping remaining retries due to HTTP 500 error.');
+            break;
+          }
+          
+          // Dynamic fallback: If we tried to connect to a local tunnel and it failed,
+          // switch to the Render backend immediately to save time and prevent lockup.
+          if (usingTunnel) {
+            console.log('[Dynamic Fallback] Local server tunnel offline. Switching to Railway backend...');
+            apiBase = 'https://amn-backend-production.up.railway.app';
+            usingTunnel = false;
+            attempt = 0; // Reset attempts to give Render a clean slot
+            continue;
+          }
+
+          if (attempt === maxRetries) {
+            throw fetchErr;
+          }
+          // Wait before retrying
+          await new Promise(resolve => setTimeout(resolve, retryDelay));
+        }
+      }
+
+      try {
+        if (!booksRes || !booksRes.ok) throw new Error('Failed to fetch books after retries');
+        attendanceBooks = await booksRes.json();
+
+        // 2. Fetch records and logs
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000);
+        const reportsRes = await fetch(`${apiBase}/api/attendance/reports`, {
+          signal: controller.signal,
+          headers: { 'Bypass-Tunnel-Reminder': 'true' }
+        });
+        clearTimeout(timeoutId);
+        if (!reportsRes.ok) throw new Error('Failed to fetch reports');
+        const reportsData = await reportsRes.json();
+        attendanceRecords = reportsData.records || [];
+        bookActivityLogs = reportsData.logs || [];
+
+        // Save successfully loaded data to local cache
+        localStorage.setItem('ps_attendance_books_cache', JSON.stringify(attendanceBooks));
+        localStorage.setItem('ps_attendance_records_cache', JSON.stringify(attendanceRecords));
+        localStorage.setItem('ps_attendance_logs_cache', JSON.stringify(bookActivityLogs));
+
+        // Render everything with fresh data
+        renderBooks();
+        renderRecordsTable();
+        renderLogsTable();
+        
+        // Success: clear reload state
+        sessionStorage.removeItem('auto_reloaded_attendance');
+        console.log('[SWR] Successfully revalidated attendance data from server!');
+      } catch (e) {
+        console.warn('[Cache Load] Connection failed, attempting cache fallback:', e.message);
+        
+        // Self-healing fallback from localStorage cache (if we haven't already rendered it)
+        if (!hasCache) {
+          try {
+            const cachedBooks = JSON.parse(localStorage.getItem('ps_attendance_books_cache') || '[]');
+            const cachedRecords = JSON.parse(localStorage.getItem('ps_attendance_records_cache') || '[]');
+            const cachedLogs = JSON.parse(localStorage.getItem('ps_attendance_logs_cache') || '[]');
+            
+            if (cachedBooks && cachedBooks.length > 0) {
+              attendanceBooks = cachedBooks;
+              attendanceRecords = cachedRecords;
+              bookActivityLogs = cachedLogs;
+              
+              // Render cached data
+              renderBooks();
+              renderRecordsTable();
+              renderLogsTable();
+              
+              console.log('[Cache Load] Successfully loaded attendance data from local cache!');
+              return; // Exit silently, no warning/failure banner is shown!
+            }
+          } catch (cacheErr) {
+            console.error('[Cache Load] Failed to parse local storage cache:', cacheErr);
+          }
+
+          // If no cache exists, show a friendly status message instead of a red error warning
+          if (container) {
+            container.innerHTML = `
+              <div class="no-records" style="grid-column: 1 / -1; width: 100%; padding: 40px 20px; text-align: center; background: rgba(255, 255, 255, 0.02); border: 1px dashed rgba(255, 255, 255, 0.08); border-radius: 16px;">
+                <div style="font-size: 1.15rem; font-weight: 850; margin-bottom: 8px; color: var(--color-text-secondary);">
+                  ⏳ يرجى تشغيل خادم الاتصال للمزامنة أول مرة
+                </div>
+                <p style="color: var(--color-text-muted); font-size: 0.88rem; max-width: 500px; margin: 0 auto 15px; line-height: 1.6;">
+                  لم نتمكن من الوصول للبيانات حالياً لعدم وجود اتصال نشط بالسيرفر. يرجى التأكد من تشغيل خادم الاتصال وعمل مزامنة.
+                </p>
+                <button onclick="localStorage.removeItem('ps_settings'); window.location.href = window.location.pathname + '?t=' + Date.now();" class="btn-attendance checkin-active" style="display: inline-flex; width: auto; padding: 8px 20px; font-size: 0.82rem; margin: 0 auto;">
+                  <i class="fa-solid fa-arrows-rotate"></i> تحديث الاتصال للموقع
+                </button>
+              </div>
+            `;
+          }
+        } else {
+          // If we had cache but background revalidation failed, show a subtle warning toast (non-intrusive)
+          if (window.App && App.toast) {
+            App.toast('⚠️ تعذر الاتصال بخادم المزامنة. يتم عرض كاش الحضور المحلي.', 'warning');
+          }
+        }
+      }
+    }
+
+    function renderBooks() {
+      const container = document.getElementById('books-container');
+      if (!container) return;
+
+      if (attendanceBooks.length === 0) {
+        container.innerHTML = '<div class="no-records" style="grid-column: 1 / -1;">لا توجد دفاتر حضور معرفة في قاعدة البيانات.</div>';
+        return;
+      }
+
+      container.innerHTML = attendanceBooks.map(book => {
+        const isOpen = book.status === 'open';
+        const isReportSent = book.status === 'report_sent';
+        
+        let statusBadge = '';
+        if (isOpen) {
+          statusBadge = '<span class="status-badge open"><span class="pulse-dot"></span> التحضير مفتوح</span>';
+        } else if (isReportSent) {
+          statusBadge = '<span class="status-badge closed" style="background: rgba(52, 152, 219, 0.12); border-color: rgba(52, 152, 219, 0.3); color: #3498db;"><i class="fa-solid fa-envelope"></i> تم إرسال التقرير</span>';
+        } else {
+          statusBadge = '<span class="status-badge closed"><i class="fa-solid fa-lock"></i> التحضير مغلق</span>';
+        }
+
+        const lastUpdateText = book.updated_by 
+          ? `آخر تحديث بواسطة: ${book.updated_by}<br>${formatDate(book.updated_at)}` 
+          : 'الحالة: افتراضية مغلقة';
+
+        // Check-in button logic
+        let checkinBtnClass = 'btn-attendance checkin-disabled';
+        let checkinBtnIcon = '<i class="fa-solid fa-user-lock"></i>';
+        let checkinBtnText = 'التحضير مغلق';
+        let checkinBtnDisabled = 'disabled';
+
+        if (isOpen) {
+          // Check if this user already submitted attendance in the current open session
+          const alreadyCheckedIn = checkIfAlreadyCheckedIn(book.book_id);
+          if (alreadyCheckedIn) {
+            checkinBtnClass = 'btn-attendance checkin-disabled';
+            checkinBtnIcon = '<i class="fa-solid fa-clipboard-check" style="color: #2ecc71;"></i>';
+            checkinBtnText = 'تم تحضيرك بنجاح';
+          } else {
+            checkinBtnClass = 'btn-attendance checkin-active';
+            checkinBtnIcon = '<i class="fa-solid fa-user-check"></i>';
+            checkinBtnText = 'تحضير نفسي';
+            checkinBtnDisabled = '';
+          }
+        } else if (isReportSent) {
+          checkinBtnClass = 'btn-attendance checkin-disabled';
+          checkinBtnIcon = '<i class="fa-solid fa-file-invoice" style="color: #3498db;"></i>';
+          checkinBtnText = 'تم إرسال التقرير';
+        }
+
+        // Supervisor controls block
+        let supervisorControls = '';
+        if (isCourseAdmin) {
+          if (book.status === 'open') {
+            supervisorControls = `
+              <div style="display: flex; gap: 8px;">
+                <button class="btn-attendance toggle-close" style="background: rgba(230, 126, 34, 0.08); border-color: rgba(230, 126, 34, 0.25); color: #e67e22;" onclick="toggleBookStatus('${book.book_id}', 'report_sent')">
+                  <i class="fa-solid fa-paper-plane"></i> إرسال التقرير
+                </button>
+                <button class="btn-attendance toggle-close" onclick="toggleBookStatus('${book.book_id}', 'closed')">
+                  <i class="fa-solid fa-lock"></i> إغلاق التحضير
+                </button>
+              </div>
+            `;
+          } else if (book.status === 'report_sent') {
+            const ROLE_LEVELS = { 'owner': 6, 'assistant_owner': 5, 'academy_affairs': 4.5, 'admin': 4, 'course_admin': 3.5, 'college_trainee': 1, 'viewer': 0 };
+            const userRole = Auth.getRole() || (currentUser ? currentUser.role : 'viewer');
+            const userLevel = ROLE_LEVELS[userRole] || 0;
+            const canReopen = userLevel >= 3.5 || isOwnerBackdoor;
+
+            if (canReopen) {
+              supervisorControls = `
+                <button class="btn-attendance toggle-open" onclick="openReopenModal('${book.book_id}')">
+                  <i class="fa-solid fa-lock-open"></i> إعادة فتح التحضير
+                </button>
+              `;
+            } else {
+              supervisorControls = `
+                <button class="btn-attendance checkin-disabled" disabled style="background: rgba(255, 255, 255, 0.03); color: var(--color-text-muted);">
+                  <i class="fa-solid fa-circle-minus"></i> مقفل (بإذن شؤون الأكاديمية)
+                </button>
+              `;
+            }
+          } else {
+            // status is closed or anything else
+            supervisorControls = `
+              <button class="btn-attendance toggle-open" onclick="openReopenModal('${book.book_id}')">
+                <i class="fa-solid fa-lock-open"></i> فتح التحضير
+              </button>
+            `;
+          }
+        }
+
+        return `
+          <div class="book-card">
+            <div class="book-card-header">
+              <div class="book-card-icon">
+                <i class="fa-solid fa-clipboard-user"></i>
+              </div>
+              ${statusBadge}
+            </div>
+            <h3 class="book-card-title">${book.book_name}</h3>
+            <p class="book-card-subtitle">سجل تحضير دائم لمدربي هذه الدورة بالكلية الأمنية.</p>
+            <div class="book-card-info">${lastUpdateText}</div>
+            
+            <div class="book-card-actions">
+              <button class="${checkinBtnClass}" ${checkinBtnDisabled} onclick="submitAttendance('${book.book_id}')">
+                ${checkinBtnIcon} ${checkinBtnText}
+              </button>
+              ${supervisorControls}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function checkIfAlreadyCheckedIn(bookId) {
+      // Find the latest "فتح التحضير" log for this book
+      const openLogs = bookActivityLogs.filter(l => l.book_id === bookId && l.action === 'فتح التحضير');
+      if (openLogs.length === 0) return false;
+
+      // Latest open time
+      const latestOpenTime = new Date(openLogs[0].timestamp);
+
+      // Check if user has an attendance record for this book since that timestamp
+      return attendanceRecords.some(r => {
+        if (r.book_id !== bookId || r.user_id !== currentUser.id) return false;
+        const recordTime = new Date(r.timestamp);
+        return recordTime >= latestOpenTime;
+      });
+    }
+
+    async function submitAttendance(bookId) {
+      if (!currentUser) return;
+
+      const apiBase = await getApiBase();
+      try {
+        if (window.App && App.toast) App.toast('⏳ جاري تسجيل حضورك...', 'info');
+
+        const res = await fetch(`${apiBase}/api/attendance/submit`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            book_id: bookId,
+            user_id: currentUser.id
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to submit attendance');
+
+        if (window.App && App.toast) App.toast('✅ تم تسجيل حضورك بنجاح في دفتر التحضير!', 'success');
+        window.location.reload();
+      } catch (e) {
+        console.error('Error checking in:', e);
+        if (window.App && App.toast) App.toast(`✕ فشل تسجيل الحضور: ${e.message}`, 'error');
+      }
+    }
+
+    function openReopenModal(bookId) {
+      _pendingBookId = bookId;
+      _roomImageBase64 = null;
+      const preview = document.getElementById('room-img-preview');
+      const submitBtn = document.getElementById('btn-room-submit');
+      const fileInput = document.getElementById('room-img-file');
+      if (preview) { preview.src = ''; preview.classList.remove('visible'); }
+      if (submitBtn) submitBtn.disabled = true;
+      if (fileInput) fileInput.value = '';
+      document.getElementById('room-img-overlay').classList.add('active');
+    }
+
+    function handleRoomImageSelect(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          const maxDim = 800;
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Compress to JPEG with 0.6 quality (typically results in ~30-50KB)
+          _roomImageBase64 = canvas.toDataURL('image/jpeg', 0.6);
+
+          const preview = document.getElementById('room-img-preview');
+          if (preview) {
+            preview.src = _roomImageBase64;
+            preview.classList.add('visible');
+          }
+          const submitBtn = document.getElementById('btn-room-submit');
+          if (submitBtn) submitBtn.disabled = false;
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function closeRoomImageModal() {
+      document.getElementById('room-img-overlay').classList.remove('active');
+      _pendingBookId = null;
+      _roomImageBase64 = null;
+    }
+
+    async function uploadToImgBB(base64Image) {
+      try {
+        const settingsRes = await fetch('../assets/data/settings.json?t=' + Date.now()).catch(() => null);
+        if (!settingsRes || !settingsRes.ok) return null;
+        const settings = await settingsRes.json();
+        const apiKey = settings.imgbbApiKey || '530e62d3cf340938786396074c9e4dd8';
+        
+        if (!apiKey) {
+          console.warn('No ImgBB API key found, storing base64 directly.');
+          return null;
+        }
+
+        const base64Data = base64Image.split(',')[1] || base64Image;
+
+        const formData = new URLSearchParams();
+        formData.append('image', base64Data);
+
+        const res = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!res.ok) throw new Error(`ImgBB upload failed with status ${res.status}`);
+        const result = await res.json();
+        if (result && result.success && result.data && result.data.url) {
+          console.log('Successfully uploaded image to ImgBB:', result.data.url);
+          return result.data.url;
+        }
+      } catch (e) {
+        console.error('Error uploading to ImgBB:', e);
+      }
+      return null;
+    }
+
+    async function confirmRoomImageAndSubmit() {
+      if (!_pendingBookId || !_roomImageBase64) return;
+
+      const bookId = _pendingBookId;
+      const courseType = _courseType || 'أساسية';
+      let roomImage = _roomImageBase64;
+
+      // Close modal
+      closeRoomImageModal();
+
+      if (window.App && App.toast) {
+        App.toast('⏳ جاري رفع صورة الروم سحابياً...', 'info');
+      }
+
+      // Try uploading to ImgBB
+      const uploadedUrl = await uploadToImgBB(roomImage);
+      if (uploadedUrl) {
+        roomImage = uploadedUrl;
+      }
+
+      // Call toggle status to open the book with the room image and course type!
+      await toggleBookStatus(bookId, 'open', roomImage, courseType);
+    }
+
+    function openLightbox(src) {
+      const overlay = document.getElementById('lightbox-overlay');
+      const img = document.getElementById('lightbox-img');
+      if (!overlay || !img) return;
+      img.src = src;
+      overlay.classList.add('active');
+    }
+
+    function closeLightbox() {
+      document.getElementById('lightbox-overlay').classList.remove('active');
+    }
+
+    async function toggleBookStatus(bookId, newStatus, roomImage = null, courseType = null) {
+      if (!currentUser) return;
+
+      const apiBase = await getApiBase();
+      const actionLabel = newStatus === 'open' ? 'فتح التحضير' : (newStatus === 'report_sent' ? 'إرسال التقرير' : 'إغلاق التحضير');
+
+      try {
+        if (window.App && App.toast) {
+          App.toast(`⏳ جاري ${actionLabel}...`, 'info');
+        }
+
+        const res = await fetch(`${apiBase}/api/attendance/toggle`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            book_id: bookId,
+            status: newStatus,
+            operator_id: currentUser.id,
+            room_image: roomImage,
+            course_type: courseType
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || 'Failed to toggle status');
+        }
+
+        if (window.App && App.toast) {
+          App.toast(`✅ تم ${actionLabel} بنجاح!`, 'success');
+        }
+
+        // Reload the page exactly once to reflect changes
+        window.location.reload();
+
+      } catch (e) {
+        console.error('Error toggling book status:', e);
+        if (window.App && App.toast) {
+          App.toast(`✕ فشلت العملية: ${e.message}`, 'error');
+        }
+      }
+    }
+
+
+    // Tab Switching
+    function switchTab(tabName) {
+      document.querySelectorAll('.panel-tab').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.style.display = 'none');
+
+      // Add active state to button
+      const clickedBtn = event.currentTarget;
+      if (clickedBtn) clickedBtn.classList.add('active');
+
+      document.getElementById(`tab-${tabName}`).style.display = 'block';
+    }
+
+    // Lookup trainee responsibility from cached training sheets table
+    function getTraineeResponsibility(record) {
+      try {
+        const cachedDataStr = localStorage.getItem('members_google_sheets_cache');
+        if (!cachedDataStr) return '—';
+        const cachedData = JSON.parse(cachedDataStr);
+        const trainingMembers = cachedData['جدول الإدارة العامه لشؤون تدريب الامن العام'] || [];
+        
+        const userId = String(record.user_id || '').trim();
+        const recordCode = String(record.code || '').replace(/\s+/g, '').toLowerCase();
+        const recordName = String(record.display_name || record.username || '').trim();
+        
+        for (const member of trainingMembers) {
+          // 1. Match by Discord ID
+          if (member.discord && userId) {
+            const cachedDiscordId = member.discord.replace(/\D/g, '');
+            if (cachedDiscordId === userId) {
+              return member.position || '—';
+            }
+          }
+          
+          // 2. Match by military badge/code
+          if (member.badge && recordCode) {
+            const cachedBadge = String(member.badge).replace(/\s+/g, '').toLowerCase();
+            if (cachedBadge === recordCode) {
+              return member.position || '—';
+            }
+          }
+
+          // 3. Match by name
+          if (member.name && recordName) {
+            if (member.name.trim() === recordName) {
+              return member.position || '—';
+            }
+          }
+        }
+      } catch (e) {
+        console.error('Error in getTraineeResponsibility:', e);
+      }
+      return '—';
+    }
+
+    // Lookup trainee real name from cached training sheets table
+    function getTraineeRealName(record) {
+      try {
+        const cachedDataStr = localStorage.getItem('members_google_sheets_cache');
+        if (!cachedDataStr) return record.display_name || record.username;
+        const cachedData = JSON.parse(cachedDataStr);
+        const trainingMembers = cachedData['جدول الإدارة العامه لشؤون تدريب الامن العام'] || [];
+        
+        const userId = String(record.user_id || '').trim();
+        const recordCode = String(record.code || '').replace(/\s+/g, '').toLowerCase();
+        const recordName = String(record.display_name || record.username || '').trim();
+        
+        for (const member of trainingMembers) {
+          // 1. Match by Discord ID
+          if (member.discord && userId) {
+            const cachedDiscordId = member.discord.replace(/\D/g, '');
+            if (cachedDiscordId === userId) {
+              return member.name || record.display_name || record.username;
+            }
+          }
+          
+          // 2. Match by military badge/code
+          if (member.badge && recordCode) {
+            const cachedBadge = String(member.badge).replace(/\s+/g, '').toLowerCase();
+            if (cachedBadge === recordCode) {
+              return member.name || record.display_name || record.username;
+            }
+          }
+
+          // 3. Match by name
+          if (member.name && recordName) {
+            if (member.name.trim() === recordName) {
+              return member.name;
+            }
+          }
+        }
+      } catch (e) {
+        console.error('Error in getTraineeRealName:', e);
+      }
+      return record.display_name || record.username;
+    }
+
+    // Find trainee names checked in during a specific session log
+    function getAttendeesForLog(logItem) {
+      if (logItem.action !== 'إرسال التقرير') return [];
+
+      const logTime = new Date(logItem.timestamp);
+      
+      // Find all "فتح التحضير" logs for this book
+      const openLogs = bookActivityLogs.filter(l => l.book_id === logItem.book_id && l.action === 'فتح التحضير');
+      
+      // Find closest "فتح التحضير" log BEFORE this "إرسال التقرير" log
+      let openTime = null;
+      let closestDiff = Infinity;
+      
+      for (const openLog of openLogs) {
+        const tOpen = new Date(openLog.timestamp);
+        const diff = logTime - tOpen;
+        if (diff >= 0 && diff < closestDiff) {
+          closestDiff = diff;
+          openTime = tOpen;
+        }
+      }
+
+      // Default to 24 hours before if no open log matches
+      if (!openTime) {
+        openTime = new Date(logTime.getTime() - 24 * 60 * 60 * 1000);
+      }
+
+      // Filter records
+      const matchingRecords = attendanceRecords.filter(r => {
+        if (r.book_id !== logItem.book_id) return false;
+        const recordTime = new Date(r.timestamp);
+        return recordTime >= openTime && recordTime <= logTime;
+      });
+
+      return matchingRecords.map(r => getTraineeRealName(r));
+    }
+
+    // Render tables
+    function renderRecordsTable(filteredRecords = null) {
+      const tbody = document.getElementById('records-tbody');
+      const msg = document.getElementById('no-records-msg');
+      if (!tbody) return;
+
+      const list = filteredRecords || attendanceRecords;
+
+      if (list.length === 0) {
+        tbody.innerHTML = '';
+        msg.style.display = 'block';
+        return;
+      }
+
+      msg.style.display = 'none';
+      tbody.innerHTML = list.map(r => {
+        const imgCell = r.room_image
+          ? `<img src="${r.room_image}" class="room-thumb" alt="صورة الروم" onclick="openLightbox('${r.room_image}')">` 
+          : `<span style="color: var(--color-text-muted); font-size: 0.75rem;">—</span>`;
+        return `
+          <tr>
+            <td>${getTraineeRealName(r)}</td>
+            <td>${getTraineeResponsibility(r)}</td>
+            <td><code>${r.code || '—'}</code></td>
+            <td>${r.book_name}</td>
+            <td>${formatDate(r.timestamp)}</td>
+            <td>${imgCell}</td>
+            <td><span style="color: #2ecc71; font-weight:800;"><i class="fa-solid fa-circle-check"></i> حاضر</span></td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderLogsTable() {
+      const tbody = document.getElementById('logs-tbody');
+      const msg = document.getElementById('no-logs-msg');
+      if (!tbody) return;
+
+      if (bookActivityLogs.length === 0) {
+        tbody.innerHTML = '';
+        msg.style.display = 'block';
+        return;
+      }
+
+      msg.style.display = 'none';
+      tbody.innerHTML = bookActivityLogs.map(l => {
+        const isActionOpen = l.action === 'فتح التحضير';
+        const isActionReport = l.action === 'إرسال التقرير';
+        
+        let actionStyle = 'color: #e74c3c; font-weight:800;';
+        let actionIcon = '<i class="fa-solid fa-lock"></i>';
+        
+        if (isActionOpen) {
+          actionStyle = 'color: #2ecc71; font-weight:800;';
+          actionIcon = '<i class="fa-solid fa-lock-open"></i>';
+        } else if (isActionReport) {
+          actionStyle = 'color: #3498db; font-weight:800;';
+          actionIcon = '<i class="fa-solid fa-paper-plane"></i>';
+        }
+
+        let attendeesDetails = '';
+        if (isActionReport) {
+          const attendees = getAttendeesForLog(l);
+          if (attendees.length > 0) {
+            attendeesDetails = `
+              <details style="margin-top: 8px; cursor: pointer; text-align: right;">
+                <summary style="color: var(--color-gold-primary); font-size: 0.8rem; font-weight: 750; outline: none; list-style: none; display: inline-flex; align-items: center; gap: 4px;">
+                  <i class="fa-solid fa-users" style="font-size: 0.75rem;"></i> عرض الحاضرين بالتقرير (${attendees.length})
+                </summary>
+                <div style="background: rgba(255, 255, 255, 0.02); border: 1px dashed rgba(201, 162, 39, 0.25); padding: 8px 12px; border-radius: 8px; margin-top: 6px; font-size: 0.8rem; color: var(--color-text-secondary); max-height: 150px; overflow-y: auto; line-height: 1.6;">
+                  ${attendees.map((name, idx) => `<span style="display: inline-block; margin-left: 10px;">${idx + 1}. <b>${name}</b></span>`).join('')}
+                </div>
+              </details>
+            `;
+          } else {
+            attendeesDetails = `
+              <div style="color: var(--color-text-muted); font-size: 0.75rem; margin-top: 4px;">
+                <i class="fa-solid fa-circle-info"></i> لم يتم تحضير أي مدرب
+              </div>
+            `;
+          }
+        }
+
+        return `
+          <tr>
+            <td>${l.book_name}</td>
+            <td>
+              <span style="${actionStyle}">${actionIcon} ${l.action}</span>
+              ${attendeesDetails}
+            </td>
+            <td>${l.operator}</td>
+            <td>${formatDate(l.timestamp)}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function filterRecords() {
+      const bookFilter = document.getElementById('filter-book').value;
+      const searchVal = document.getElementById('search-records').value.toLowerCase().trim();
+
+      let filtered = attendanceRecords;
+
+      if (bookFilter !== 'all') {
+        filtered = filtered.filter(r => r.book_id === bookFilter);
+      }
+
+      if (searchVal) {
+        filtered = filtered.filter(r => {
+          const name = (getTraineeRealName(r) || r.display_name || r.username || '').toLowerCase();
+          const code = (r.code || '').toLowerCase();
+          return name.includes(searchVal) || code.includes(searchVal);
+        });
+      }
+
+      renderRecordsTable(filtered);
+    }
+
+    window.clearAttendanceRecords = async function() {
+      if (!currentUser) return;
+      const confirmMsg = 'هل أنت متأكد من مسح جميع سجلات الحضور بالكامل من قاعدة البيانات؟ لا يمكن التراجع عن هذا الإجراء.';
+      if (confirm(confirmMsg)) {
+        try {
+          const apiBase = await getApiBase();
+          const response = await fetch(`${apiBase}/api/attendance/clear_records`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
+          const resJson = await response.json();
+          if (resJson.success) {
+            App.toast('🗑️ تم مسح جميع سجلات الحضور بنجاح.', 'success');
+            window.location.reload();
+          } else {
+            App.toast(`فشل مسح السجلات: ${resJson.error || 'خطأ غير معروف'}`, 'danger');
+          }
+        } catch (e) {
+          console.error(e);
+          App.toast('حدث خطأ أثناء محاولة الاتصال بالخادم لمسح السجلات.', 'danger');
+        }
+      }
+    };
+
+    window.clearAttendanceLogs = async function() {
+      if (!currentUser) return;
+      const confirmMsg = 'هل أنت متأكد من مسح سجل فتح وإغلاق الدفاتر بالكامل من قاعدة البيانات؟ لا يمكن التراجع عن هذا الإجراء.';
+      if (confirm(confirmMsg)) {
+        try {
+          const apiBase = await getApiBase();
+          const response = await fetch(`${apiBase}/api/attendance/clear_logs`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
+          const resJson = await response.json();
+          if (resJson.success) {
+            App.toast('🗑️ تم مسح سجل فتح وإغلاق الدفاتر بنجاح.', 'success');
+            window.location.reload();
+          } else {
+            App.toast(`فشل مسح سجل العمليات: ${resJson.error || 'خطأ غير معروف'}`, 'danger');
+          }
+        } catch (e) {
+          console.error(e);
+          App.toast('حدث خطأ أثناء محاولة الاتصال بالخادم لمسح سجل العمليات.', 'danger');
+        }
+      }
+    };
+
+    // Helper date format - 12H Format
+    function formatDate(dateString) {
+      if (!dateString) return '—';
+      try {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return dateString;
+        
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        
+        let hours = date.getHours();
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const ampm = hours >= 12 ? 'م' : 'ص';
+        
+        hours = hours % 12;
+        hours = hours ? hours : 12; // 0 should be 12
+        const hoursStr = String(hours).padStart(2, '0');
+        
+        return `${y}-${m}-${d} ${hoursStr}:${minutes} ${ampm}`;
+      } catch (e) {
+        return dateString;
+      }
+    }
+  </script>
+</body>
+
+</html>

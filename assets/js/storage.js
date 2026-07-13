@@ -36,7 +36,7 @@
 
       if (isProduction) {
         if (!backendUrl || backendUrl.includes('localhost') || backendUrl.includes('127.0.0.1') || backendUrl.includes('trycloudflare.com') || backendUrl.includes('loca.lt')) {
-          backendUrl = 'https://amn-backend.onrender.com';
+          backendUrl = 'https://amn-backend-production.up.railway.app';
         }
       } else {
         if (!backendUrl) {
@@ -305,7 +305,7 @@ const Storage = (() => {
       const settings = JSON.parse(localStorage.getItem('ps_settings') || '{}');
       if (settings && settings.backendUrl) return settings.backendUrl;
     } catch (e) {}
-    return 'https://amn-backend.onrender.com';
+    return 'https://amn-backend-production.up.railway.app';
   }
 
   // Auto-detect if Node is running on current server (Hostinger)

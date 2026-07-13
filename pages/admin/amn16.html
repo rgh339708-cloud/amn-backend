@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>لوحة التحكم العليا | الأمن العام</title>
   
-  <link rel="stylesheet" href="../../assets/css/main.css?v=1.3.0">
-  <link rel="stylesheet" href="../../assets/css/admin.css?v=1.1.27">
-  <script src="../../assets/js/storage.js?v=1.3.0"></script>
-  <script src="../../assets/js/data.js?v=1.3.0"></script>
-  <script src="../../assets/js/auth.js?v=1.3.0"></script>
-  <script src="../../assets/js/app.js?v=1.3.0"></script>
+  <link rel="stylesheet" href="../../assets/css/main.css?v=1.4.0">
+  <link rel="stylesheet" href="../../assets/css/admin.css?v=1.4.0">
+  <script src="../../assets/js/storage.js?v=1.4.0"></script>
+  <script src="../../assets/js/data.js?v=1.4.0"></script>
+  <script src="../../assets/js/auth.js?v=1.4.0"></script>
+  <script src="../../assets/js/app.js?v=1.4.0"></script>
   <script>
     // Synchronous route guard to prevent flashing of admin content
     if (!Auth.isLoggedIn() || !['owner', 'assistant_owner', 'academy_affairs', 'admin'].includes(Auth.getRole())) {
@@ -2904,7 +2904,7 @@
     const action = document.getElementById('perm-action-type').value;
     const operator = Auth.getCurrentUser();
     // Always use the production backend directly
-    const apiBase = 'https://amn-backend.onrender.com';
+    const apiBase = 'https://amn-backend-production.up.railway.app';
 
     let targetId = '';
     let targetDiscord = '';
@@ -3016,7 +3016,7 @@
 
     const operator = Auth.getCurrentUser();
     // Always use the production backend directly
-    const apiBase = 'https://amn-backend.onrender.com';
+    const apiBase = 'https://amn-backend-production.up.railway.app';
 
     const payload = {
       operator_id: operator ? operator.id : '',

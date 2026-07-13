@@ -178,7 +178,7 @@ const App = (() => {
     if (backendUrl) {
       return backendUrl;
     }
-    return 'https://amn-backend.onrender.com';
+    return 'https://amn-backend-production.up.railway.app';
   }
 
   // Auto-detect if Node is running on current server (Hostinger)
@@ -2508,8 +2508,10 @@ const App = (() => {
             }
           }
 
-          // Always apply openExams regardless of role/shouldMerge
-          if (serverSettings.openExams && typeof serverSettings.openExams === 'object') {
+          // Apply openExams ONLY from live backend — never from the static settings.json file.
+          // If we fell back to static hosting, the openExams value there is stale and must not
+          // overwrite the real-time state managed by the backend.
+          if (!isStaticHosting && serverSettings.openExams && typeof serverSettings.openExams === 'object') {
             const exams = Storage.getCollection(Storage.keys.EXAMS) || [];
             let examsUpdated = false;
             exams.forEach(e => {
@@ -2526,6 +2528,7 @@ const App = (() => {
               }
             }
           }
+
 
           if (shouldMerge) {
             const maintenanceChanged = localSettings.maintenanceMode !== serverSettings.maintenanceMode ||
