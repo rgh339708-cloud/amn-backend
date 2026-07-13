@@ -1410,7 +1410,11 @@ const Auth = (() => {
     const mainTabs = [
       'جدول الامن العام - الاساسي',
       'جدول الامن العام - المنتدبين',
-      'جدول الامن العام - الادارة'
+      'جدول الامن العام - الادارة',
+      'جدول الإدارة العامه لشؤون تدريب الامن العام',
+      ' جدول الادارة العامه لشؤون التجنيد',
+      'جدول الادارة العامة لشؤون الادارية والمالية',
+      'الادارة العامة لشؤون العسكرية'
     ];
 
     let foundInMain = false;
@@ -1560,6 +1564,46 @@ const Auth = (() => {
             console.warn('[Session Sync] User status is not active. Logging out.');
             logout();
             return;
+          }
+
+          // Auto-heal database user information based on Sheets cache
+          const resolved = resolveUserTableInfo(dbUser);
+          if (resolved && resolved.found) {
+            let needsServerUpdate = false;
+            // Prevent stripping owner/assistant_owner overrides
+            const isPrivileged = ['owner', 'assistant_owner'].includes(dbUser.role);
+            if (!isPrivileged) {
+              if (dbUser.display_name !== resolved.name) { dbUser.display_name = resolved.name; needsServerUpdate = true; }
+              if (dbUser.rank !== resolved.rank) { dbUser.rank = resolved.rank; needsServerUpdate = true; }
+              if (dbUser.code !== resolved.badge) { dbUser.code = resolved.badge; needsServerUpdate = true; }
+              const resolvedDept = resolved.tables.join(', ');
+              if (dbUser.department !== resolvedDept) { dbUser.department = resolvedDept; needsServerUpdate = true; }
+              
+              // Automatically resolve role from rank if rank was updated
+              const newRole = resolveRoleFromRank(dbUser.rank, dbUser.role);
+              if (dbUser.role !== newRole) { dbUser.role = newRole; needsServerUpdate = true; }
+            }
+
+            if (needsServerUpdate) {
+              console.log('[Session Sync] Local sheets mismatch, auto-updating server for:', dbUser.display_name);
+              fetchWithTimeout(`${apiBase}/api/auth/upsert_user`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Bypass-Tunnel-Reminder': 'true' },
+                body: JSON.stringify({
+                  id: dbUser.id,
+                  discord_id: dbUser.discord_id || dbUser.id,
+                  username: dbUser.username,
+                  display_name: dbUser.display_name,
+                  avatar: dbUser.avatar,
+                  banner: dbUser.banner,
+                  role: dbUser.role,
+                  rank: dbUser.rank,
+                  department: dbUser.department,
+                  code: dbUser.code,
+                  status: dbUser.status
+                })
+              }).catch(err => console.warn('Failed to auto-heal user on server:', err));
+            }
           }
 
           let roleChanged = false;
