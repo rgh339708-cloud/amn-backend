@@ -19,7 +19,7 @@ const Auth = (() => {
       emoji: '<i class="fa-solid fa-star"></i>',
       color: '#9b59b6',
       level: 5,
-      permissions: ['view', 'resolve_retakes'],
+      permissions: ['*'], // all permissions
     },
     academy_affairs: {
       label: 'رئاسة تدريب الامن العام',
@@ -1734,8 +1734,8 @@ const Auth = (() => {
     const user = getCurrentUser();
     const userRole = getRole();
 
-    // Owner and academy_affairs always have full access (unless in preview mode)
-    if (user && (user.role === 'owner' || user.role === 'academy_affairs') && !getPreviewRole()) return true;
+    // Owner, assistant_owner and academy_affairs always have full access (unless in preview mode)
+    if (user && (user.role === 'owner' || user.role === 'assistant_owner' || user.role === 'academy_affairs') && !getPreviewRole()) return true;
 
     // Direct authoritative permissions map for key system pages
     const systemAuthMap = {
