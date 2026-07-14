@@ -1,26 +1,31 @@
-const sqlite3 = require('sqlite3').verbose();
+const fs = require('fs');
 const path = require('path');
+const sqlite3 = require('sqlite3').verbose();
 
-const DB_PATH = path.join(__dirname, '..', 'assets', 'data', 'exam_archive.db');
-const db = new sqlite3.Database(DB_PATH);
+const dbPath = path.join(__dirname, '..', 'assets', 'data', 'exam_archive.db');
+if (fs.existsSync(dbPath)) {
+  console.log('DB File Size:', (fs.statSync(dbPath).size / 1024 / 1024).toFixed(2), 'MB');
+} else {
+  console.log('DB File not found at:', dbPath);
+  process.exit(1);
+}
 
-console.log('Querying database tables...');
+const db = new sqlite3.Database(dbPath);
 
-db.all("SELECT * FROM attendance_book_logs ORDER BY id DESC LIMIT 5", [], (err, logs) => {
+db.all("SELECT name FROM sqlite_master WHERE type='table'", [], (err, tables) => {
   if (err) {
-    console.error('Error fetching logs:', err);
-  } else {
-    console.log('--- Last 5 Attendance Book Logs ---');
-    console.log(logs);
+    console.error(err);
+    return;
   }
-
-  db.all("SELECT * FROM attendance_records ORDER BY id DESC LIMIT 5", [], (errRecs, records) => {
-    if (errRecs) {
-      console.error('Error fetching records:', errRecs);
-    } else {
-      console.log('--- Last 5 Attendance Records ---');
-      console.log(records);
-    }
-    db.close();
+  
+  let completed = 0;
+  tables.forEach(t => {
+    db.get(`SELECT COUNT(*) as cnt FROM ${t.name}`, [], (e, r) => {
+      console.log(`${t.name}: ${r ? r.cnt : 0} rows`);
+      completed++;
+      if (completed === tables.length) {
+        db.close();
+      }
+    });
   });
 });

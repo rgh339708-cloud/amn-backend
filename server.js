@@ -4,6 +4,7 @@ const path = require('path');
 const url = require('url');
 const fs = require('fs');
 const https = require('https');
+const zlib = require('zlib');
 
 // ─── Global Discord Interceptor for Render Hosting ───
 // Bypasses Cloudflare Error 1015 (Discord block on Render IP addresses)
@@ -148,6 +149,32 @@ function loadConfig() {
 
 
 const config = loadConfig();
+
+// Helper to send gzipped response if supported by client
+function sendGzippedResponse(req, res, statusCode, headers, body) {
+  const acceptEncoding = req.headers['accept-encoding'] || '';
+  const bodyBuffer = Buffer.isBuffer(body) ? body : Buffer.from(body, 'utf8');
+
+  if (acceptEncoding.includes('gzip')) {
+    zlib.gzip(bodyBuffer, (err, gzipped) => {
+      if (err) {
+        res.writeHead(statusCode, { ...headers, 'Content-Length': bodyBuffer.length });
+        res.end(bodyBuffer);
+      } else {
+        res.writeHead(statusCode, {
+          ...headers,
+          'Content-Encoding': 'gzip',
+          'Content-Length': gzipped.length
+        });
+        res.end(gzipped);
+      }
+    });
+  } else {
+    res.writeHead(statusCode, { ...headers, 'Content-Length': bodyBuffer.length });
+    res.end(bodyBuffer);
+  }
+}
+
 const MYSQL_HOST = config.mysqlHost || 'srv1812.hstgr.io';
 const MYSQL_USER = config.mysqlUser || 'u978543219_amn3user';
 const MYSQL_PASSWORD = config.mysqlPassword || 'L198611272m';
@@ -5107,8 +5134,7 @@ const server = http.createServer((req, res) => {
         res.end();
         return;
       }
-      res.writeHead(200, { 'Content-Type': 'application/json', 'ETag': _collectionsCache.etag, 'Cache-Control': 'no-cache' });
-      res.end(_collectionsCache.body);
+      sendGzippedResponse(req, res, 200, { 'Content-Type': 'application/json', 'ETag': _collectionsCache.etag, 'Cache-Control': 'no-cache' }, _collectionsCache.body);
       return;
     }
 
@@ -5208,7 +5234,6 @@ const server = http.createServer((req, res) => {
         username: l.username || l.operator || 'النظام',
         details: l.details || `عملية: ${l.action_name} بواسطة ${l.operator}`
       }));
-      collections['ps_audit_logs'] = auditLogs;
 
       // Merge general collections
       generalColls.forEach(c => {
@@ -5219,7 +5244,6 @@ const server = http.createServer((req, res) => {
           'ps_retake_requests',
           'ps_exam_violations',
           'ps_system_logs',
-          'ps_audit_logs',
           'ps_login_logs',
           'ps_discord_links'
         ];
@@ -5261,8 +5285,7 @@ const server = http.createServer((req, res) => {
       _collectionsCache = { body: responseBody, etag };
       _collectionsCacheTime = Date.now();
 
-      res.writeHead(200, { 'Content-Type': 'application/json', 'ETag': etag, 'Cache-Control': 'no-cache' });
-      res.end(responseBody);
+      sendGzippedResponse(req, res, 200, { 'Content-Type': 'application/json', 'ETag': etag, 'Cache-Control': 'no-cache' }, responseBody);
     }).catch(err => {
       console.error('❌ Error fetching collections:', err);
       res.writeHead(500, { 'Content-Type': 'application/json' });
@@ -6734,8 +6757,17 @@ const server = http.createServer((req, res) => {
         return;
       }
 
-      res.writeHead(200, { 'Content-Type': contentType });
-      res.end(content);
+      const isText = contentType.startsWith('text/') || 
+                     contentType === 'application/javascript' || 
+                     contentType === 'application/json' ||
+                     contentType === 'image/svg+xml';
+      
+      if (isText) {
+        sendGzippedResponse(req, res, 200, { 'Content-Type': contentType }, content);
+      } else {
+        res.writeHead(200, { 'Content-Type': contentType, 'Content-Length': content.length });
+        res.end(content);
+      }
     });
   });
 });
