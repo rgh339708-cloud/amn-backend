@@ -2369,11 +2369,31 @@ function dumpExamsToFile(callback) {
         questions: qs
       };
     });
+    
     fs.writeFile(EXAMS_FILE, JSON.stringify(examsList, null, 2), 'utf8', (writeErr) => {
       if (writeErr) {
         console.error('[Backup Exams] Failed to write exams.json:', writeErr.message);
       } else {
         console.log('[Backup Exams] Successfully updated assets/data/exams.json on disk!');
+        
+        // تحديث النسخ الاحتياطية تلقائياً للحفاظ على الأسئلة
+        try {
+          // 1. تحديث النسخة الاحتياطية المحلية المباشرة (exams_backup.json)
+          const BACKUP_EXAMS_FILE = path.join(PUBLIC_DIR, 'assets', 'data', 'exams_backup.json');
+          fs.writeFileSync(BACKUP_EXAMS_FILE, JSON.stringify(examsList, null, 2), 'utf8');
+          console.log('[Backup Exams] Successfully updated assets/data/exams_backup.json!');
+
+          // 2. تحديث نسخة مجلد النشر الذكي (.deploy_backup/assets_data_exams.json)
+          const DEPLOY_BACKUP_DIR = path.join(PUBLIC_DIR, '.deploy_backup');
+          if (!fs.existsSync(DEPLOY_BACKUP_DIR)) {
+            fs.mkdirSync(DEPLOY_BACKUP_DIR, { recursive: true });
+          }
+          const DEPLOY_BACKUP_FILE = path.join(DEPLOY_BACKUP_DIR, 'assets_data_exams.json');
+          fs.writeFileSync(DEPLOY_BACKUP_FILE, JSON.stringify(examsList, null, 2), 'utf8');
+          console.log('[Backup Exams] Successfully updated .deploy_backup/assets_data_exams.json!');
+        } catch (backupErr) {
+          console.error('[Backup Exams Error] Failed to update secondary backups:', backupErr.message);
+        }
       }
       if (callback) callback(writeErr);
     });
