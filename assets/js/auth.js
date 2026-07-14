@@ -1515,19 +1515,8 @@ const Auth = (() => {
   if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
     const cachedData = localStorage.getItem('members_google_sheets_cache');
     if (!cachedData) {
-      // Use getBackendUrl() to always point to the Render/Railway server where the cache is fresh
-      const backendUrl = typeof Auth !== 'undefined' && typeof Auth.getBackendUrl === 'function'
-        ? Auth.getBackendUrl()
-        : (() => {
-            try {
-              const settings = JSON.parse(localStorage.getItem('ps_settings') || '{}');
-              return (settings && settings.backendUrl && !settings.backendUrl.includes('localhost'))
-                ? settings.backendUrl
-                : 'https://amn-backend-production.up.railway.app';
-            } catch (e) {
-              return 'https://amn-backend-production.up.railway.app';
-            }
-          })();
+      // Use getApiBase() to always point to the Render/Railway server where the cache is fresh
+      const backendUrl = getApiBase();
 
       const jsonPath = (backendUrl && !backendUrl.includes('localhost'))
         ? `${backendUrl}/assets/data/members_google_sheets_cache.json`
@@ -1560,16 +1549,7 @@ const Auth = (() => {
     if (Date.now() - lastCacheFetch > CACHE_TTL_MS) {
       localStorage.setItem('members_cache_last_fetch', String(Date.now()));
       try {
-        const backendUrl = (() => {
-          try {
-            const settings = JSON.parse(localStorage.getItem('ps_settings') || '{}');
-            return (settings && settings.backendUrl && !settings.backendUrl.includes('localhost'))
-              ? settings.backendUrl
-              : 'https://amn-backend-production.up.railway.app';
-          } catch (e) {
-            return 'https://amn-backend-production.up.railway.app';
-          }
-        })();
+        const backendUrl = getApiBase();
         fetch(`${backendUrl}/assets/data/members_google_sheets_cache.json?t=${Date.now()}`)
           .then(r => r.ok ? r.json() : null)
           .then(data => {
