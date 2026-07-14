@@ -4007,7 +4007,7 @@ function logSystemActivity(type, username, details) {
 // Avoids 9 DB queries + full JSON serialization on every polling cycle (every 10s)
 let _collectionsCache = null;       // { body: string, etag: string }
 let _collectionsCacheTime = 0;
-const COLLECTIONS_CACHE_TTL = 8000; // 8 seconds TTL
+const COLLECTIONS_CACHE_TTL = 30000; // 30 seconds TTL (was 8s - increased to reduce DB load)
 function invalidateCollectionsCache() {
   _collectionsCache = null;
   _collectionsCacheTime = 0;

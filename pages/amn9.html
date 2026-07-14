@@ -1489,7 +1489,7 @@
         }
       });
 
-      // Periodic sync every 10 seconds for supervisor data if active (reduced from 3s to reduce server load)
+      // Periodic sync every 30 seconds for supervisor data (matched to server-side 30s cache TTL)
       setInterval(() => {
         const panel = document.getElementById('supervisor-panel');
         if (panel && panel.style.display !== 'none') {
@@ -1522,9 +1522,9 @@
             renderHandRaiseLog();
           }
         }
-      }, 10000);
+      }, 30000); // 30s - matched to server cache TTL
 
-      // Periodic sync every 15 seconds (reduced from 5s to reduce server load)
+      // Periodic sync every 45 seconds for exam list / settings
       setInterval(() => {
         App.syncSettingsWithServer()
           .then(() => {
@@ -1532,7 +1532,7 @@
             renderExamsList();
           })
           .catch(() => { });
-      }, 15000);
+      }, 45000); // 45s - reduced load on Render free tier
 
       // Global Discord Auth Gate for all subpages
       checkAuthGate();

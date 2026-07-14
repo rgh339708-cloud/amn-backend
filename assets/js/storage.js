@@ -324,7 +324,7 @@ const Storage = (() => {
   // In-memory cache for exam archive to avoid redundant network requests
   let _examArchiveCache = null;
   let _examArchiveCacheTime = 0;
-  const EXAM_ARCHIVE_CACHE_TTL = 10000; // 10 seconds
+  const EXAM_ARCHIVE_CACHE_TTL = 30000; // 30 seconds (was 10s - matches server-side TTL)
 
   function invalidateExamArchiveCache() {
     _examArchiveCache = null;
