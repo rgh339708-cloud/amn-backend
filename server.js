@@ -140,10 +140,7 @@ function loadConfig() {
   if (!config.mysqlPassword && process.env.MYSQL_PASSWORD) config.mysqlPassword = process.env.MYSQL_PASSWORD;
   if (!config.mysqlDatabase && process.env.MYSQL_DATABASE) config.mysqlDatabase = process.env.MYSQL_DATABASE;
   if (!config.discordToken) {
-    const p1 = "MTUxMDE1NzU0NjUwMDAwMTg4NA";
-    const p2 = "GAUVcw";
-    const p3 = "EKZ5Zp-WsvwUmrtmxRzjQdaXJqEiFaI7mEatt0";
-    config.discordToken = p1 + "." + p2 + "." + p3;
+    config.discordToken = process.env.DISCORD_TOKEN || '';
   }
 
   return config;
@@ -1375,7 +1372,7 @@ async function sendRecruitmentDecisionWebhook(application, newStatus, operatorNa
 
 function sendRecruitmentDecisionDM(userId, fullName, sector, newStatus, examScore = 0, examTotal = 15) {
   return new Promise(async (resolve) => {
-    const token = config.discordToken || 'MTUxMDE1NzU0NjUwMDAwMTg4NA.G2vHtB.jWHVzM7gd2EvV0Er8NOgIcX9neH2bhA3JiLipg';
+    const token = config.discordToken;
     if (!token || !userId) {
       console.warn('[Discord Decision DM] Missing bot token or userId:', userId);
       return resolve(false);
@@ -1807,7 +1804,7 @@ async function resolveDiscordUserId(inputStr) {
 
   // 3. Search via Discord Guild Search API
   try {
-    const token = config.discordToken || 'MTUxMDE1NzU0NjUwMDAwMTg4NA.G2vHtB.jWHVzM7gd2EvV0Er8NOgIcX9neH2bhA3JiLipg';
+    const token = config.discordToken;
     const guildId = config.guildId || '1272212444936404992';
     const searchRes = await new Promise((res) => {
       const options = {
@@ -1834,7 +1831,7 @@ async function resolveDiscordUserId(inputStr) {
 
 function sendDiscordDM(userId, fullName, sector) {
   return new Promise(async (resolve) => {
-    const token = config.discordToken || 'MTUxMDE1NzU0NjUwMDAwMTg4NA.G2vHtB.jWHVzM7gd2EvV0Er8NOgIcX9neH2bhA3JiLipg';
+    const token = config.discordToken;
     if (!token || !userId) {
       console.warn('[Discord DM] Missing bot token or userId:', userId);
       return resolve(false);
@@ -6933,13 +6930,12 @@ server.listen(PORT, '0.0.0.0', () => {
   }, 6 * 60 * 60 * 1000);
   // ─── Discord Gateway: تشغيل الاتصال فوراً عند بدء السيرفر ───
   if (process.env.RENDER === 'true' || process.env.NODE_ENV === 'production') {
-    const { discordToken: gatewayToken } = (() => {
-      const p1 = 'MTUxMDE1NzU0NjUwMDAwMTg4NA';
-      const p2 = 'GAUVcw';
-      const p3 = 'EKZ5Zp-WsvwUmrtmxRzjQdaXJqEiFaI7mEatt0';
-      return { discordToken: process.env.DISCORD_TOKEN || (p1 + '.' + p2 + '.' + p3) };
-    })();
-    startGateway(gatewayToken, db);
+    const gatewayToken = process.env.DISCORD_TOKEN || config.discordToken;
+    if (gatewayToken) {
+      startGateway(gatewayToken, db);
+    } else {
+      console.warn('[Gateway] DISCORD_TOKEN is missing. Gateway connection skipped.');
+    }
   }
 
   // ─── CSV Discord Sync: المزامنة التلقائية لجداول CSV مع الديسكورد ───

@@ -175,9 +175,8 @@ function loadConfig() {
     }
   }
 
-  // Fallback: token مضمّن (نفس ما في server.js)
-  const discordToken = process.env.DISCORD_TOKEN ||
-    'MTUxMDE1NzU0NjUwMDAwMTg4NA' + '.' + 'GAUVcw' + '.' + 'EKZ5Zp-WsvwUmrtmxRzjQdaXJqEiFaI7mEatt0';
+  // Fallback: load strictly from environment
+  const discordToken = process.env.DISCORD_TOKEN || '';
   const guildId     = process.env.GUILD_ID || '1272212444936404992';
 
   return { discordToken, guildId };
