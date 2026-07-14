@@ -6888,6 +6888,26 @@ server.listen(PORT, '0.0.0.0', () => {
     console.log('[Tunnel] Cloudflare Tunnel disabled. Using production backend: https://amn-backend-euhi.onrender.com');
   }
 
+  // ─── Keep-Alive: منع نوم الخادم على Render المجاني ───
+  // Render المجاني ينام بعد 15 دقيقة من الخمول مما يسبب تأخير 50+ ثانية.
+  // نضرب الخادم على نفسه كل 10 دقائق لإبقائه مستيقظاً.
+  if (process.env.RENDER === 'true' || process.env.NODE_ENV === 'production') {
+    const selfPingUrl = process.env.RENDER_EXTERNAL_URL
+      ? `${process.env.RENDER_EXTERNAL_URL}/api/healthz`
+      : 'https://amn-backend-euhi.onrender.com/api/healthz';
+
+    setInterval(() => {
+      https.get(selfPingUrl, (res) => {
+        console.log(`[Keep-Alive] Self-ping OK. Status: ${res.statusCode}`);
+        res.resume();
+      }).on('error', (err) => {
+        console.warn('[Keep-Alive] Self-ping failed:', err.message);
+      });
+    }, 10 * 60 * 1000); // كل 10 دقائق
+
+    console.log('[Keep-Alive] Self-ping scheduled every 10 minutes to prevent Render cold starts.');
+  }
+
   // Start background Google Sheets synchronization:
   // First sync after 10 seconds of startup, then every 5 minutes.
   setTimeout(() => {
