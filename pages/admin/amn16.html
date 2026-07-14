@@ -2904,7 +2904,7 @@
     const action = document.getElementById('perm-action-type').value;
     const operator = Auth.getCurrentUser();
     // Always use the production backend directly
-    const apiBase = 'https://amn-backend-production.up.railway.app';
+    const apiBase = 'https://amn-backend.onrender.com';
 
     let targetId = '';
     let targetDiscord = '';
@@ -3016,7 +3016,7 @@
 
     const operator = Auth.getCurrentUser();
     // Always use the production backend directly
-    const apiBase = 'https://amn-backend-production.up.railway.app';
+    const apiBase = 'https://amn-backend.onrender.com';
 
     const payload = {
       operator_id: operator ? operator.id : '',

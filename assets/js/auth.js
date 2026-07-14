@@ -467,7 +467,7 @@ const Auth = (() => {
     } catch (e) {}
     
     if (!backendUrl || backendUrl.includes('localhost') || backendUrl.includes('127.0.0.1') || backendUrl.includes('trycloudflare.com') || backendUrl.includes('loca.lt')) {
-      backendUrl = 'https://amn-backend-production.up.railway.app';
+      backendUrl = 'https://amn-backend.onrender.com';
     }
     return backendUrl;
   }
@@ -525,17 +525,17 @@ const Auth = (() => {
         const testRes = await fetch(`${apiBase}/api/healthz`, { signal: controller.signal }).catch(() => null);
         clearTimeout(timeoutId);
         if (!testRes || !testRes.ok) {
-          console.warn('[Discord Auth] Local tunnel offline, falling back to Railway...');
-          apiBase = 'https://amn-backend-production.up.railway.app';
+          console.warn('[Discord Auth] Local tunnel offline, falling back to Render...');
+          apiBase = 'https://amn-backend.onrender.com';
         }
       } catch (pingErr) {
-        console.warn('[Discord Auth] Local tunnel ping failed, falling back to Railway:', pingErr.message);
-        apiBase = 'https://amn-backend-production.up.railway.app';
+        console.warn('[Discord Auth] Local tunnel ping failed, falling back to Render:', pingErr.message);
+        apiBase = 'https://amn-backend.onrender.com';
       }
     }
 
     if (!apiBase || apiBase.includes('localhost') || apiBase.includes('127.0.0.1') || apiBase.includes('loca.lt')) {
-      apiBase = 'https://amn-backend-production.up.railway.app';
+      apiBase = 'https://amn-backend.onrender.com';
     }
 
     return apiBase;

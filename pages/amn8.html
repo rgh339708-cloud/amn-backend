@@ -933,7 +933,7 @@
       }
 
       if (!apiBase || apiBase.includes('localhost') || apiBase.includes('127.0.0.1') || apiBase.includes('loca.lt')) {
-        apiBase = 'https://amn-backend-production.up.railway.app';
+        apiBase = 'https://amn-backend.onrender.com';
       }
 
       return apiBase;
@@ -1093,8 +1093,8 @@
           // Dynamic fallback: If we tried to connect to a local tunnel and it failed,
           // switch to the Render backend immediately to save time and prevent lockup.
           if (usingTunnel) {
-            console.log('[Dynamic Fallback] Local server tunnel offline. Switching to Railway backend...');
-            apiBase = 'https://amn-backend-production.up.railway.app';
+            console.log('[Dynamic Fallback] Local server tunnel offline. Switching to Render backend...');
+            apiBase = 'https://amn-backend.onrender.com';
             usingTunnel = false;
             attempt = 0; // Reset attempts to give Render a clean slot
             continue;

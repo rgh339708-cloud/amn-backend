@@ -2324,9 +2324,8 @@
           }
         } catch (e) {}
 
-        // Never use localhost as the cache source - always use production backend
         if (!backendUrl || backendUrl.includes('localhost') || backendUrl.includes('127.0.0.1') || backendUrl.includes('trycloudflare.com')) {
-          backendUrl = 'https://amn-backend-production.up.railway.app';
+          backendUrl = 'https://amn-backend.onrender.com';
         }
 
         const url = `${backendUrl}/assets/data/members_google_sheets_cache.json?t=${Date.now()}`;

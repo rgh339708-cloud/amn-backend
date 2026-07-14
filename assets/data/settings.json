@@ -17,7 +17,7 @@
   "theme": "dark",
   "animationStyle": "animate-glow",
   "animationSpeed": 0.5,
-  "backendUrl": "https://amn-backend-production.up.railway.app",
+  "backendUrl": "https://amn-backend.onrender.com",
   "imgbbApiKey": "530e62d3cf340938786396074c9e4dd8",
   "openExams": {
     "exam_004": false
