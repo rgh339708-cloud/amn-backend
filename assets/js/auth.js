@@ -467,7 +467,7 @@ const Auth = (() => {
     } catch (e) {}
     
     if (!backendUrl || backendUrl.includes('localhost') || backendUrl.includes('127.0.0.1') || backendUrl.includes('trycloudflare.com') || backendUrl.includes('loca.lt')) {
-      backendUrl = 'https://amn-backend.onrender.com';
+      backendUrl = 'https://amn-backend-euhi.onrender.com';
     }
     return backendUrl;
   }
@@ -526,16 +526,16 @@ const Auth = (() => {
         clearTimeout(timeoutId);
         if (!testRes || !testRes.ok) {
           console.warn('[Discord Auth] Local tunnel offline, falling back to Render...');
-          apiBase = 'https://amn-backend.onrender.com';
+          apiBase = 'https://amn-backend-euhi.onrender.com';
         }
       } catch (pingErr) {
         console.warn('[Discord Auth] Local tunnel ping failed, falling back to Render:', pingErr.message);
-        apiBase = 'https://amn-backend.onrender.com';
+        apiBase = 'https://amn-backend-euhi.onrender.com';
       }
     }
 
     if (!apiBase || apiBase.includes('localhost') || apiBase.includes('127.0.0.1') || apiBase.includes('loca.lt')) {
-      apiBase = 'https://amn-backend.onrender.com';
+      apiBase = 'https://amn-backend-euhi.onrender.com';
     }
 
     return apiBase;

@@ -6885,7 +6885,7 @@ server.listen(PORT, '0.0.0.0', () => {
   if (process.argv.includes('--tunnel') || process.env.START_TUNNEL === 'true') {
     startCloudflareTunnel();
   } else {
-    console.log('[Tunnel] Cloudflare Tunnel disabled. Using production backend: https://amn-backend.onrender.com');
+    console.log('[Tunnel] Cloudflare Tunnel disabled. Using production backend: https://amn-backend-euhi.onrender.com');
   }
 
   // Start background Google Sheets synchronization:

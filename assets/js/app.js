@@ -178,7 +178,7 @@ const App = (() => {
     if (backendUrl) {
       return backendUrl;
     }
-    return 'https://amn-backend.onrender.com';
+    return 'https://amn-backend-euhi.onrender.com';
   }
 
   // Auto-detect if Node is running on current server (Hostinger)
