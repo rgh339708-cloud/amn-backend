@@ -321,6 +321,16 @@ const Storage = (() => {
       .catch(() => {});
   }
 
+  // In-memory cache for exam archive to avoid redundant network requests
+  let _examArchiveCache = null;
+  let _examArchiveCacheTime = 0;
+  const EXAM_ARCHIVE_CACHE_TTL = 10000; // 10 seconds
+
+  function invalidateExamArchiveCache() {
+    _examArchiveCache = null;
+    _examArchiveCacheTime = 0;
+  }
+
   function saveExamAttempt(data) {
     // Write-through wrapper to match legacy code
     return fetchWithTimeout(`${getApiBase()}/api/exams`, {
@@ -328,21 +338,34 @@ const Storage = (() => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
     }).then(res => res.json()).then(resData => {
-      // Refresh local cache after attempt saves
+      // Invalidate local caches + force fresh fetch on next poll
+      invalidateExamArchiveCache();
+      _lastCollectionsEtag = null; // Force re-fetch on next poll
       loadAllFromServer();
       return resData;
     });
   }
 
   function fetchExamArchive() {
+    const now = Date.now();
+    // Return cached data if it's still fresh
+    if (_examArchiveCache && (now - _examArchiveCacheTime) < EXAM_ARCHIVE_CACHE_TTL) {
+      return Promise.resolve(_examArchiveCache);
+    }
     return fetchWithTimeout(`${getApiBase()}/api/exams`, { method: 'GET' })
       .then(res => res.json())
-      .then(json => json.exams || []);
+      .then(json => {
+        _examArchiveCache = json.exams || [];
+        _examArchiveCacheTime = Date.now();
+        return _examArchiveCache;
+      });
   }
 
   function deleteExamAttempt(id) {
     return fetchWithTimeout(`${getApiBase()}/api/exams?id=${id}`, { method: 'DELETE' })
       .then(res => res.json()).then(resData => {
+        invalidateExamArchiveCache();
+        _lastCollectionsEtag = null; // Force next poll to fetch fresh state since database changed
         loadAllFromServer();
         return resData;
       });
@@ -360,6 +383,7 @@ const Storage = (() => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
     }).then(res => res.json()).then(resData => {
+      _lastCollectionsEtag = null; // Force next poll to fetch fresh state since database changed
       loadAllFromServer();
       return resData;
     });
@@ -371,6 +395,7 @@ const Storage = (() => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, status, approved_by })
     }).then(res => res.json()).then(resData => {
+      _lastCollectionsEtag = null; // Force next poll to fetch fresh state since database changed
       loadAllFromServer();
       return resData;
     });
@@ -395,6 +420,7 @@ const Storage = (() => {
       body: JSON.stringify(data),
       keepalive: true
     }).then(res => res.json()).then(resData => {
+      _lastCollectionsEtag = null; // Force next poll to fetch fresh state since database changed
       loadAllFromServer();
       return resData;
     });
@@ -403,6 +429,7 @@ const Storage = (() => {
   function deleteViolation(id) {
     return fetchWithTimeout(`${getApiBase()}/api/violations?id=${id}`, { method: 'DELETE' })
       .then(res => res.json()).then(resData => {
+        _lastCollectionsEtag = null; // Force next poll to fetch fresh state since database changed
         loadAllFromServer();
         return resData;
       });
@@ -459,6 +486,7 @@ const Storage = (() => {
       .then(resData => {
         activeSyncs[collection] = Math.max(0, (activeSyncs[collection] || 0) - 1);
         if (resData.success) {
+          _lastCollectionsEtag = null; // Force next poll to fetch fresh state since we just mutated it
           markKeySynced(collection);
         } else {
           console.warn(`[Storage Sync] Failed to sync ${collection} remote action ${action}`);
@@ -522,6 +550,7 @@ const Storage = (() => {
           const resData = await res.json();
           if (resData.success) {
             console.log(`[Storage Sync] Successfully retried and synced key: ${key}`);
+            _lastCollectionsEtag = null; // Force next poll to fetch fresh state since we just mutated it
             markKeySynced(key);
           } else {
             console.warn(`[Storage Sync] Retry sync failed on server for key: ${key}`);
@@ -533,15 +562,32 @@ const Storage = (() => {
     }
   }
 
+  let _lastCollectionsEtag = null; // Track ETag for 304 support
+
   async function loadAllFromServer() {
     try {
       const apiBase = getApiBase();
       const fetchStartTime = Date.now();
 
+      const headers = { 'Bypass-Tunnel-Reminder': 'true' };
+      if (_lastCollectionsEtag) {
+        headers['If-None-Match'] = _lastCollectionsEtag;
+      }
+
       const res = await fetchWithTimeout(`${apiBase}/api/db/collections`, {
-        headers: { 'Bypass-Tunnel-Reminder': 'true' },
+        headers,
         timeout: 15000
       });
+
+      // 304 Not Modified: data unchanged, skip localStorage update
+      if (res.status === 304) {
+        return true;
+      }
+
+      // Store new ETag for next request
+      const etag = res.headers.get('ETag');
+      if (etag) _lastCollectionsEtag = etag;
+
       if (res.ok) {
         const json = await res.json();
         if (json && json.success && json.collections) {
@@ -599,9 +645,10 @@ const Storage = (() => {
 
   let pollingInterval = null;
   let retryInterval = null;
-  function startRealTimePolling(intervalMs = 3000) {
+  function startRealTimePolling(intervalMs = 10000) {
     if (pollingInterval) clearInterval(pollingInterval);
     pollingInterval = setInterval(() => {
+      invalidateExamArchiveCache(); // Invalidate cache so next fetchExamArchive() fetches fresh data
       loadAllFromServer();
     }, intervalMs);
 
@@ -621,6 +668,7 @@ const Storage = (() => {
     deleteFromCollection, findById, findWhere, count,
     saveExamAttempt,
     fetchExamArchive,
+    invalidateExamArchiveCache,
     deleteExamAttempt,
     fetchRetakeRequests,
     saveRetakeRequest,

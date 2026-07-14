@@ -1982,7 +1982,7 @@ const App = (() => {
     try {
       if (typeof Storage !== 'undefined' && Storage.loadAllFromServer) {
         await Storage.loadAllFromServer();
-        Storage.startRealTimePolling(3000); // Poll every 3 seconds for all collections
+        Storage.startRealTimePolling(5000); // Poll every 5 seconds (reduced from 3s)
       }
     } catch (e) {
       console.warn('[Storage Sync] Failed initial database load:', e);

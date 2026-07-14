@@ -4006,6 +4006,16 @@ function logSystemActivity(type, username, details) {
   });
 }
 
+// ─── Server-side cache for /api/db/collections ───
+// Avoids 9 DB queries + full JSON serialization on every polling cycle (every 10s)
+let _collectionsCache = null;       // { body: string, etag: string }
+let _collectionsCacheTime = 0;
+const COLLECTIONS_CACHE_TTL = 8000; // 8 seconds TTL
+function invalidateCollectionsCache() {
+  _collectionsCache = null;
+  _collectionsCacheTime = 0;
+}
+
 const server = http.createServer((req, res) => {
   const reqUrl = url.parse(req.url, true);
   const pathname = reqUrl.pathname;
@@ -4634,6 +4644,7 @@ const server = http.createServer((req, res) => {
             }
             
             logSystemActivity(auditType, data.examiner || name || 'النظام', auditMsg);
+            invalidateCollectionsCache(); // Fresh data for next polling cycle
               
             res.writeHead(data.id ? 200 : 201, {'Content-Type':'application/json'});
             res.end(JSON.stringify({success:true, id: data.id ? parseInt(data.id) : resultId}));
@@ -4752,6 +4763,7 @@ const server = http.createServer((req, res) => {
           } else {
             const auditMsg = `قدم المتدرب "${trainee_name}" طلب إعادة اختبار لـ "${course_name}" (الدرجة السابقة: ${previous_score}%)`;
             logSystemActivity('retake_request', trainee_name, auditMsg);
+            invalidateCollectionsCache();
 
             res.writeHead(201, {'Content-Type':'application/json'});
             res.end(JSON.stringify({success:true, id:this.lastID}));
@@ -4804,6 +4816,7 @@ const server = http.createServer((req, res) => {
               const action = status === 'approved' ? 'موافقة' : 'رفض';
               const auditMsg = `تم ${action} طلب إعادة اختبار المتدرب "${row.trainee_name}" في "${row.course_name}" بواسطة "${approved_by}"`;
               logSystemActivity('retake_resolve', approved_by, auditMsg);
+              invalidateCollectionsCache();
 
               if (status === 'approved') {
                 // Delete previous attempts for this exam and student
@@ -4857,6 +4870,7 @@ const server = http.createServer((req, res) => {
           } else {
             const auditMsg = `<i class="fa-solid fa-triangle-exclamation"></i> مخالفة غش مرصودة للمتدرب "${trainee_name}" في اختبار "${course_name}": ${violation_type}`;
             logSystemActivity('exam_violation', trainee_name, auditMsg);
+            invalidateCollectionsCache();
 
             res.writeHead(201, {'Content-Type':'application/json'});
             res.end(JSON.stringify({success:true, id:this.lastID}));
@@ -4895,6 +4909,7 @@ const server = http.createServer((req, res) => {
           res.end(JSON.stringify({error:'DB clear failed'}));
         } else {
           logSystemActivity('violations_clear_all', 'المشرف العام', 'تم مسح جميع سجلات المخالفات');
+          invalidateCollectionsCache();
           res.writeHead(200, {'Content-Type':'application/json'});
           res.end(JSON.stringify({success:true}));
         }
@@ -4918,6 +4933,7 @@ const server = http.createServer((req, res) => {
         } else {
           const auditMsg = `تم حذف مخالفة غش للمتدرب "${trainee}" (${type})`;
           logSystemActivity('violation_delete', 'المشرف العام', auditMsg);
+          invalidateCollectionsCache();
 
           res.writeHead(200, {'Content-Type':'application/json'});
           res.end(JSON.stringify({success:true}));
@@ -5084,6 +5100,21 @@ const server = http.createServer((req, res) => {
 
   // GET /api/db/collections - Fetch all central data collections
   if (pathname === '/api/db/collections' && req.method === 'GET') {
+    const now = Date.now();
+    const clientEtag = req.headers['if-none-match'];
+
+    // Serve from cache if still fresh and ETag matches
+    if (_collectionsCache && (now - _collectionsCacheTime) < COLLECTIONS_CACHE_TTL) {
+      if (clientEtag && clientEtag === _collectionsCache.etag) {
+        res.writeHead(304, { 'ETag': _collectionsCache.etag, 'Cache-Control': 'no-cache' });
+        res.end();
+        return;
+      }
+      res.writeHead(200, { 'Content-Type': 'application/json', 'ETag': _collectionsCache.etag, 'Cache-Control': 'no-cache' });
+      res.end(_collectionsCache.body);
+      return;
+    }
+
     const dbAll = (sql, params = []) => new Promise((resolve, reject) => {
       db.all(sql, params, (err, rows) => {
         if (err) reject(err); else resolve(rows);
@@ -5227,8 +5258,14 @@ const server = http.createServer((req, res) => {
       collections['ps_login_logs'] = loginLogs;
       collections['ps_discord_links'] = discordLinks;
 
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ success: true, collections }));
+      const responseBody = JSON.stringify({ success: true, collections });
+      // Simple ETag: timestamp of when this response was built
+      const etag = `"${Date.now()}"`;
+      _collectionsCache = { body: responseBody, etag };
+      _collectionsCacheTime = Date.now();
+
+      res.writeHead(200, { 'Content-Type': 'application/json', 'ETag': etag, 'Cache-Control': 'no-cache' });
+      res.end(responseBody);
     }).catch(err => {
       console.error('❌ Error fetching collections:', err);
       res.writeHead(500, { 'Content-Type': 'application/json' });
@@ -5254,6 +5291,7 @@ const server = http.createServer((req, res) => {
 
         // Helper function for quick return
         const sendSuccess = (changes = 1) => {
+          invalidateCollectionsCache(); // Invalidate after any write
           res.writeHead(200, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({ success: true, changes }));
         };

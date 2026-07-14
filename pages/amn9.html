@@ -1447,6 +1447,7 @@
   <script>
     let activeExam = null;
     let currentQIdx = 0;
+    let cachedExamAttempts = null; // ذاكرة مؤقتة لتجنب تكرار الطلبات المتتالية
     let userAnswers = []; // holds indices of selected choices
     let timerInterval = null;
     let timeLeft = 0; // seconds
@@ -1488,7 +1489,7 @@
         }
       });
 
-      // Periodic sync every 3 seconds for supervisor data if active
+      // Periodic sync every 10 seconds for supervisor data if active (reduced from 3s to reduce server load)
       setInterval(() => {
         const panel = document.getElementById('supervisor-panel');
         if (panel && panel.style.display !== 'none') {
@@ -1521,9 +1522,9 @@
             renderHandRaiseLog();
           }
         }
-      }, 3000);
+      }, 10000);
 
-      // Periodic sync every 5 seconds
+      // Periodic sync every 15 seconds (reduced from 5s to reduce server load)
       setInterval(() => {
         App.syncSettingsWithServer()
           .then(() => {
@@ -1531,7 +1532,7 @@
             renderExamsList();
           })
           .catch(() => { });
-      }, 5000);
+      }, 15000);
 
       // Global Discord Auth Gate for all subpages
       checkAuthGate();
@@ -3266,9 +3267,13 @@
       const currentUser = Auth.getCurrentUser();
       let existing = results.find(r => r.examId === id && currentUser && r.studentDiscord === currentUser.discord);
 
+      // إعادة ضبط الذاكرة المؤقتة للطلب الجديد
+      cachedExamAttempts = null;
+
       if (!existing) {
         try {
           const dbAttempts = await Storage.fetchExamArchive();
+          cachedExamAttempts = dbAttempts; // حفظ السجلات لتجنب تكرار الطلبات لاحقاً
           const found = dbAttempts.find(a =>
             a.exam_name === exam.title &&
             currentUser &&
@@ -3286,6 +3291,11 @@
         } catch (err) {
           console.warn('Failed to fetch exam archive for check:', err);
         }
+      } else {
+        // في حال وجود محاولة محلية، نجلب الأرشيف في الخلفية لتحضير التخزين المؤقت
+        Storage.fetchExamArchive().then(dbAttempts => {
+          cachedExamAttempts = dbAttempts;
+        }).catch(() => {});
       }
 
       if (existing) {
@@ -3340,7 +3350,9 @@
 
       // Check concurrent device login
       try {
-        const dbAttempts = await Storage.fetchExamArchive();
+        // إعادة استخدام السجلات المخزنة مؤقتاً لتجنب طلب شبكة إضافي
+        const dbAttempts = cachedExamAttempts || await Storage.fetchExamArchive();
+        cachedExamAttempts = dbAttempts;
         const currentUser = Auth.getCurrentUser();
         const lookupUser = {
           id: currentUser ? currentUser.id : '',
@@ -3384,7 +3396,9 @@
 
       if (!existing) {
         try {
-          const dbAttempts = await Storage.fetchExamArchive();
+          // إعادة استخدام السجلات المخزنة مؤقتاً لتجنب طلب شبكة إضافي ثالث
+          const dbAttempts = cachedExamAttempts || await Storage.fetchExamArchive();
+          cachedExamAttempts = dbAttempts;
           const found = dbAttempts.find(a =>
             a.exam_name === examObj.title &&
             a.trainee_name.toLowerCase() === inputName.toLowerCase() &&
