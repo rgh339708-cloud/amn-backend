@@ -2022,11 +2022,13 @@ function initializePostgresConnection() {
   
   pgPool.on('error', (err) => {
     console.error('Unexpected error on PostgreSQL pool:', err);
-    fallbackToSqlite();
+    // Only fallback to sqlite if database was not yet fully loaded, otherwise maintain connection
+    if (!isPostgres) {
+      fallbackToSqlite();
+    }
   });
   
-  isPostgres = true;
-  
+  // Set up db interface immediately to prevent startup runtime errors before connection completes
   db = {
     run(sql, params = [], callback) {
       if (typeof params === 'function') {
@@ -2114,17 +2116,60 @@ function initializePostgresConnection() {
       };
     }
   };
-  
-  initializePostgresSchema(pgPool).then(() => {
-    console.log('✅ PostgreSQL Schema initialized successfully.');
-    initializeAttendanceBooks(db);
-  }).catch(e => {
-    console.error('❌ Failed to initialize PostgreSQL schema:', e.message || e);
-    console.log('⚠️ Falling back to local SQLite database...');
-    dbInitError = e.message || String(e);
-    isPostgres = false;
-    initializeSqlite();
-  });
+
+  // Connection Retry Logic for Neon cold start
+  const maxRetries = 6;
+  let retryCount = 0;
+
+  function tryConnect() {
+    retryCount++;
+    console.log(`🔌 Attempting to connect to PostgreSQL (Attempt ${retryCount}/${maxRetries})...`);
+    pgPool.query('SELECT 1', (err, res) => {
+      if (err) {
+        console.error(`❌ PostgreSQL connection attempt ${retryCount} failed: ${err.message}`);
+        if (retryCount < maxRetries) {
+          const delay = Math.min(1000 * Math.pow(2, retryCount - 1), 10000);
+          console.log(`⏳ Retrying PostgreSQL connection in ${delay}ms...`);
+          setTimeout(tryConnect, delay);
+        } else {
+          console.error('❌ All PostgreSQL connection attempts failed. Falling back to local SQLite...');
+          dbInitError = err.message || String(err);
+          isPostgres = false;
+          initializeSqlite();
+        }
+      } else {
+        console.log('✅ PostgreSQL connected successfully (Neon is awake!).');
+        isPostgres = true;
+
+        // Keep-Alive Ping to keep Neon database awake
+        setInterval(() => {
+          if (isPostgres && pgPool) {
+            pgPool.query('SELECT 1', (pingErr) => {
+              if (pingErr) {
+                console.warn('[DB Keep-Alive] PostgreSQL ping failed:', pingErr.message);
+              } else {
+                console.log('[DB Keep-Alive] PostgreSQL ping OK (Neon kept active)');
+              }
+            });
+          }
+        }, 4 * 60 * 1000); // Every 4 minutes (Neon sleep threshold is 5 mins)
+
+        // Initialize Postgres schema and attendance books
+        initializePostgresSchema(pgPool).then(() => {
+          console.log('✅ PostgreSQL Schema initialized successfully.');
+          initializeAttendanceBooks(db);
+        }).catch(schemaErr => {
+          console.error('❌ Failed to initialize PostgreSQL schema:', schemaErr.message || schemaErr);
+          console.log('⚠️ Falling back to local SQLite database...');
+          dbInitError = schemaErr.message || String(schemaErr);
+          isPostgres = false;
+          initializeSqlite();
+        });
+      }
+    });
+  }
+
+  tryConnect();
 }
 
 // Always initialize local SQLite database connection & schema on startup to prevent fallback race conditions
