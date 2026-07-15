@@ -6297,20 +6297,29 @@ const server = http.createServer((req, res) => {
       } catch(e) { return 'error'; }
     })() : 'not_set';
     
-    res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-    res.end(JSON.stringify({
-      RENDER: process.env.RENDER || 'false',
-      NODE_ENV: process.env.NODE_ENV || 'not_set',
-      GUILD_ID: process.env.GUILD_ID || 'not_set',
-      appId: appId,
-      maskedToken: maskedToken,
-      isMysql: typeof isMysql !== 'undefined' ? isMysql : false,
-      MYSQL_HOST: typeof MYSQL_HOST !== 'undefined' ? MYSQL_HOST : 'not_set',
-      dbInitError: typeof dbInitError !== 'undefined' ? dbInitError : null,
-      isPostgres: typeof isPostgres !== 'undefined' ? isPostgres : false,
-      hasDatabaseUrl: !!(process.env.DATABASE_URL || config.databaseUrl),
-      dbUrlType: (process.env.DATABASE_URL || config.databaseUrl || '').substring(0, 15)
-    }));
+    db.all("SELECT COUNT(*) as cnt FROM users", [], (err, rows) => {
+      const userCount = !err && rows && rows[0] ? rows[0].cnt : (err ? err.message : 'no_rows');
+      db.all("SELECT database() as dbname", [], (dbErr, dbRows) => {
+        const dbName = !dbErr && dbRows && dbRows[0] ? Object.values(dbRows[0])[0] : (dbErr ? dbErr.message : 'unknown');
+        
+        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify({
+          RENDER: process.env.RENDER || 'false',
+          NODE_ENV: process.env.NODE_ENV || 'not_set',
+          GUILD_ID: process.env.GUILD_ID || 'not_set',
+          appId: appId,
+          maskedToken: maskedToken,
+          isMysql: typeof isMysql !== 'undefined' ? isMysql : false,
+          MYSQL_HOST: typeof MYSQL_HOST !== 'undefined' ? MYSQL_HOST : 'not_set',
+          dbInitError: typeof dbInitError !== 'undefined' ? dbInitError : null,
+          dbName: dbName,
+          userCount: userCount,
+          isPostgres: typeof isPostgres !== 'undefined' ? isPostgres : false,
+          hasDatabaseUrl: !!(process.env.DATABASE_URL || config.databaseUrl),
+          dbUrlType: (process.env.DATABASE_URL || config.databaseUrl || '').substring(0, 15)
+        }));
+      });
+    });
     return;
   }
 
