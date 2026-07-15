@@ -745,7 +745,13 @@ async function runCsvDiscordSync(db, force = false) {
         if (rawRes && (rawRes.user || rawRes.roles)) {
           guildMember = rawRes;
         }
+        await delay(350); // تأخير لتجنب Rate Limiting من Discord عند الطلب الفردي
       } catch (err) {
+        // إذا كان خطأ 429 (Rate Limit)، ننتظر أطول
+        if (err.message && err.message.includes('429')) {
+          console.warn(`[CSV Sync] ⚠️ Rate limit مؤقت عند جلب ${member.name} — ننتظر 5 ثوانٍ...`);
+          await delay(5000);
+        }
         guildMember = null;
       }
     }
