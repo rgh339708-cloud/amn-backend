@@ -153,10 +153,10 @@ async function sendLogMessage(channelId, embed, botToken) {
 
 function loadConfig() {
   const envPaths = [
+    path.join(__dirname, '.env'),
     path.join(process.env.HOME || process.env.USERPROFILE || '', 'OneDrive', 'Documents', 'DISCORD', '.env'),
     path.join(process.env.HOME || process.env.USERPROFILE || '', 'DISCORD', '.env'),
-    path.join(__dirname, '..', 'DISCORD', '.env'),
-    path.join(__dirname, '.env')
+    path.join(__dirname, '..', 'DISCORD', '.env')
   ];
 
   for (const envPath of envPaths) {
@@ -168,7 +168,10 @@ function loadConfig() {
           if (trimmed && !trimmed.startsWith('#') && trimmed.includes('=')) {
             const [key, ...rest] = trimmed.split('=');
             const value = rest.join('=').trim().replace(/^['"]|['"]$/g, '');
-            process.env[key.trim()] = value;
+            const envKey = key.trim();
+            if (!process.env[envKey]) {
+              process.env[envKey] = value;
+            }
           }
         }
       } catch (e) {}
@@ -178,6 +181,8 @@ function loadConfig() {
   // Fallback: load strictly from environment
   const discordToken = process.env.DISCORD_TOKEN || '';
   const guildId     = process.env.GUILD_ID || '1272212444936404992';
+
+  console.log(`[CSV Config Diag] Selected Token Ends With: "${discordToken.substring(discordToken.length - 10)}" | Guild ID: "${guildId}"`);
 
   return { discordToken, guildId };
 }
@@ -732,14 +737,26 @@ async function runCsvDiscordSync(db, force = false) {
   for (const member of mergedMembers) {
     if (!member.discordId) continue;
 
-    // 1. جلب بيانات العضو ورولاته من الذاكرة (Cached)
-    const guildMember = guildMembersMap.get(member.discordId);
+    // 1. جلب بيانات العضو ورولاته من الذاكرة (Cached) مع fallback للطلب الفردي في حال فشل الكاش
+    let guildMember = guildMembersMap.get(member.discordId);
+    if (!guildMember) {
+      try {
+        const rawRes = await getGuildMember(guildId, member.discordId, discordToken);
+        if (rawRes && (rawRes.user || rawRes.roles)) {
+          guildMember = rawRes;
+        }
+      } catch (err) {
+        guildMember = null;
+      }
+    }
+
     if (!guildMember) {
       console.warn(`[CSV Sync] ⚠️ العضو ${member.name} (${member.discordId}) غير موجود في السيرفر.`);
       delete newSnapshot[member.discordId];
       continue;
     }
 
+    const isNew = !snapshot[member.discordId];
     const currentRoles = guildMember.roles || [];
     const expectedNickname = `${member.code ? '[' + member.code + '] ' : ''}${member.name}`;
     const actualNickname = guildMember.nick || guildMember.user.username || '';

@@ -303,7 +303,16 @@ const Storage = (() => {
     
     try {
       const settings = JSON.parse(localStorage.getItem('ps_settings') || '{}');
-      if (settings && settings.backendUrl) return settings.backendUrl;
+      if (settings && settings.backendUrl) {
+        // Force override old outdated backends to prevent loops
+        if (settings.backendUrl.includes('railway.app') || 
+            settings.backendUrl.includes('trycloudflare.com') ||
+            settings.backendUrl === 'https://amn-backend.onrender.com') {
+          settings.backendUrl = 'https://amn-backend-euhi.onrender.com';
+          localStorage.setItem('ps_settings', JSON.stringify(settings));
+        }
+        return settings.backendUrl;
+      }
     } catch (e) {}
     return 'https://amn-backend-euhi.onrender.com';
   }

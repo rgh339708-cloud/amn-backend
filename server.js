@@ -87,10 +87,10 @@ function loadConfig() {
     mysqlPort: ''
   };
   const envPaths = [
+    path.join(__dirname, '.env'),
     path.join(process.env.USERPROFILE || 'C:\\Users\\rayan', 'OneDrive', 'Documents', 'DISCORD', '.env'),
     path.join('c:', 'Users', 'rayan', 'OneDrive', 'Documents', 'DISCORD', '.env'),
-    path.join(__dirname, '..', 'DISCORD', '.env'),
-    path.join(__dirname, '.env')
+    path.join(__dirname, '..', 'DISCORD', '.env')
   ];
   
   let loadedCount = 0;
@@ -103,17 +103,17 @@ function loadConfig() {
           if (parts.length >= 2 && !parts[0].startsWith('#')) {
             const key = parts[0].trim();
             const value = parts.slice(1).join('=').trim().replace(/^['"]|['"]$/g, '');
-            if (key === 'SPREADSHEET_ID') config.spreadsheetId = value;
-            if (key === 'SPREADSHEET_GID') config.spreadsheetGid = value;
-            if (key === 'DISCORD_TOKEN') config.discordToken = value;
-            if (key === 'DATABASE_URL') config.databaseUrl = value;
-            if (key === 'GUILD_ID') config.guildId = value;
-            if (key === 'MANAGED_ROLES') config.managedRoles = value.split(',').map(r => r.trim());
-            if (key === 'MYSQL_HOST') config.mysqlHost = value;
-            if (key === 'MYSQL_USER') config.mysqlUser = value;
-            if (key === 'MYSQL_PASSWORD') config.mysqlPassword = value;
-            if (key === 'MYSQL_DATABASE') config.mysqlDatabase = value;
-            if (key === 'MYSQL_PORT') config.mysqlPort = value;
+            if (key === 'SPREADSHEET_ID' && !config.spreadsheetId) config.spreadsheetId = value;
+            if (key === 'SPREADSHEET_GID' && !config.spreadsheetGid) config.spreadsheetGid = value;
+            if (key === 'DISCORD_TOKEN' && !config.discordToken) config.discordToken = value;
+            if (key === 'DATABASE_URL' && !config.databaseUrl) config.databaseUrl = value;
+            if (key === 'GUILD_ID' && !config.guildId) config.guildId = value;
+            if (key === 'MANAGED_ROLES' && (!config.managedRoles || config.managedRoles.length === 0)) config.managedRoles = value.split(',').map(r => r.trim());
+            if (key === 'MYSQL_HOST' && !config.mysqlHost) config.mysqlHost = value;
+            if (key === 'MYSQL_USER' && !config.mysqlUser) config.mysqlUser = value;
+            if (key === 'MYSQL_PASSWORD' && !config.mysqlPassword) config.mysqlPassword = value;
+            if (key === 'MYSQL_DATABASE' && !config.mysqlDatabase) config.mysqlDatabase = value;
+            if (key === 'MYSQL_PORT' && !config.mysqlPort) config.mysqlPort = value;
           }
         });
         console.log(`[Config] Successfully loaded environment variables from ${p}`);
