@@ -2202,7 +2202,7 @@ if (isPostgresUrl) {
       dns.lookup(hostname, { family: 4 }, cb);
     },
     waitForConnections: true,
-    connectionLimit: 10,
+    connectionLimit: 4,
     queueLimit: 0,
     enableKeepAlive: true,
     keepAliveInitialDelay: 10000
@@ -2242,11 +2242,9 @@ if (isPostgresUrl) {
         if (err) {
           console.error(`MySQL error on run: ${err.message}. SQL: ${mySql}`);
           if (isConnectionError(err)) {
-            console.warn('⚠️ MySQL connection error. Temporarily falling back to SQLite for this query...');
-            globalSqliteDb.run(sql, params, callback);
-          } else {
-            if (callback) callback(err);
+            console.warn('⚠️ MySQL connection error. Failing query to prevent empty data cache.');
           }
+          if (callback) callback(err);
         } else {
           const context = {
             lastID: res ? res.insertId : null,
@@ -2270,11 +2268,9 @@ if (isPostgresUrl) {
         if (err) {
           console.error(`MySQL error on get: ${err.message}. SQL: ${mySql}`);
           if (isConnectionError(err)) {
-            console.warn('⚠️ MySQL connection error. Temporarily falling back to SQLite for this query...');
-            globalSqliteDb.get(sql, params, callback);
-          } else {
-            if (callback) callback(err, null);
+            console.warn('⚠️ MySQL connection error. Failing query to prevent empty data cache.');
           }
+          if (callback) callback(err, null);
         } else {
           const row = res && res.length > 0 ? res[0] : null;
           if (callback) callback(null, row);
@@ -2295,11 +2291,9 @@ if (isPostgresUrl) {
         if (err) {
           console.error(`MySQL error on all: ${err.message}. SQL: ${mySql}`);
           if (isConnectionError(err)) {
-            console.warn('⚠️ MySQL connection error. Temporarily falling back to SQLite for this query...');
-            globalSqliteDb.all(sql, params, callback);
-          } else {
-            if (callback) callback(err, []);
+            console.warn('⚠️ MySQL connection error. Failing query to prevent empty data cache.');
           }
+          if (callback) callback(err, []);
         } else {
           if (callback) callback(null, res || []);
         }
