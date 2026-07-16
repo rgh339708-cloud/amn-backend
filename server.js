@@ -3087,16 +3087,36 @@ function checkUserMatch(row, user) {
   return false;
 }
 
-function resolveRoleFromRank(rank, currentRole = 'viewer') {
-  if (!rank) return currentRole;
-  const r = String(rank).trim();
+function resolveRoleFromRank(rank, leadership = '', currentRole = 'viewer') {
+  let actualLeadership = String(leadership || '').trim();
+  let actualCurrentRole = currentRole;
+  
+  if (arguments.length === 2 && typeof leadership === 'string' && !['القائد', 'نائب', 'مساعد', 'رئاسة', 'شؤون', 'دورة', 'تجنيد'].some(k => leadership.includes(k))) {
+    actualCurrentRole = leadership;
+    actualLeadership = '';
+  }
+
+  const r = String(rank || '').trim();
+  const l = actualLeadership;
+
+  // 1. الأولوية للمهام القيادية (leadership) من عمود AF
+  if (l.includes('القائد') && !l.includes('نائب') && !l.includes('مساعد')) return 'owner';
+  if (l.includes('نائب القائد') || l.includes('مساعد القائد') || l.includes('نائب قائد') || l.includes('مساعد قائد')) return 'assistant_owner';
+  if (l.includes('رئاسة تدريب') || l.includes('رئاسة هيئة تدريب') || l.includes('رئاسة تدريب الأمن العام')) return 'academy_affairs';
+  if (l.includes('شؤون اكاديمية التدريب') || l.includes('شؤون أكاديمية التدريب')) return 'admin';
+  if (l.includes('شعبة التجنيد') || l.includes('التجنيد')) return 'recruitment_affairs';
+  if (l.includes('مدير دورة') || l.includes('مدير الدورة')) return 'course_admin';
+
+  // 2. فحص الرتبة (rank) كـ fallback
   if (r.includes('المشرف العام') || r.includes('المالك') || r.includes('owner')) return 'owner';
   if (r.includes('قيادة الامن العام') || r.includes('assistant_owner')) return 'assistant_owner';
   if (r.includes('رئاسة تدريب الامن العام') || r.includes('academy_affairs')) return 'academy_affairs';
   if (r.includes('شؤون أكاديمية التدريب') || r.includes('admin')) return 'admin';
   if (r.includes('شؤون التجنيد') || r.includes('recruitment_affairs')) return 'recruitment_affairs';
   if (r.includes('مسؤول دورة') || r.includes('مسؤول الدورة') || r.includes('course_admin')) return 'course_admin';
-  return currentRole;
+
+  // 3. الافتراضي هو مشاهد
+  return actualCurrentRole;
 }
 
 function syncGoogleSheetsToDb(forceId = null, loginUser = null) {
@@ -3279,7 +3299,7 @@ function syncGoogleSheetsToDb(forceId = null, loginUser = null) {
             }
 
             if (!dbUser) {
-              let finalRole = resolveRoleFromRank(m.rank, 'viewer');
+              let finalRole = resolveRoleFromRank(m.rank, m.leadership, 'viewer');
               if (discordId === '750581378168389632' && finalRole === 'owner') {
                 finalRole = 'viewer';
               }
@@ -3298,7 +3318,7 @@ function syncGoogleSheetsToDb(forceId = null, loginUser = null) {
               );
             } else {
               const isManual = dbUser.is_manual_role === 1 || dbUser.is_manual_role === true;
-              let finalRole = isManual ? dbUser.role : resolveRoleFromRank(m.rank, dbUser.role);
+              let finalRole = isManual ? dbUser.role : resolveRoleFromRank(m.rank, m.leadership, dbUser.role);
               if ((targetDbId === '750581378168389632' || discordId === '750581378168389632') && finalRole === 'owner') {
                 finalRole = 'viewer';
               }
