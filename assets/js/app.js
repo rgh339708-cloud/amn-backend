@@ -141,7 +141,7 @@ const App = (() => {
     let isOwner = false;
     if (typeof Auth !== 'undefined' && Auth.isLoggedIn()) {
       const user = Auth.getCurrentUser();
-      if (user && user.role === 'owner') {
+      if (user && Auth.hasRole(user.role, 'owner')) {
         isOwner = true;
       }
     }
@@ -432,7 +432,7 @@ const App = (() => {
       }
 
       let adminBtnHtml = '';
-      const isAuthorizedAdmin = ['owner', 'assistant_owner', 'academy_affairs', 'admin'].includes(user.role);
+      const isAuthorizedAdmin = Auth.hasAnyRole(user.role, ['owner', 'assistant_owner', 'academy_affairs', 'admin']);
       if (isAuthorizedAdmin) {
         adminBtnHtml = `
           <a href="${ROOT}pages/admin/amn16.html" class="dropdown-item admin-link" id="nav-admin-dashboard-btn">
@@ -443,8 +443,8 @@ const App = (() => {
       }
 
       let ownerStatusToggleHtml = '';
-      const isOwner = user.role === 'owner';
-      const canToggleMaintenance = user.role === 'owner' || user.role === 'academy_affairs';
+      const isOwner = Auth.hasRole(user.role, 'owner');
+      const canToggleMaintenance = Auth.hasAnyRole(user.role, ['owner', 'academy_affairs']);
       if (canToggleMaintenance) {
         const settings = Storage.get(Storage.keys.SETTINGS, {});
         const isMaintenance = settings.maintenanceMode === true;
@@ -787,7 +787,7 @@ const App = (() => {
                 saveBtn.style.display = 'flex';
                 
                 // Show Add/Delete page controls only if role is owner
-                if (user.role === 'owner') {
+                if (Auth.hasRole(user.role, 'owner')) {
                   addPageBtn.style.display = 'flex';
                   addElementBtn.style.display = 'flex';
                   if (deletePageBtn) {
@@ -1365,7 +1365,7 @@ const App = (() => {
     // Check if user is strictly owner to display dashboard controls (Disabled)
     return;
     const currentUser = Auth.getCurrentUser();
-    if (!currentUser || currentUser.role !== 'owner') return;
+    if (!currentUser || !Auth.hasRole(currentUser.role, 'owner')) return;
 
     // Inject css visual rules
     const styleEl = document.createElement('style');

@@ -93,7 +93,7 @@ const Auth = (() => {
     if (!user) return null;
     
     // Preview Mode for Owner
-    if (user.role === 'owner') {
+    if (hasRole(user.role, 'owner')) {
       const previewRole = sessionStorage.getItem('ps_preview_role');
       if (previewRole) {
         return previewRole;
@@ -104,7 +104,7 @@ const Auth = (() => {
 
   function isActualOwner() {
     const user = getCurrentUser();
-    return user && user.role === 'owner';
+    return user && hasRole(user.role, 'owner');
   }
 
   function setPreviewRole(role) {
@@ -122,6 +122,10 @@ const Auth = (() => {
   }
 
   function getRoleInfo(role) {
+    // For multi-role strings, return info for the highest-level role
+    if (role && role.includes(',')) {
+      return getRoleInfo(getHighestRole(role));
+    }
     return ROLES[role] || {
       label: 'مشاهد',
       emoji: '<i class="fa-solid fa-eye"></i>',
@@ -129,6 +133,35 @@ const Auth = (() => {
       level: 0,
       permissions: ['view']
     };
+  }
+
+  // Helper: Check if a comma-separated role string contains a specific role
+  function hasRole(roleStr, target) {
+    if (!roleStr || !target) return false;
+    return String(roleStr).split(',').some(r => r.trim() === target);
+  }
+
+  // Helper: Check if a comma-separated role string contains any of the target roles
+  function hasAnyRole(roleStr, targets) {
+    if (!roleStr || !targets || !targets.length) return false;
+    const userRoles = String(roleStr).split(',').map(r => r.trim());
+    return targets.some(t => userRoles.includes(t));
+  }
+
+  // Helper: Get the highest-level role from a comma-separated role string
+  function getHighestRole(roleStr) {
+    if (!roleStr) return 'viewer';
+    const parts = String(roleStr).split(',').map(r => r.trim());
+    let highest = 'viewer';
+    let highestLevel = 0;
+    for (const r of parts) {
+      const info = ROLES[r];
+      if (info && info.level > highestLevel) {
+        highestLevel = info.level;
+        highest = r;
+      }
+    }
+    return highest;
   }
 
   /* ── Login / Logout ───────────────────────────────── */
@@ -641,7 +674,7 @@ const Auth = (() => {
 
   function navigateToDestination(session) {
     const redirectBack = typeof localStorage !== 'undefined' ? localStorage.getItem('auth_redirect_back') : null;
-    const isAdminRole = ['owner', 'assistant_owner', 'admin'].includes(session.role);
+    const isAdminRole = hasAnyRole(session.role, ['owner', 'assistant_owner', 'admin']);
     const ROOT = getRootPath();
     
     if (typeof localStorage !== 'undefined') {
@@ -1002,11 +1035,11 @@ const Auth = (() => {
                   dbUser.username = session.username;
                   updated = true;
                 }
-                if (isOwner && dbUser.role !== 'owner') {
+                if (isOwner && !hasRole(dbUser.role, 'owner')) {
                   dbUser.role = 'owner';
                   dbUser.rank = 'المشرف العام';
                   updated = true;
-                } else if (isAssistantOwner && dbUser.role !== 'assistant_owner') {
+                } else if (isAssistantOwner && !hasRole(dbUser.role, 'assistant_owner')) {
                   dbUser.role = 'assistant_owner';
                   dbUser.rank = 'مساعد المشرف العام';
                   updated = true;
@@ -1229,19 +1262,24 @@ const Auth = (() => {
 
   /* ── Permission Checks ────────────────────────────── */
   function hasPermission(permission) {
-    const role = getRole();
-    if (!role) return false;
-    const roleInfo = ROLES[role];
-    if (!roleInfo) return false;
-    if (roleInfo.permissions.includes('*')) return true;
-    return roleInfo.permissions.includes(permission);
+    const roleStr = getRole();
+    if (!roleStr) return false;
+    // Support multi-role: check all roles in comma-separated string
+    const roleParts = String(roleStr).split(',').map(r => r.trim());
+    for (const role of roleParts) {
+      const roleInfo = ROLES[role];
+      if (!roleInfo) continue;
+      if (roleInfo.permissions.includes('*')) return true;
+      if (roleInfo.permissions.includes(permission)) return true;
+    }
+    return false;
   }
 
   function canAccess(section) {
     const minRole = SECTION_MIN_ROLE[section];
     if (!minRole) return true; // public section
     if (!isLoggedIn()) return false;
-    const roleLevel = getRoleInfo(getRole()).level;
+    const roleLevel = getRoleInfo(getHighestRole(getRole())).level;
     const minLevel = getRoleInfo(minRole).level;
     return roleLevel >= minLevel;
   }
@@ -1329,7 +1367,7 @@ const Auth = (() => {
       let updated = false;
       allUsers.forEach(u => {
         const isOwner = ['1334568342345748565', '821825761673478144'].includes(u.id) || (u.discord && ['3gjo', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(u.discord.toLowerCase()));
-        const isAdminRole = ['owner', 'assistant_owner', 'academy_affairs', 'admin', 'recruitment_affairs', 'course_admin'].includes(u.role);
+        const isAdminRole = hasAnyRole(u.role, ['owner', 'assistant_owner', 'academy_affairs', 'admin', 'recruitment_affairs', 'course_admin']);
         if (!isOwner && !isAdminRole) {
           u.role = 'viewer';
           u.rank = 'مشاهد';
@@ -1592,7 +1630,7 @@ const Auth = (() => {
           if (resolved && resolved.found) {
             let needsServerUpdate = false;
             // Prevent stripping owner/assistant_owner overrides
-            const isPrivileged = ['owner', 'assistant_owner'].includes(dbUser.role);
+            const isPrivileged = hasAnyRole(dbUser.role, ['owner', 'assistant_owner']);
             if (!isPrivileged) {
               if (dbUser.display_name !== resolved.name) { dbUser.display_name = resolved.name; needsServerUpdate = true; }
               if (dbUser.rank !== resolved.rank) { dbUser.rank = resolved.rank; needsServerUpdate = true; }
@@ -1669,7 +1707,7 @@ const Auth = (() => {
           }
         }
       } else if (res.status === 404) {
-        if (user.role !== 'viewer') {
+        if (!hasRole(user.role, 'viewer') || hasAnyRole(user.role, ['owner', 'assistant_owner', 'academy_affairs', 'admin', 'recruitment_affairs', 'course_admin', 'college_trainee'])) {
           if (user.accessToken) {
             console.warn('[Session Sync] User not found in database. Attempting automatic silent re-sync with Discord token...');
             processDiscordLogin(user.accessToken)
@@ -1800,7 +1838,7 @@ const Auth = (() => {
     const userRole = getRole();
 
     // Owner, assistant_owner and academy_affairs always have full access (unless in preview mode)
-    if (user && (user.role === 'owner' || user.role === 'assistant_owner' || user.role === 'academy_affairs') && !getPreviewRole()) return true;
+    if (user && hasAnyRole(user.role, ['owner', 'assistant_owner', 'academy_affairs']) && !getPreviewRole()) return true;
 
     // Direct authoritative permissions map for key system pages
     const systemAuthMap = {
@@ -1811,7 +1849,7 @@ const Auth = (() => {
     if (systemAuthMap[pageId]) {
       const allowed = systemAuthMap[pageId];
       if (allowed.includes('*')) return true;
-      return allowed.includes(userRole);
+      return hasAnyRole(userRole, allowed);
     }
 
     // 1. Check system pages first (authoritative source - never depends on localStorage)
@@ -1820,7 +1858,7 @@ const Auth = (() => {
       if (sysPage) {
         const allowed = sysPage.allowedRoles || ['*'];
         if (allowed.includes('*')) return true;
-        return allowed.includes(userRole);
+        return hasAnyRole(userRole, allowed);
       }
     }
 
@@ -1831,7 +1869,7 @@ const Auth = (() => {
       if (page) {
         const allowed = page.allowedRoles || ['*'];
         if (allowed.includes('*')) return true;
-        return allowed.includes(userRole);
+        return hasAnyRole(userRole, allowed);
       }
     }
 
@@ -1860,6 +1898,7 @@ const Auth = (() => {
     requireDiscordAuth, handleDiscordCallback, getDiscordBadges, getDiscordAuthUrl,
     resolveUserTableInfo, validateSessionOnline,
     isActualOwner, setPreviewRole, getPreviewRole,
+    hasRole, hasAnyRole, getHighestRole,
     checkPageAccess, seedSystemPages
   };
 })();

@@ -3092,25 +3092,46 @@ function resolveRoleFromRank(rank, leadership = '', currentRole = 'viewer') {
 
   const r = String(rank || '').trim();
   const l = actualLeadership;
+  const roles = new Set();
 
-  // 1. الأولوية للمهام القيادية (leadership) من عمود AF
-  if (l.includes('القائد') && !l.includes('نائب') && !l.includes('مساعد')) return 'owner';
-  if (l.includes('نائب القائد') || l.includes('مساعد القائد') || l.includes('نائب قائد') || l.includes('مساعد قائد')) return 'assistant_owner';
-  if (l.includes('رئاسة تدريب') || l.includes('رئاسة هيئة تدريب') || l.includes('رئاسة تدريب الأمن العام')) return 'academy_affairs';
-  if (l.includes('شؤون اكاديمية التدريب') || l.includes('شؤون أكاديمية التدريب')) return 'admin';
-  if (l.includes('شعبة التجنيد') || l.includes('التجنيد')) return 'recruitment_affairs';
-  if (l.includes('مدير دورة') || l.includes('مدير الدورة')) return 'course_admin';
+  // 1. المهام القيادية (leadership) من عمود AF - يمكن أن يكون الشخص في أكثر من مهمة
+  if (l.includes('القائد') && !l.includes('نائب') && !l.includes('مساعد')) roles.add('owner');
+  if (l.includes('نائب القائد') || l.includes('مساعد القائد') || l.includes('نائب قائد') || l.includes('مساعد قائد')) roles.add('assistant_owner');
+  if (l.includes('رئاسة تدريب') || l.includes('رئاسة هيئة تدريب') || l.includes('رئاسة تدريب الأمن العام')) roles.add('academy_affairs');
+  if (l.includes('شؤون اكاديمية التدريب') || l.includes('شؤون أكاديمية التدريب')) roles.add('admin');
+  if (l.includes('شعبة التجنيد') || l.includes('التجنيد')) roles.add('recruitment_affairs');
+  if (l.includes('مدير دورة') || l.includes('مدير الدورة')) roles.add('course_admin');
+  if (l.includes('منسوبي ادارة التدريب') || l.includes('منسوبي إدارة التدريب')) roles.add('college_trainee');
 
-  // 2. فحص الرتبة (rank) كـ fallback
-  if (r.includes('المشرف العام') || r.includes('المالك') || r.includes('owner')) return 'owner';
-  if (r.includes('قيادة الامن العام') || r.includes('assistant_owner')) return 'assistant_owner';
-  if (r.includes('رئاسة تدريب الامن العام') || r.includes('academy_affairs')) return 'academy_affairs';
-  if (r.includes('شؤون أكاديمية التدريب') || r.includes('admin')) return 'admin';
-  if (r.includes('شؤون التجنيد') || r.includes('recruitment_affairs')) return 'recruitment_affairs';
-  if (r.includes('مسؤول دورة') || r.includes('مسؤول الدورة') || r.includes('course_admin')) return 'course_admin';
+  // 2. فحص الرتبة (rank) كـ fallback إذا لم يتم العثور على مهام قيادية
+  if (roles.size === 0) {
+    if (r.includes('المشرف العام') || r.includes('المالك') || r.includes('owner')) roles.add('owner');
+    if (r.includes('قيادة الامن العام') || r.includes('assistant_owner')) roles.add('assistant_owner');
+    if (r.includes('رئاسة تدريب الامن العام') || r.includes('academy_affairs')) roles.add('academy_affairs');
+    if (r.includes('شؤون أكاديمية التدريب') || r.includes('admin')) roles.add('admin');
+    if (r.includes('شؤون التجنيد') || r.includes('recruitment_affairs')) roles.add('recruitment_affairs');
+    if (r.includes('مسؤول دورة') || r.includes('مسؤول الدورة') || r.includes('course_admin')) roles.add('course_admin');
+    if (r.includes('منسوبي كلية التدريب') || r.includes('college_trainee')) roles.add('college_trainee');
+  }
 
-  // 3. الافتراضي هو مشاهد
-  return actualCurrentRole;
+  // 3. إذا لم يتم العثور على أي رتبة، يرجع الدور الحالي
+  if (roles.size === 0) return actualCurrentRole;
+
+  // 4. إرجاع جميع الأدوار مفصولة بفاصلة
+  return Array.from(roles).join(',');
+}
+
+// Helper: Check if a comma-separated role string contains a specific role
+function hasRole(roleStr, target) {
+  if (!roleStr || !target) return false;
+  return String(roleStr).split(',').some(r => r.trim() === target);
+}
+
+// Helper: Check if a comma-separated role string contains any of the target roles
+function hasAnyRole(roleStr, targets) {
+  if (!roleStr || !targets || !targets.length) return false;
+  const userRoles = String(roleStr).split(',').map(r => r.trim());
+  return targets.some(t => userRoles.includes(t));
 }
 
 function syncGoogleSheetsToDb(forceId = null, loginUser = null) {
@@ -3372,9 +3393,9 @@ function syncGoogleSheetsToDb(forceId = null, loginUser = null) {
             const isOwnerOrAssistant = ['1334568342345748565', '821825761673478144'].includes(user.id) || 
                                        (user.username && ['3gjo', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(user.username.toLowerCase())) ||
                                        (user.display_name && ['3gjo', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(user.display_name.toLowerCase())) ||
-                                       (user.role === 'owner' || user.role === 'assistant_owner');
-            const isGuest = user.role === 'viewer' && (!user.rank || user.rank === 'مشاهد' || user.rank === 'غير معروف');
-            const isStaff = ['owner', 'assistant_owner', 'academy_affairs', 'admin', 'recruitment_affairs', 'course_admin'].includes(user.role);
+                                       hasAnyRole(user.role, ['owner', 'assistant_owner']);
+            const isGuest = hasRole(user.role, 'viewer') && (!user.rank || user.rank === 'مشاهد' || user.rank === 'غير معروف');
+            const isStaff = hasAnyRole(user.role, ['owner', 'assistant_owner', 'academy_affairs', 'admin', 'recruitment_affairs', 'course_admin']);
             const isManual = user.is_manual_role === 1 || user.is_manual_role === true || user.is_manual_role === '1';
             if (isOwnerOrAssistant || isStaff || isGuest || isManual) {
               return Promise.resolve();
@@ -3443,9 +3464,9 @@ function syncGoogleSheetsToDb(forceId = null, loginUser = null) {
 
             const isOwnerOrAssistant = ['1334568342345748565', '821825761673478144'].includes(targetDbId) || 
                                        ['1334568342345748565', '821825761673478144'].includes(cleanForceId) || 
-                                       (dbUser && (dbUser.role === 'owner' || dbUser.role === 'assistant_owner'));
+                                       (dbUser && hasAnyRole(dbUser.role, ['owner', 'assistant_owner']));
 
-            const isGuest = dbUser && dbUser.role === 'viewer' && (!dbUser.rank || dbUser.rank === 'مشاهد' || dbUser.rank === 'غير معروف');
+            const isGuest = dbUser && hasRole(dbUser.role, 'viewer') && (!dbUser.rank || dbUser.rank === 'مشاهد' || dbUser.rank === 'غير معروف');
 
             if (foundInSheets) {
               // The user is present in Google Sheets under a different format/ID. Reactivate/keep active!
@@ -6551,12 +6572,12 @@ const server = http.createServer((req, res) => {
             return;
           }
           
-          const isOwner = (opUser && opUser.role === 'owner') || 
+          const isOwner = (opUser && hasRole(opUser.role, 'owner')) || 
                             ['1334568342345748565'].includes(operator_id) ||
                             (opUser && opUser.username && ['3gjo', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(opUser.username.toLowerCase())) ||
                             (opUser && opUser.display_name && ['3gjo', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(opUser.display_name.toLowerCase()));
                             
-          const isAssistantOwner = (opUser && opUser.role === 'assistant_owner') ||
+          const isAssistantOwner = (opUser && hasAnyRole(opUser.role, ['assistant_owner', 'owner'])) ||
                                    ['821825761673478144'].includes(operator_id) ||
                                    (opUser && opUser.username && ['ifm711'].includes(opUser.username.toLowerCase())) ||
                                    (opUser && opUser.display_name && ['ifm711'].includes(opUser.display_name.toLowerCase()));

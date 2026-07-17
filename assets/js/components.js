@@ -70,9 +70,9 @@ const Components = (() => {
     if (!Auth.isLoggedIn()) return false;
     // Owner, assistant_owner and academy_affairs always see everything (unless in preview mode)
     const user = Auth.getCurrentUser();
-    if (user && (user.role === 'owner' || user.role === 'assistant_owner' || user.role === 'academy_affairs') && !Auth.getPreviewRole()) return true;
+    if (user && Auth.hasAnyRole(user.role, ['owner', 'assistant_owner', 'academy_affairs']) && !Auth.getPreviewRole()) return true;
     const role = Auth.getRole();
-    return allowed.includes(role);
+    return Auth.hasAnyRole(role, allowed);
   }
 
   // Helper: get custom pages (non-system) from localStorage
