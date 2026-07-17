@@ -3091,7 +3091,8 @@ function resolveRoleFromRank(rank, leadership = '', currentRole = 'viewer') {
   }
 
   const r = String(rank || '').trim();
-  const l = actualLeadership;
+  // تنظيف حرف التطويل (ـ) لتصحيح النصوص مثل رئـاسـة المـجلـس
+  const l = actualLeadership.replace(/ـ/g, '');
   const roles = new Set();
 
   // 1. المهام القيادية (leadership) من عمود AF - يمكن أن يكون الشخص في أكثر من مهمة
