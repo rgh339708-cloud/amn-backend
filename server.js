@@ -3097,11 +3097,12 @@ function resolveRoleFromRank(rank, leadership = '', currentRole = 'viewer') {
   // 1. المهام القيادية (leadership) من عمود AF - يمكن أن يكون الشخص في أكثر من مهمة
   if (l.includes('القائد') && !l.includes('نائب') && !l.includes('مساعد')) roles.add('owner');
   if (l.includes('نائب القائد') || l.includes('مساعد القائد') || l.includes('نائب قائد') || l.includes('مساعد قائد')) roles.add('assistant_owner');
-  if (l.includes('رئاسة تدريب') || l.includes('رئاسة هيئة تدريب') || l.includes('رئاسة تدريب الأمن العام')) roles.add('academy_affairs');
-  if (l.includes('شؤون اكاديمية التدريب') || l.includes('شؤون أكاديمية التدريب')) roles.add('admin');
+  if (l.includes('رئاسة تدريب') || l.includes('رئاسة هيئة تدريب') || l.includes('رئاسة تدريب الأمن العام') || l.includes('رئاسة تدريب الامن العام') || l.includes('مدير كلية')) roles.add('academy_affairs');
+  if (l.includes('شؤون اكاديمية التدريب') || l.includes('شؤون أكاديمية التدريب') || l.includes('شؤون عسكرية')) roles.add('admin');
   if (l.includes('شعبة التجنيد') || l.includes('التجنيد')) roles.add('recruitment_affairs');
   if (l.includes('مدير دورة') || l.includes('مدير الدورة')) roles.add('course_admin');
   if (l.includes('منسوبي ادارة التدريب') || l.includes('منسوبي إدارة التدريب')) roles.add('college_trainee');
+  if (l.includes('كبار ضباط الامن العام') || l.includes('رئاسة المجلس العسكري') || l.includes('اللجنة العليا')) roles.add('assistant_owner');
 
   // 2. فحص الرتبة (rank) كـ fallback إذا لم يتم العثور على مهام قيادية
   if (roles.size === 0) {
