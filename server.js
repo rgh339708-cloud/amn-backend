@@ -2966,7 +2966,7 @@ function syncSaveAttempt(data, callback) {
 function fetchPublicSheetRows(spreadsheetId, tabName) {
   return new Promise((resolve, reject) => {
     const encodedTab = encodeURIComponent(tabName);
-    const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=responseHandler:cb&sheet=${encodedTab}`;
+    const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=responseHandler:cb&sheet=${encodedTab}&t=${Date.now()}`;
 
     https.get(url, { headers: { 'User-Agent': 'Mozilla/5.0' } }, (res) => {
       if (res.statusCode !== 200) {
@@ -6389,12 +6389,19 @@ const server = http.createServer((req, res) => {
         const avatarUrl = data.avatar || '';
         const bannerUrl = data.banner || '';
         // 1. Fetch the user's current data from the DB first to determine roles, ranks, etc.
-        db.get('SELECT * FROM users WHERE id = ?', [id], (err, existingUser) => {
+        db.get('SELECT * FROM users WHERE id = ? OR discord_id = ? OR id = ? ORDER BY id ASC LIMIT 1', [id, id, 'discord_' + id], (err, existingUser) => {
           if (err) {
             console.error('❌ Database error querying user:', err);
             res.writeHead(500, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ error: 'خطأ في قاعدة البيانات.' }));
             return;
+          }
+
+          // Merge ghost record with real record if needed
+          if (existingUser && existingUser.id !== id) {
+             console.log(`[Auth] User ${id} logged in. Replacing ghost record ${existingUser.id}`);
+             db.run('UPDATE users SET id = ? WHERE id = ?', [id, existingUser.id]);
+             existingUser.id = id;
           }
 
           const isOwner = ['1334568342345748565'].includes(id) || 
