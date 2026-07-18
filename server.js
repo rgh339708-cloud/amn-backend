@@ -3085,7 +3085,7 @@ function resolveRoleFromRank(rank, leadership = '', currentRole = 'viewer') {
   let actualLeadership = String(leadership || '').trim();
   let actualCurrentRole = currentRole;
   
-  if (arguments.length === 2 && typeof leadership === 'string' && !['القائد', 'نائب', 'مساعد', 'رئاسة', 'شؤون', 'دورة', 'تجنيد'].some(k => leadership.includes(k))) {
+  if (arguments.length === 2 && typeof leadership === 'string' && !['القائد', 'نائب', 'مساعد', 'رئاسة', 'شؤون', 'دورة', 'تجنيد', 'منسوبي'].some(k => leadership.includes(k))) {
     actualCurrentRole = leadership;
     actualLeadership = '';
   }
@@ -3095,31 +3095,28 @@ function resolveRoleFromRank(rank, leadership = '', currentRole = 'viewer') {
   const l = actualLeadership.replace(/ـ/g, '');
   const roles = new Set();
 
-  // 1. المهام القيادية (leadership) من عمود AF - يمكن أن يكون الشخص في أكثر من مهمة
-  if (l.includes('القائد') && !l.includes('نائب') && !l.includes('مساعد')) roles.add('owner');
-  if (l.includes('نائب القائد') || l.includes('مساعد القائد') || l.includes('نائب قائد') || l.includes('مساعد قائد')) roles.add('assistant_owner');
-  if (l.includes('رئاسة تدريب') || l.includes('رئاسة هيئة تدريب') || l.includes('رئاسة تدريب الأمن العام') || l.includes('رئاسة تدريب الامن العام') || l.includes('مدير كلية')) roles.add('academy_affairs');
-  if (l.includes('شؤون اكاديمية التدريب') || l.includes('شؤون أكاديمية التدريب') || l.includes('شؤون عسكرية')) roles.add('admin');
-  if (l.includes('شعبة التجنيد') || l.includes('التجنيد')) roles.add('recruitment_affairs');
-  if (l.includes('مدير دورة') || l.includes('مدير الدورة')) roles.add('course_admin');
-  if (l.includes('منسوبي ادارة التدريب') || l.includes('منسوبي إدارة التدريب')) roles.add('college_trainee');
-  if (l.includes('كبار ضباط الامن العام') || l.includes('رئاسة المجلس العسكري') || l.includes('اللجنة العليا')) roles.add('assistant_owner');
-
-  // 2. فحص الرتبة (rank) كـ fallback إذا لم يتم العثور على مهام قيادية
-  if (roles.size === 0) {
-    if (r.includes('المشرف العام') || r.includes('المالك') || r.includes('owner')) roles.add('owner');
-    if (r.includes('قيادة الامن العام') || r.includes('assistant_owner')) roles.add('assistant_owner');
-    if (r.includes('رئاسة تدريب الامن العام') || r.includes('academy_affairs')) roles.add('academy_affairs');
-    if (r.includes('شؤون أكاديمية التدريب') || r.includes('admin')) roles.add('admin');
-    if (r.includes('شؤون التجنيد') || r.includes('recruitment_affairs')) roles.add('recruitment_affairs');
-    if (r.includes('مسؤول دورة') || r.includes('مسؤول الدورة') || r.includes('course_admin')) roles.add('course_admin');
-    if (r.includes('منسوبي كلية التدريب') || r.includes('college_trainee')) roles.add('college_trainee');
+  // ─── القائمة الحصرية لعمود AF (محددة بشكل دقيق) ───
+  // القائد → قيادة الامن العام (assistant_owner) + المشرف العام (owner)
+  if (l.includes('القائد') && !l.includes('نائب') && !l.includes('مساعد')) {
+    roles.add('owner');
+    roles.add('assistant_owner');
   }
+  // نائب القائد / مساعد القائد → قيادة الامن العام فقط
+  if (l.includes('نائب القائد') || l.includes('مساعد القائد') || l.includes('نائب قائد') || l.includes('مساعد قائد')) roles.add('assistant_owner');
+  // رئاسة تدريب الأمن العام
+  if (l.includes('رئاسة تدريب')) roles.add('academy_affairs');
+  // شؤون اكاديمية التدريب
+  if (l.includes('شؤون اكاديمية التدريب') || l.includes('شؤون أكاديمية التدريب')) roles.add('admin');
+  // مدير دورة → مسؤول دورة
+  if (l.includes('مدير دورة') || l.includes('مدير الدورة')) roles.add('course_admin');
+  // منسوبي ادارة التدريب → منسوبي كلية التدريب
+  if (l.includes('منسوبي ادارة التدريب') || l.includes('منسوبي إدارة التدريب')) roles.add('college_trainee');
+  // شعبة التجنيد → شؤون التجنيد
+  if (l.includes('شعبة التجنيد')) roles.add('recruitment_affairs');
 
-  // 3. إذا لم يتم العثور على أي رتبة، يرجع الدور الحالي
-  if (roles.size === 0) return actualCurrentRole;
+  // غير الموجودين في القائمة → مشاهد بالموقع
+  if (roles.size === 0) return 'viewer';
 
-  // 4. إرجاع جميع الأدوار مفصولة بفاصلة
   return Array.from(roles).join(',');
 }
 
