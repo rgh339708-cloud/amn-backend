@@ -6351,6 +6351,7 @@ const server = http.createServer((req, res) => {
           maskedToken: maskedToken,
           isMysql: typeof isMysql !== 'undefined' ? isMysql : false,
           MYSQL_HOST: typeof MYSQL_HOST !== 'undefined' ? MYSQL_HOST : 'not_set',
+          SPREADSHEET_ID: loadConfig().spreadsheetId,
           dbInitError: typeof dbInitError !== 'undefined' ? dbInitError : null,
           dbName: dbName,
           userCount: userCount,
