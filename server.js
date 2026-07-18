@@ -1966,6 +1966,102 @@ let db;
 let mysqlPool = null;
 let globalSqliteDb = null;
 
+let _isBackingUp = false;
+let _backupPending = false;
+function backupDatabaseToHostinger() {
+  if (_isBackingUp) {
+    _backupPending = true;
+    return;
+  }
+  _isBackingUp = true;
+  _backupPending = false;
+  
+  const https = require('https');
+  const fs = require('fs');
+  const DB_PATH = path.join(__dirname, 'assets', 'data', 'exam_archive.db');
+  
+  if (!fs.existsSync(DB_PATH)) {
+    _isBackingUp = false;
+    return;
+  }
+  
+  console.log('🔄 Backing up SQLite DB to Hostinger...');
+  
+  const req = https.request({
+    hostname: 'amn-3-90.com',
+    path: '/sync_db.php',
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer L198611272m@DB_SYNC_SECURE_TOKEN',
+      'Content-Type': 'application/octet-stream'
+    }
+  }, (res) => {
+    let body = '';
+    res.on('data', chunk => body += chunk);
+    res.on('end', () => {
+      if (res.statusCode === 200) {
+        console.log('✅ SQLite DB backed up to Hostinger successfully.');
+      } else {
+        console.log(`⚠️ Backup failed with status ${res.statusCode}: ${body}`);
+      }
+      _isBackingUp = false;
+      if (_backupPending) {
+        setTimeout(backupDatabaseToHostinger, 1000);
+      }
+    });
+  });
+  
+  req.on('error', (e) => {
+    console.log('❌ Backup error:', e.message);
+    _isBackingUp = false;
+  });
+  
+  fs.createReadStream(DB_PATH).pipe(req);
+}
+
+function syncDatabaseFromHostinger(callback) {
+  const https = require('https');
+  const fs = require('fs');
+  const DB_PATH = path.join(__dirname, 'assets', 'data', 'exam_archive.db');
+  console.log('🔄 Attempting to download persistent database from Hostinger...');
+  
+  const options = {
+    hostname: 'amn-3-90.com',
+    path: '/sync_db.php',
+    method: 'GET',
+    headers: {
+      'Authorization': 'Bearer L198611272m@DB_SYNC_SECURE_TOKEN'
+    }
+  };
+  
+  const req = https.request(options, (res) => {
+    if (res.statusCode === 200) {
+      // Ensure directory exists
+      const dir = path.dirname(DB_PATH);
+      if (!fs.existsSync(dir)){
+          fs.mkdirSync(dir, { recursive: true });
+      }
+      const file = fs.createWriteStream(DB_PATH);
+      res.pipe(file);
+      file.on('finish', () => {
+        file.close();
+        console.log('✅ Successfully downloaded persistent database from Hostinger!');
+        callback();
+      });
+    } else {
+      console.log(`⚠️ Hostinger DB sync returned ${res.statusCode}. Proceeding with local DB.`);
+      callback();
+    }
+  });
+  
+  req.on('error', (e) => {
+    console.log('❌ Failed to download Hostinger DB:', e.message);
+    callback();
+  });
+  
+  req.end();
+}
+
 function initializeSqliteConnection() {
   const DB_PATH = path.join(__dirname, 'assets', 'data', 'exam_archive.db');
   globalSqliteDb = new sqlite3.Database(DB_PATH, (err) => {
@@ -2174,8 +2270,12 @@ function initializePostgresConnection() {
 }
 
 // Always initialize local SQLite database connection & schema on startup to prevent fallback race conditions
-initializeSqliteConnection();
-
+// We first sync the persistent database from Hostinger so data is restored after Render restarts
+syncDatabaseFromHostinger(() => {
+  initializeSqliteConnection();
+  // Automatically sync to Hostinger every 2 minutes as a fallback
+  setInterval(backupDatabaseToHostinger, 120000);
+});
 const dbUrl = process.env.DATABASE_URL || config.databaseUrl;
 const forceMysql = process.env.FORCE_MYSQL === 'true' || process.env.FORCE_MYSQL === '1';
 const isPostgresUrl = !forceMysql && dbUrl && (dbUrl.startsWith('postgresql://') || dbUrl.startsWith('postgres://'));
@@ -5412,6 +5512,7 @@ const server = http.createServer((req, res) => {
         // Helper function for quick return
         const sendSuccess = (changes = 1) => {
           invalidateCollectionsCache(); // Invalidate after any write
+          backupDatabaseToHostinger(); // Immediately sync to Hostinger
           res.writeHead(200, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({ success: true, changes }));
         };
