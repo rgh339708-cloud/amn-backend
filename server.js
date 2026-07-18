@@ -2044,9 +2044,10 @@ function syncDatabaseFromHostinger(callback) {
       const file = fs.createWriteStream(DB_PATH);
       res.pipe(file);
       file.on('finish', () => {
-        file.close();
-        console.log('✅ Successfully downloaded persistent database from Hostinger!');
-        callback();
+        file.close(() => {
+          console.log('✅ Successfully downloaded persistent database from Hostinger!');
+          callback();
+        });
       });
     } else {
       console.log(`⚠️ Hostinger DB sync returned ${res.statusCode}. Proceeding with local DB.`);
@@ -4316,6 +4317,24 @@ const server = http.createServer((req, res) => {
       'Access-Control-Max-Age': '86400' // Cache preflight response for 24 hours
     });
     res.end();
+    return;
+  }
+
+  if (pathname === '/api/force_sync_hostinger' && req.method === 'GET') {
+    syncDatabaseFromHostinger(() => {
+      // Reinitialize sqlite connection after download
+      if (globalSqliteDb) {
+        globalSqliteDb.close((err) => {
+          initializeSqliteConnection();
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: true, message: 'Database successfully synced from Hostinger and SQLite reinitialized.' }));
+        });
+      } else {
+        initializeSqliteConnection();
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, message: 'Database synced from Hostinger.' }));
+      }
+    });
     return;
   }
 
