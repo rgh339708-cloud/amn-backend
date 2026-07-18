@@ -486,6 +486,20 @@
 
       const data = await res.json();
       if (res.ok && data.success) {
+        if (data.user) {
+          let currentSession = null;
+          try {
+            currentSession = JSON.parse(localStorage.getItem('session_ps_current_user') || 'null');
+          } catch(e) {}
+          
+          if (currentSession) {
+            if (data.user.avatar) currentSession.avatar_url = data.user.avatar;
+            if (data.user.banner) currentSession.banner_url = data.user.banner;
+            if (data.user.username) currentSession.username = data.user.username;
+            if (data.user.globalName) currentSession.display_name = data.user.globalName;
+            localStorage.setItem('session_ps_current_user', JSON.stringify(currentSession));
+          }
+        }
         await App.alert('تم تحديث صورتك وبنرك الشخصي من ديسكورد بنجاح! سيتم إعادة تحميل الصفحة لعرض التغييرات.', 'تم التحديث بنجاح');
         window.location.reload();
       } else {
