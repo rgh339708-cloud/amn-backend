@@ -129,6 +129,7 @@ function loadConfig() {
 
   // Fallback to process.env if variables are not loaded from file (useful for cloud environments like Render/Railway)
   if (!config.spreadsheetId && process.env.SPREADSHEET_ID) config.spreadsheetId = process.env.SPREADSHEET_ID;
+  if (!config.spreadsheetId) config.spreadsheetId = '1deRenpRLjJYNqp2zBbzBm3iegqGjqXoPuJAM4iI01y0';
   if (!config.spreadsheetGid && process.env.SPREADSHEET_GID) config.spreadsheetGid = process.env.SPREADSHEET_GID;
   if (!config.discordToken && process.env.DISCORD_TOKEN) config.discordToken = process.env.DISCORD_TOKEN;
   if (!config.databaseUrl && process.env.DATABASE_URL) config.databaseUrl = process.env.DATABASE_URL;
