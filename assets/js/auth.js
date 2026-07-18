@@ -1689,7 +1689,9 @@ const Auth = (() => {
           if (dbUser.display_name !== user.username) { user.username = dbUser.display_name; otherChanged = true; }
           if (dbUser.code !== user.code) { user.code = dbUser.code; otherChanged = true; }
           if (dbUser.avatar !== user.avatar) { user.avatar = dbUser.avatar; otherChanged = true; }
+          if (dbUser.avatar_url !== user.avatar_url) { user.avatar_url = dbUser.avatar_url; otherChanged = true; }
           if (dbUser.banner !== user.banner) { user.banner = dbUser.banner; otherChanged = true; }
+          if (dbUser.banner_url !== user.banner_url) { user.banner_url = dbUser.banner_url; otherChanged = true; }
           if (dbUser.department !== user.department) { user.department = dbUser.department; otherChanged = true; }
           
           if (roleChanged || otherChanged) {

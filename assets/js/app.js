@@ -400,7 +400,7 @@ const App = (() => {
         }
       }
 
-      let avatarUrl = user.avatar;
+      let avatarUrl = user.avatar_url || user.avatar;
       // Try resolving actual Discord avatar from our local json cache if current avatar is fallback
       const isFallback = !avatarUrl || 
                          avatarUrl === '🎮' || 
@@ -2756,27 +2756,11 @@ window.resolveDiscordCDNUrl = function(path, type = 'avatar') {
 };
 
 window.handleAvatarError = function(imgElement, fallbackPath) {
-  if (!imgElement.dataset.triedDiscord) {
-    imgElement.dataset.triedDiscord = 'true';
-    const cdnUrl = window.resolveDiscordCDNUrl(imgElement.src, 'avatar');
-    if (cdnUrl) {
-      imgElement.src = cdnUrl;
-      return;
-    }
-  }
   imgElement.src = fallbackPath;
 };
 
 window.resolveDiscordAsset = function(path, type = 'avatar') {
   if (!path) return '';
-  
-  // On production (Surge), bypass local cache files and resolve directly to Discord CDN
-  // to avoid broken images caused by delayed background sync/deployments.
-  const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-  if (!isLocalhost && (path.includes('avatars/') || path.includes('banners/'))) {
-    const cdnUrl = window.resolveDiscordCDNUrl(path, type);
-    if (cdnUrl) return cdnUrl;
-  }
   
   if (path.startsWith('assets/') || path.startsWith('uploads/') || path.includes('/assets/') || path.includes('/uploads/') || path.includes('\\assets\\') || path.includes('\\uploads\\')) {
     let cleanPath = path;

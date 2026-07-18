@@ -493,8 +493,14 @@
           } catch(e) {}
           
           if (currentSession) {
-            if (data.user.avatar) currentSession.avatar_url = data.user.avatar;
-            if (data.user.banner) currentSession.banner_url = data.user.banner;
+            if (data.user.avatar) {
+               currentSession.avatar = data.user.avatar;
+               currentSession.avatar_url = data.user.avatar;
+            }
+            if (data.user.banner) {
+               currentSession.banner = data.user.banner;
+               currentSession.banner_url = data.user.banner;
+            }
             if (data.user.username) currentSession.username = data.user.username;
             if (data.user.globalName) currentSession.display_name = data.user.globalName;
             localStorage.setItem('session_ps_current_user', JSON.stringify(currentSession));
@@ -750,8 +756,8 @@
         targetUser = {
           ...targetUser,
           id: currentUser.id || targetUser.id,
-          avatar: currentUser.avatar || targetUser.avatar,
-          banner: currentUser.banner || targetUser.banner,
+          avatar: currentUser.avatar_url || currentUser.avatar || targetUser.avatar_url || targetUser.avatar,
+          banner: currentUser.banner_url || currentUser.banner || targetUser.banner_url || targetUser.banner,
           bannerColor: currentUser.bannerColor || targetUser.bannerColor,
           discord: currentUser.discord || targetUser.discord
         };
@@ -805,8 +811,8 @@
       name: targetUser.name || targetUser.username || 'عضو الأمن العام',
       badge: targetUser.badge || targetUser.code || (dbUser ? dbUser.code : '') || '—',
       discord: targetUser.discord || 'unknown',
-      avatar: targetUser.avatar || '../assets/img/emblem.png',
-      banner: targetUser.banner || null,
+      avatar: targetUser.avatar_url || targetUser.avatar || '../assets/img/emblem.png',
+      banner: targetUser.banner_url || targetUser.banner || null,
       bannerColor: targetUser.bannerColor || '#121e4b',
       rank: 'مشاهد', // resolved below
       unit: dbUser ? (dbUser.department || targetUser.unit || 'إدارة العمليات') : (targetUser.unit || 'إدارة العمليات'),
