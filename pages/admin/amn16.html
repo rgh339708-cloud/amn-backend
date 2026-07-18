@@ -864,7 +864,7 @@
               <option value="شؤون التجنيد">جدول شؤون التجنيد</option>
             </select>
           </div>
-          <button class="btn-action secondary" onclick="Storage.loadAllFromServer().then(() => { renderPermissionsTable(); App.toast('تم تحديث البيانات من السيرفر!', 'success'); })" style="padding:8px 16px; border-radius:8px;">
+          <button class="btn-action secondary" onclick="forceFullSync()" style="padding:8px 16px; border-radius:8px;">
             <i class="fa-solid fa-arrows-rotate"></i> تحديث فوري
           </button>
         </div>
@@ -2056,7 +2056,9 @@
             <button onclick="document.getElementById('exp-img-modal').remove()" style="background:none; border:none; color:var(--color-text-secondary); font-size:1.6rem; cursor:pointer; font-weight:bold;">&times;</button>
           </div>
           <div style="text-align:center; overflow:auto; max-height:500px;">
-            <img src="${item.experienceImage}" style="max-width:100%; border-radius:8px; border:1px solid rgba(255,255,255,0.15);" alt="صورة الخبرة">
+            <a href="${item.experienceImage}" target="_blank" title="اضغط لتكبير الصورة في علامة تبويب جديدة">
+              <img src="${item.experienceImage}" style="max-width:100%; border-radius:8px; border:1px solid rgba(255,255,255,0.15); cursor: zoom-in;" alt="صورة الخبرة">
+            </a>
           </div>
         </div>
       </div>
@@ -2198,6 +2200,35 @@
     }
   }
 
+  window.forceFullSync = async function() {
+    App.toast('⏳ جاري الاتصال بقاعدة بيانات قوقل شيت وتحديث الرتب...', 'info');
+    try {
+      // 1. Trigger backend to fetch from sheets
+      let backendUrl = 'https://amn-backend-euhi.onrender.com';
+      if (window.detectedBackendUrl) backendUrl = window.detectedBackendUrl;
+      else {
+        try { const settings = JSON.parse(localStorage.getItem('ps_settings') || '{}'); if (settings.backendUrl) backendUrl = settings.backendUrl; } catch(e){}
+      }
+      
+      const res = await fetch(`${backendUrl}/api/csv-sync/run?force=true`, { method: 'POST' });
+      if(res.ok) {
+         // 2. Clear local cache
+         localStorage.removeItem('members_cache_last_fetch');
+         // 3. Fetch newly generated cache file from backend
+         if(window.Auth && Auth.fetchMembersGoogleSheetsCache) await Auth.fetchMembersGoogleSheetsCache(true);
+         // 4. Fetch users from DB
+         if (window.Storage && Storage.loadAllFromServer) await Storage.loadAllFromServer();
+         if (window.renderPermissionsTable) renderPermissionsTable();
+         App.toast('✅ تم تحديث البيانات من السيرفر وجلب أحدث تعديلات الرتب من الشيت بنجاح!', 'success');
+      } else {
+         App.toast('❌ حدث خطأ أثناء مزامنة قوقل شيت. حاول لاحقاً.', 'error');
+      }
+    } catch(e) {
+      App.toast('❌ فشل الاتصال بالسيرفر للمزامنة.', 'error');
+      console.error(e);
+    }
+  };
+
   window.renderPermissionsTable = function() {
     const tableBody = document.getElementById('table-body-permissions');
     if (!tableBody) return;
@@ -2323,7 +2354,7 @@
           if (cleanL.includes('نائب القائد') || cleanL.includes('مساعد القائد') || cleanL.includes('نائب قائد') || cleanL.includes('مساعد قائد')) rolesSet.add('assistant_owner');
           if (cleanL.includes('رئاسة تدريب')) rolesSet.add('academy_affairs');
           if (cleanL.includes('شؤون اكاديمية التدريب') || cleanL.includes('شؤون أكاديمية التدريب')) rolesSet.add('admin');
-          if (cleanL.includes('مدير دورة') || cleanL.includes('مدير الدورة')) rolesSet.add('course_admin');
+          if (cleanL.includes('مدير دورة') || cleanL.includes('مدير الدورة') || cleanL.includes('مدير دوره') || cleanL.includes('مدير الدوره')) rolesSet.add('course_admin');
           if (cleanL.includes('منسوبي ادارة التدريب') || cleanL.includes('منسوبي إدارة التدريب') || cleanL.includes('كلية التدريب')) rolesSet.add('college_trainee');
           if (cleanL.includes('شعبة التجنيد') || cleanL.includes('شؤون التجنيد')) rolesSet.add('recruitment_affairs');
           if (rolesSet.size > 0) calculatedRole = Array.from(rolesSet).join(',');
@@ -2348,20 +2379,20 @@
     });
     // ================================================================
 
-    // Stats calculation (based on actual ps_users only)
+    // Stats calculation (based on all unified users)
     let ownersCount = 0;
     let academyCount = 0;
     let adminsCount = 0;
     let courseAdminsCount = 0;
     let collegeTraineeCount = 0;
 
-    users.forEach(u => {
+    unifiedUsers.forEach(u => {
       const r = u.role || 'viewer';
-      if (r === 'owner' || r === 'assistant_owner') ownersCount++;
-      else if (r === 'academy_affairs') academyCount++;
-      else if (r === 'admin') adminsCount++;
-      else if (r === 'course_admin') courseAdminsCount++;
-      else if (r === 'college_trainee') collegeTraineeCount++;
+      if (Auth.hasRole(r, 'owner') || Auth.hasRole(r, 'assistant_owner')) ownersCount++;
+      if (Auth.hasRole(r, 'academy_affairs')) academyCount++;
+      if (Auth.hasRole(r, 'admin')) adminsCount++;
+      if (Auth.hasRole(r, 'course_admin')) courseAdminsCount++;
+      if (Auth.hasRole(r, 'college_trainee')) collegeTraineeCount++;
     });
 
     const elOwners = document.getElementById('perm-stat-owners');
