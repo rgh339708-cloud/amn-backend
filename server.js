@@ -3108,7 +3108,7 @@ function resolveRoleFromRank(rank, leadership = '', currentRole = 'viewer') {
   // شؤون اكاديمية التدريب
   if (l.includes('شؤون اكاديمية التدريب') || l.includes('شؤون أكاديمية التدريب')) roles.add('admin');
   // مدير دورة → مسؤول دورة
-  if (l.includes('مدير دورة') || l.includes('مدير الدورة')) roles.add('course_admin');
+  if (l.includes('مدير دورة') || l.includes('مدير الدورة') || l.includes('مدير دوره') || l.includes('مدير الدوره')) roles.add('course_admin');
   // منسوبي ادارة التدريب → منسوبي كلية التدريب
   if (l.includes('منسوبي ادارة التدريب') || l.includes('منسوبي إدارة التدريب')) roles.add('college_trainee');
   // شعبة التجنيد → شؤون التجنيد
@@ -6310,7 +6310,13 @@ const server = http.createServer((req, res) => {
   if (pathname === '/api/csv-sync/run' && req.method === 'POST') {
     const force = reqUrl.query && reqUrl.query.force === 'true';
     runCsvDiscordSync(db, force)
-      .then(result => {
+      .then(async (result) => {
+        // Force fully waiting for cache sync
+        try {
+          await syncMembersCacheFile();
+        } catch(e) {
+          result.cacheError = e.message;
+        }
         res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
         res.end(JSON.stringify({ success: true, result }));
       })
