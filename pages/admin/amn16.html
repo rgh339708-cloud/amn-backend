@@ -1513,7 +1513,32 @@
       });
     });
     
-    return unifiedList;
+    // Filter to show ONLY users present in the specified sheets + system owners/admins
+    const filteredList = unifiedList.filter(u => {
+      if (u.department) return true;
+      if (['owner', 'assistant_owner', 'academy_affairs', 'admin'].includes(u.role)) return true;
+      return false;
+    });
+    
+    // Force correct roles and ranks for Rayan and Omar in the UI table
+    filteredList.forEach(u => {
+      const uId = String(u.discord_id || u.id || '');
+      const uDiscord = String(u.discord || '').toLowerCase();
+      
+      // Rayan
+      if (uId.includes('1334568342345748565') || uDiscord.includes('onlyryan')) {
+        u.role = 'owner,academy_affairs';
+        u.rank = 'المشرف العام و رئاسة تدريب الامن العام';
+      }
+      
+      // Omar
+      if (uId.includes('821825761673478144') || uDiscord.includes('ifm711')) {
+        u.role = 'academy_affairs';
+        u.rank = 'رئاسة تدريب الامن العام';
+      }
+    });
+    
+    return filteredList;
   }
 
 
@@ -2083,9 +2108,13 @@
 
 
   window.grantApplicationRetake = async function(candidateName, discordId, prevScore) {
+    const userRole = Auth.getRole();
+    if (!Auth.hasAnyRole(userRole, ['owner', 'assistant_owner', 'admin', 'recruitment_affairs'])) {
+      App.toast('عذراً، لا تمتلك الصلاحية للسماح بإعادة الاختبار.', 'error');
+      return;
+    }
     const user = Auth.getCurrentUser();
     const userName = user ? (user.globalName || user.username) : 'شؤون التجنيد';
-    
     if (!await App.confirm(`هل أنت متأكد من منح المتقدم "${candidateName}" صلاحية إعادة الاختبار؟`, 'تأكيد منح الإعادة')) {
       return;
     }
@@ -2114,8 +2143,8 @@
 
   window.updateApplicationStatus = function(id, newStatus) {
     const userRole = Auth.getRole();
-    if (userRole === 'assistant_owner') {
-      App.toast('عذراً، لا تمتلك الصلاحية لقبول أو رفض طلبات التقديم. يمكنك فقط السماح بإعادة الاختبار.', 'error');
+    if (!Auth.hasAnyRole(userRole, ['owner', 'assistant_owner', 'admin', 'recruitment_affairs'])) {
+      App.toast('عذراً، لا تمتلك الصلاحية لقبول أو رفض طلبات التقديم.', 'error');
       return;
     }
     const user = Auth.getCurrentUser();

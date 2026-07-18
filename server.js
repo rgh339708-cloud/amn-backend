@@ -1349,11 +1349,21 @@ async function sendRecruitmentDecisionWebhook(application, newStatus, operatorNa
   // Resolve numeric Discord ID for applicant
   const rawApplicant = application.discordId || application.userId || application.username || '';
   const resolvedApplicantId = await resolveDiscordUserId(rawApplicant);
-  let userMention = resolvedApplicantId ? `<@${resolvedApplicantId}>` : (rawApplicant ? `<@${String(rawApplicant).replace(/^@/, '')}>` : '—');
+  const formatSafeMention = (resolvedId, rawStr, fallback) => {
+    if (resolvedId && /^\\d{17,20}$/.test(String(resolvedId))) return `<@${resolvedId}>`;
+    if (rawStr) {
+      let clean = String(rawStr).replace(/^@/, '');
+      if (/^\\d{17,20}$/.test(clean)) return `<@${clean}>`;
+      return `@${clean}`;
+    }
+    return fallback || '—';
+  };
+
+  let userMention = formatSafeMention(resolvedApplicantId, rawApplicant, '—');
 
   // Resolve numeric Discord ID for operator
   const resolvedOpId = await resolveDiscordUserId(operatorName);
-  let operatorMention = resolvedOpId ? `<@${resolvedOpId}>` : (operatorName ? `<@${String(operatorName).replace(/^@/, '')}>` : '<@شؤون التجنيد>');
+  let operatorMention = formatSafeMention(resolvedOpId, operatorName, '@شؤون التجنيد');
 
   const embed = {
     title: isApproved ? '✅ قبول نهائي | شؤون التجنيد والقبول' : '❌ اعتذار ورفض طلب | شؤون التجنيد والقبول',
@@ -1519,7 +1529,7 @@ function sendAttendanceReportToDiscord(bookName, operatorStr, roomImage, records
   if (cleanOp) {
     if (!cleanOp.startsWith('<@')) {
       const opDigits = String(cleanOp).replace(/\D/g, '');
-      cleanOp = opDigits.length >= 17 ? `<@${opDigits}>` : `<@${cleanOp}>`;
+      cleanOp = opDigits.length >= 17 ? `<@${opDigits}>` : `@${cleanOp.replace(/^@/, '')}`;
     }
   } else {
     cleanOp = '—';
@@ -1565,10 +1575,10 @@ function sendAttendanceReportToDiscord(bookName, operatorStr, roomImage, records
 
   // Helper to get Discord mention string
   const getDiscordMention = (rawId, nameFallback) => {
-    const discordId = rawId ? String(rawId).replace(/\D/g, '') : '';
-    if (discordId.length >= 17) return `<@${discordId}>`;
-    if (String(rawId || '').startsWith('<@')) return rawId;
-    return nameFallback ? `@${nameFallback}` : `<@${rawId || 'عضو'}>`;
+    let cleanId = String(rawId || '').replace(/[<@!>]/g, '').trim();
+    const numericId = cleanId.replace(/\D/g, '');
+    if (numericId.length >= 17) return `<@${numericId}>`;
+    return nameFallback ? `@${nameFallback}` : `@${cleanId || 'عضو'}`;
   };
 
   // Helper to check if an expected member attended
@@ -1635,12 +1645,8 @@ function sendAttendanceReportToDiscord(bookName, operatorStr, roomImage, records
   let attendeesList = '';
   if (recs.length > 0) {
     const attendeesMapped = recs.map((r) => {
-      if (r.display_name && String(r.display_name).startsWith('<@')) return r.display_name;
       const rawId = r.user_id || r.discord || r.display_name;
-      const cleanId = String(rawId).replace(/\D/g, '');
-      if (cleanId.length >= 17) return `<@${cleanId}>`;
-      if (String(rawId).startsWith('<@')) return rawId;
-      return `<@${rawId}>`;
+      return getDiscordMention(rawId, r.display_name || r.username);
     });
     if (attendeesMapped.length > 50) {
       attendeesList = attendeesMapped.slice(0, 50).join('\n') + `\n... و ${attendeesMapped.length - 50} آخرين`;
@@ -1750,7 +1756,14 @@ function sendExamNotificationToDiscord(attempt) {
   const duration = attempt.duration || 0;
   const discordId = attempt.discord_id || '';
   
-  const userMention = discordId ? `<@${discordId}>` : (code !== '—' ? `<@${code}>` : '—');
+  let userMention = '—';
+  if (discordId) {
+    const num = String(discordId).replace(/\D/g, '');
+    userMention = num.length >= 17 ? `<@${num}>` : `@${String(discordId).replace(/[<@>]/g, '')}`;
+  } else if (code !== '—') {
+    const num = String(code).replace(/\D/g, '');
+    userMention = num.length >= 17 ? `<@${num}>` : `@${String(code).replace(/[<@>]/g, '')}`;
+  }
 
   const embed = {
     title: isPass ? '🎓 اجتياز اختبار جديد - ناجح' : '❌ عدم اجتياز اختبار - راسب',

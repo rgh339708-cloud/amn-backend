@@ -1814,21 +1814,38 @@
       const userRole = Auth.getRole();
       const roleInfo = Auth.getRoleInfo(userRole);
 
+      if (tbody) tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:30px;"><i class="fa-solid fa-spinner fa-spin"></i> جاري جلب السجلات من الخادم...</td></tr>`;
+
       Storage.fetchExamArchive()
         .then(exams => {
           let results = exams.map(dbRow => {
             const examObj = Storage.getCollection(Storage.keys.EXAMS).find(e => e.title === dbRow.exam_name);
             const passingScore = examObj ? examObj.passingScore : 50;
-            return {
-              id: dbRow.id,
-              examId: examObj ? examObj.id : null,
-              studentName: dbRow.trainee_name,
-              studentRank: dbRow.rank,
-              studentBadge: dbRow.badge_code || dbRow.code,
-              discordId: dbRow.discord_id || '—',
-              attemptCount: dbRow.attempt_count || 1,
-              duration: dbRow.duration !== undefined ? dbRow.duration : 0,
-              examTitle: dbRow.exam_name || dbRow.course_name,
+              let durationVal = dbRow.duration;
+              if (!durationVal && dbRow.start_time && dbRow.end_time) {
+                try {
+                  const t1 = dbRow.start_time.split(':');
+                  const t2 = dbRow.end_time.split(':');
+                  if (t1.length >= 2 && t2.length >= 2) {
+                    const d1 = new Date(); d1.setHours(t1[0], t1[1], t1[2] || 0);
+                    const d2 = new Date(); d2.setHours(t2[0], t2[1], t2[2] || 0);
+                    let diff = Math.round((d2 - d1) / 60000);
+                    if (diff < 0) diff += 24 * 60;
+                    durationVal = diff;
+                  }
+                } catch(e) {}
+              }
+
+              return {
+                id: dbRow.id,
+                examId: examObj ? examObj.id : null,
+                studentName: dbRow.trainee_name,
+                studentRank: dbRow.rank,
+                studentBadge: dbRow.badge_code || dbRow.code,
+                discordId: dbRow.discord_id || '—',
+                attemptCount: dbRow.attempt_count || 1,
+                duration: durationVal || 0,
+                examTitle: dbRow.exam_name || dbRow.course_name,
               date: dbRow.created_at ? dbRow.created_at.split(' ')[0].replace(/-/g, '/') : '—',
               entryTime: dbRow.start_time,
               endTime: dbRow.end_time,
@@ -2116,6 +2133,8 @@
       const tbody = document.getElementById('retakes-tbody');
       if (!tbody) return;
 
+      tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:30px;"><i class="fa-solid fa-spinner fa-spin"></i> جاري جلب طلبات الإعادة من الخادم...</td></tr>`;
+
       Storage.fetchRetakeRequests()
         .then(requests => {
           if (requests.length === 0) {
@@ -2197,7 +2216,11 @@
       const exams = Storage.getCollection(Storage.keys.EXAMS) || [];
 
       if (exams.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:30px;color:rgba(255,255,255,0.3)">لا توجد اختبارات مسجلة بعد</td></tr>`;
+        if (!window.ps_storage_synced) {
+          tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:30px;color:rgba(255,255,255,0.7)"><i class="fa-solid fa-spinner fa-spin"></i> جاري الاتصال بالخادم وجلب البيانات...</td></tr>`;
+        } else {
+          tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:30px;color:rgba(255,255,255,0.3)">لا توجد اختبارات مسجلة بعد</td></tr>`;
+        }
         return;
       }
 
@@ -2344,21 +2367,38 @@
       const userRole = Auth.getRole();
       const roleInfo = Auth.getRoleInfo(userRole);
 
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:30px;"><i class="fa-solid fa-spinner fa-spin"></i> جاري جلب سجل رفع اليد من الخادم...</td></tr>`;
+
       Storage.fetchExamArchive()
         .then(exams => {
           let logs = exams.map(dbRow => {
             const examObj = Storage.getCollection(Storage.keys.EXAMS).find(e => e.title === dbRow.exam_name);
             const passingScore = examObj ? examObj.passingScore : 50;
-            return {
-              id: dbRow.id,
-              examId: examObj ? examObj.id : null,
-              studentName: dbRow.trainee_name,
-              studentRank: dbRow.rank,
-              studentBadge: dbRow.badge_code || dbRow.code,
-              discordId: dbRow.discord_id || '—',
-              attemptCount: dbRow.attempt_count || 1,
-              duration: dbRow.duration !== undefined ? dbRow.duration : 0,
-              examTitle: dbRow.exam_name || dbRow.course_name,
+              let durationVal = dbRow.duration;
+              if (!durationVal && dbRow.start_time && dbRow.end_time) {
+                try {
+                  const t1 = dbRow.start_time.split(':');
+                  const t2 = dbRow.end_time.split(':');
+                  if (t1.length >= 2 && t2.length >= 2) {
+                    const d1 = new Date(); d1.setHours(t1[0], t1[1], t1[2] || 0);
+                    const d2 = new Date(); d2.setHours(t2[0], t2[1], t2[2] || 0);
+                    let diff = Math.round((d2 - d1) / 60000);
+                    if (diff < 0) diff += 24 * 60;
+                    durationVal = diff;
+                  }
+                } catch(e) {}
+              }
+
+              return {
+                id: dbRow.id,
+                examId: examObj ? examObj.id : null,
+                studentName: dbRow.trainee_name,
+                studentRank: dbRow.rank,
+                studentBadge: dbRow.badge_code || dbRow.code,
+                discordId: dbRow.discord_id || '—',
+                attemptCount: dbRow.attempt_count || 1,
+                duration: durationVal || 0,
+                examTitle: dbRow.exam_name || dbRow.course_name,
               date: dbRow.created_at ? dbRow.created_at.split(' ')[0].replace(/-/g, '/') : '—',
               entryTime: dbRow.start_time,
               endTime: dbRow.end_time,
@@ -3204,7 +3244,11 @@
       }
 
       if (exams.length === 0) {
-        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:50px;color:var(--color-text-muted)">لا توجد اختبارات متوفرة حالياً.</div>`;
+        if (!window.ps_storage_synced) {
+          grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:50px;color:rgba(255,255,255,0.7)"><i class="fa-solid fa-spinner fa-spin" style="margin-left:8px; font-size:1.2rem;"></i> جاري تحميل الاختبارات والدورات المتاحة...</div>`;
+        } else {
+          grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:50px;color:var(--color-text-muted)">لا توجد اختبارات متوفرة حالياً.</div>`;
+        }
         return;
       }
 
@@ -3244,7 +3288,7 @@
               </div>
             </div>
             
-            <button class="btn btn-gold" style="width:100%;justify-content:center" onclick="startExam('${e.id}')">✏️ ابدأ الاختبار</button>
+            <button class="btn btn-gold" style="width:100%;justify-content:center" onclick="startExam('${e.id}', this)">✏️ ابدأ الاختبار</button>
           </div>
         </article>
       `;
@@ -3252,13 +3296,22 @@
     }
 
     /* ── Quiz Launch & Single Attempt Enforcement ── */
-    async function startExam(id) {
+    async function startExam(id, btnElement) {
+      if (btnElement) {
+        btnElement.disabled = true;
+        btnElement.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري التحقق...';
+      }
+
       const exam = Storage.findById(Storage.keys.EXAMS, id);
-      if (!exam) return;
+      if (!exam) {
+        if (btnElement) { btnElement.disabled = false; btnElement.innerHTML = '✏️ ابدأ الاختبار'; }
+        return;
+      }
 
       // 1. Enforce closed check
       if (!exam.isOpen) {
         App.toast('✕ عذراً، هذا الاختبار مغلق حالياً ولا يمكن التقديم فيه.', 'error');
+        if (btnElement) { btnElement.disabled = false; btnElement.innerHTML = '✏️ ابدأ الاختبار'; }
         return;
       }
 
@@ -3271,6 +3324,7 @@
       cachedExamAttempts = null;
 
       if (!existing) {
+        App.toast('⏳ جاري التحقق من أهليتك للاختبار والاتصال بالخادم...', 'info');
         try {
           const dbAttempts = await Storage.fetchExamArchive();
           cachedExamAttempts = dbAttempts; // حفظ السجلات لتجنب تكرار الطلبات لاحقاً
@@ -3303,8 +3357,11 @@
         if (confirmRetake) {
           submitRetakeRequestForUser(id, existing.studentName, existing.studentDiscord, existing.studentRank, existing.score);
         }
+        if (btnElement) { btnElement.disabled = false; btnElement.innerHTML = '✏️ ابدأ الاختبار'; }
         return;
       }
+
+      if (btnElement) { btnElement.disabled = false; btnElement.innerHTML = '✏️ ابدأ الاختبار'; }
 
       activeExamIdToPrompt = id;
 
@@ -3686,7 +3743,8 @@
       const tableInfo = Auth.resolveUserTableInfo(lookupUser) || {};
 
       const endTime = new Date().toLocaleTimeString('en-US', { hour12: false });
-      const durationMinutes = Math.max(1, Math.round((activeExam.duration * 60 - timeLeft) / 60));
+      const examDur = activeExam.duration ? parseInt(activeExam.duration) : 60;
+      const durationMinutes = Math.max(1, Math.round((examDur * 60 - timeLeft) / 60));
 
       // Save attempt inside Storage.keys.EXAM_RESULTS
       const resultId = activeAttemptDbId || ('res_' + Date.now());
@@ -3783,7 +3841,8 @@
       clearExamProgress();
       if (activeAttemptDbId && isExamActive && activeExam) {
         const endTime = new Date().toLocaleTimeString('en-US', { hour12: false });
-        const durationMinutes = Math.max(1, Math.round((activeExam.duration * 60 - timeLeft) / 60));
+        const examDur = activeExam.duration ? parseInt(activeExam.duration) : 60;
+        const durationMinutes = Math.max(1, Math.round((examDur * 60 - timeLeft) / 60));
 
         const exitAttemptData = {
           id: activeAttemptDbId,
@@ -4232,6 +4291,8 @@
       const roleInfo = Auth.getRoleInfo(userRole);
       const isAuthorizedToClear = roleInfo && roleInfo.level >= 4.5;
 
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:30px;"><i class="fa-solid fa-spinner fa-spin"></i> جاري جلب المخالفات من الخادم...</td></tr>`;
+
       Storage.fetchViolations()
         .then(violations => {
           const filterDropdown = document.getElementById('violations-course-filter');
@@ -4343,6 +4404,14 @@
           });
       }
     }
+
+    // Listen for background sync updates to dynamically render the exams without refreshing
+    window.addEventListener('storage_sync', () => {
+      if (typeof renderExamsMgmtTable === 'function') renderExamsMgmtTable();
+      if (typeof renderExamsList === 'function') renderExamsList();
+      if (typeof renderRetakeRequests === 'function') renderRetakeRequests();
+      if (typeof renderHandRaiseLog === 'function') renderHandRaiseLog();
+    });
   </script>
 </body>
 

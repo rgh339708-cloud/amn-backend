@@ -432,7 +432,7 @@ const App = (() => {
       }
 
       let adminBtnHtml = '';
-      const isAuthorizedAdmin = Auth.hasAnyRole(user.role, ['owner', 'assistant_owner', 'academy_affairs', 'admin']);
+      const isAuthorizedAdmin = Auth.hasAnyRole(user.role, ['owner', 'assistant_owner', 'academy_affairs', 'admin', 'recruitment_affairs', 'course_admin']);
       if (isAuthorizedAdmin) {
         adminBtnHtml = `
           <a href="${ROOT}pages/admin/amn16.html" class="dropdown-item admin-link" id="nav-admin-dashboard-btn">

@@ -67,10 +67,10 @@ const Auth = (() => {
 
   /* ── Section Access Control ───────────────────────── */
   const SECTION_MIN_ROLE = {
-    'admin':       'admin',
+    'admin':       'course_admin',
     'users':       'assistant_owner', // only Owner & assistant_owner can manage members & change roles
     'amn13':    'admin',
-    'applications':'admin',
+    'applications':'recruitment_affairs',
     'reports':     'admin',
     'promotions':  'admin',
     'amn9':       'viewer',
@@ -746,16 +746,18 @@ const Auth = (() => {
         (u.id === userData.id)
       );
       
-      // Force Owner/Assistant Owner permissions for specified Discord accounts
+      // Force Owner/Assistant Owner/Academy Affairs permissions for specified Discord accounts
       const ownerIds = ['1334568342345748565'];
       const ownerUsernames = ['3gjo', 'onlyryan', 'onlyryan -', 'onlyryan-'];
-      const assistantOwnerIds = []; // Removed Omar's ID (821825761673478144) as per user request
+      const assistantOwnerIds = [];
       const assistantOwnerUsernames = [];
+      const academyAffairsIds = ['821825761673478144']; // Omar Al-Malki
+      const academyAffairsUsernames = [];
 
       if (ownerIds.includes(userData.id) || 
           (userData.username && ownerUsernames.includes(userData.username.toLowerCase()))) {
         matchedUser = {
-          role: 'owner',
+          role: 'owner,academy_affairs',
           username: userData.global_name || userData.username || userData.username,
           discord: userData.username,
           status: 'active'
@@ -764,6 +766,14 @@ const Auth = (() => {
                  (userData.username && assistantOwnerUsernames.includes(userData.username.toLowerCase()))) {
         matchedUser = {
           role: 'assistant_owner',
+          username: userData.global_name || userData.username || userData.username,
+          discord: userData.username,
+          status: 'active'
+        };
+      } else if (academyAffairsIds.includes(userData.id) || 
+                 (userData.username && academyAffairsUsernames.includes(userData.username.toLowerCase()))) {
+        matchedUser = {
+          role: 'academy_affairs',
           username: userData.global_name || userData.username || userData.username,
           discord: userData.username,
           status: 'active'

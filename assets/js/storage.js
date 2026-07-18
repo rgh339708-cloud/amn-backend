@@ -357,17 +357,30 @@ const Storage = (() => {
 
   function fetchExamArchive() {
     const now = Date.now();
-    // Return cached data if it's still fresh
     if (_examArchiveCache && (now - _examArchiveCacheTime) < EXAM_ARCHIVE_CACHE_TTL) {
       return Promise.resolve(_examArchiveCache);
     }
-    return fetchWithTimeout(`${getApiBase()}/api/exams`, { method: 'GET' })
+    
+    let localCache = null;
+    try { localCache = JSON.parse(localStorage.getItem('ps_exam_archive_cache')); } catch(e) {}
+
+    const fetchPromise = fetchWithTimeout(`${getApiBase()}/api/exams`, { method: 'GET' })
       .then(res => res.json())
       .then(json => {
         _examArchiveCache = json.exams || [];
         _examArchiveCacheTime = Date.now();
+        localStorage.setItem('ps_exam_archive_cache', JSON.stringify(_examArchiveCache));
+        if (localCache) window.dispatchEvent(new CustomEvent('storage_sync'));
         return _examArchiveCache;
+      }).catch(err => {
+        console.warn('Background fetch for exam archive failed:', err);
+        return localCache || [];
       });
+
+    if (localCache) {
+      return Promise.resolve(localCache);
+    }
+    return fetchPromise;
   }
 
   function deleteExamAttempt(id) {
@@ -381,9 +394,25 @@ const Storage = (() => {
   }
 
   function fetchRetakeRequests() {
-    return fetchWithTimeout(`${getApiBase()}/api/retakes`, { method: 'GET' })
+    let localCache = null;
+    try { localCache = JSON.parse(localStorage.getItem('ps_retakes_cache')); } catch(e) {}
+
+    const fetchPromise = fetchWithTimeout(`${getApiBase()}/api/retakes`, { method: 'GET' })
       .then(res => res.json())
-      .then(json => json.requests || []);
+      .then(json => {
+        const requests = json.requests || [];
+        localStorage.setItem('ps_retakes_cache', JSON.stringify(requests));
+        if (localCache) window.dispatchEvent(new CustomEvent('storage_sync'));
+        return requests;
+      }).catch(err => {
+        console.warn('Background fetch for retakes failed:', err);
+        return localCache || [];
+      });
+
+    if (localCache) {
+      return Promise.resolve(localCache);
+    }
+    return fetchPromise;
   }
 
   function saveRetakeRequest(data) {
@@ -411,9 +440,25 @@ const Storage = (() => {
   }
 
   function fetchViolations() {
-    return fetchWithTimeout(`${getApiBase()}/api/violations`, { method: 'GET' })
+    let localCache = null;
+    try { localCache = JSON.parse(localStorage.getItem('ps_violations_cache')); } catch(e) {}
+
+    const fetchPromise = fetchWithTimeout(`${getApiBase()}/api/violations`, { method: 'GET' })
       .then(res => res.json())
-      .then(json => json.violations || []);
+      .then(json => {
+        const violations = json.violations || [];
+        localStorage.setItem('ps_violations_cache', JSON.stringify(violations));
+        if (localCache) window.dispatchEvent(new CustomEvent('storage_sync'));
+        return violations;
+      }).catch(err => {
+        console.warn('Background fetch for violations failed:', err);
+        return localCache || [];
+      });
+
+    if (localCache) {
+      return Promise.resolve(localCache);
+    }
+    return fetchPromise;
   }
 
   function saveViolation(data) {
@@ -585,7 +630,7 @@ const Storage = (() => {
 
       const res = await fetchWithTimeout(`${apiBase}/api/db/collections`, {
         headers,
-        timeout: 15000
+        timeout: 60000
       });
 
       // 304 Not Modified: data unchanged, skip localStorage update
@@ -649,6 +694,9 @@ const Storage = (() => {
     } catch (err) {
       console.warn('[Storage Sync] Failed to load collections from server:', err);
     }
+    // Always dispatch sync event so UI doesn't hang in a loading state forever
+    window.ps_storage_synced = true;
+    window.dispatchEvent(new CustomEvent('storage_sync'));
     return false;
   }
 

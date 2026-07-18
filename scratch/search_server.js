@@ -1,8 +1,7 @@
 const fs = require('fs');
-const content = fs.readFileSync('server.js', 'utf8');
-const lines = content.split('\n');
-lines.forEach((line, index) => {
-  if (line.includes('executeBulkSync')) {
-    console.log(`${index + 1}: ${line.trim()}`);
-  }
+const lines = fs.readFileSync('server.js', 'utf8').split('\n');
+lines.forEach((l, i) => {
+    if (l.includes('/api/exams') || l.includes('exam_attempts') || l.includes('/api/violations')) {
+        console.log(`Line ${i+1}: ${l.trim()}`);
+    }
 });
