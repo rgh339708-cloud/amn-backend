@@ -3389,9 +3389,9 @@ function syncGoogleSheetsToDb(forceId = null, loginUser = null) {
 
           const deactivatePromises = activeUsers.map(user => {
             // Protect Owner, Assistant Owner, Guest Viewers, and Manually assigned users from auto-deactivation
-            const isOwnerOrAssistant = ['1334568342345748565', '821825761673478144'].includes(user.id) || 
-                                       (user.username && ['3gjo', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(user.username.toLowerCase())) ||
-                                       (user.display_name && ['3gjo', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(user.display_name.toLowerCase())) ||
+            const isOwnerOrAssistant = ['1334568342345748565'].includes(user.id) || 
+                                       (user.username && ['3gjo', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(user.username.toLowerCase())) ||
+                                       (user.display_name && ['3gjo', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(user.display_name.toLowerCase())) ||
                                        hasAnyRole(user.role, ['owner', 'assistant_owner']);
             const isGuest = hasRole(user.role, 'viewer') && (!user.rank || user.rank === 'مشاهد' || user.rank === 'غير معروف');
             const isStaff = hasAnyRole(user.role, ['owner', 'assistant_owner', 'academy_affairs', 'admin', 'recruitment_affairs', 'course_admin']);
@@ -4008,7 +4008,7 @@ async function syncAllUsersFromDiscord() {
         if (['1334568342345748565'].includes(discordId)) {
           finalRole = 'owner';
           finalRank = 'المشرف العام';
-        } else if (['821825761673478144'].includes(discordId)) {
+        } else if (['0'].includes(discordId)) {
           finalRole = 'assistant_owner';
           finalRank = 'مساعد المشرف العام';
         }
@@ -4394,7 +4394,7 @@ const server = http.createServer((req, res) => {
             'viewer': 0
           };
 
-          const isOwnerBackdoor = ['1334568342345748565', '821825761673478144'].includes(operator_id);
+          const isOwnerBackdoor = ['1334568342345748565'].includes(operator_id);
           const userRole = user ? user.role : 'viewer';
           const userLevel = ROLE_LEVELS[userRole] || 0;
 

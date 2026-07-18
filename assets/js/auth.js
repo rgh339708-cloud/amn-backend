@@ -109,7 +109,7 @@ const Auth = (() => {
 
   function setPreviewRole(role) {
     if (!isActualOwner()) return;
-    if (!role || role === 'owner') {
+    if (!role || hasRole(role, 'owner')) {
       sessionStorage.removeItem('ps_preview_role');
     } else {
       sessionStorage.setItem('ps_preview_role', role);
@@ -749,14 +749,13 @@ const Auth = (() => {
       // Force Owner/Assistant Owner permissions for specified Discord accounts
       const ownerIds = ['1334568342345748565'];
       const ownerUsernames = ['3gjo', 'onlyryan', 'onlyryan -', 'onlyryan-'];
-      const assistantOwnerIds = ['821825761673478144'];
-      const assistantOwnerUsernames = ['ifm711'];
+      const assistantOwnerIds = []; // Removed Omar's ID (821825761673478144) as per user request
+      const assistantOwnerUsernames = [];
 
       if (ownerIds.includes(userData.id) || 
           (userData.username && ownerUsernames.includes(userData.username.toLowerCase()))) {
         matchedUser = {
           role: 'owner',
-          rank: 'المشرف العام',
           username: userData.global_name || userData.username || userData.username,
           discord: userData.username,
           status: 'active'
@@ -765,7 +764,6 @@ const Auth = (() => {
                  (userData.username && assistantOwnerUsernames.includes(userData.username.toLowerCase()))) {
         matchedUser = {
           role: 'assistant_owner',
-          rank: 'مساعد المشرف العام',
           username: userData.global_name || userData.username || userData.username,
           discord: userData.username,
           status: 'active'
@@ -831,7 +829,7 @@ const Auth = (() => {
       const isCallbackPage = window.location.pathname.includes('callback.html') || window.location.pathname.includes('auth/discord/callback');
 
       // Allow any Discord user to login as guest/viewer role even if not found in sheets.
-      const isOwner = session.role === 'owner';
+      const isOwner = hasRole(session.role, 'owner');
 
       // Helper to make promises safe when backend is offline
       const makeSafe = (promise, name) => {
@@ -939,8 +937,8 @@ const Auth = (() => {
                             (session.username && ownerUsernames.includes(session.username.toLowerCase())) ||
                             (session.discord && ownerUsernames.includes(session.discord.toLowerCase()));
 
-            const assistantOwnerIds = ['821825761673478144'];
-            const assistantOwnerUsernames = ['ifm711'];
+            const assistantOwnerIds = [];
+            const assistantOwnerUsernames = [];
             const isAssistantOwner = assistantOwnerIds.includes(userData.id) || 
                                      (userData.username && assistantOwnerUsernames.includes(userData.username.toLowerCase())) || 
                                      (session.username && assistantOwnerUsernames.includes(session.username.toLowerCase())) ||
@@ -953,7 +951,7 @@ const Auth = (() => {
                 resolvedRole = resolveRoleFromRank(userRank, 'viewer');
               }
               session.role = isOwner ? 'owner' : (isAssistantOwner ? 'assistant_owner' : resolvedRole);
-              session.rank = isOwner ? 'المشرف العام' : (isAssistantOwner ? 'مساعد المشرف العام' : (serverUser.rank || 'مشاهد'));
+              session.rank = serverUser.rank || 'مشاهد';
               session.department = serverUser.department || '';
               session.code = serverUser.code || '';
               session.status = serverUser.status || 'active';
@@ -998,7 +996,7 @@ const Auth = (() => {
                   username: session.username || userData.username,
                   discord: session.discord || userData.username,
                   role: isOwner ? 'owner' : (isAssistantOwner ? 'assistant_owner' : 'viewer'),
-                  rank: isOwner ? 'المشرف العام' : (isAssistantOwner ? 'مساعد المشرف العام' : (userRank || 'مشاهد')),
+                  rank: userRank || 'مشاهد',
                   department: userDepartment,
                   code: userCode,
                   status: 'active',
@@ -1037,11 +1035,11 @@ const Auth = (() => {
                 }
                 if (isOwner && !hasRole(dbUser.role, 'owner')) {
                   dbUser.role = 'owner';
-                  dbUser.rank = 'المشرف العام';
+
                   updated = true;
                 } else if (isAssistantOwner && !hasRole(dbUser.role, 'assistant_owner')) {
                   dbUser.role = 'assistant_owner';
-                  dbUser.rank = 'مساعد المشرف العام';
+
                   updated = true;
                 }
                 if (updated) {
@@ -1052,7 +1050,7 @@ const Auth = (() => {
                   resolvedRole = resolveRoleFromRank(userRank, 'viewer');
                 }
                 session.role = isOwner ? 'owner' : (isAssistantOwner ? 'assistant_owner' : resolvedRole);
-                session.rank = isOwner ? 'المشرف العام' : (isAssistantOwner ? 'مساعد المشرف العام' : (dbUser.rank || 'مشاهد'));
+                session.rank = dbUser.rank || 'مشاهد';
                 session.department = dbUser.department || '';
                 session.code = dbUser.code || '';
                 session.status = dbUser.status || 'active';
@@ -1366,7 +1364,7 @@ const Auth = (() => {
       const allUsers = Storage.getCollection(Storage.keys.USERS) || [];
       let updated = false;
       allUsers.forEach(u => {
-        const isOwner = ['1334568342345748565', '821825761673478144'].includes(u.id) || (u.discord && ['3gjo', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(u.discord.toLowerCase()));
+        const isOwner = ['1334568342345748565'].includes(u.id) || (u.discord && ['3gjo', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(u.discord.toLowerCase()));
         const isAdminRole = hasAnyRole(u.role, ['owner', 'assistant_owner', 'academy_affairs', 'admin', 'recruitment_affairs', 'course_admin']);
         if (!isOwner && !isAdminRole) {
           u.role = 'viewer';
@@ -1494,12 +1492,9 @@ const Auth = (() => {
     }
 
     // Special override for owner 3gjo / admin role
-    const isOwner = ['1334568342345748565', '821825761673478144'].includes(user.id) || (user.discord && ['3gjo', 'ifm711', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(user.discord.toLowerCase())) || (user.role === 'owner');
+    const isOwner = ['1334568342345748565'].includes(user.id) || (user.discord && ['3gjo', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(user.discord.toLowerCase())) || hasRole(user.role, 'owner');
     if (isOwner) {
       found = true;
-      if (tables.length === 0) {
-        tables.push('المشرف العام');
-      }
       if (!registeredName || registeredName === '3gjo' || registeredName === 'OnlyRyan' || registeredName === 'سداح الحربي' || registeredName === 'z6tw' || registeredName === 'ifm711') {
         if (user.id === '1120142432554713261' || (user.discord && user.discord.toLowerCase() === 'z6tw')) {
           registeredName = 'إبراهيم بن علي';
@@ -1511,9 +1506,6 @@ const Auth = (() => {
       }
       if (!badge || badge === '<i class="fa-solid fa-crown"></i>' || badge === 'M-08') {
         badge = 'CC | P-20';
-      }
-      if (!highestRank || highestRank === 'عضو') {
-        highestRank = 'المشرف العام';
       }
     }
 
@@ -1675,18 +1667,18 @@ const Auth = (() => {
                           (user.username && ownerUsernames.includes(user.username.toLowerCase())) || 
                           (user.discord && ownerUsernames.includes(user.discord.toLowerCase()));
           
-          const assistantOwnerIds = ['821825761673478144'];
-          const assistantOwnerUsernames = ['ifm711'];
+          const assistantOwnerIds = [];
+          const assistantOwnerUsernames = [];
           const isAssistantOwner = assistantOwnerIds.includes(user.id) || 
                                    (user.username && assistantOwnerUsernames.includes(user.username.toLowerCase())) || 
                                    (user.discord && assistantOwnerUsernames.includes(user.discord.toLowerCase()));
           
           if (isOwner) {
             dbUser.role = 'owner';
-            dbUser.rank = 'المشرف العام';
+
           } else if (isAssistantOwner) {
             dbUser.role = 'assistant_owner';
-            dbUser.rank = 'مساعد المشرف العام';
+
           } else {
             // Automatically resolve role from rank if rank was updated on server
             dbUser.role = resolveRoleFromRank(dbUser.rank, dbUser.role);

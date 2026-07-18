@@ -2312,13 +2312,30 @@
         if (discordId) addedIds.add(discordId);
         addedNames.add(String(row.name || '').trim().toLowerCase());
 
+        let calculatedRole = 'viewer';
+        if (row.position) {
+          let rolesSet = new Set();
+          const cleanL = String(row.position).replace(/ـ/g, '');
+          if (cleanL.includes('القائد') && !cleanL.includes('نائب') && !cleanL.includes('مساعد')) {
+            rolesSet.add('owner');
+            rolesSet.add('assistant_owner');
+          }
+          if (cleanL.includes('نائب القائد') || cleanL.includes('مساعد القائد') || cleanL.includes('نائب قائد') || cleanL.includes('مساعد قائد')) rolesSet.add('assistant_owner');
+          if (cleanL.includes('رئاسة تدريب')) rolesSet.add('academy_affairs');
+          if (cleanL.includes('شؤون اكاديمية التدريب') || cleanL.includes('شؤون أكاديمية التدريب')) rolesSet.add('admin');
+          if (cleanL.includes('مدير دورة') || cleanL.includes('مدير الدورة')) rolesSet.add('course_admin');
+          if (cleanL.includes('منسوبي ادارة التدريب') || cleanL.includes('منسوبي إدارة التدريب') || cleanL.includes('كلية التدريب')) rolesSet.add('college_trainee');
+          if (cleanL.includes('شعبة التجنيد') || cleanL.includes('شؤون التجنيد')) rolesSet.add('recruitment_affairs');
+          if (rolesSet.size > 0) calculatedRole = Array.from(rolesSet).join(',');
+        }
+
         unifiedUsers.push({
           id: virtualId,
           display_name: row.name,
           real_name: row.name,
           username: discordVal && !/^\d+$/.test(discordVal) ? discordVal : '',
           discord_id: discordId,
-          role: 'viewer',
+          role: calculatedRole,
           rank: row.rank || 'مشاهد',
           military_rank: row.rank || 'مشاهد',
           status: 'active',
@@ -2367,7 +2384,7 @@
       const matchesSearch = !searchVal || nameMatch || idMatch;
 
       const matchesRole = !filterRole || 
-                          u.role === filterRole || 
+                          (u.role && Auth.hasRole(u.role, filterRole)) || 
                           (u.rank && filterRoleLabel && u.rank.split('/').map(p => p.trim()).includes(filterRoleLabel));
 
       const isManual = u.is_manual_role === 1 || u.is_manual_role === true;
@@ -2439,7 +2456,7 @@
       
       const isTargetOwner = ownerIds.includes(u.id) || 
                             (u.username && ownerUsernames.includes(u.username.toLowerCase())) || 
-                            u.role === 'owner';
+                            (u.role && Auth.hasRole(u.role, 'owner'));
       
       const isRayan = currentLoggedInUser && currentLoggedInUser.id === '1334568342345748565';
       const isTargetProtected = !isRayan && (isTargetOwner || (!isOperatorOwner && targetLevel >= opLevel));
