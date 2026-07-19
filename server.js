@@ -1350,10 +1350,10 @@ async function sendRecruitmentDecisionWebhook(application, newStatus, operatorNa
   const rawApplicant = application.discordId || application.userId || application.username || '';
   const resolvedApplicantId = await resolveDiscordUserId(rawApplicant);
   const formatSafeMention = (resolvedId, rawStr, fallback) => {
-    if (resolvedId && /^\\d{17,20}$/.test(String(resolvedId))) return `<@${resolvedId}>`;
+    if (resolvedId && /^\d{17,20}$/.test(String(resolvedId))) return `<@${resolvedId}>`;
     if (rawStr) {
-      let clean = String(rawStr).replace(/^@/, '');
-      if (/^\\d{17,20}$/.test(clean)) return `<@${clean}>`;
+      let clean = String(rawStr).replace(/^@/, '').replace('discord_', '').trim();
+      if (/^\d{17,20}$/.test(clean)) return `<@${clean}>`;
       return `@${clean}`;
     }
     return fallback || '—';
@@ -6763,7 +6763,7 @@ const server = http.createServer((req, res) => {
             });
         
         const targetQuery = new Promise((resolve) => {
-          db.get('SELECT * FROM users WHERE id = ?', [target_id], (err, row) => resolve(err ? null : row));
+          db.get('SELECT * FROM users WHERE id = ? OR discord_id = ? OR id = ?', [target_id, target_id, 'discord_' + target_id], (err, row) => resolve(err ? null : row));
         });
         
         Promise.all([opQuery, targetQuery]).then(([opUser, targetUser]) => {
@@ -6832,8 +6832,9 @@ const server = http.createServer((req, res) => {
 
             if (action === 'remove') {
               // Resetting user's manual rank: is_manual_role = 0
-              db.run('UPDATE users SET role = ?, rank = ?, is_manual_role = 0, updated_at = datetime(\'now\') WHERE id = ?',
-                ['viewer', 'مشاهد', target_id],
+              const matchId = targetUser ? targetUser.id : target_id;
+              db.run('UPDATE users SET role = ?, rank = ?, is_manual_role = 0, updated_at = datetime(\'now\') WHERE id = ? OR discord_id = ?',
+                ['viewer', 'مشاهد', matchId, target_id],
                 function(updErr) {
                   if (updErr) {
                     console.error('❌ Error resetting manual permission:', updErr);
@@ -6862,8 +6863,9 @@ const server = http.createServer((req, res) => {
               // Granting or updating user rank: is_manual_role = 1
               if (targetUser) {
                 // Update existing user
-                db.run('UPDATE users SET role = ?, rank = ?, is_manual_role = 1, updated_at = datetime(\'now\') WHERE id = ?',
-                  [role, rank, target_id],
+                const matchId = targetUser.id || target_id;
+                db.run('UPDATE users SET role = ?, rank = ?, is_manual_role = 1, updated_at = datetime(\'now\') WHERE id = ? OR discord_id = ?',
+                  [role, rank, matchId, target_id],
                   function(updErr) {
                     if (updErr) {
                       console.error('❌ Error updating manual permission:', updErr);
