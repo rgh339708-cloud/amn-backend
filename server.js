@@ -5044,7 +5044,7 @@ const server = http.createServer((req, res) => {
 
   // GET /api/retakes - return all retake requests
   if (pathname === '/api/retakes' && req.method === 'GET') {
-    db.all('SELECT r.*, u.real_name FROM retake_requests r LEFT JOIN users u ON r.user_id = u.id ORDER BY r.id DESC', [], (err, rows) => {
+    sqliteDb.all('SELECT r.*, u.real_name FROM retake_requests r LEFT JOIN users u ON r.user_id = u.id ORDER BY r.id DESC', [], (err, rows) => {
       if (err) {
         console.error('❌ DB retakes select error:', err);
         res.writeHead(500, {'Content-Type':'application/json'});
@@ -5066,14 +5066,14 @@ const server = http.createServer((req, res) => {
         const data = JSON.parse(body);
         const { id, status, approved_by } = data;
         
-        db.get('SELECT * FROM retake_requests WHERE id = ?', [id], (err, row) => {
+        sqliteDb.get('SELECT * FROM retake_requests WHERE id = ?', [id], (err, row) => {
           if (err || !row) {
             res.writeHead(404, {'Content-Type':'application/json'});
             res.end(JSON.stringify({error:'Retake request not found'}));
             return;
           }
           
-          db.run('UPDATE retake_requests SET status = ?, approved_by = ? WHERE id = ?', [status, approved_by, id], function(err) {
+          sqliteDb.run('UPDATE retake_requests SET status = ?, approved_by = ? WHERE id = ?', [status, approved_by, id], function(err) {
             if (err) {
               res.writeHead(500, {'Content-Type':'application/json'});
               res.end(JSON.stringify({error:'DB update failed'}));
