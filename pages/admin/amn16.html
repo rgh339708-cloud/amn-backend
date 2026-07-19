@@ -2338,15 +2338,20 @@
         let discordId = /^\d+$/.test(discordVal) ? discordVal : '';
         const cleanRowDiscord = discordVal && !/^\d+$/.test(discordVal) ? discordVal.toLowerCase() : '';
 
+        const normalizeName = (n) => String(n || '').replace(/[\u200B-\u200D\uFEFF]/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
+        const sheetNameNorm = normalizeName(row.name);
+        const uId = (u) => String(u.id || '').replace(/^discord_/, '').trim();
+        const uDiscord = (u) => String(u.discord_id || '').replace(/^discord_/, '').trim();
+
         // Match existing user by ID, name, real_name or discord tag
         const existing = unifiedUsers.find(u =>
-          (discordId && (String(u.id || '').trim() === discordId || String(u.discord_id || '').trim() === discordId)) ||
+          (discordId && (uId(u) === discordId || uDiscord(u) === discordId)) ||
           (cleanRowDiscord && (
             (u.username && String(u.username).trim().toLowerCase() === cleanRowDiscord) ||
             (u.discord && String(u.discord).trim().toLowerCase() === cleanRowDiscord)
           )) ||
-          (u.real_name && String(u.real_name).trim().toLowerCase() === String(row.name || '').trim().toLowerCase()) ||
-          String(u.display_name || u.username || '').trim().toLowerCase() === String(row.name || '').trim().toLowerCase()
+          (u.real_name && normalizeName(u.real_name) === sheetNameNorm) ||
+          normalizeName(u.display_name || u.username) === sheetNameNorm
         );
 
         if (existing) {
@@ -2505,11 +2510,14 @@
         `<div style="width:32px;height:32px;border-radius:50%;background:rgba(201,162,39,0.15);display:flex;align-items:center;justify-content:center;color:#c9a227;font-size:0.95rem;font-weight:bold;">${avatarInitialChar}</div>`;
 
       // Role badge style
-      const roleColor = Auth.getRoleColor(u.role || 'viewer');
-      const roleEmoji = Auth.getRoleEmoji(u.role || 'viewer');
-      const roleLabel = Auth.getRoleLabel(u.role || 'viewer');
-
-      const roleBadge = `<span style="display:inline-flex; align-items:center; gap:4px; padding:4px 8px; border-radius:6px; font-size:0.78rem; font-weight:bold; background:${roleColor}20; color:${roleColor}; border:1px solid ${roleColor}35;">${roleEmoji} ${roleLabel}</span>`;
+      let roleBadge = '';
+      const rList = (u.role || 'viewer').split(',').map(r => r.trim());
+      rList.forEach(r => {
+        const roleColor = Auth.getRoleColor(r);
+        const roleEmoji = Auth.getRoleEmoji(r);
+        const roleLabel = Auth.getRoleLabel(r);
+        roleBadge += `<span style="display:inline-flex; align-items:center; gap:4px; padding:4px 8px; border-radius:6px; font-size:0.78rem; font-weight:bold; background:${roleColor}20; color:${roleColor}; border:1px solid ${roleColor}35; margin-right:4px; margin-bottom:4px;">${roleEmoji} ${roleLabel}</span>`;
+      });
 
       // Assignment type badge
       const typeBadge = isManual ?
@@ -2588,30 +2596,7 @@
           </td>
           <td style="font-family:monospace; font-size:0.8rem; color:rgba(255,255,255,0.6);">${u.id || u.discord_id || '—'}</td>
           <td style="font-weight:800; color:#ffd700;">${u.military_rank || (isManual ? 'مشاهد' : (u.rank || 'مشاهد'))}</td>
-          <td>${isManual ? (() => {
-            const arabicToRoleKey = {
-              'المشرف العام': 'owner',
-              'قيادة الأمن العام': 'assistant_owner',
-              'رئاسة تدريب الأمن العام': 'academy_affairs',
-              'شؤون أكاديمية التدريب': 'admin',
-              'شؤون التجنيد': 'recruitment_affairs',
-              'مسؤول دورة': 'course_admin',
-              'منسوبي كلية التدريب': 'college_trainee',
-              'مشاهد': 'viewer'
-            };
-            const manualParts = (u.rank || '').split('/').map(p => p.trim());
-            let badgesHtml = '';
-            manualParts.forEach(p => {
-              const roleKey = arabicToRoleKey[p];
-              if (roleKey) {
-                const roleColor = Auth.getRoleColor(roleKey);
-                const roleEmoji = Auth.getRoleEmoji(roleKey);
-                const roleLabel = Auth.getRoleLabel(roleKey);
-                badgesHtml += `<span style="display:inline-flex; align-items:center; gap:4px; padding:4px 8px; border-radius:6px; font-size:0.78rem; font-weight:bold; background:${roleColor}20; color:${roleColor}; border:1px solid ${roleColor}35; margin-right:4px; margin-bottom:4px;">${roleEmoji} ${roleLabel}</span>`;
-              }
-            });
-            return badgesHtml || roleBadge;
-          })() : roleBadge}</td>
+          <td>${roleBadge}</td>
           <td>${typeBadge}</td>
           <td style="font-size:0.8rem; color:rgba(255,255,255,0.55);">${u.isSheetOnly ? '<span style="color:#3498db; font-size:0.75rem;"><i class="fa-solid fa-table"></i> من الجدول</span>' : formatLogDate(u.updated_at || u.last_sync)}</td>
           <td>${actionsHtml}</td>

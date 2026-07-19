@@ -434,8 +434,7 @@ const Storage = (() => {
       body: JSON.stringify({ id, status, approved_by })
     }).then(res => res.json()).then(resData => {
       _lastCollectionsEtag = null; // Force next poll to fetch fresh state since database changed
-      loadAllFromServer();
-      return resData;
+      return loadAllFromServer().then(() => resData);
     });
   }
 

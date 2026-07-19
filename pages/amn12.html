@@ -655,7 +655,7 @@
       const candidateJobCodeInput = document.getElementById('candidate-job-code');
       
       if (candidateNameInput) {
-        candidateNameInput.value = tableInfo.name || currentUser.globalName || currentUser.username || '';
+        candidateNameInput.value = tableInfo.name || '';
         if (!tableInfo.found) {
           candidateNameInput.removeAttribute('readonly');
           candidateNameInput.style.opacity = '1';

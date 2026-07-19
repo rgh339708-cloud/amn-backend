@@ -1350,9 +1350,23 @@ const Auth = (() => {
   }
 
   /* ── Helpers ──────────────────────────────────────── */
-  function resolveRoleFromRank(rank, currentRole = 'viewer') {
-    // ⚠️ Auto role assignment is disabled client-side to match the server.
-    // Everyone defaults to 'viewer' unless they have a manual role override.
+  function resolveRoleFromRank(rank, currentRole = 'viewer', position = '') {
+    // If the user has manual overrides, don't change it here, wait, we already check isPrivileged in the caller!
+    if (position) {
+      let rolesSet = new Set();
+      const cleanL = String(position).replace(/ـ/g, '');
+      if (cleanL.includes('القائد') && !cleanL.includes('نائب') && !cleanL.includes('مساعد')) {
+        rolesSet.add('owner');
+        rolesSet.add('assistant_owner');
+      }
+      if (cleanL.includes('نائب القائد') || cleanL.includes('مساعد القائد') || cleanL.includes('نائب قائد') || cleanL.includes('مساعد قائد')) rolesSet.add('assistant_owner');
+      if (cleanL.includes('رئاسة تدريب')) rolesSet.add('academy_affairs');
+      if (cleanL.includes('شؤون اكاديمية التدريب') || cleanL.includes('شؤون أكاديمية التدريب')) rolesSet.add('admin');
+      if (cleanL.includes('مدير دورة') || cleanL.includes('مدير الدورة') || cleanL.includes('مدير دوره') || cleanL.includes('مدير الدوره')) rolesSet.add('course_admin');
+      if (cleanL.includes('منسوبي ادارة التدريب') || cleanL.includes('منسوبي إدارة التدريب') || cleanL.includes('كلية التدريب')) rolesSet.add('college_trainee');
+      if (cleanL.includes('شعبة التجنيد') || cleanL.includes('شؤون التجنيد')) rolesSet.add('recruitment_affairs');
+      if (rolesSet.size > 0) return Array.from(rolesSet).join(',');
+    }
     return currentRole;
   }
 
@@ -1414,6 +1428,7 @@ const Auth = (() => {
     let registeredName = user.globalName || user.username || '';
     let badge = '';
     let highestRank = '';
+    let position = '';
     let found = false;
 
     const cleanStr = (s) => String(s || '').trim().toLowerCase();
@@ -1478,6 +1493,7 @@ const Auth = (() => {
         registeredName = matchedRow.name;
         if (matchedRow.badge) badge = matchedRow.badge;
         if (matchedRow.rank) highestRank = matchedRow.rank;
+        if (matchedRow.position) position = matchedRow.position;
         found = true;
         foundInMain = true;
       }
@@ -1536,6 +1552,7 @@ const Auth = (() => {
       badge: badge,
       tables: tables,
       rank: highestRank,
+      position: position,
       found: found
     };
   }
@@ -1640,8 +1657,8 @@ const Auth = (() => {
               const resolvedDept = resolved.tables.join(', ');
               if (dbUser.department !== resolvedDept) { dbUser.department = resolvedDept; needsServerUpdate = true; }
               
-              // Automatically resolve role from rank if rank was updated
-              const newRole = resolveRoleFromRank(dbUser.rank, dbUser.role);
+              // Automatically resolve role from position
+              const newRole = resolveRoleFromRank(dbUser.rank, dbUser.role, resolved.position);
               if (dbUser.role !== newRole) { dbUser.role = newRole; needsServerUpdate = true; }
             }
 
@@ -1691,7 +1708,8 @@ const Auth = (() => {
 
           } else {
             // Automatically resolve role from rank if rank was updated on server
-            dbUser.role = resolveRoleFromRank(dbUser.rank, dbUser.role);
+            const rInfo = resolveUserTableInfo(dbUser);
+            dbUser.role = resolveRoleFromRank(dbUser.rank, dbUser.role, rInfo ? rInfo.position : '');
           }
 
           if (dbUser.role !== user.role) { user.role = dbUser.role; roleChanged = true; }

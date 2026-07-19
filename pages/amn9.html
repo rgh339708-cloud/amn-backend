@@ -2150,8 +2150,8 @@
               statusBadge = `<span class="status-badge-el pending">⏳ معلق</span>`;
               actionBtns = `
               <div class="action-btn-group">
-                <button class="action-btn-el approve" onclick="approveRetakeRequest('${r.id}')">✔️ موافقة</button>
-                <button class="action-btn-el reject" onclick="rejectRetakeRequest('${r.id}')">❌ رفض</button>
+                <button class="action-btn-el approve" onclick="approveRetakeRequest(event, '${r.id}')">✔️ موافقة</button>
+                <button class="action-btn-el reject" onclick="rejectRetakeRequest(event, '${r.id}')">❌ رفض</button>
               </div>
             `;
             } else if (r.status === 'approved') {
@@ -2179,7 +2179,12 @@
         .catch(err => console.error(err));
     }
 
-    window.approveRetakeRequest = function (requestId) {
+    window.approveRetakeRequest = function (event, requestId) {
+      const btn = event.currentTarget;
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+      btn.disabled = true;
+
       const currentUser = Auth.getCurrentUser();
       const adminName = currentUser ? currentUser.username : 'مسؤول الدورة';
 
@@ -2192,10 +2197,17 @@
         .catch(err => {
           console.error(err);
           App.toast('✕ فشل الموافقة على الطلب', 'error');
+          btn.innerHTML = originalText;
+          btn.disabled = false;
         });
     }
 
-    window.rejectRetakeRequest = function (requestId) {
+    window.rejectRetakeRequest = function (event, requestId) {
+      const btn = event.currentTarget;
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+      btn.disabled = true;
+
       const currentUser = Auth.getCurrentUser();
       const adminName = currentUser ? currentUser.username : 'مسؤول الدورة';
 
@@ -2207,6 +2219,8 @@
         .catch(err => {
           console.error(err);
           App.toast('✕ فشل رفض الطلب', 'error');
+          btn.innerHTML = originalText;
+          btn.disabled = false;
         });
     }
 

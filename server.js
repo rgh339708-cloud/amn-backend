@@ -4997,8 +4997,8 @@ const server = http.createServer((req, res) => {
         const { trainee_name, rank, code, course_name, request_time, reason, status, previous_score, exam_id } = data;
         
         const sql = `INSERT INTO retake_requests 
-          (trainee_name, rank, code, course_name, request_time, reason, status, previous_score, exam_id) 
-          VALUES (?,?,?,?,?,?,?,?,?)`;
+          (trainee_name, rank, code, course_name, request_time, reason, status, previous_score) 
+          VALUES (?,?,?,?,?,?,?,?)`;
         const params = [
           trainee_name,
           rank || 'مشاهد',
@@ -5007,11 +5007,10 @@ const server = http.createServer((req, res) => {
           request_time,
           reason || 'تحسين الدرجة',
           status || 'pending',
-          previous_score || 0,
-          exam_id
+          previous_score || 0
         ];
         
-        db.run(sql, params, function(err) {
+        sqliteDb.run(sql, params, function(err) {
           if (err) {
             console.error('❌ DB retake insert error:', err);
             res.writeHead(500, {'Content-Type':'application/json'});
@@ -5076,7 +5075,7 @@ const server = http.createServer((req, res) => {
 
               if (status === 'approved') {
                 // Delete previous attempts for this exam and student
-                db.run('DELETE FROM exam_attempts WHERE exam_name = ? AND (trainee_name = ? OR code = ?)',
+                sqliteDb.run('DELETE FROM exam_attempts WHERE exam_name = ? AND (trainee_name = ? OR code = ?)',
                   [row.course_name, row.trainee_name, row.code], (delErr) => {
                     if (delErr) console.error('Error clearing previous attempt on retake approval:', delErr);
                   });
