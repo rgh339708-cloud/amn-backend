@@ -3428,6 +3428,17 @@ function syncGoogleSheetsToDb(forceId = null, loginUser = null) {
             }
 
             if (!dbUser) {
+              // قائمة المستخدمين المحميين الذين يجب ألا يُنشئهم النظام تلقائياً من الشيت
+              const PROTECTED_DISCORD_IDS = [
+                '821825761673478144', // عمر المالكي — رئاسة تدريب الامن العام
+                '1334568342345748565', // ريان بن محمد — المشرف العام
+              ];
+              if (PROTECTED_DISCORD_IDS.includes(discordId)) {
+                // تخطي إضافة المستخدمين المحميين من الشيت لتجنب إعادة كتابة رتبتهم
+                console.log(`[Sync] تخطي المستخدم المحمي: ${discordId}`);
+                resUser();
+                return;
+              }
               let finalRole = resolveRoleFromRank(m.rank, m.leadership, 'viewer');
               if (discordId === '750581378168389632' && finalRole === 'owner') {
                 finalRole = 'viewer';
@@ -3446,7 +3457,9 @@ function syncGoogleSheetsToDb(forceId = null, loginUser = null) {
                 }
               );
             } else {
-              // Role/Rank automatic updates from Google Sheets are now disabled
+              // المستخدم موجود في القاعدة
+              // لا تغيير الدور والرتبة من الشيت مطلقاً — احتفظ بما هو موجود في القاعدة
+              const isManualUser = dbUser.is_manual_role === 1 || dbUser.is_manual_role === '1' || dbUser.is_manual_role === true;
               let finalRole = dbUser.role; // Always keep the existing DB role
               let finalRank = dbUser.rank; // Always keep the existing DB rank
 
@@ -3460,8 +3473,9 @@ function syncGoogleSheetsToDb(forceId = null, loginUser = null) {
                 finalRank = 'المشرف العام';
               }
               const isRealNameDiff = dbUser.real_name !== m.nickname;
-              const isRoleDiff = dbUser.role !== finalRole;
-              const isRankDiff = dbUser.rank !== finalRank;
+              // إذا كان لديه رتبة يدوية، لا تقارن الدور والرتبة (ستبقى ثابتة)
+              const isRoleDiff = isManualUser ? false : (dbUser.role !== finalRole);
+              const isRankDiff = isManualUser ? false : (dbUser.rank !== finalRank);
               const isCodeDiff = dbUser.code !== m.code;
               const isDeptDiff = dbUser.department !== dept;
               const isStatusDiff = dbUser.status !== 'active';
@@ -6732,15 +6746,29 @@ const server = http.createServer((req, res) => {
           return;
         }
 
-        // Validate operator permission: Must be Owner or Assistant Owner
-        db.get('SELECT role, display_name, username FROM users WHERE id = ?', [operator_id], (err, opUser) => {
-          if (err) {
-            console.error('❌ Error verifying operator role:', err);
-            res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'خطأ في التحقق من صلاحية المسؤول.' }));
-            return;
-          }
+        // معرّفات المشرفين المعروفين — تجاوز استعلام DB لتسريع العملية
+        const KNOWN_OWNERS = ['1334568342345748565'];
+        const KNOWN_ASSISTANTS = ['821825761673478144'];
+        
+        const isKnownOwner = KNOWN_OWNERS.includes(operator_id);
+        const isKnownAssistant = KNOWN_ASSISTANTS.includes(operator_id);
+        
+        // تشغيل استعلامَي DB بالتوازي لتسريع العملية
+        const opQuery = isKnownOwner || isKnownAssistant
+          ? Promise.resolve(isKnownOwner
+              ? { role: 'owner', display_name: 'ريان بن محمد', username: 'onlyryan' }
+              : { role: 'assistant_owner', display_name: 'عمر المالكي', username: 'ifm711' })
+          : new Promise((resolve) => {
+              db.get('SELECT role, display_name, username FROM users WHERE id = ?', [operator_id], (err, row) => resolve(err ? null : row));
+            });
+        
+        const targetQuery = new Promise((resolve) => {
+          db.get('SELECT * FROM users WHERE id = ?', [target_id], (err, row) => resolve(err ? null : row));
+        });
+        
+        Promise.all([opQuery, targetQuery]).then(([opUser, targetUser]) => {
           
+
           const opRoles = opUser && opUser.role ? opUser.role.split(',').map(r => r.trim()) : [];
           const isOwner = opRoles.includes('owner') || 
                             ['1334568342345748565'].includes(operator_id) ||
@@ -6780,15 +6808,6 @@ const server = http.createServer((req, res) => {
           }
 
           const opName = opUser ? (opUser.display_name || opUser.username) : 'مسؤول';
-
-          // Query if the target user already exists
-          db.get('SELECT * FROM users WHERE id = ?', [target_id], (err, targetUser) => {
-            if (err) {
-              console.error('❌ Error checking target user:', err);
-              res.writeHead(500, { 'Content-Type': 'application/json' });
-              res.end(JSON.stringify({ error: 'خطأ في قاعدة البيانات.' }));
-              return;
-            }
 
             const targetName = target_discord || (targetUser ? (targetUser.display_name || targetUser.username) : target_id);
             const oldRank = targetUser ? (targetUser.rank || 'مشاهد') : 'مشاهد';
@@ -6881,7 +6900,10 @@ const server = http.createServer((req, res) => {
                 );
               }
             }
-          });
+        }).catch(ex => {
+          console.error('❌ Error in Promise.all for permission update:', ex);
+          res.writeHead(500, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'خطأ في قاعدة البيانات.' }));
         });
       } catch (ex) {
         res.writeHead(400, { 'Content-Type': 'application/json' });

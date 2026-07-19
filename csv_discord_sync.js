@@ -735,8 +735,33 @@ async function runCsvDiscordSync(db, force = false) {
     return { processed: mergedMembers.length, changed: 0, errors: 0 };
   }
 
+  // 🛡️ استثناء الأعضاء الذين تم تعيين رتبهم يدوياً (is_manual_role = 1)
+  let manualUserIds = new Set();
+  if (db && typeof db.all === 'function') {
+    try {
+      const manualUsers = await new Promise((resolve, reject) => {
+        db.all("SELECT discord_id, id FROM users WHERE is_manual_role = 1 OR is_manual_role = '1'", [], (err, rows) => {
+          if (err) resolve([]); // تجاهل الخطأ في حال لم يكن الجدول موجوداً (أثناء اختبارات التشغيل الأولي)
+          else resolve(rows || []);
+        });
+      });
+      for (const row of manualUsers) {
+        if (row.discord_id) manualUserIds.add(row.discord_id);
+        else if (row.id) manualUserIds.add(String(row.id).replace('discord_', ''));
+      }
+      console.log(`[CSV Sync] تم تحديد ${manualUserIds.size} عضو برتبة يدوية سيتم استثناؤهم من المزامنة.`);
+    } catch (e) {
+      console.warn('[CSV Sync] ⚠️ فشل جلب المستخدمين ذوي الرتب اليدوية:', e.message);
+    }
+  }
+
   for (const member of mergedMembers) {
     if (!member.discordId) continue;
+
+    // تخطي إذا كان لديه رتبة يدوية لتجنب إزالة رتبته
+    if (manualUserIds.has(member.discordId)) {
+      continue;
+    }
 
     // 1. جلب بيانات العضو ورولاته من الذاكرة (Cached) مع fallback للطلب الفردي في حال فشل الكاش
     let guildMember = guildMembersMap.get(member.discordId);
@@ -1072,6 +1097,13 @@ if (require.main === module) {
           params = [];
         }
         sqliteDb.run(sql, params, callback);
+      },
+      all(sql, params = [], callback) {
+        if (typeof params === 'function') {
+          callback = params;
+          params = [];
+        }
+        sqliteDb.all(sql, params, callback);
       }
     };
   } catch (dbErr) {

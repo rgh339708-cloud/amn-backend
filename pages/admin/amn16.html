@@ -3075,12 +3075,29 @@
       App.toast('✅ تم منح وتحديث الرتبة العسكرية بنجاح وتطبيق الصلاحيات فورياً!', 'success');
       closeGrantPermissionModal();
       
-      // Sync and render
+      // تحديث الواجهة محلياً لتجنب التحميل البطيء من السيرفر
       setTimeout(() => {
-        Storage.loadAllFromServer().then(() => {
-          renderPermissionsTable();
-        });
-      }, 500);
+        let users = Storage.getCollection(Storage.keys.USERS) || [];
+        let userIndex = users.findIndex(u => String(u.id) === String(targetId));
+        if (userIndex !== -1) {
+          users[userIndex].role = role;
+          users[userIndex].rank = rank;
+          users[userIndex].is_manual_role = 1;
+        } else {
+          users.push({
+            id: targetId,
+            discord_id: targetId,
+            username: targetDiscord,
+            display_name: targetDiscord,
+            role: role,
+            rank: rank,
+            is_manual_role: 1,
+            status: 'active'
+          });
+        }
+        Storage.saveCollection(Storage.keys.USERS, users);
+        renderPermissionsTable();
+      }, 100);
     })
     .catch(err => {
       App.toast(err.message, 'error');
@@ -3129,12 +3146,18 @@
     .then(resData => {
       App.toast('✅ تم إلغاء الصلاحية العسكرية اليدوية وإرجاع الحساب للمزامنة بنجاح.', 'success');
       
-      // Sync and render
+      // تحديث الواجهة محلياً لتجنب التحميل البطيء من السيرفر
       setTimeout(() => {
-        Storage.loadAllFromServer().then(() => {
-          renderPermissionsTable();
-        });
-      }, 500);
+        let users = Storage.getCollection(Storage.keys.USERS) || [];
+        let userIndex = users.findIndex(u => String(u.id) === String(userId));
+        if (userIndex !== -1) {
+          users[userIndex].role = 'viewer';
+          users[userIndex].rank = 'مشاهد';
+          users[userIndex].is_manual_role = 0;
+          Storage.saveCollection(Storage.keys.USERS, users);
+        }
+        renderPermissionsTable();
+      }, 100);
     })
     .catch(err => {
       App.toast(err.message, 'error');
