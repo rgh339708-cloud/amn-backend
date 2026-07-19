@@ -1234,7 +1234,13 @@
         if (tabId === 'logs') {
           filterAndRenderLogs();
         } else if (tabId === 'recruitment') {
-          renderRecruitmentTable();
+          // جلب البيانات من السيرفر دائماً عند فتح تبويب التجنيد لضمان التزامن بين المتصفحات
+          renderRecruitmentTable(); // عرض الكاش الحالي فوراً
+          if (Storage.loadAllFromServer) {
+            Storage.loadAllFromServer().then(() => {
+              renderRecruitmentTable(); // تحديث بالبيانات الجديدة
+            }).catch(() => {});
+          }
         } else if (tabId === 'permissions') {
           renderPermissionsTable();
         }
@@ -1291,6 +1297,17 @@
     // 4. Load Content
     loadThemeSettings();
     updateOverviewStats();
+    
+    // تحميل بيانات التجنيد من السيرفر عند فتح الصفحة لضمان التزامن بين المتصفحات
+    if (isOwnerOrAdmin) {
+      if (Storage.loadAllFromServer) {
+        Storage.loadAllFromServer().then(() => {
+          renderRecruitmentTable();
+        }).catch(() => {});
+      } else {
+        renderRecruitmentTable();
+      }
+    }
     
     // 5. Wire Forms
     document.getElementById('theme-settings-form').addEventListener('submit', handleThemeFormSubmit);
