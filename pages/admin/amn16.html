@@ -3069,15 +3069,20 @@
 
     App.toast('<i class="fa-solid fa-circle-notch fa-spin"></i> جاري حفظ الصلاحيات في قاعدة البيانات...', 'info');
 
+    const _abortCtrl = new AbortController();
+    const _abortTimer = setTimeout(() => _abortCtrl.abort(), 12000);
+
     fetch(`${apiBase}/api/auth/update_user_permission`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Bypass-Tunnel-Reminder': 'true'
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
+      signal: _abortCtrl.signal
     })
     .then(res => {
+      clearTimeout(_abortTimer);
       return res.text().then(text => {
         let data;
         try { data = JSON.parse(text); } catch(e) { data = null; }
@@ -3117,7 +3122,11 @@
       }, 100);
     })
     .catch(err => {
-      App.toast(err.message, 'error');
+      clearTimeout(_abortTimer);
+      const msg = err.name === 'AbortError'
+        ? 'انتهت مهلة الاتصال بالسيرفر (12 ثانية). يرجى المحاولة مرة أخرى.'
+        : err.message;
+      App.toast(msg, 'error');
     });
   };
 
@@ -3141,15 +3150,20 @@
 
     App.toast('<i class="fa-solid fa-trash-can fa-spin"></i> جاري إزالة الصلاحية وإرجاع الحساب للمزامنة...', 'info');
 
+    const _abortCtrl2 = new AbortController();
+    const _abortTimer2 = setTimeout(() => _abortCtrl2.abort(), 12000);
+
     fetch(`${apiBase}/api/auth/update_user_permission`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Bypass-Tunnel-Reminder': 'true'
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
+      signal: _abortCtrl2.signal
     })
     .then(res => {
+      clearTimeout(_abortTimer2);
       return res.text().then(text => {
         let data;
         try { data = JSON.parse(text); } catch(e) { data = null; }
