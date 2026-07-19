@@ -259,7 +259,7 @@ const SeedData = (() => {
         password: 'owner123_change_me',
         role: 'owner',
         rank: 'المشرف العام',
-        avatar: 'assets/img/avatars/1334568342345748565_e2dcb67601cdaefd19b887ad9c1105a9.png',
+        avatar: 'assets/img/avatars/1334568342345748565_849f01485420e8d8a13e002e0dad60b8.png',
         status: 'active',
         joinDate: '2024-01-01',
         createdAt: new Date().toISOString(),
