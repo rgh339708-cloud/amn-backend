@@ -6757,7 +6757,7 @@ const server = http.createServer((req, res) => {
         const opQuery = isKnownOwner || isKnownAssistant
           ? Promise.resolve(isKnownOwner
               ? { role: 'owner', display_name: 'ريان بن محمد', username: 'onlyryan' }
-              : { role: 'assistant_owner', display_name: 'عمر المالكي', username: 'ifm711' })
+              : { role: 'academy_affairs', display_name: 'عمر المالكي', username: 'ifm711' })
           : new Promise((resolve) => {
               db.get('SELECT role, display_name, username FROM users WHERE id = ?', [operator_id], (err, row) => resolve(err ? null : row));
             });
