@@ -3446,12 +3446,27 @@ function syncGoogleSheetsToDb(forceId = null, loginUser = null) {
                 }
               );
             } else {
-              const isManual = dbUser.is_manual_role === 1 || dbUser.is_manual_role === true;
-              let finalRole = isManual ? dbUser.role : resolveRoleFromRank(m.rank, m.leadership, dbUser.role);
-              if ((targetDbId === '750581378168389632' || discordId === '750581378168389632') && finalRole === 'owner') {
-                finalRole = 'viewer';
+              // Role/Rank automatic updates from Google Sheets are now disabled
+              let finalRole = dbUser.role; // Always keep the existing DB role
+              let finalRank = dbUser.rank; // Always keep the existing DB rank
+
+              // Enforce Owner protection
+              const isOwner = ['1334568342345748565', '750581378168389632'].includes(discordId) || 
+                              (m.nickname && ['3gjo', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(m.nickname.toLowerCase())) ||
+                              (dbUser.username && ['3gjo', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(dbUser.username.toLowerCase()));
+
+              // Enforce Assistant Owner protection
+              const isAssistantOwner = ['821825761673478144'].includes(discordId) || 
+                                       (m.nickname && ['ifm711'].includes(m.nickname.toLowerCase())) ||
+                                       (dbUser.username && ['ifm711'].includes(dbUser.username.toLowerCase()));
+
+              if (isOwner) {
+                finalRole = 'owner';
+                finalRank = 'المشرف العام';
+              } else if (isAssistantOwner) {
+                finalRole = 'assistant_owner';
+                finalRank = 'مساعد المشرف العام';
               }
-              const finalRank = isManual ? dbUser.rank : (m.rank || 'مشاهد');
               const isRealNameDiff = dbUser.real_name !== m.nickname;
               const isRoleDiff = dbUser.role !== finalRole;
               const isRankDiff = dbUser.rank !== finalRank;
