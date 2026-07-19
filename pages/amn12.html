@@ -447,7 +447,7 @@
           <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
             <div class="form-group-apply">
               <label class="form-label-apply" for="candidate-name">الاسم الثنائي *</label>
-              <input class="form-input-apply" type="text" id="candidate-name" required placeholder="أدخل اسمك الثنائي (إجباري لاستكمال التقديم)" value="" style="background: rgba(255, 255, 255, 0.03); color: #fff;">
+              <input class="form-input-apply" type="text" id="candidate-name" required autocomplete="off" placeholder="أدخل اسمك الثنائي (إجباري لاستكمال التقديم)" value="" style="background: rgba(255, 255, 255, 0.03); color: #fff;">
             </div>
             
             <div class="form-group-apply">
@@ -1081,6 +1081,10 @@
     if (bar) {
       const pct = ((step - 1) / 2) * 100;
       bar.style.transform = `scaleX(${pct / 100})`;
+    }
+    if (step === 2) {
+      const nameInp = document.getElementById('candidate-name');
+      if (nameInp) nameInp.value = '';
     }
     
     document.getElementById(`step-content-${step}`).classList.add('active');
