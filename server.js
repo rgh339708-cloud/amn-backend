@@ -3392,6 +3392,10 @@ function syncGoogleSheetsToDb(forceId = null, loginUser = null) {
 
     // 1. Update/Add users to DB
     for (const discordId of idsToProcess) {
+      if (['821825761673478144', '1334568342345748565'].includes(String(discordId))) {
+        console.log(`[Sync] تخطي الحساب المحمي بصفة دائمة: ${discordId}`);
+        continue;
+      }
       const m = mergedMembers[discordId];
       if (!m) continue;
 

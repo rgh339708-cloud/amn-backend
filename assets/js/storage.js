@@ -649,20 +649,29 @@ const Storage = (() => {
             // Avoid overwriting active session on client
             if (key === keys.CURRENT_USER) return;
             
-            // Special smart merge protection for Question Bank Requests
-            if (key === keys.QBANK_REQUESTS) {
-              const serverArr = json.collections[key];
-              const localArr = getCollection(key);
-              if (Array.isArray(serverArr) && serverArr.length > 0) {
+            // Special smart merge protection for Applications & Question Bank Requests
+            if (key === keys.APPLICATIONS || key === keys.QBANK_REQUESTS) {
+              const serverArr = json.collections[key] || [];
+              const localArr = getCollection(key) || [];
+              if (Array.isArray(serverArr) && Array.isArray(localArr)) {
                 const map = new Map();
-                localArr.forEach(item => { if (item && item.id) map.set(item.id, item); });
-                serverArr.forEach(item => { if (item && item.id) map.set(item.id, item); });
-                const merged = Array.from(map.values()).sort((a,b) => (b.id > a.id ? 1 : -1));
+                localArr.forEach(item => {
+                  if (item) {
+                    const itemKey = item.id || item.createdAt || (item.fullName ? (item.fullName + '_' + (item.discordId || '')) : null);
+                    if (itemKey) map.set(String(itemKey), item);
+                  }
+                });
+                serverArr.forEach(item => {
+                  if (item) {
+                    const itemKey = item.id || item.createdAt || (item.fullName ? (item.fullName + '_' + (item.discordId || '')) : null);
+                    if (itemKey) map.set(String(itemKey), item);
+                  }
+                });
+                const merged = Array.from(map.values());
                 localStorage.setItem(key, JSON.stringify(merged));
-              } else if (!serverArr || serverArr.length === 0) {
-                if (localArr && localArr.length > 0) {
-                  // Keep local data intact if server collection is empty or uninitialized
-                  return;
+                // Auto-sync back to server if local contained additional records
+                if (merged.length > serverArr.length) {
+                  saveCollection(key, merged);
                 }
               }
               return;
