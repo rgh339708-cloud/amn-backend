@@ -5018,10 +5018,20 @@ const server = http.createServer((req, res) => {
           } else {
             const auditMsg = `قدم المتدرب "${trainee_name}" طلب إعادة اختبار لـ "${course_name}" (الدرجة السابقة: ${previous_score}%)`;
             logSystemActivity('retake_request', trainee_name, auditMsg);
-            invalidateCollectionsCache();
-
-            res.writeHead(201, {'Content-Type':'application/json'});
-            res.end(JSON.stringify({success:true, id:this.lastID}));
+            
+            if (status === 'approved') {
+              sqliteDb.run('DELETE FROM exam_attempts WHERE exam_name = ? AND (trainee_name = ? OR code = ?)',
+                [course_name, trainee_name, code], (delErr) => {
+                  if (delErr) console.error('Error clearing previous attempt on retake approval:', delErr);
+                  invalidateCollectionsCache();
+                  res.writeHead(201, {'Content-Type':'application/json'});
+                  res.end(JSON.stringify({success:true, id:this.lastID}));
+              });
+            } else {
+              invalidateCollectionsCache();
+              res.writeHead(201, {'Content-Type':'application/json'});
+              res.end(JSON.stringify({success:true, id:this.lastID}));
+            }
           }
         });
       } catch (e) {
