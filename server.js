@@ -6727,12 +6727,13 @@ const server = http.createServer((req, res) => {
             return;
           }
           
-          const isOwner = (opUser && hasRole(opUser.role, 'owner')) || 
+          const opRoles = opUser && opUser.role ? opUser.role.split(',').map(r => r.trim()) : [];
+          const isOwner = opRoles.includes('owner') || 
                             ['1334568342345748565'].includes(operator_id) ||
                             (opUser && opUser.username && ['3gjo', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(opUser.username.toLowerCase())) ||
                             (opUser && opUser.display_name && ['3gjo', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(opUser.display_name.toLowerCase()));
                             
-          const isAssistantOwner = (opUser && hasAnyRole(opUser.role, ['assistant_owner', 'owner'])) ||
+          const isAssistantOwner = opRoles.includes('assistant_owner') || opRoles.includes('owner') ||
                                    ['821825761673478144'].includes(operator_id) ||
                                    (opUser && opUser.username && ['ifm711'].includes(opUser.username.toLowerCase())) ||
                                    (opUser && opUser.display_name && ['ifm711'].includes(opUser.display_name.toLowerCase()));
