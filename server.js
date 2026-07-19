@@ -3455,17 +3455,9 @@ function syncGoogleSheetsToDb(forceId = null, loginUser = null) {
                               (m.nickname && ['3gjo', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(m.nickname.toLowerCase())) ||
                               (dbUser.username && ['3gjo', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(dbUser.username.toLowerCase()));
 
-              // Enforce Assistant Owner protection
-              const isAssistantOwner = ['821825761673478144'].includes(discordId) || 
-                                       (m.nickname && ['ifm711'].includes(m.nickname.toLowerCase())) ||
-                                       (dbUser.username && ['ifm711'].includes(dbUser.username.toLowerCase()));
-
               if (isOwner) {
                 finalRole = 'owner';
                 finalRank = 'المشرف العام';
-              } else if (isAssistantOwner) {
-                finalRole = 'assistant_owner';
-                finalRank = 'مساعد المشرف العام';
               }
               const isRealNameDiff = dbUser.real_name !== m.nickname;
               const isRoleDiff = dbUser.role !== finalRole;
@@ -6575,10 +6567,6 @@ const server = http.createServer((req, res) => {
                           (username && ['3gjo', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(username.toLowerCase())) ||
                           (display_name && ['3gjo', 'onlyryan', 'onlyryan -', 'onlyryan-'].includes(display_name.toLowerCase()));
 
-          const isAssistantOwner = ['821825761673478144'].includes(id) || 
-                                   (username && ['ifm711'].includes(username.toLowerCase())) ||
-                                   (display_name && ['ifm711'].includes(display_name.toLowerCase()));
-
           // If user exists but status is disabled or banned, reject
           if (existingUser && (existingUser.status === 'disabled' || existingUser.status === 'banned') && !isOwner) {
             res.writeHead(403, { 'Content-Type': 'application/json; charset=utf-8' });
@@ -6621,12 +6609,6 @@ const server = http.createServer((req, res) => {
           if (isOwner) {
             finalRole = 'owner';
             finalRank = 'المشرف العام';
-            finalStatus = 'active';
-          }
-
-          if (isAssistantOwner) {
-            finalRole = 'assistant_owner';
-            finalRank = 'مساعد المشرف العام';
             finalStatus = 'active';
           }
 
