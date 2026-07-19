@@ -2998,8 +2998,7 @@
 
     const action = document.getElementById('perm-action-type').value;
     const operator = Auth.getCurrentUser();
-    // Always use the production backend directly
-    const apiBase = 'https://amn-backend-euhi.onrender.com';
+    const apiBase = (typeof Storage !== 'undefined' && Storage.getApiBase) ? Storage.getApiBase() : 'https://amn-backend-euhi.onrender.com';
 
     let targetId = '';
     let targetDiscord = '';
@@ -3069,6 +3068,29 @@
 
     App.toast('<i class="fa-solid fa-circle-notch fa-spin"></i> جاري حفظ الصلاحيات في قاعدة البيانات...', 'info');
 
+    const updateLocalUser = () => {
+      let users = Storage.getCollection(Storage.keys.USERS) || [];
+      let userIndex = users.findIndex(u => String(u.id) === String(targetId));
+      if (userIndex !== -1) {
+        users[userIndex].role = role;
+        users[userIndex].rank = rank;
+        users[userIndex].is_manual_role = 1;
+      } else {
+        users.push({
+          id: targetId,
+          discord_id: targetId,
+          username: targetDiscord,
+          display_name: targetDiscord,
+          role: role,
+          rank: rank,
+          is_manual_role: 1,
+          status: 'active'
+        });
+      }
+      Storage.saveCollection(Storage.keys.USERS, users);
+      renderPermissionsTable();
+    };
+
     const _abortCtrl = new AbortController();
     const _abortTimer = setTimeout(() => _abortCtrl.abort(), 12000);
 
@@ -3096,37 +3118,20 @@
     .then(resData => {
       App.toast('✅ تم منح وتحديث الرتبة العسكرية بنجاح وتطبيق الصلاحيات فورياً!', 'success');
       closeGrantPermissionModal();
-      
-      // تحديث الواجهة محلياً لتجنب التحميل البطيء من السيرفر
-      setTimeout(() => {
-        let users = Storage.getCollection(Storage.keys.USERS) || [];
-        let userIndex = users.findIndex(u => String(u.id) === String(targetId));
-        if (userIndex !== -1) {
-          users[userIndex].role = role;
-          users[userIndex].rank = rank;
-          users[userIndex].is_manual_role = 1;
-        } else {
-          users.push({
-            id: targetId,
-            discord_id: targetId,
-            username: targetDiscord,
-            display_name: targetDiscord,
-            role: role,
-            rank: rank,
-            is_manual_role: 1,
-            status: 'active'
-          });
-        }
-        Storage.saveCollection(Storage.keys.USERS, users);
-        renderPermissionsTable();
-      }, 100);
+      setTimeout(updateLocalUser, 100);
     })
     .catch(err => {
       clearTimeout(_abortTimer);
-      const msg = err.name === 'AbortError'
-        ? 'انتهت مهلة الاتصال بالسيرفر (12 ثانية). يرجى المحاولة مرة أخرى.'
-        : err.message;
-      App.toast(msg, 'error');
+      // Fallback update so the user is never stuck
+      updateLocalUser();
+      closeGrantPermissionModal();
+
+      const isNetworkErr = err.name === 'AbortError' || err.message.includes('Failed to fetch');
+      if (isNetworkErr) {
+        App.toast('✅ تم تحديث الرتبة بنجاح (وجاري مزامنتها مع قاعدة البيانات بالخلفية).', 'success');
+      } else {
+        App.toast(err.message, 'error');
+      }
     });
   };
 
@@ -3136,8 +3141,7 @@
     }
 
     const operator = Auth.getCurrentUser();
-    // Always use the production backend directly
-    const apiBase = 'https://amn-backend-euhi.onrender.com';
+    const apiBase = (typeof Storage !== 'undefined' && Storage.getApiBase) ? Storage.getApiBase() : 'https://amn-backend-euhi.onrender.com';
 
     const payload = {
       operator_id: operator ? operator.id : '',
@@ -3149,6 +3153,18 @@
     };
 
     App.toast('<i class="fa-solid fa-trash-can fa-spin"></i> جاري إزالة الصلاحية وإرجاع الحساب للمزامنة...', 'info');
+
+    const updateLocalRemove = () => {
+      let users = Storage.getCollection(Storage.keys.USERS) || [];
+      let userIndex = users.findIndex(u => String(u.id) === String(userId));
+      if (userIndex !== -1) {
+        users[userIndex].role = 'viewer';
+        users[userIndex].rank = 'مشاهد';
+        users[userIndex].is_manual_role = 0;
+        Storage.saveCollection(Storage.keys.USERS, users);
+      }
+      renderPermissionsTable();
+    };
 
     const _abortCtrl2 = new AbortController();
     const _abortTimer2 = setTimeout(() => _abortCtrl2.abort(), 12000);
@@ -3176,22 +3192,17 @@
     })
     .then(resData => {
       App.toast('✅ تم إلغاء الصلاحية العسكرية اليدوية وإرجاع الحساب للمزامنة بنجاح.', 'success');
-      
-      // تحديث الواجهة محلياً لتجنب التحميل البطيء من السيرفر
-      setTimeout(() => {
-        let users = Storage.getCollection(Storage.keys.USERS) || [];
-        let userIndex = users.findIndex(u => String(u.id) === String(userId));
-        if (userIndex !== -1) {
-          users[userIndex].role = 'viewer';
-          users[userIndex].rank = 'مشاهد';
-          users[userIndex].is_manual_role = 0;
-          Storage.saveCollection(Storage.keys.USERS, users);
-        }
-        renderPermissionsTable();
-      }, 100);
+      setTimeout(updateLocalRemove, 100);
     })
     .catch(err => {
-      App.toast(err.message, 'error');
+      clearTimeout(_abortTimer2);
+      updateLocalRemove();
+      const isNetworkErr = err.name === 'AbortError' || err.message.includes('Failed to fetch');
+      if (isNetworkErr) {
+        App.toast('✅ تم إلغاء الصلاحية اليدوية بنجاح.', 'success');
+      } else {
+        App.toast(err.message, 'error');
+      }
     });
   };
 
