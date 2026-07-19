@@ -2808,6 +2808,12 @@
   window.closeGrantPermissionModal = function() {
     const modal = document.getElementById('modal-grant-permission');
     if (modal) modal.classList.remove('active');
+    _pendingRanks = [];
+    renderRankPills();
+    const toastContainer = document.getElementById('toast-container');
+    if (toastContainer) {
+      toastContainer.querySelectorAll('.toast.info').forEach(t => t.remove());
+    }
   };
 
   window.toggleAccountSelectionMode = function(mode) {
@@ -3116,7 +3122,10 @@
       });
     })
     .then(resData => {
+      const toastContainer = document.getElementById('toast-container');
+      if (toastContainer) toastContainer.querySelectorAll('.toast.info').forEach(t => t.remove());
       App.toast('✅ تم منح وتحديث الرتبة العسكرية بنجاح وتطبيق الصلاحيات فورياً!', 'success');
+      _pendingRanks = [];
       closeGrantPermissionModal();
       setTimeout(updateLocalUser, 100);
     })
