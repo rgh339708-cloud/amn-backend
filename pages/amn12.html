@@ -447,7 +447,7 @@
           <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
             <div class="form-group-apply">
               <label class="form-label-apply" for="candidate-name">الاسم الثنائي *</label>
-              <input class="form-input-apply" type="text" id="candidate-name" required placeholder="أدخل الاسم الثنائي (مثال: ريان بن محمد)" style="background: rgba(255, 255, 255, 0.03); color: #fff;">
+              <input class="form-input-apply" type="text" id="candidate-name" required placeholder="أدخل اسمك الثنائي (إجباري لاستكمال التقديم)" value="" style="background: rgba(255, 255, 255, 0.03); color: #fff;">
             </div>
             
             <div class="form-group-apply">
@@ -655,14 +655,12 @@
       const candidateJobCodeInput = document.getElementById('candidate-job-code');
       
       if (candidateNameInput) {
-        candidateNameInput.value = tableInfo.name || '';
-        if (!tableInfo.found) {
-          candidateNameInput.removeAttribute('readonly');
-          candidateNameInput.style.opacity = '1';
-          candidateNameInput.style.cursor = 'text';
-          candidateNameInput.style.background = 'rgba(255, 255, 255, 0.03)';
-          candidateNameInput.placeholder = 'أدخل اسمك الميداني الرباعي باللغة العربية';
-        }
+        candidateNameInput.value = ''; // Always empty for all applicants so they must enter their name manually
+        candidateNameInput.removeAttribute('readonly');
+        candidateNameInput.style.opacity = '1';
+        candidateNameInput.style.cursor = 'text';
+        candidateNameInput.style.background = 'rgba(255, 255, 255, 0.03)';
+        candidateNameInput.placeholder = 'أدخل اسمك الثنائي (إجباري لاستكمال التقديم)';
       }
       if (candidateDiscordInput) {
         candidateDiscordInput.value = currentUser.discord || '';
@@ -1096,8 +1094,12 @@
     const sectorInput = document.getElementById('candidate-sector').value;
     const discordInput = document.getElementById('candidate-discord').value.trim();
     
-    if (!nameInput || !discordInput) {
-      App.toast('✕ بيانات الاسم أو الديسكورد غير مكتملة، يرجى التحدث للإدارة.', 'error');
+    if (!nameInput) {
+      App.toast('⚠️ يرجى كتابة الاسم الثنائي أولاً لاستكمال التقديم.', 'warning');
+      return;
+    }
+    if (!discordInput) {
+      App.toast('✕ بيانات معرف الديسكورد غير مكتملة، يرجى التواصل مع الإدارة.', 'error');
       return;
     }
 
