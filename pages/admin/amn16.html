@@ -13,7 +13,7 @@
   <script src="../../assets/js/app.js?v=1.4.0"></script>
   <script>
     // Synchronous route guard to prevent flashing of admin content
-    if (!Auth.isLoggedIn() || !['owner', 'assistant_owner', 'academy_affairs', 'admin'].includes(Auth.getRole())) {
+    if (!Auth.isLoggedIn() || !['owner', 'assistant_owner', 'academy_affairs', 'admin', 'recruitment_affairs'].includes(Auth.getRole())) {
       window.location.href = 'login.html';
     }
   </script>
@@ -205,7 +205,7 @@
       <img src="../../assets/img/emblem.png" alt="شعار" style="width:40px;height:40px;object-fit:contain">
       <div>
         <div class="admin-brand-text">لوحة التحكم العليا</div>
-        <div class="admin-brand-sub">PS-City 90 Control</div>
+        <div class="admin-brand-sub" style="display:none;"></div>
       </div>
     </div>
     
@@ -1145,7 +1145,7 @@
 
   document.addEventListener('DOMContentLoaded', () => {
     // 1. Secure Route - check if owner, assistant_owner, academy_affairs, admin, or recruitment_affairs
-    if (!Auth.isLoggedIn() || !['owner', 'assistant_owner', 'academy_affairs', 'admin', 'recruitment_affairs'].includes(Auth.getRole())) {
+    if (!Auth.isLoggedIn() || !Auth.hasAnyRole(Auth.getRole(), ['owner', 'assistant_owner', 'academy_affairs', 'admin', 'recruitment_affairs'])) {
       window.location.href = 'login.html';
       return;
     }
@@ -2500,7 +2500,7 @@
       const isManual = u.is_manual_role === 1 || u.is_manual_role === true;
       
       // Avatar render - fix relative paths for pages/admin/ directory depth
-      let avatarSrc = u.avatar || '';
+      let avatarSrc = typeof getDiscordAvatar === 'function' ? getDiscordAvatar(u) : (u.avatar || '');
       if (avatarSrc && !avatarSrc.startsWith('http') && !avatarSrc.startsWith('data:') && !avatarSrc.startsWith('../../')) {
         avatarSrc = '../../' + avatarSrc.replace(/^\/+/, '');
       }
@@ -2904,17 +2904,20 @@
         });
       }
 
-      // Add current primary role if not already in the list
+      // Add current primary roles if not already in the list
       if (role) {
-        const option = Array.from(selectRank.options).find(opt => opt.value === role);
-        if (option) {
-          if (!_pendingRanks.some(r => r.value === role)) {
-            _pendingRanks.push({
-              value: option.value,
-              label: option.dataset.rank || option.text.replace(/\s*\([^)]+\)\s*$/, '').trim()
-            });
+        const roleParts = role.split(',').map(r => r.trim());
+        roleParts.forEach(r => {
+          const option = Array.from(selectRank.options).find(opt => opt.value === r);
+          if (option) {
+            if (!_pendingRanks.some(pr => pr.value === r)) {
+              _pendingRanks.push({
+                value: option.value,
+                label: option.dataset.rank || option.text.replace(/\s*\([^)]+\)\s*$/, '').trim()
+              });
+            }
           }
-        }
+        });
       }
 
       // Render the pills
@@ -3034,7 +3037,7 @@
     const ROLE_LEVELS = ['owner','assistant_owner','academy_affairs','admin','recruitment_affairs','course_admin','college_trainee','viewer'];
     ranks.sort((a,b) => ROLE_LEVELS.indexOf(a.value) - ROLE_LEVELS.indexOf(b.value));
     const primaryRank = ranks[0];
-    const role = primaryRank.value;
+    const role = ranks.map(r => r.value).join(',');
     const rank = ranks.map(r => r.label).join(' / ');
 
     const payload = {

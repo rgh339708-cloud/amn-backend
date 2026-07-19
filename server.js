@@ -6022,12 +6022,26 @@ const server = http.createServer((req, res) => {
                     currentArray.unshift(item);
                   }
                 }
+              } else if (action === 'bulk') {
+                const incomingArray = Array.isArray(data) ? data : (Array.isArray(item) ? item : (data || item ? [data || item] : []));
+                incomingArray.forEach(newItem => {
+                  if (newItem && newItem.id) {
+                    const idx = currentArray.findIndex(x => x.id === newItem.id);
+                    if (idx !== -1) {
+                      currentArray[idx] = { ...currentArray[idx], ...newItem };
+                    } else {
+                      currentArray.unshift(newItem);
+                    }
+                  }
+                });
               } else {
-                // bulk override
+                // 'set' or other override
                 if (data) {
                   currentArray = Array.isArray(data) ? data : [data];
                 } else if (item) {
                   currentArray = Array.isArray(item) ? item : [item];
+                } else {
+                  currentArray = [];
                 }
               }
 
